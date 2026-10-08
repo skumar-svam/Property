@@ -1,0 +1,157 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@using NA.PMS.Common;
+
+<style>
+    .inputBox{
+        height:30px;
+        width:60%;
+        padding-left:10px;
+    }
+</style>
+
+<div class="col-md-12" style="border-left:1px solid #e2e3e4; border-right:1px solid #e2e3e4; ">
+    <div class="row" style="padding-right:30px;padding-top:5px;">
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Allottment No</label>
+            <input type="text" class="form-control" id="AllottmentNo" style="width:90%;float:right"/>
+        </div>   
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Registration Id</label>
+            <input type="text" class="form-control" id="BRegistrationNo" minlength="8" maxlength="8" style="width:90%;float:right" />
+        </div>     
+        <div class="col-md-6 col-sm-6 col-xs-12   form-group" style="text-align:right;">
+            <input type="button" id="BbtnSearch" value="Search" class="btn btn-default" />
+            <input type="button" id="BbtnClearSearchField" value="Clear" class="btn btn-default" />
+            <input type="button" id="BbtnUpdateRid" value="Update" class="btn btn-default" />
+        </div>
+    </div>
+</div>
+
+<div class="col-md-12 k-grid-content">
+    @(Html.Kendo().Grid<NA.PMS.Model.PaymentViewModel>()
+            .Name("gridManagePaidAmount")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Hidden(true);
+                columns.Bound(c => c.RegistrationNo).Title("Registration Id");
+                columns.Bound(c => c.AllottmentNo).Title("Allottment No");
+                columns.Bound(c => c.VoucherNo).Title("Voucher No");
+                columns.Bound(c => c.VoucherDate).Title("Voucher Date").Format("{0:dd-MM-yyyy}");
+                columns.Bound(c => c.Amount).Title("Amount");
+            })
+            .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+            .AutoBind(true)
+            .DataSource
+            (
+                dataSource => dataSource
+                .Ajax()
+                .Read(read => read.Action("GetPaidAmountDetails", "Payment", new { area = "Revenue" }).Data("FilterGridParameter"))                
+            )
+            //.Events(events => events.DataBound("dataBound"))
+    )
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#BbtnUpdateRid').click(function () {
+            var flag = confirm("Are you sure you want to Update the Registration Id?");
+            if (flag) {
+                if ($("#AllottmentNo").val() == "") {
+                    alertify.error("Enter Allottment No");
+                    return false;
+                }
+                //if ($("#AllottmentNo").val() != "" && $("#AllottmentNo").val().length != 15) {
+                //    alertify.error("Allottment No should be of 15 characters");
+                //    return false;
+                //}
+                if ($("#BRegistrationNo").val() == "") {
+                    alertify.error("Enter RegistrationId");
+                    return false;
+                }
+                if ($("#BRegistrationNo").val() != "" && $("#BRegistrationNo").val().length != 8) {
+                    alertify.error("Registration Id should be of 8 digits.");
+                    return false;
+                }
+                else {
+                    IsRegistrationIdExists();
+                }
+            }
+        });
+
+        $('#BbtnClearSearchField').click(function () {
+            $("#AllottmentNo").val('');
+            $("#BRegistrationNo").val('');
+            $('#gridManagePaidAmount').data("kendoGrid").dataSource.read();
+        });
+
+        $('#BbtnSearch').click(function () {
+            $('#gridManagePaidAmount').data("kendoGrid").dataSource.read();
+        });
+    });
+    
+    function FilterGridParameter() {
+        return {
+            AllottmentNo: $('#AllottmentNo').val().trim(),
+            RegistrationNo: $("#BRegistrationNo").val().trim()           
+        }
+    }
+    function BSearchPaymentDetail() {
+        $('#gridManagePaidAmount').data("kendoGrid").dataSource.read();
+    }
+    function UpdateRegistrationNo() {
+        var rid = $("#BRegistrationNo").val();
+        var allotNo = $('#AllottmentNo').val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ RegistrationNo: rid, AllottmentNo:allotNo}),
+            url: '/Revenue/Payment/UpdateRegistrationIdByAllottmentNo',
+            success: function (result) {
+                if (result == '@ReturnType.Updated') {
+                    $('#gridManagePaidAmount').data("kendoGrid").dataSource.read();
+                    alertify.success("Data updated successfully.");
+                }
+                else if (result == '@ReturnType.None') {
+                    alertify.error("Property Not Found.");
+                }
+                else if (result == '@ReturnType.Mismatch') {
+                    alertify.error("RegistrationId Mismatch.");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                alertify.error("Update Failed");
+            }
+        });
+    }
+    function IsRegistrationIdExists() {
+        var pmodel = {
+            RegistrationId: $("#BRegistrationNo").val()
+        };
+        var flag = false;
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ model: pmodel }),
+            url: '/Revenue/Payment/IsRegistrationIdExist',
+            success: function (result) {
+                if (result == '@ReturnType.NotExist') {
+                    alertify.error("RegistrationId not exist.");
+                }
+                else {
+                    UpdateRegistrationNo();
+                }
+            },
+            error: function (obj) {
+                alertify.error("provider failed, Please try again.");
+            }
+        });
+    }
+</script>
+
+
+

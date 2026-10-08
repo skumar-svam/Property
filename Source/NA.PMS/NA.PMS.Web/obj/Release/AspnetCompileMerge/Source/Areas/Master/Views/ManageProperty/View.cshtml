@@ -1,0 +1,219 @@
+﻿@model NA.PMS.Model.PropertyModel
+
+@{
+    ViewBag.Title = "View";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">View Property</h1></div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 mandatory"></div>
+                </div>
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="col-md-12 content-top-spce">
+                <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                    <h2 class="blck-heading">Property Detail</h2>
+                    <div class="form-bx">
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Allotted")</div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                                @{
+
+    if (@Model.IsAllotted == 0)
+    {
+
+        <label class="form-control">No</label>
+    }
+
+    else
+    {
+        <label class="form-control">Yes</label>
+    }
+                                }
+
+                            </div>
+
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@*@Html.Label("Registration Id")*@</div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.HiddenFor(m => m.refId)
+                                <input type="button" value="Detach Property" id="btnDetachProperty" />
+                                @*<a href="@Url.Action("PropertyDetails", "PropertyAllotment", new {area="Property", id = @Model.IsAllotted } )">@Model.IsAllotted</a>*@
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Scheme Name")</div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control">@Html.DisplayFor(m => m.schemeName)</label></div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Department")</div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control">@Html.DisplayFor(m => m.departmentName)</label></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Property Type")</div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control">@Html.DisplayFor(m => m.propertyType)</label></div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Sector")</div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control">@Html.DisplayFor(m => m.sectorName)</label></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Block")</div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control">@Html.DisplayFor(m => m.blockName)</label></div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Property / Plot No")</div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control">@Html.DisplayFor(m => m.plotProperty, new { @class = "form-control" })</label></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @{
+    if (Model.departmentId == 5)
+    {
+        @Html.Label("Floor")
+    }
+    else
+    {  @Html.Label("Area Range")}
+                                }
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control">@Html.DisplayFor(m => m.floorName)</label></div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label>Total Area (Sq.Mtr)</label></div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control">@Html.DisplayFor(m => m.totalArea, new { @class = "form-control" })</label></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label>Covered Area (Sq.Mtr)</label>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control">@Html.DisplayFor(m => m.coveredArea, new { @class = "form-control" })</label></div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label>Actual Area (Sq.Mtr)</label></div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control">@Html.DisplayFor(m => m.actualArea, new { @class = "form-control" })</label></div>
+                        </div>
+
+                        @{
+    if (Model.departmentId == 5)
+    {
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label>Property Cost (INR)</label></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control">@Html.DisplayFor(m => m.PropertyCost, new { @class = "form-control" })</label></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Civil Cost (INR)")</div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control">@Html.DisplayFor(m => m.civilCost, new { @class = "form-control" })</label></div>
+        </div>
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label>Total Property Cost (INR)</label></div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control">@Html.DisplayFor(m => m.TotalPropertyCost, new { @class = "form-control" })</label></div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Allotment Money")</div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control">@Html.DisplayFor(m => m.allotementMoney)</label></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Lease Rent (INR)")</div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control">@Html.DisplayFor(m => m.leaseRent)</label></div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Registry")</div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control">@Html.DisplayFor(m => m.RegistryName)</label></div>
+                            </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label>Total Property Cost (INR)</label></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control">@Html.DisplayFor(m => m.TotalPropertyCost, new { @class = "form-control" })</label></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label>Location Charge (INR)</label></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control">@Html.DisplayFor(m => m.charges)</label></div>
+        </div>
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label>Land Rate (per Sq.Mtr)</label></div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control">@Html.DisplayFor(m => m.LandRatePerSqMet, new { @class = "form-control" })</label></div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Floor Area Ratio")</div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control">@Html.DisplayFor(m => m.floorAreaRatio)</label></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Lease Rent %")</div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control">@Html.DisplayFor(m => m.leaseRentPercentage)</label></div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Allotment Money %")</div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control">@Html.DisplayFor(m => m.allotementMoneyPercentage)</label></div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Registry")</div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control">@Html.DisplayFor(m => m.RegistryName)</label></div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Land Rate (Per Sqm)")</div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control">@Html.DisplayFor(m => m.LandRatePerSqMet)</label></div>
+                            </div>
+    }
+                        }
+                    </div>
+                </div>
+
+
+                <div class="box-button text-center">
+                    <input type="button" id="btnClose" value="Back" class="btn btn-default" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+
+<script type="text/javascript">
+    $("#btnDetachProperty").click(function () {
+
+        alertify.confirm('Detach Property', 'Are you sure you want Detach this Property?', function () {
+            var rIds = [];
+            rIds.push($("#refId").val());
+            if (rIds.length > 0) {
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ refIds: rIds }),
+                    url: '/ManageProperty/DetachProperties',
+                    success: function (result) {
+                        alertify.success("Properties detached successfully.");
+                        window.location.href = '@Url.Action("Manage", "ManageProperty")';
+                    },
+                    error: function (obj) {
+                        alertify.error("Some error occured. Please try again later.");
+                    }
+                });
+            } else {
+                alertify.error("Please select atleast one property from detached grid.");
+                return false;
+            }
+         }
+                    , function () {
+                        //alertify.error('Cancel')
+                    });
+
+
+
+
+        @*var detachProperty = confirm('Are you sure you want Detach this Property?');
+        if (detachProperty) {
+            var rIds = [];
+            rIds.push($("#refId").val());
+            if (rIds.length > 0) {
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ refIds: rIds }),
+                    url: '/ManageProperty/DetachProperties',
+                    success: function (result) {
+                        alertify.success("Properties detached successfully.");
+                        window.location.href = '@Url.Action("Manage", "ManageProperty")';
+                    },
+                    error: function (obj) {
+                        alertify.error("Some error occured. Please try again later.");
+                    }
+                });
+            } else {
+                alertify.error("Please select atleast one property from detached grid.");
+                return false;
+            }
+        }*@
+    });
+    $("#btnClose").click(function () {
+        window.location.href = '@Url.Action("Manage", "ManageProperty")';
+    });
+</script>

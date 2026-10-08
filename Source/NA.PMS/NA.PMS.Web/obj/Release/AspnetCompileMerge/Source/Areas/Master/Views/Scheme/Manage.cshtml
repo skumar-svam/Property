@@ -1,0 +1,165 @@
+﻿@model NA.PMS.Model.Scheme
+@using Kendo.Mvc.UI;
+@using NA.PMS.Model
+@{
+    ViewBag.Title = "Manage";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .k-grid-content {
+        overflow-y: hidden;
+        overflow-x: hidden;
+    }
+</style>
+
+<div class="ApplicationForm">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Scheme</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                @*<a href="#" id="btnAddScheme" class="" onclick="javascript:CreateScheme(event);">Create Scheme</a>*@
+                <a href="#" id="btnAddScheme" class="" onclick="return CreateScheme(event);">Create Scheme</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<Scheme>()
+        .Name("gridScheme")
+        .Columns(columns =>
+        {
+            //columns.Bound(c => c.scheId).ClientTemplate("<a href='/Master/Scheme/ViewScheme/#= scheId #'>#= scheId #</a>").Width(80);
+            columns.Bound(c => c.scheId).Title("Scheme Id").Width(90).Sortable(false).Filterable(false);
+            columns.Bound(c => c.schemeName).Title("Scheme Name").ClientTemplate("<a href='/Master/Scheme/ViewScheme/#= EncodedParameter #'>#= schemeName #</a>");
+            columns.Bound(c => c.schemeType).Title("Scheme Type").Width(150);
+            columns.Bound(c => c.startDate).Title("Start Date").Width(110).Format("{0:dd-MMM-yyyy}");
+            columns.Bound(c => c.endDate).Title("End Date").Width(110).Format("{0:dd-MMM-yyyy}");
+            columns.Bound(c => c.strSchemeStatus).Width(100).Title("Status");
+            columns.Bound(c => c.SchemeStatus).Hidden(true).Title("SchemeStatus");
+            columns.Bound(c => c.IsAllotted).Hidden(true);
+            columns.Bound(c => c.completed).Title("Completed").Width(100).ClientTemplate("#if(completed == true){#  Yes #} else{#No#}#").Filterable(false).Sortable(false);
+            columns.Bound(c => c.EncodedParameter).Hidden(true);
+            //if (@ViewBag.EditMenuVal != null && @ViewBag.EditMenuVal == true) -> Changes done on 22nd March to open all Schemes for entering old data, as requested by Vishal Shukla 
+            //{
+                //columns.Bound(c => c.scheId).ClientTemplate("# if ((SchemeStatus == 26 || IsAllotted == 1)) {#<span class='gridNotEdit'>Edit</span>#} else {#<a class='gridEdit' href='" + "/Master/Scheme/EditScheme/#= EncodedParameter #'> Edit </a>#} #").HeaderHtmlAttributes(new { style = "text-align:center;" }).HtmlAttributes(new { style = "text-align:center;" }).Title("Edit").Filterable(false);
+            columns.Bound(c => c.scheId).Width(70).ClientTemplate("<a class='gridEdit' href='" + "/Master/Scheme/EditScheme/#= EncodedParameter #'> Edit </a>").HeaderHtmlAttributes(new { style = "text-align:center;" }).HtmlAttributes(new { style = "text-align:center;" }).Title("Edit").Filterable(false);
+            //}
+            //else
+            //{
+            //    columns.Bound(c => c.scheId).ClientTemplate("Edit").Title("Edit").Filterable(false); ;
+            //}
+
+            if (@ViewBag.DeleteMenuVal != null && @ViewBag.DeleteMenuVal == true)
+            {
+                columns.Bound(c => c.scheId).Title("Remove").Width(90).HeaderHtmlAttributes(new { style = "text-align:center;" }).HtmlAttributes(new { style = "text-align:center;" }).ClientTemplate("# if ((SchemeStatus == 26 || IsAllotted == 1)) {#<span class='gridNotRem'>Remove</span>#} else {#<a onclick='javascript:return RemoveScheme(#=scheId#)' class='gridRemove' id='RemovescheIdTag'>Remove</a>#} #").Filterable(false);
+            }
+            else
+            {
+                columns.Bound(c => c.scheId).Width(100).ClientTemplate("Remove").Title("Remove").Filterable(false);
+            }
+            columns.Bound(c => c.scheId).Title("Close").Width(90).HeaderHtmlAttributes(new { style = "text-align:center;" }).HtmlAttributes(new { style = "text-align:center;" }).ClientTemplate("# if ((SchemeStatus != '26')) {#<a onclick='javascript: return GetStatusUpdated(#=scheId#)' class='gridRemove' id='RemovescheIdTag'>Close</a>#} else {#<span class='gridNotRem'>Close</span>#} #").Filterable(false);
+        })
+        .Sortable().Filterable().Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+        .Events(e => e.DataBound("onDataBound"))
+        .DataSource
+        (
+             dataSource => dataSource
+            .Ajax().Model(model => model.Id(p => p.scheId))
+            .ServerOperation(true)
+            .Read(read => read.Action("GetAllScheme", "Scheme")).PageSize(10)
+         )
+         .ToolBar(tools => tools.Excel())
+         .Excel(excel => excel.AllPages(true).Filterable(true).FileName("Scheme.xlsx"))
+        )
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var exportFlag = false;
+        $("#gridScheme").data("kendoGrid").bind("excelExport", function (e) {
+            if (!exportFlag) {
+                //alert(0);
+                e.sender.hideColumn(9);
+                e.sender.hideColumn(10);
+                e.sender.hideColumn(11);
+                //e.sender.showColumn(5);
+                
+                e.preventDefault();
+                exportFlag = true;
+                setTimeout(function () {
+                e.sender.saveAsExcel();
+                });
+            } else {
+                //alert(1);
+                e.sender.showColumn(9);
+                e.sender.showColumn(10);
+                e.sender.showColumn(11);
+                exportFlag = false;
+            }
+        });
+    });
+
+    function CreateScheme(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("CreateScheme", "Scheme")';
+    }
+
+    function RemoveScheme(schemeId) {
+        var removescheme = confirm('Are you sure you want to remove this scheme?');
+        if (removescheme) {
+            $.ajax({
+                url: '@(Url.Action("Delete", "Scheme"))',
+                type: 'POST',
+                data: { scheId: schemeId },
+                success: function (result) {
+                    if (result == true) {
+                        $('#gridScheme').data('kendoGrid').dataSource.read();
+                        $('#gridScheme').data('kendoGrid').refresh();
+                    }
+                    else {
+                        alertify.error("Scheme not removed");
+                        return false;
+                    }
+                }
+            });
+        }
+        else {
+            return false;
+        }
+    }
+
+    function onDataBound(e) {
+        var AddMenuVal = '@ViewBag.AddMenuVal'
+        if (AddMenuVal == "False") {
+            $("#btnAddScheme").addClass("disable_a_href");
+        }
+    }
+
+    function GetStatusUpdated(schemeId) {       
+        var closeScheme = confirm('Are you sure you want to close this scheme?');
+        var bflag=false;
+        if (closeScheme) {
+            $.ajax({
+                url: '@(Url.Action("GetStatusUpdated", "Scheme"))',
+                type: 'POST',
+                data: { schemeID: schemeId },
+                success: function (result) {
+                    if (result == true) {
+                        $("#gridScheme").data("kendoGrid").dataSource.read();
+                        alertify.success('Scheme successfully closed.');
+                        bflag=true;
+                    }
+                    else {
+                        alertify.error("Scheme not closed");
+                        bflag= false;
+                    }
+                }
+            });
+        }
+        else {
+            bflag= false;
+        }
+        return bflag;
+    }
+</script>

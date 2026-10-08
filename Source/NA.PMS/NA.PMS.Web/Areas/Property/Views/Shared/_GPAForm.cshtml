@@ -1,0 +1,292 @@
+﻿@model NA.PMS.Model.GPAModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+
+<h2 class="blck-heading">GPA Details</h2>
+<div class="form-bx">
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("GPA Holder Name", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(gpa => gpa.GPAHolderName, new { @maxlength = "99", @class = "form-control" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("GPA Holder Address", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextAreaFor(gpa => gpa.GPAHolderAdd, new { @maxlength = "499", @class = "form-control" })
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Relation", htmlAttributes: new { @class = "" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(gpa => gpa.RelationName, new { @maxlength = "29", @class = "form-control" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Application Date", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DatePickerFor(gpa => gpa.ApplicationDate)
+                                  .HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("GPA Effective From", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DatePickerFor(gpa => gpa.EffectiveFrom)
+                                  .HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("GPA Effective To", htmlAttributes: new { @class = "" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DatePickerFor(gpa => gpa.EffectiveTo)
+                                  .HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("GPA Registered", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DropDownListFor(m => m.GPARegistered)
+                    .Filter("contains")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel("Select")
+                    .SelectedIndex(1)
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("YesNoDDL", "PropertyRegistration");
+                        });
+                    })
+                    // .Events(events => { events.Change("RegisteredChange"); })
+                    .HtmlAttributes(new { @class = "schemeForms", style = "width:100%" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("GPA Registration Number", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(gpa => gpa.GPARegisteredNo, new { @class = "form-control", @maxlength = "29", style = "width:100%" })
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Acceptance Date", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DatePickerFor(gpa => gpa.AcceptanceDate)
+                                  .HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Bahi Number", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(m => m.BahiNo, htmlAttributes: new { @class = "form-control", @maxlength = "29" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Bahi Zild Number", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(m => m.BahiZildNo, htmlAttributes: new { @class = "form-control", @maxlength = "29" })
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Bahi Page Number", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(m => m.BahiPageNo, htmlAttributes: new { @class = "form-control", @maxlength = "29" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("SI Number", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(m => m.SINo, htmlAttributes: new { @class = "form-control", @maxlength = "29" })
+        </div>
+    </div>
+</div>
+<h2 class="blck-heading">Sale of Agreement</h2>
+<div class="form-bx">
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Sale of Agreement", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DropDownListFor(m => m.GPASOA)
+                    .Filter("contains")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel("Select")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("YesNoDDL", "PropertyRegistration");
+                        });
+                    })
+                             .Events(events => { events.Change("GPASOAChange"); })
+                    .HtmlAttributes(new { @class = "schemeForms", style = "width:100%" })
+            )
+        </div>
+        <div class="DivAgreement">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Agreement Type", htmlAttributes: new { @class = "required" })
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @(Html.Kendo().DropDownListFor(m => m.AgreementType)
+                    .Filter("contains")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel("Select")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("RegUnRegDDL", "PropertyRegistration");
+                        });
+                    })
+                                     .Events(events => { events.Change("AgreementTypeChange"); })
+                    .HtmlAttributes(new { @class = "", style = "width:100%" })
+                )
+            </div>
+        </div>
+    </div>
+    <div class="RegisteredPart">
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Registration Date", htmlAttributes: new { @class = "required" })
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @(Html.Kendo().DatePickerFor(gpa => gpa.RegistrationDate)
+                                  .HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Bahi Number", htmlAttributes: new { @class = "required" })
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.TextBoxFor(m => m.SOABahiNo, htmlAttributes: new { @class = "form-control", @maxlength = "29" })
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Bahi Zild Number", htmlAttributes: new { @class = "required" })
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.TextBoxFor(m => m.SOABahiZildNo, htmlAttributes: new { @class = "form-control", @maxlength = "29" })
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Bahi Page Number", htmlAttributes: new { @class = "required" })
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.TextBoxFor(m => m.SOABahiPageNo, htmlAttributes: new { @class = "form-control", @maxlength = "29" })
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("SI Number", htmlAttributes: new { @class = "required" })
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.TextBoxFor(m => m.SOASINo, htmlAttributes: new { @class = "form-control", @maxlength = "29" })
+            </div>
+        </div>
+    </div>
+    <div class="UnRegisteredPart">
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Advertisment in Newspaper", htmlAttributes: new { @class = "required" })
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.TextAreaFor(m => m.AdvertismentInNewsPaper, htmlAttributes: new { @class = "form-control", @maxlength = "499" })
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Published Date", htmlAttributes: new { @class = "required" })
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @(Html.Kendo().DatePickerFor(gpa => gpa.PublishedDate)
+                                  .HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $(".RegisteredPart").hide();
+        $(".UnRegisteredPart").hide();
+        $(".DivAgreement").hide();
+        $("#GPARegistered").data("kendoDropDownList").enable(false);
+    });
+    @*function RegisteredChange() {
+        var registeredVal = $("#GPARegistered").val();
+        if (registeredVal == '') {
+            $("#GPARegisteredNo").val('');
+            $("#GPARegisteredNo").prop("disabled", true);
+            alertify.error("Please select GPA Registered");
+            return false;
+        }
+        if (registeredVal == '@NA.PMS.Common.MortPrevLoan.no') {
+            $("#GPARegisteredNo").val('');
+            $("#GPARegisteredNo").prop("disabled", true);
+        }
+        else {
+            $("#GPARegisteredNo").prop("disabled", false);
+        }
+    }*@
+
+    function GPASOAChange() {
+        var GPASOAVal = $("#GPASOA").val();
+        if (GPASOAVal == '') {
+            $(".RegisteredPart").hide();
+            $(".UnRegisteredPart").hide();
+            $(".DivAgreement").hide();
+            // alertify.error("Please select GPA Registered");
+            return false;
+        }
+        if (GPASOAVal == '@NA.PMS.Common.MortPrevLoan.no') {
+            $(".RegisteredPart").hide();
+            $(".UnRegisteredPart").hide();
+            $(".DivAgreement").hide();
+        }
+        else {
+            $(".RegisteredPart").hide();
+            $(".UnRegisteredPart").hide();
+            $(".DivAgreement").show();
+        }
+    }
+
+    function AgreementTypeChange() {
+        var AgreementTypeVal = $("#AgreementType").val();
+        if (AgreementTypeVal == '') {
+            $(".RegisteredPart").hide();
+            $(".UnRegisteredPart").hide();
+            //alertify.error("Please select GPA Registered");
+            return false;
+        }
+        if (AgreementTypeVal == '1') {
+            $(".RegisteredPart").show();
+            $(".UnRegisteredPart").hide();
+        }
+        else {
+            $(".RegisteredPart").hide();
+            $(".UnRegisteredPart").show();
+        }
+    }
+</script>

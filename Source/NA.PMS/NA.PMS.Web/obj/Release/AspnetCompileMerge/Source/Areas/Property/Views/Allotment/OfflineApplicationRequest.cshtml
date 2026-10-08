@@ -1,0 +1,180 @@
+﻿@{
+    ViewBag.Title = "Offline Application Request";
+    Layout = "~/Views/Shared/_OnlineRequestLayout.cshtml";
+}
+
+<style type="text/css">
+    .textBoxWidth {
+        width: 50px;
+    }
+
+    .btn {
+        min-width: 70px;
+    }
+
+    .btn-add {
+        background-color: #299a8b;
+        border-color: rgb(43, 137, 90);
+        color: #fff;
+    }
+</style>
+@using (Html.BeginForm("OfflineApplicationRequest", "Allotment", FormMethod.Post, new { enctype = "multipart/form-data", id = "offLine" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Offline Application Request</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>    
+    <div class="tab-pane">
+        <div class="row">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Applicant Name")
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                <input type="text" id="txtApplicantName" maxlength="100" />
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Mobile Number")
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                <input type="text" id="txtMobileno" maxlength="10" />
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Enter OTP")
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                <input type="text" id="txtEnterOTP" /> &nbsp; <a herf="" id="btnGenerateOTP">Generate OTP</a>
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Application Form Fee (INR)")
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                <input type="text" id="txtApplicationFee" maxlength="20" />
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                <input type="button" id="btnCancel" value="Back" class="btn btn-default" />
+                <input type="button" id="btnPayment" value="Proceed to Payment" class="btn btn-add" />
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            </div>
+        </div>
+    </div>
+}
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#btnPayment").attr("disabled", "disabled");
+    });
+
+
+    $("#btnGenerateOTP").click(function () {
+        $.ajax({
+            url: '@(Url.Action("GenerateOTPForOfline", "Allotment"))',
+            type: 'POST',
+            dataType: 'json',
+            data: { strMobileNumber: $("#txtMobileno").val() },
+            success: function (result) {
+                if (result == true) {
+                    alertify.success("OTP Generated Successfully.");
+                    return false;
+                }
+            }
+        });
+    });
+
+    $("#txtenterotp").blur(function () {
+        $.ajax({
+            url: '@(Url.Action("VerifyOTP", "Allotment"))',
+            type: 'post',
+            datatype: 'json',
+            data: { otp: $("#txtenterotp").val() },
+            success: function (result) {
+                if (result == true) {
+                    alertify.success("OTP verified.");
+                    $("#btnPayment").removeAttr("disabled");
+                    return false;
+                }
+                else {
+                    alertify.error("OTP not verified.");
+                    return false;
+                }
+            }
+        });
+    });
+
+
+    $("#btnPayment").click(function () {
+        window.location.href = '@Url.Action("PaymentDetails", "Allotment")';
+        if (Validation())
+        {
+            //payment Gateway implmented.
+        }
+
+    });
+
+    function Validation() {
+        var bflag = false;
+        var applName = $("#txtApplicantName").val().trim();
+        var mobileno = $("#txtMobileno").val().trim();
+        var applicationFee = $("#txtApplicationFee").val().trim();
+        ///txtEnterOTP
+        //debugger;
+        if (applName == "") {
+            alertify.error("Please enter Applicant Name");
+            bflag = false;
+        }
+        else if (mobileno == "" ) {
+            alertify.error("Please enter Mobile Number");
+            bflag = false;
+        }
+        else if (isNaN(mobileno) || mobileno == 0 || mobileno.length() < 10) {
+            alertify.error("Please enter a valid Mobile Number");
+            bflag = false;
+        }
+        else if (applicationFee == "") {
+            alertify.error("Please enter Applicant Fee");
+            bflag = false;
+        }
+        else {
+            bflag = true;
+        }
+        return bflag;
+    }
+</script>

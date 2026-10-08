@@ -1,0 +1,533 @@
+﻿@model NA.PMS.Model.MortgageModel
+@using Kendo.Mvc.UI;
+@using NA.PMS.Common;
+
+
+<div id="divMortgage">
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Registration Id", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DropDownListFor(model => model.RID)
+                .DataTextField("text")
+                .DataValueField("id")
+                .OptionLabel("Select")
+                .Filter("contains")
+                .DataSource(source =>
+                {
+                    //source.Read(read =>
+                    //{
+                    //    read.Action("GetRIDsByDeptt", "PropertyRegistration");
+                    //});
+                    source.Custom()
+                    .ServerFiltering(true)
+                    .ServerPaging(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    .Transport(transport =>
+                    {
+                        transport.Read(read => read.Action("GetRIDsByDeptt", "PropertyRegistration").Data("GetRid"));
+                    }).Schema(schema =>
+                    {
+                        schema.Data("Data")
+                        .Total("Total");
+                    }).PageSize(100);
+                })
+            .HtmlAttributes(new { style = "width:100%;" })
+            .Events(m => m.Change("GetPropertyDetails"))
+            )
+        </div>
+
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Request Ref No", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(model => model.OnlineRequestNo, new { @class = "form-control", @maxlength = "8", @minlength = "3", @onchange = "RequestIdCheck();" })
+            @*@Html.TextBox("txtRequestRefNo","", new { @class="form-control", @maxlength="8"})*@
+        </div>
+    </div>
+    <div class="row">
+        @Html.HiddenFor(m => m.RequestNo)
+        <input type="hidden" id="isMortgage" />
+        <input type="hidden" id="allotmentDate" />
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Allottee Name", htmlAttributes: new { @id = "_AllotteeName" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span id="AllotteeName" class="form-control"></span>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Father's Name", htmlAttributes: new { @id = "_FatherName" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span id="FatherName" class="form-control"></span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Department", htmlAttributes: new { @id = "_Department" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span id="Department" class="form-control"></span>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Property Type", htmlAttributes: new { @id = "_PropertyType" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span id="PropertyType" class="form-control"></span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Property Number", htmlAttributes: new { @id = "_PropertyNu" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span id="PropertyNu" class="form-control"></span>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Property Cost", htmlAttributes: new { @id = "_PropertyCost" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span id="PropertyCost" class="form-control"></span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Total Dues", htmlAttributes: new { @id = "_TotalDues" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span id="TotalDues" class="form-control"></span>
+            @Html.HiddenFor(m => m.TotalDues, htmlAttributes: new { @id = "hdnTotalDues" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Functional", htmlAttributes: new { @id = "_Functional" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span id="Functional" class="form-control"></span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Mortgage Date", htmlAttributes: new { @id = "_requestDate", @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span id="requestDate">@(Html.Kendo().DatePickerFor(m => m.MortgageDate).DisableDates(DayOfWeek.Sunday).Max(DateTime.Now).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))</span>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group" style="display: none">
+            @Html.Label("Approval Date", htmlAttributes: new { @id = "_ApprovalDate", @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group" style="display: none">
+            <span id="ApprovalDate">@(Html.Kendo().DatePickerFor(m => m.ApproveDate).DisableDates(DayOfWeek.Sunday).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))</span>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.LabelFor(model => model.SanctionedAmount, htmlAttributes: new { @class = "" })<i class="glyphicon fa fa-inr"></i>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(model => model.SanctionedAmount, new { @maxlength = "13", @class = "form-control" })
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.LabelFor(model => model.BankName, htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(model => model.BankName, new { @maxlength = "70", @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.BankName, "", new { @class = "text-danger" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.LabelFor(model => model.BranchAddress, htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(model => model.BranchAddress, new { @maxlength = "150", @class = "form-control" })
+            @Html.ValidationMessageFor(model => model.BranchAddress, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.LabelFor(model => model.MortgageType, htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DropDownListFor(model => model.MortgageType)
+                                      .DataTextField("text")
+                                      .DataValueField("id")
+                                      .OptionLabel("Select")
+                                      .DataSource(source =>
+                                      {
+                                          source.Read(read =>
+                                          {
+                                              read.Action("GetMortgageType", "PropertyRegistration");
+                                          });
+                                      })
+                                    .HtmlAttributes(new { style = "width:100%;" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.LabelFor(model => model.ValidUpto, htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DatePickerFor(m => m.ValidUpto).DisableDates(DayOfWeek.Sunday).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.LabelFor(model => model.ProcessingFee, htmlAttributes: new { @class = "required" })<i class="glyphicon fa fa-inr"></i>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(model => model.ProcessingFee, new { @maxlength = "9", @class = "form-control" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.LabelFor(model => model.PreviousLoanNoc, htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DropDownListFor(model => model.PreviousLoanNoc)
+                                      .DataTextField("text")
+                                      .DataValueField("id")
+                                      .OptionLabel("Select")
+                                      .DataSource(source =>
+                                      {
+                                          source.Read(read =>
+                                          {
+                                              read.Action("GetPreviousLoanNoc", "PropertyRegistration");
+                                          });
+                                      })
+                                    .Events(m => m.Change("GetPreviousMortgageBankDetails"))
+                                    .HtmlAttributes(new { style = "width:100%;" })
+            )
+        </div>
+    </div>
+    <input type="hidden" value="" name="hdnpreviousMortgageBankDetails" id="hdnpreviousMortgageBankDetails" />
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Previous Mortgage Bank Details", htmlAttributes: new { @id = "_previousMortgageBankDetails" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span id="previousMortgageBankDetails" class="form-control"></span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+        </div>
+    </div>
+</div>
+
+
+
+<div class='col-md-12' id='divCommentPost'>
+    <div class="row" style="margin-top:30px; margin-bottom:15px;">
+        <div class="col-md-3">
+            @Html.Label("Enter Comment :")
+        </div>
+        <div class="col-md-8">
+            @Html.TextAreaFor(model => model.Comment, new { style = "width: 100%; height:100px;", @maxlength = "500", @class = "form-control" })
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3"></div>
+        <div class="col-md-8">
+            <button type='submit' id="btnCommentPostApprove" class='btn btn-default' value='Save'>Post</button>
+            <button type='button' class='btn btn-default' value='Cancel' onclick="CloseCommnetPostPopUp();">Close</button>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    function GetRid() {
+        var regId = $("#hdnRid").val();
+        if (regId == "") { regId = 0; }
+        return {
+            Rid: regId
+        };
+    }
+
+    function GetPropertyDetails() {
+        $('#AllotteeName').empty();
+        $('#Department').empty();
+        $('#PropertyNu').empty();
+        $('#TotalDues').empty();
+        $('#FatherName').empty();
+        $('#PropertyType').empty();
+        $('#PropertyCost').empty();
+        $('#Functional').empty();
+        //GetKYADetails();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rID: $('#RID').val() }),
+            url: "/PropertyRegistration/GetPropertyDetailByRid",
+            success: function (data) {
+                if (data != null) {
+                    //if (data.Mortgage) {
+                    //    alertify.error("Already Mortgage property.");
+                    //}
+                    $('#isMortgage').val(data.Mortgage);
+                    $('#AllotteeName').html(data.ApplicantName);
+                    $('#Department').html(data.DepartmentName);
+                    $('#PropertyNu').html(data.PropertyNumber);
+                    $('#TotalDues').html(data.TotalDues);
+                    $('#hdnTotalDues').val(data.TotalDues);
+                    $('#FatherName').html(data.FatherName);
+                    $('#PropertyType').html(data.PropertyType);
+                    $('#PropertyCost').html(data.PropertyCost);
+                    //$('#previousMortgageBankDetails').html(data.PreviousBankDetail);
+                    $('#hdnpreviousMortgageBankDetails').val(data.PreviousBankDetail);
+                    $('#allotmentDate').val(data.AllotmentDate);
+                    if (data.Functional != null)
+                    { $('#Functional').html("Yes"); }
+                    else
+                    { $('#Functional').html("No"); }
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert("Error: " + respText);
+            }
+        });
+    }
+
+    function GetKYADetails() {
+        var rId = $("#RID").val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ RegistrationId: rId }),
+            url: '/Property/PropertyRegistration/GetKYADetailsForRid',
+            success: function (result) {
+                if (result != null) {
+                    if (result.StatusId == "2") {
+                        alertify.error("Your KYA has been Rejected. Please Complete your KYA again.");
+                        $('#btnSubmitScheme').attr('disabled', 'disabled');
+                        return false;
+                    }
+                    else if (result.StatusId == "" || result.StatusId == null) {
+                        alertify.error("Please Complete your KYA.");
+                        $('#btnSubmitScheme').prop('disabled', true);
+                        return false;
+                    }
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+
+    function GetPreviousLoanDetails() {
+        var rid = $("#RID").val();
+        var requestId = $('#RequestNo').val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ requestNo: requestId, Rid: rid }),
+            url: "/PropertyRegistration/GetMortgagePreviousLoan",
+            success: function (data) {
+                if (data != null) {
+                    $('#previousMortgageBankDetails').html(data);
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert("Error: " + respText);
+            }
+        });
+    }
+
+    function ValidateMortgage() {
+        var reqNo = $('#OnlineRequestNo').val();
+        var mortgageDate = $("#MortgageDate").val();
+        var bankName = $("#BankName").val().trim();
+        var mortgageType = $("#MortgageType").val();
+        var branchAddress = $("#BranchAddress").val().trim();
+        var processingFee = $("#ProcessingFee").val().trim();
+        var sanctionedAmount = $("#SanctionedAmount").val().trim();
+        var previousLoanval = $("#PreviousLoanNoc").val().trim();
+        var validUpto = $('#ValidUpto').val();
+        var rID = $('#RID').val();
+        var bflag = false;
+        var totalDues = $('#hdnTotalDues').val().trim();
+        if (rID == "") {
+            alertify.error("Please select RID.");
+            bflag = false;
+        }
+            //else if (reqNo == "") {
+            //    alertify.error("Please enter Service reqeust reference no");
+            //    bflag = false;
+            //}
+        else if (reqNo == "") {
+            alertify.error("Please enter Request Ref. No.");
+            return false;
+        }
+        else if (reqNo.length < 3) {
+            alertify.error("Request Ref. No. length must be 3 characters");
+            return false;
+        }
+        else if (mortgageDate == "") {
+            alertify.error("Please enter Mortgage date.");
+            bflag = false;
+        }
+        else if (!checkAllotmentDate()) {
+            bflag = false;
+        }
+        else if (bankName == "") {
+            alertify.error("Please enter Bank Name.");
+            bflag = false;
+        }
+        else if (mortgageType == "") {
+            alertify.error("Please select Mortgage Type.");
+            bflag = false;
+        }
+        else if (branchAddress == "") {
+            alertify.error("Please enter Branch Address.");
+            bflag = false;
+        }
+        else if (processingFee == "") {
+            alertify.error("Please enter Processing Fee.");
+            bflag = false;
+        }
+            //else if (sanctionedAmount == "") {
+            //    alertify.error("Please enter Sanctioned Amount.");
+            //    bflag = false;
+            //}
+        else if (isNaN(processingFee)) {
+            alertify.error("Processing Fee should be number.");
+            bflag = false;
+        }
+        else if (sanctionedAmount != "" && isNaN(sanctionedAmount)) {
+            alertify.error("Sanctioned Amount should be number.");
+            bflag = false;
+        }
+        else if (previousLoanval == "") {
+            alertify.error("Please enter Previous Loan NOC.");
+            bflag = false;
+        }
+        else if (validUpto == "") {
+            alertify.error("Please enter Valid Upto.");
+            bflag = false;
+        }
+            //else if ($('#isMortgage').val() == "true") {
+            //    alertify.error("Already Mortgage property.");
+            //}
+        else if (parseInt(totalDues) > 0) {
+            alertify.error("Please clear your dues before mortgage.");
+            bflag = false;
+        }
+        else {
+            bflag = true;
+        }
+        return bflag;
+    }
+
+    function checkAllotmentDate() {
+        var mortgageDate = $("#MortgageDate").val();
+        var allotmentDate = $("#allotmentDate").val();
+        var date = new Date(parseInt(allotmentDate.substr(6)));
+        var strdate = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
+        var flag = false;
+        if ((Date.parse(strdate) >= Date.parse(mortgageDate))) {
+            alertify.error("Mortgage date should not be earlier than allotment date.");
+            flag = false;
+            return flag;
+        }
+        else { flag = true }
+        return flag;
+    }
+
+    $("#OnlineRequestNo").keydown(function (e) {
+        // Allow: backspace, delete, tab, escape, enter and .
+        if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
+            // Allow: Ctrl+A, Command+A
+            (e.keyCode === 65 && (e.ctrlKey === true || e.metaKey === true)) ||
+            // Allow: home, end, left, right, down, up
+            (e.keyCode >= 35 && e.keyCode <= 40)) {
+            // let it happen, don't do anything
+            return;
+        }
+        // Ensure that it is a number and stop the keypress
+        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+            e.preventDefault();
+        }
+    });
+
+    function GetPreviousMortgageBankDetails() {
+
+        var previousLoanval = $("#PreviousLoanNoc").val().trim();
+        // var previousMortgageBankDetails = $('#hdnpreviousMortgageBankDetails').val();
+        if (previousLoanval != "") {
+            if (previousLoanval == '1') {
+                //$('#previousMortgageBankDetails').html(previousMortgageBankDetails);
+                GetPreviousLoanDetails();
+            }
+            else {
+                $('#previousMortgageBankDetails').html('');
+            }
+        }
+        else {
+            $('#previousMortgageBankDetails').html('');
+        }
+    }
+
+    function RequestIdCheck() {
+        var request = $("#OnlineRequestNo").val();
+        rModel = {
+            RequestId: $("#OnlineRequestNo").val(),
+            RegistrationId: $("#RID").val(),
+            ServiceId: "4"
+        }
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ model: rModel }),
+            url: '/Property/PropertyRegistration/IsRequestIdIsExist',
+            success: function (result) {
+                if (result != '@ReturnType.Exist') {
+                    if (result == '@NAStatusId.Completed') {
+                        alertify.error("This Request is Completed");
+                    }
+                    else if (result == '@NAStatusId.Initiated') {
+                        alertify.error("This Request is in Initiated State. Please Forward this request first.");
+                    }
+                    else if (result == '@NAStatusId.Objection') {
+                        alertify.error("This Request in Objection State.");
+                    }
+                    else if (result == '@NAStatusId.Rejected') {
+                        alertify.error("This Request is Rejected");
+                    }
+                    else if (result == '@NAStatusId.Cancelled') {
+                        alertify.error("This Request is cancelled");
+                    }
+                    else if (result == '@NAStatusId.Withdrawn') {
+                        alertify.error("This Request is Withdrawn by Allottee.");
+                    }
+                    else {
+                        alertify.error("Request no. mismatch. Please enter a valid Request No.");
+                    }
+                    $("#OnlineRequestNo").val('');
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+</script>

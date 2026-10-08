@@ -1,0 +1,473 @@
+﻿@using Kendo.Mvc.UI;
+@using System.Web.Optimization
+
+@{
+    ViewBag.Title = "Manage Users";
+    Layout = "~/Views/Shared/_LayoutCustomer.cshtml";
+}
+
+<style type="text/css">
+    .k-window div.k-window-content {
+        overflow: hidden;
+    }
+
+    div#UserListGrid .k-grid-content {
+        min-height: 50px;
+        max-height: 600px;
+    }
+
+    .view-docs {
+        color: blue;
+        text-decoration: underline;
+    }
+
+        .view-docs:hover {
+            color: blue;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+</style>
+
+<div style="width: 100%">
+    <table style="width: 100%; float: left">
+
+        <tr>
+            @if (Convert.ToInt32(Session["RoleId_PIS"]) != 5)
+            {
+                <td>
+                    <h4>Manage Administrators</h4>
+                </td>
+            }
+            <td style="text-align:right;">
+                <input type="button" title="AddCustomer" class="btn btn-default btn-bg" value="Add Back Office" onclick="location.href='@Url.Action("AddEditCustomer", "ManageUsers", new { uid = "00000000-0000-0000-0000-000000000000" })'" />
+                <input type="button" title="AddAdministrator" class="btn btn-default btn-bg" value="Add Noida User" onclick="location.href='@Url.Action("AddEditAdmin", "ManageUsers", new { uid = "00000000-0000-0000-0000-000000000000" })'" />
+            </td>
+        </tr>
+        @if (Convert.ToInt32(Session["RoleId_PIS"]) != 5)
+        {
+            <tr>
+                <td colspan="2">
+                    <div class="k-grid-content">
+                        @(Html.Kendo().Grid<NA.PMS.Model.UserViewModel>()
+                                          .Name("UserListGrid")
+                  .Columns(columns =>
+                  {
+                      columns.Bound(p => p.RoleId).Visible(false);
+                      columns.Bound(p => p.UserId).Width(200).Title("UserId").Visible(false);
+                      if (Session["RoleId_PIS"].ToString() != "5")
+                      {
+                          columns.Bound(p => p.UserName).Width(150).ClientTemplate("# if (RoleId == 1) { # <a href='" + Url.Action("MyProfile", "Account") + "?uid=#= UserId #'" + ">#=UserName#</a> # } else {#<a href='" + Url.Action("EditCustomer", "ManageUsers") + "?uid=#= UserId #'" + ">#=UserName#</a> #} #").Title("User Email Address").Width(150);
+                      }
+                      else
+                      {
+                          columns.Bound(p => p.UserName).Width(150).Title("User Email Address").Width(150);
+                      }
+
+                      columns.Bound(p => p.MobileNo).Hidden(true);
+                      columns.Bound(p => p.FullName).Width(150).Title("Name").HtmlAttributes(new { @class = "longTextPopup" });
+                      columns.Bound(p => p.PropertyId).Width(150).Title("Property ID").HtmlAttributes(new { @class = "longTextPopup" });
+                      columns.Bound(p => p.RoleName).Width(150).Title("Role").Visible(false);
+                      columns.Bound(p => p.Status).Width(150).Title("Status").ClientTemplate("#= Status ? '<text>Active</text>' : '<text>Deactivated</text>' #");
+                      columns.Bound(p => p.IsLockedOut).Width(150).Title("Locked").ClientTemplate("#= IsLockedOut ? '<text>Yes</text>' : '<text>No</text>' #");
+                      columns.Bound(p => p.UserId).Title("Action").ClientTemplate("#if(Status == false || Status == null){#<input type='button' value='Activate' onclick='javascript:SendPassword(this);' class='btn btn-default btn-bg'>#} else {#<input type='button' value='DeActivate' onclick='javascript:DeactivateUser(this);' class='btn btn-default btn-bg'>#}#").Width(100);
+                      columns.Bound(p => p.CustomerIdFileName).Title("ID Document").Hidden(true);
+                      columns.Bound(p => p.AuthorityLetter).Title("Letter Document").Hidden(true);
+                      columns.Bound(p => p.CustomerIdFileName).Title("ID Document").ClientTemplate("#if(CustomerIdFileName != ''){#<a onclick='javascript:OpenCustomerFileForAdmin(this);' class='view-docs'>View</a>#}#").Width(100);
+                      columns.Bound(p => p.AuthorityLetter).Title("Letter Document").ClientTemplate("#if(AuthorityLetter != ''){#<a onclick='javascript:OpenLetterFileForAdmin(this);' class='view-docs'>View</a>#}#").Width(100);
+                  })
+                           .Pageable(pageable =>
+                                        {
+                                            pageable.Refresh(true);
+                                            pageable.PageSizes(new int[] { 20, 50, 100 });
+                                            pageable.Messages(messages => messages.Empty("No Administrator found"));
+                                        })
+                                   .Filterable(f => f.Operators(o => o.ForString(fs =>
+                                                  {
+                                                      fs.Clear().Contains("Contains");
+                                                      fs.DoesNotContain("Does not contain");
+                                                      fs.IsEqualTo("Equal to");
+                                                      fs.IsNotEqualTo("Not equal to");
+                                                      fs.StartsWith("Starts with");
+                                                      fs.EndsWith("Ends with");
+                                                  })))
+                                             .Sortable()
+
+                                          //  .HtmlAttributes(new { style = "width:1120px" })
+                                      .DataSource(dataSource => dataSource
+                                         .Ajax()
+                                        .ServerOperation(false) // paging, sorting, filtering and grouping will be applied client-side
+
+                               .Read("ManageUsersAjax", "Dashboard", new { area = "Admin" })
+                                      .Events(events => events.Error("error_handler"))
+
+                                      )
+                        )
+                    </div>
+                </td>
+            </tr>
+        }
+        <tr>
+            <td>
+                <h4>Manage Customers</h4>
+            </td>
+        <tr>
+            <td colspan="2">
+                <div class="k-grid-content">
+                    @(Html.Kendo().Grid<NA.PMS.Model.UserViewModel>()
+                                          .Name("CustomerListGrid")
+                  .Columns(columns =>
+                  {
+                      columns.Bound(p => p.RoleId).Visible(false);
+                      columns.Bound(p => p.Email).Width(200).Title("UserEmail").Hidden(true);
+                      if (Session["RoleId_PIS"].ToString() != "5")
+                      {
+                          columns.Bound(p => p.UserName).Width(150).ClientTemplate("# if (RoleId == 1) { # <a href='" + Url.Action("MyProfile", "Account") + "?uid=#= UserName #'" + ">#=UserEmail#</a> # } else {#<a href='" + Url.Action("EditCustomer", "ManageUsers") + "?uid=#= UserName #'" + ">#=UserEmail#</a> #} #").Title("User Email Address").Width(150);
+                      }
+                      else
+                      {
+                          columns.Bound(p => p.UserName).Width(150).Title("User Name");
+                      }
+                      columns.Bound(p => p.MobileNo).Hidden(true);
+                      columns.Bound(p => p.FullName).Width(150).Title("Name").HtmlAttributes(new { @class = "longTextPopup" });
+                      columns.Bound(p => p.PropertyId).Width(100).Title("Property ID").ClientTemplate("# {#<a href='/Property/PropertyDetail/#=PropertyId#'>#=PropertyId#</a>#}#").HtmlAttributes(new { @class = "longTextPopup" });
+                      columns.Bound(p => p.RoleName).Width(150).Title("Role").Visible(false);
+                      columns.Bound(p => p.Status).Width(100).Title("Status").ClientTemplate("#if(IsRejected == true) {#<text>Rejected</text>#} else {if(Status == true) {#<text>Active</text></br><small>#=kendo.toString(CreatedOn,'dd MMM yyyy')#</small>#} else{#<text>DeActivated</text></br><small>#=kendo.toString(CreatedOn,'dd MMM yyyy')#</small>#}}#");
+                      columns.Bound(p => p.IsLockedOut).Width(80).Title("Locked").ClientTemplate("<input type='button' value='#if(IsLockedOut == true){# Unlock #} else{# Lock #}#' onclick='javascript:LockUnLockCustomer(this);' class='btn btn-default btn-bg'>");
+                      columns.Bound(p => p.Email).Title("Action").ClientTemplate("#if((IsRejected == false|| IsRejected == null)){if((Status == false || Status == null)){#<input type='button' value='Activate' onclick='javascript:SendPassword(this);' class='btn btn-default btn-bg'>#}else {#<input type='button' value='DeActivate' onclick='javascript:DeactivateUser(this);' class='btn btn-default btn-bg'>#}}#").Width(100);
+                      columns.Bound(p => p.IsFirstTimeActivated).Title("Action").ClientTemplate("#if((IsFirstTimeActivated == false || IsFirstTimeActivated == null)&&(IsRejected == false || IsRejected == null)){#<input type='button' value='Reject' onclick='javascript:OpenRemarksPopUp(this);' class='btn btn-default btn-bg'>#}#").Width(100);
+                      columns.Bound(p => p.Email).Title("Action").ClientTemplate("#if((IsRejected == false || IsRejected == null)){if((Status == true)){#<input type='button' value='Reset Password' onclick='javascript:ResetPassword(this);' class='btn btn-default btn-bg'>#}}#").Width(140);
+                      columns.Bound(p => p.CustomerIdFileName).Title("ID Document").Hidden(true);
+                      columns.Bound(p => p.AuthorityLetter).Title("Letter Document").Hidden(true);
+                      columns.Bound(p => p.CustomerIdFileName).Title("ID Doc").ClientTemplate("#if(CustomerIdFileName != ''){#<a onclick='javascript:OpenCustomerFile(this);' class='view-docs'>View</a>#}#").Width(80);
+                      columns.Bound(p => p.AuthorityLetter).Title("Letter Doc").ClientTemplate("#if(AuthorityLetter != ''){#<a onclick='javascript:OpenLetterFile(this);' class='view-docs'>View</a>#}#").Width(90);
+                      columns.Bound(p => p.IsLockedOut).Title("Status Locked").Hidden(true);
+                  })
+                           .Pageable(pageable =>
+                                        {
+                                            pageable.Refresh(true);
+                                            pageable.PageSizes(new int[] { 10, 20, 50, 100 });
+                                            pageable.Messages(messages => messages.Empty("No Customer found"));
+                                        })
+                                   .Filterable(f => f.Operators(o => o.ForString(fs =>
+                                                  {
+                                                      fs.Clear().Contains("Contains");
+                                                      fs.DoesNotContain("Does not contain");
+                                                      fs.IsEqualTo("Equal to");
+                                                      fs.IsNotEqualTo("Not equal to");
+                                                      fs.StartsWith("Starts with");
+                                                      fs.EndsWith("Ends with");
+                                                  })))
+                                             .Sortable()
+                                      .DataSource(dataSource => dataSource
+                                         .Ajax()
+                                        .ServerOperation(false) // paging, sorting, filtering and grouping will be applied client-side
+                                                                       .Read("ManageCustomersAjax", "Dashboard", new { area = "Admin" })
+                                        .Model(m =>
+                                                {
+                                                    m.Field("PropertyId", typeof(System.Int32));
+                                                })
+                                      .Events(events => events.Error("error_handler"))
+                                      )
+                    )
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+@(Html.Kendo().Window().Visible(false)
+                   .Name("IDWindow")
+           .Title("Document")
+           .Modal(true)
+           .Content(@<text>
+            <div style="width:100%">
+                <img alt="Document" id="IDWindowLink" style="max-width:100%" />
+            </div>
+        </text>)
+        .Actions(actions => actions.Close())
+)
+
+@(Html.Kendo().Window().Visible(false)
+                   .Name("LetterWindow")
+           .Title("Document")
+           .Modal(true)
+           .Content(@<text>
+            <div style="width:100%">
+                <img alt="Document" id="LetterWindowLink" style="max-width:100%" />
+            </div>
+        </text>)
+        .Actions(actions => actions.Close())
+)
+
+<div id="details">
+    <div class="row">
+        <div class="col-sm-12">
+            <center>
+                <textarea class="form-control" id="txtRemarks" style="width:200px" maxlength="200" onkeypress=" return IsAlpha(event);"></textarea>
+            </center>
+        </div>
+    </div>
+    <br />
+    <br />
+    <div class="row">
+        <center>
+            <div class="col-sm-2" style="float:none">
+                <input type="submit" class="btn btn-primary btn-block" id="btnSubmit" value="Submit" />
+                <div class="col-sm-10"></div>
+            </div>
+        </center>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(window).load(function () {
+
+        @if (TempData["isCreated"] != null && (bool)TempData["isCreated"] == true)
+        {
+
+            <text>toastr.success('User has been added successfully.');</text>
+        }
+
+        @if (TempData["isUpdated"] != null && (bool)TempData["isUpdated"] == true)
+        {
+
+            <text>toastr.success('User has been updated successfully.');</text>
+        }
+
+        $("#UserListGrid").kendoTooltip({
+            filter: "td.longTextPopup",
+            content: function (e) {
+                var element = e.target;
+                if (element.is("td.longTextPopup")) {
+                    return element.html();
+                }
+            },
+            position: "top",
+            width: 120,
+        });
+
+        $("#CustomerListGrid").kendoTooltip({
+            filter: "td.longTextPopup",
+            content: function (e) {
+                var element = e.target;
+                if (element.is("td.longTextPopup")) {
+                    return element.html();
+                }
+            },
+            position: "top",
+            width: 120,
+        });
+    });
+
+    function error_handler(e) {
+        if (e.errors) {
+            var message = "Errors:\n";
+            $.each(e.errors, function (key, value) {
+                if ('errors' in value) {
+                    $.each(value.errors, function () {
+                        message += this + "\n";
+                    });
+                }
+            });
+            alert(message);
+        }
+    }
+</script>
+
+<script type="text/javascript">
+    var email;
+    var mobileNo;
+    var wnd;
+    wnd = $("#details")
+                       .kendoWindow({
+                           title: "Reason for Rejection",
+                           modal: true,
+                           visible: false,
+                           resizable: false,
+                           width: 350,
+                           height: 180
+                       }).data("kendoWindow");
+    function OpenRemarksPopUp(row) {
+        var rejectUser = confirm('Are you sure you want to Reject User?');
+        if (rejectUser == true) {
+            var tr = $(row).parent().parent();
+            email = $(tr).children("td:eq(1)").text();
+            mobileNo = $(tr).children("td:eq(2)").text();
+            wnd.center().open();
+            return false;
+        }
+    }
+
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsAlphaNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+    var specialKeys1 = new Array();
+    specialKeys1.push(8); //Backspace
+    function IsAlpha(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || (keyCode >= 65 && keyCode <= 90) || (keyCode >= 97 && keyCode <= 122) || (keyCode == 32) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+
+    $('#btnSubmit').click(function () {
+        var remarks = $('#txtRemarks').val();
+
+        if (remarks.trim() != '') {
+            wnd.center().close();
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ mobileNo: mobileNo, email: email, remarks: remarks }),
+                url: '/ManageUsers/RejectCustomer',
+                success: function (result) {
+                    alert("User Rejected successfully.");
+                    $("#CustomerListGrid").data("kendoGrid").dataSource.read();
+                    $("#UserListGrid").data("kendoGrid").dataSource.read();
+                },
+                error: function (obj) {
+                }
+            });
+        }
+        else {
+            alert("Blank space and special characters are not allowed")
+        }
+    });
+
+    function DeactivateUser(row) {
+        var deActivateUser = confirm('Are you sure you want to DeActivate User?');
+        if (deActivateUser == true) {
+            var tr = $(row).parent().parent();
+            var email = $(tr).children("td:eq(1)").text();
+            //var mobileNo = $(tr).children("td:eq(1)").text();
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ email: email }),
+                url: '/ManageUsers/DeactivateUser',
+                success: function (result) {
+                    alert("User DeActivated successfully.");
+                    $("#CustomerListGrid").data("kendoGrid").dataSource.read();
+                    $("#UserListGrid").data("kendoGrid").dataSource.read();
+                },
+                error: function (obj) {
+                }
+            });
+        }
+    }
+
+    function ResetPassword(row) {
+        var deActivateUser = confirm('Are you sure you want to Reset User Password?');
+        if (deActivateUser == true) {
+            var tr = $(row).parent().parent();
+            var email = $(tr).children("td:eq(1)").text();
+            //var mobileNo = $(tr).children("td:eq(1)").text();
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ email: email }),
+                url: '/ManageUsers/ResetPassword',
+                success: function (result) {
+                    alert("User password reset successfully.");
+                    $("#CustomerListGrid").data("kendoGrid").dataSource.read();
+                    $("#UserListGrid").data("kendoGrid").dataSource.read();
+                },
+                error: function (obj) {
+                }
+            });
+        }
+    }
+
+
+    function SendPassword(row) {
+        var tr = $(row).parent().parent();
+        var email = $(tr).children("td:eq(0)").text();
+        var userId = $(tr).children("td:eq(1)").text();
+        var mobileNo = $(tr).children("td:eq(2)").text();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ email: email, mobileNo: mobileNo, userId: userId }),
+            url: '/ManageUsers/SendPassword',
+            success: function (result) {
+                alert("User activated successfully.");
+                $("#CustomerListGrid").data("kendoGrid").dataSource.read();
+                $("#UserListGrid").data("kendoGrid").dataSource.read();
+            },
+            error: function (obj) {
+            }
+        });
+    }
+
+    function OpenCustomerFileForAdmin(row) {
+        var tr = $(row).parent().parent();
+        var link = $(tr).children("td:eq(7)").text();
+        $("#IDWindowLink").attr("src", link);
+        $("#IDWindow").data("kendoWindow").center();
+        $("#IDWindow").data("kendoWindow").open();
+    }
+
+    function OpenLetterFileForAdmin(row) {
+        var tr = $(row).parent().parent();
+        var link = $(tr).children("td:eq(8)").text();
+        $("#LetterWindowLink").attr("src", link);
+        $("#LetterWindow").data("kendoWindow").center();
+        $("#LetterWindow").data("kendoWindow").open();
+    }
+
+    function OpenCustomerFile(row) {
+        var tr = $(row).parent().parent();
+        var link = $(tr).children("td:eq(10)").text();
+        $("#IDWindowLink").attr("src", link);
+        $("#IDWindow").data("kendoWindow").center();
+        $("#IDWindow").data("kendoWindow").open();
+    }
+
+    function OpenLetterFile(row) {
+        var tr = $(row).parent().parent();
+        var link = $(tr).children("td:eq(11)").text();
+        $("#LetterWindowLink").attr("src", link);
+        $("#LetterWindow").data("kendoWindow").center();
+        $("#LetterWindow").data("kendoWindow").open();
+    }
+
+    function LockUnLockCustomer(row) {
+        var tr = $(row).parent().parent();
+        var Status = $(tr).children("td:eq(14)").text();
+        var Statustext = "Unlock";
+        if (Status == 'false') { Statustext = "Lock" } else { Statustext = "Unlock" }
+        var deActivateUser = confirm('Are you sure you want to ' + Statustext + ' Customer?');
+        if (deActivateUser == true) {
+            var email = $(tr).children("td:eq(1)").text();
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ email: email }),
+                url: '/ManageUsers/LockUnLockCustomer',
+                success: function (result) {
+                    if (result == true) {
+                        alert("User Locked successfully.");
+                    } else { alert("User Unlocked successfully."); }
+                    $("#CustomerListGrid").data("kendoGrid").dataSource.read();
+                },
+                error: function (obj) {
+                }
+            });
+        }
+    }
+
+    $(document).ready(function () {
+        setCurrentTab('admi')
+
+    });
+</script>

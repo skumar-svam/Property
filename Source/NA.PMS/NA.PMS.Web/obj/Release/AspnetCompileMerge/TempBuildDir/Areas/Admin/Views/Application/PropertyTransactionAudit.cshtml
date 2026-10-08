@@ -1,0 +1,123 @@
+﻿@model NA.PMS.Model.PropertyTransactionAudit
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@{
+    ViewBag.Title = "PropertyTransactionAudit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/Scripts/KendoJS/2016.2/kendo.excel.min.js"></script>
+<script src="~/Scripts/KendoJS/2016.2/jszip.min.js"></script>
+
+<div class="ApplicationForm">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Property Transaction History</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                @*<a href="#" id="btnAddApplication" class="" onclick="javascript:AddApplication(event);">Add Application</a>*@
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="col-md-12 content-top-spce">
+        <div class="row">
+            <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                @Html.Label("Rid")
+                @(Html.Kendo().DropDownListFor(m=>m.Rid)
+                          //.Name("ddModuleName")
+                          .Filter("contains")
+                          .DataTextField("Value")
+                          .DataValueField("Value")
+                          .OptionLabel(" -- Please Select --")
+                          .DataSource(source => source.Read(read => read.Action("GetRidOfPropertyTransaction", "Application")))
+                )
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                @Html.Label("Transaction")
+                @(Html.Kendo().DropDownListFor(m=>m.ServiceName)
+                          //.Name("ddActionName")
+                          .Filter("contains")
+                          .DataTextField("Name")
+                          .DataValueField("Name")
+                          .OptionLabel(" -- Please Select --")
+                          .DataSource(source => source.Read(read => read.Action("GetServiceNameOfPropertyTransaction", "Application")))
+                )
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                @Html.Label("User")
+                @(Html.Kendo().DropDownListFor(m=>m.UserIdentity)
+                          //.Name("ddUserName")
+                          .Filter("contains")
+                          .DataTextField("Name")
+                          .DataValueField("Value")
+                          .OptionLabel(" -- Please Select --")
+                          .DataSource(source => source.Read(read => read.Action("GetUserOfPropertyTransaction", "Application")))
+                )
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                @Html.Label("From Date")
+                @(Html.Kendo().DatePickerFor(m=>m.ServiceDate).Name("StartDate"))
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                @Html.Label("To Date")
+                @(Html.Kendo().DatePickerFor(m=>m.ServiceDate).Name("EndDate"))
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12 form-group" style="text-align:center">
+                @Html.Label(" ")<br />
+                <input type="button" class="btn btn-add" value="Search" id="btnAdvanceSearch" />
+                @*<input type="button" class="btn btn-default" value="Clear" id="btnClear" />*@
+            </div>
+        </div>     
+    </div>
+
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12" id="divTransactionHistory">
+        <div class="row">
+            <div class="k-grid-content">
+                @(Html.Kendo().Grid<NA.PMS.Model.PropertyTransactionAudit>()
+                      .Name("gridTransactionHistory")
+                      .ToolBar(tool => tool.Excel())
+                      .Excel(excel => excel.FileName("TransactionHistory.xlsx").AllPages(true).Filterable(true))
+                      .Columns(columns =>
+                      {
+                          columns.Bound(c => c.Id).Title("ID").Hidden(true);
+                          columns.Bound(c => c.ServiceDate).Title("Date").Format("{0:dd-MMM-yyyy}");
+                          columns.Bound(c => c.Rid).Title("Rid");
+                          columns.Bound(c => c.UserName).Title("User");
+                          columns.Bound(c => c.ServiceName).Title("Transaction");
+                          //columns.Bound(c => c.UserIdentity).Title("user identity");
+                      })
+                      .Sortable()
+                      .Filterable()
+                      .Resizable(resize => resize.Columns(true))
+                      .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+
+                      .DataSource(dataSource => dataSource
+                           .Ajax().Model(model => model.Id(p => p.Id))
+                           .ServerOperation(true)
+                           .Read(read => read.Action("GetTransactionAuditHistory", "Application").Data("FilterAdvanceSearch")).PageSize(10)
+                       )
+                )
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+    function FilterAdvanceSearch(){
+        return {
+            rid: $('#Rid').val(),
+            serviceName: $('#ServiceName').val(),
+            user: $('#UserIdentity').val(),
+            startDate: $('#StartDate').val(),
+            endDate: $('#EndDate').val()
+        };
+    }
+
+    $('#btnAdvanceSearch').click(function () {
+        $("#gridTransactionHistory").data("kendoGrid").dataSource.read();
+    });
+
+</script>

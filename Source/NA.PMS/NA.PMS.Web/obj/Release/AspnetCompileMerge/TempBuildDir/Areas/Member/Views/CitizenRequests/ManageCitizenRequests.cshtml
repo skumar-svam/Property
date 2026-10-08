@@ -1,0 +1,254 @@
+﻿@using Kendo.Mvc.UI
+
+@{
+    ViewBag.Title = "Manage Citizen Requests";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="CitizenRequestServices">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Manage Citizen Requests</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 col-btn">
+                    @Html.ActionLink("Request Service", "Index", new { controller = "ServiceRequest", area = "Member" }, htmlAttributes: new { target="_blank"})
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-12 blnk-rw"></div>
+       
+        <div class="k-grid-content">
+            @(Html.Kendo().Grid<NA.PMS.Model.CitizenRequestsModel>()
+            .Name("gridCitizenReq")
+                    .ToolBar(tools => tools.Excel())
+                        .ToolBar(tools => tools.Pdf())
+                        .Pdf(pdf => pdf
+                            .AllPages()
+                            .AvoidLinks()
+                            .PaperSize("A4")
+                            .Scale(0.8)
+                            .Margin("2cm", "1cm", "1cm", "1cm")
+                            .Landscape()
+                            .RepeatHeaders()
+                            .TemplateId("page-template")
+                            .FileName("ServiceRequestReport.pdf")
+                            .ProxyURL(Url.Action("Pdf_Export_Save", "Report"))
+                        )
+                        .Excel(excel => excel
+                            .FileName("ServiceRequestReport.xlsx")
+                            .AllPages(true)
+                            .Filterable(true)
+                            .ProxyURL(Url.Action("Excel_Export_Save", "Report"))
+                        )
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.EncryptedRId).Hidden();
+                columns.Bound(c => c.EncryptedRefNo).Hidden();
+                columns.Bound(c => c.DepartmentId).Hidden();
+                columns.Bound(c => c.ServiceId).Hidden();
+                columns.Bound(c => c.RId).Title("Registration Id");//.ClientTemplate("<label class='hyperlinkcss' onclick='javascript:RedirectForServices(#=ServiceId#, #=RId#)'>#=RId#</label>");
+                columns.Bound(c => c.RefNo).Title("Reference No");
+                columns.Bound(c => c.Department).Title("Department");
+                //columns.Bound(c => c.SectorName).Title("Sector");
+                //columns.Bound(c => c.BlockName).Title("Block");
+                columns.Bound(c => c.PropertyNo).Title("PropertyNo");
+                //columns.Bound(c => c.PropNo).Title("Property No.");
+                columns.Bound(c => c.ReqDate).Title("Request Date").Format("{0:dd/MM/yyyy}");
+                //columns.Bound(c => c.SLA).Title("SLA (In Days)");
+                columns.Bound(c => c.ServiceName).Title("Service Name");
+                columns.Bound(c => c.Status).Title("Status");
+                columns.Bound(c => c.RId).Title("Action").ClientTemplate("<a href='" + "/Member/CitizenRequests/ViewRequestDetails/#= Id #" + "'>View</a>").Sortable(false).Filterable(false);
+                columns.Bound(c => c.RId).Title("").ClientTemplate("<a href='" + "/Member/CitizenRequests/CitizenChallan?regId=#= EncryptedRId #" + "&refid=#=EncryptedRefNo#" + "'>Create Challan</a>").Sortable(false).Filterable(false);
+                columns.Bound(c => c.ReqDate).Title("Print Receipt").ClientTemplate("<a  onclick='javascript:OpenFile(this);'><center><span class='glyphicon glyphicon-print'></span></center></a>").Width(110).Filterable(false).Sortable(false);
+                columns.Bound(c => c.ApplicantName).Hidden();
+                columns.Bound(c => c.MobileNumber).Hidden();
+                columns.Bound(c => c.SubDepartment).Hidden();
+                columns.Bound(c => c.Description).Hidden();
+            })
+            .Sortable()
+            .Filterable()
+            .Resizable(resize => resize.Columns(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+            .AutoBind(true)
+            .DataSource(dataSource => dataSource
+                .Ajax()
+                .Model(model => model.Id(c => c.RId))
+                .ServerOperation(true)
+                .Read(read => read.Action("GetCitizenRequests", "CitizenRequests")).PageSize(20)
+            )
+            )
+        </div>
+        </div>
+    </div>
+
+@(Html.Kendo().Window().Visible(false)
+           .Name("IDWindow")
+           .Title("<b>Service Request Acknowledgement</b>")
+           .Width(1000)
+           .Modal(true)
+           .Content(@<text>
+            <div class="">
+                @*<div class="">
+                        <h4 class="modal-title">  <b>Service Request Acknowledgement</b></h4>
+                    </div>*@
+                <div class="modal-body" id="divAcknowledgementReceiptBody" style="height:420px;width:900px">
+                    <div class="row">
+                        &nbsp;&nbsp;<span class="duphead" style="float: right; border: solid 1px black; border-radius: 11px; padding: 0px 4px;"><b>D</b></span>
+                        <div class="col-md-12">
+                            <h2 style="text-align:center;padding:0;margin-bottom:4px;">NEW OKHLA INDUSTRIAL DEVELOPMENT AUTHORITY</h2>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <h4 style="text-align:center;padding:0;margin-bottom:4px;">Jan Suvidha Kendra Sector-6 Administrator Office, NOIDA</h4>
+                        </div>
+                    </div>
+                    <div class="row ">
+                        <div class="col-md-12">
+                            <h5 style="text-align:center;padding:0;margin-top:4px;">Acknowledgement Receipt </h5>
+                        </div>
+                    </div>
+                    <div class="row rw-pad">
+                        <div class="col-md-12">
+                            <span style="width:50%;text-align:right;float:right"> <b>Date: <span id="CreatedDate">["CreatedDate"]</span></b></span>
+                        </div>
+                    </div>
+                    <div class="row rw-pad">
+                        <div class="col-md-12">
+                            <span style="width:50%;float:left"><b> Acknowledgement No: &nbsp;<span id="ServiceRequestId">["ServiceRequestId"]</span></b></span>
+                            <span style="width:50%;text-align:right;float:right"><b><span id="Registration_No">["Registration_No"]</span></b></span>
+                        </div>
+                    </div>
+                    <div class="row rw-pad">
+                        <div class="col-md-12">
+                            <span style="width:70%;float:left"><b> Applicant Name: &nbsp;<span id="Name">["Name"]</span></b></span>
+                            <span style="width:30%;text-align:right;float:right"><b>Property No: &nbsp;<span id="Property_No">["Property_No"]</span></b></span>
+                        </div>
+                    </div>
+                    <div class="row rw-pad">
+                        <div class="col-md-12">
+                            <span style="width:50%;float:left"><b> Department: &nbsp;<span id="DepartmentName">["DepartmentName"]</span></b> &nbsp;&nbsp;( <span id="SubDepartment">["SubDepartment"]</span> )</span>
+                            <span style="width:50%;text-align:right;float:right"><b>Mobile No.: &nbsp;<span id="Mobile">["Mobile"]</span></b></span>
+                        </div>
+                    </div>
+                    <div class="row rw-pad">
+                        <div class="col-md-12">
+                            @*@{
+                                    if (Model.ServiceId != 21 || Model.ServiceId != 22)
+                                    {
+                                        <b> Service Name: &nbsp;["ServiceName"]</b>
+                                    }
+                                    else
+                                    {
+                                        <b> Service Name: &nbsp;["ServiceName"]</b> @Html.Raw("[") <label id="lblDescription">["Description"]</label> @Html.Raw("]")
+                                    }
+                                }*@
+                            <b> Service Name: &nbsp;<span id="ServiceName">["ServiceName"]</span></b> @Html.Raw("[") <label id="lblDescription">["Description"]</label> @Html.Raw("]")
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12" style="text-align:justify;text-justify:inter-word">
+                            <p>
+                                <b> Note:</b> We will validate the information provided in application will be updated against the available information with the department.
+                                In case where addition information like payment info addition supporting document etc.is required, the same shall be communicated on registered
+                                mobile number and mail You can also track the status of service request on <b> http://www.mynoida.in </b>,Please keep your service request number for any
+                                communication regarding the application.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <b>
+                                Thanks for using services online.<br />
+                                Your Thankfully<br />
+                                NOIDA
+                            </b>
+                        </div>
+                    </div>
+                </div>
+                <div style="page-break-after: always;"></div>
+                <div class="modal-footer" style="text-align: center;">
+                    <button type="submit" id="btnPrintDiv" class="btn btn-success" onclick=" PrintAcknowledgementReciept();">Print</button>
+                    <button type="submit" id="btnClose" class="btn btn-danger" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </text>)
+                                    .Actions(actions => actions.Close())
+)
+<script type="text/javascript">
+    $(document).ready(function () {
+
+    })
+
+    function RedirectForServices(serviceid, rid) {
+        if (serviceid == 1) {
+           // window.location.href = "/Property/PropertyRegistration/AddRentRequest" + "?id=" + rid;
+        }
+        if (serviceid == 2) {
+            window.location.href = "/Property/PropertyRegistration/AddRentRequest" + "?id=" + rid;
+        }
+        if (serviceid == 3) {
+
+        }
+    }
+
+    function OpenFile(row) {
+        $("#windowDiv").empty();
+        var tr = $(row).parent().parent();
+        var RegistrationNo = $(tr).children("td:eq(4)").text();
+        var ServiceRequestId = $(tr).children("td:eq(5)").text();   
+        var DepartmentName = $(tr).children("td:eq(6)").text();
+        var PropertyNo = $(tr).children("td:eq(7)").text();
+        var CreatedDate = $(tr).children("td:eq(8)").text();
+        var ApplicantName = $(tr).children("td:eq(14)").text();
+        var MobileNo = $(tr).children("td:eq(15)").text();
+        var SubDepartment = $(tr).children("td:eq(16)").text();
+        //var Sector = $(tr).children("td:eq(7)").text();
+        //var Block = $(tr).children("td:eq(8)").text();
+        var ServiceName = $(tr).children("td:eq(9)").text();
+        var Description = $(tr).children("td:eq(17)").text();
+     
+        $('#CreatedDate').text(CreatedDate);
+        $('#ServiceRequestId').text(ServiceRequestId);
+        $('#Registration_No').text(RegistrationNo != "" ? ("Registration No: "+ RegistrationNo) : "");
+        $('#Name').text(ApplicantName);
+        //$('#Property_No').text(Sector + "-/" + Block + "-" + PropertyNo);
+        $('#Property_No').text(PropertyNo);
+        $('#DepartmentName').text(DepartmentName);
+        $('#SubDepartment').text(SubDepartment);
+        $('#Mobile').text(MobileNo);
+        $('#ServiceName').text(ServiceName);
+        $('#lblDescription').text(Description);
+        $("#IDWindow").data("kendoWindow").center();
+        $("#IDWindow").data("kendoWindow").open();
+    }
+
+    $("#btnClose").click(function () {
+        $("#IDWindow").data("kendoWindow").close();
+    });
+
+    function PrintAcknowledgementReciept() {
+        var contents = document.getElementById("divAcknowledgementReceiptBody").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+
+</script>

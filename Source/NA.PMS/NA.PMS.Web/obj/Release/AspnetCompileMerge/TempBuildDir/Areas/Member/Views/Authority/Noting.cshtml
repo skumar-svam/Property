@@ -1,0 +1,422 @@
+﻿@model NA.PMS.Model.NotingViewModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@using NA.PMS.Common;
+
+@{
+    ViewBag.Title = "Noting";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    #display-comment-box {
+        min-height: 250px;
+        max-height: 450px;
+    }
+    .form-group table{
+        /*margin-left:30px;*/
+        /*margin-right:30px;*/
+        float:right;
+    }
+</style>
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Noting </h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                @*<a href="#" id="btnViewComment" class="" onclick="javascript:ViewAllComments();">View Comment</a>*@
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 content-top-spce">
+        <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            <h2 class="blck-heading" style="margin-bottom:12px;">Add notes for property</h2>
+            <div class="form-bx">
+                <div>
+                    @Html.HiddenFor(model=>model.DepartmentId)
+                    @Html.HiddenFor(model=>model.PropertyNo)
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.Label("Registration Id")
+                        @(Html.Kendo().DropDownListFor(m => m.RegistrationId)
+                            .Filter("contains")
+                            .DataTextField("Text")
+                            .DataValueField("Id")
+                            .OptionLabel("---select---")
+                            .DataSource(source =>
+                            {
+                                source.Custom()
+                                .ServerFiltering(true)
+                                .ServerPaging(true)
+                                .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                .Transport(transport => transport.Read(read => read.Action("GetRegistrationIdListAsDataSource", "Authority", new { area = "Member" })))
+                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                .PageSize(100);
+                            })
+                            .HtmlAttributes(new { style = "width:90%; float:right;" })
+                            .Events(e=>e.Change("ChangeRegistrationIdEvent"))
+                        )
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.Label("Department")
+                        @Html.TextBoxFor(m => m.Department, htmlAttributes: new { @class = "form-control", style = "width:90%;float:right;" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.Label("File Type")
+                        @(Html.Kendo().DropDownListFor(m => m.NotingFile)
+                            .Filter("contains")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("---select---")
+                            .DataSource(source =>
+                            {
+                                source.Custom()
+                                .ServerFiltering(true)
+                                .ServerPaging(true)
+                                .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                .Transport(transport => transport.Read(read => read.Action("GetNotingFileTypeList", "Authority", new { area = "Member" })))
+                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                .PageSize(100);
+                            })
+                            .HtmlAttributes(new { style = "width:90%; float:right;" })
+                            .Events(e => e.Change("ChangeNotingFileEvent"))
+                        )
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.Label("Noting File No")
+                        @Html.TextBoxFor(m => m.NotingFileNo, htmlAttributes: new { @class = "form-control", style = "width:90%;float:right;" })
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 col-sm-6 col-xs-12  form-group">
+                        @Html.Label("Allottee")
+                        @Html.TextAreaFor(m => m.Applicant, htmlAttributes: new { @class = "form-control", style = "width:94%; height:30px; float:right;" })
+                    </div>
+                    <div class="col-md-6 col-sm-6 col-xs-12   form-group">
+                        @Html.Label("Address")
+                        @Html.TextAreaFor(m => m.Address, htmlAttributes: new { @class = "form-control", style = "width:94%; height:30px; float:right;" })
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12  form-group" style="margin-bottom:2px;border:solid #e2e3e4; border-width:1px 0px 0px">
+                        @Html.Label("Existing Noting") <button class="k-button" id="btnPrintNotingDetail" style="width:100px; float:right;">Print</button>
+                    </div>
+                    <div class="col-md-12 col-sm-12 col-xs-12  form-group">                     
+                        <div id="ex-noting" style="word-wrap:break-word; width:97%;height:200px; float:right; overflow:auto; margin-left:30px;background:#ffffff;"></div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12  form-group" style="margin-bottom:2px;border:solid #e2e3e4; border-width:1px 0px 0px">
+                        @Html.Label("Noting Details") <button class="k-button" id="btnAddComment" style="width:120px; float:right;">Add Comment</button>
+                    </div>
+                    <div class="col-md-12 col-sm-12 col-xs-12  form-group">                     
+                        @(Html.Kendo().EditorFor(model => model.NotingDetail)
+                                .Pdf(pdf => pdf
+                                    .Margin(20, 20, 20, 20)
+                                    .PaperSize("A4")
+                                    .ProxyURL(Url.Action("Pdf_Export_Save", "PropertyAllotment", new { area = "Property" }))
+                                    )
+                                .Tools(tools => tools
+                                    .FontColor()
+                                    .FontSize()
+                                    .Print()
+                                    .Pdf()
+                                )
+                            .HtmlAttributes(new { style = "height:240px; width:97%; float:right;" })
+                            .Resizable(resizable => resizable.Content(true).Toolbar(true))
+                        )
+                    </div>
+                </div>
+            </div>
+            
+            <div class="box-button text-center">
+                <input type='button' id="btnBack" class='btn btn-default' value='Back' />
+                <input type="button" id="btnOpenApproverWindow" class="btn btn-add" alt="click to open Check List popup" value="Move" />
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<div class="col-md-12 popup-window" id="display-comment-box">
+    <div class="row">
+        <div id="divCommentBody" class="col-md-12 form-group">
+            <div id="comment" style="word-wrap:break-word;">
+                @*@Model.Content*@
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class='col-md-12 popup-window' id='approver-window' style="min-height:200px;">
+    <div class="row form-group" style="padding-top:20px;">
+        <div class="col-md-4 col-sm-4 col-xs-12  form-group">
+            @Html.Label("Send to :")
+        </div>
+        <div class="col-md-5 col-sm-6 col-xs-12 form-group">
+            @(Html.Kendo().DropDownListFor(model => model.ApproverId)
+            .DataTextField("Text")
+            .DataValueField("Id")
+            .Filter("contains")
+            .OptionLabel("---Select---")
+            .DataSource(source =>
+            {
+                source.Custom()
+                .ServerFiltering(true)
+                .ServerPaging(true)
+                .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                .Transport(transport => transport.Read(read => read.Action("GetApproverIdList", "Authority", new { area = "Member" })))
+                .Schema(schema => schema.Data("Data").Total("Total"))
+                .PageSize(100);
+            })
+            .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-4 col-sm-4 col-xs-12  form-group"></div>
+        <div class="col-md-8 col-sm-8 col-xs-12 form-group" style="">
+            <button type='button' class='btn btn-default' value='Cancel' onclick="CloseApproverWindow();">Close</button>
+            <button type='submit' id="btnSubmitForApproval" class='btn btn-default' value='Save'>Submit</button>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var editor = $('#NotingDetail').data('kendoEditor');
+        @*if ('@Model.IsNotingToDisplay' == 'True') {
+            editor.body.contentEditable = true;
+        }
+        else {
+            editor.body.contentEditable = false;
+        }*@
+
+        $("div[id='display-comment-box']").kendoWindow({
+            modal: true,
+            title: "Comments",
+            actions: ["Pin", "Minimize", "Maximize", "Close"],
+            visible: false,
+            width: "60%"
+        });
+
+        $("div[id='approver-window']").kendoWindow({
+            modal: true,
+            title: "Noting",
+            visible: false,
+            width: "40%"
+        });
+
+        $("#btnBack").click(function () {
+            window.location.href = '@Url.Action("ManageNoting", "Authority", new { area="Member"})';
+        });
+
+        $("#btnOpenApproverWindow").click(function () {
+            OpenApproverWindow()
+        });
+
+        $('#btnViewComment').click(function () {
+            var win = $("#display-comment-box").data("kendoWindow");
+            win.center();
+            win.open();
+        })
+
+        $("#btnSubmitForApproval").click(function () {
+            SubmitNotingForApproval();
+        });
+
+        $("#btnAddComment").click(function () {
+            AddCommentInNoting();
+        });
+
+        $('#btnPrintNotingDetail').click(function () {
+            PrintDiv();
+        });
+    });
+
+    function OpenApproverWindow() {
+        var win = $("#approver-window").data("kendoWindow");
+        win.center();
+        win.open();
+    }
+    function CloseApproverWindow() {
+        var win = $("#approver-window").data("kendoWindow");
+        win.close();
+    }
+
+    function ChangeRegistrationIdEvent() {
+        if ($("#RegistrationId").val() == "") {
+            alertify.error("Select Registration Id");
+            return false;
+        }
+        else {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ rid: $("#RegistrationId").val() }),
+                url: '/Member/Authority/GetAllottedPropertyDetailByRegistrationId',
+                success: function (result) {
+                    if (result != null) {
+                        $("#DepartmentId").val(result.DepartmentId);
+                        $("#Department").val(result.Department);
+                        $("#Applicant").val(result.Applicant);
+                        $("#Address").val(result.CorrespondAddress);
+                        $("#PropertyNo").val(result.PropertyNo);
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again later.");
+                }
+
+            });
+        }
+    }
+
+    function ChangeNotingFileEvent() {
+        if ($("#RegistrationId").val() == "") {
+            alertify.error("Select Registration Id");
+            return false;
+        }
+        if ($("#NotingFile").val() == "") {
+            alertify.error("Select File Name");
+            return false;
+        }
+        else {
+            var model = {
+                RegistrationId: $("#RegistrationId").val(),
+                DepartmentId: $("#DepartmentId").val(),
+                FileName: $("#FileName").val(),
+                NotingFileNo: $("#NotingFileNo").val(),
+            };
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ model: model }),
+                url: '/Member/Authority/GetNotingFileDetailById',
+                success: function (result) {
+                    if (result != null) {
+                        $("#ex-noting").html(result.HtmlNoting);
+                        $("#NotingDetail").val(result.HtmlNoting);
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again later.");
+                }
+
+            });
+        }
+    }
+
+    function SubmitNotingForApproval() {
+        var rid = $("#RegistrationId").val();
+        var user = $("#ApproverId").val();
+        if (user == "") {
+            alertify.error("Please select assignee user");
+            return false;
+        }
+        else {
+            var model = {
+                RegistrationId: $("#RegistrationId").val(),
+                DepartmentId: $("#DepartmentId").val(),
+                NotingFile: $("#NotingFile").val(),
+                NotingFileNo: $("#NotingFileNo").val(),
+                Applicant: $("#Applicant").val(),
+                Address: $("#Address").val(),
+                NotingDetail: $("#NotingDetail").val(),
+            };
+
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ model: model }),
+                url: '/Member/Authority/SaveNotingFileContent',
+                success: function (result) {
+                    if (result == '@ReturnType.Saved') {
+                        $("#approver-window").data("kendoWindow").close();
+                        alertify.success("Noting saved successfully.")                       
+                    }
+                    else {
+                        alertify.error("Noting is not saved, try again");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again later.");
+                }
+
+            });
+        }
+    }
+
+    function AddCommentInNoting() {
+        var rid = $("#RegistrationId").val();
+        var noting = $("#NotingDetail").val();
+        if (noting == "" || rid == "") {
+            alertify.error("Please write your comment.");
+            return false;
+        }
+        else {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json:charset=utf-8',
+                data: JSON.stringify({ rid: rid, addNotingDetails: AddNotingDetails }),
+                url: '/PropertyRegistration/AddNotingsDetails',
+                success: function (result) {
+                    if (result != "") {
+                        alertify.success("Your comment is added successfully.")
+                        $('#AddNotingDetails').data("kendoEditor").value('');
+                        window.location.reload();
+                    }
+                    else {
+                        alertify.error("Your comment is not saved");
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+    }
+    
+
+    function PrintDiv() {
+        var contents = document.getElementById("comment").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+</script>
+

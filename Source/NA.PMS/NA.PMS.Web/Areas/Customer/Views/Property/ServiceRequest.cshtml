@@ -1,0 +1,461 @@
+﻿@model NA.PMS.Model.ServiceRequestViewModel
+@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions;
+@using NA.PMS.Common;
+
+@{
+    ViewBag.Title = "Service Request";
+    Layout = "~/Views/Shared/_LayoutCustomer.cshtml";
+}
+
+<style>
+    .k-textbox{width:100%;}
+    #div-extension{display:none;}
+    #div-transfer{display:none;}
+    #div-mortgage{display:none;}
+    #div-mutation{display:none;}
+    #div-gpa{display:none;}
+    #div-rent{display:none;}
+    #div-cic{display:none;}
+
+    .row-border{
+        border:solid #e2e3e4; 
+        border-width:0 0px 1px 0px;
+    }
+    .row.file-header{
+        background:#56afff;
+        padding-top:6px;
+    }
+    .col-lbl>label{
+        padding-left:15px;
+    }
+    .row-file{
+        padding-top:4px;
+        padding-bottom:4px;
+        /*background-color:#d5d5d5;*/
+         background-color:#fff;
+    }
+   .row-file:nth-child(2n+1){
+        /*padding-top:6px;*/
+        /*background-color:#d5d5d5;*/
+        background-color:#f1f1f1;
+    }
+</style>
+
+@using (Html.BeginForm())
+{
+    <div class="container-content">
+        <div class="col-md-12">
+            <div class="row row-heading">
+                <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="h1-title">Service Request</h1></div>
+                <div class="col-md-6 col-sm-12 col-xs-12 text-right">
+                    <h1 class="h1-title">Registration No : @Model.ServiceModel.RegistrationId</h1>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 hr-div"></div>
+
+        <div class="col-md-12 k-grid-content content-border">
+            <div>
+                @Html.HiddenFor(model => model.RegistrationId)
+                @Html.HiddenFor(model => model.ServiceModel.RegistrationId)
+                @Html.HiddenFor(model => model.ServiceModel.SchemeId)
+                @Html.HiddenFor(model => model.ServiceModel.DepartmentId)
+                @Html.HiddenFor(model => model.ServiceModel.Department)
+                @Html.HiddenFor(model => model.ServiceModel.SubDepartment)
+                @Html.HiddenFor(model => model.ServiceModel.ServiceName)
+                @Html.HiddenFor(model => model.ServiceModel.SectorId)
+                @Html.HiddenFor(model => model.ServiceModel.Sector)
+                @Html.HiddenFor(model => model.ServiceModel.BlockId)
+                @Html.HiddenFor(model => model.ServiceModel.Block)
+                @Html.HiddenFor(model => model.ServiceModel.PlotNo)
+                @Html.HiddenFor(model => model.ServiceModel.PropertyNo)
+                @Html.HiddenFor(model => model.ServiceModel.Applicant)
+                @Html.HiddenFor(model => model.ServiceModel.ApplicantMaster)
+                @Html.HiddenFor(model => model.ServiceModel.ApplicantAddress)
+            </div>
+            <div class="row" style="padding-top:15px;">
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <label class=" required"> Services: </label>
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @(Html.Kendo().DropDownListFor(model => model.ServiceModel.ServiceId)
+                        .DataTextField("Text")
+                        .DataValueField("Id")
+                        .OptionLabel("---select---")
+                        .DataSource(dataSource => dataSource
+                            .Read(read => read.Action("GetServiceListByDepartment", "Property").Data("FilterDepartment"))
+                        )
+                        //.CascadeFrom("ServiceModel_DepartmentId")
+                        .HtmlAttributes(new { style = "width:100%;" })
+                        .Events(e => e.Change("ChangeService"))
+                    )
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <label class="">Sub Department: </label>
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @(Html.Kendo().DropDownListFor(model => model.ServiceModel.SubDepartmentId)
+                        .DataTextField("Text")
+                        .DataValueField("Id")
+                        .DataSource(dataSource => dataSource.Read(read => read.Action("GetSubDepartmentList", "Property").Data("FilterDepartment")).ServerFiltering(true))
+                        //.CascadeFrom("ServiceModel_DepartmentId")
+                        .HtmlAttributes(new { style = "width:100%;" })
+                    )
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <label class=" required"> Mobile No: </label>
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.ServiceModel.MobileNo, htmlAttributes: new { @class = "form-control", @maxlength = "10", onkeypress = "return IsNumeric(event);" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <label class="">  Email ID: </label>
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.ServiceModel.Email, htmlAttributes: new { @class = "form-control", @maxlength = "50" })
+                </div>
+            </div>
+
+            <div id="div-extension">
+                @{Html.RenderPartial("_ExtensionRequest");}
+            </div>
+
+            <div id="div-transfer">
+                @{Html.RenderPartial("_TransferRequest");}
+            </div>
+            
+            <div id="div-cic">
+                @{Html.RenderPartial("_CICRequest");}
+            </div>
+
+            <div id="div-mortgage">
+                @{Html.RenderPartial("_MortgageRequest");}
+            </div>
+
+            <div id="div-mutation">
+                @{Html.RenderPartial("_MutationRequest");}
+            </div>
+
+            <div id="div-gpa">
+                @{Html.RenderPartial("_GPARequest");}
+            </div>
+
+            <div id="div-rent">
+                @{Html.RenderPartial("_RentRequest");}
+            </div>
+
+            
+
+            <div class="row" style="padding-bottom:8px;">
+                <div class="col-md-3">
+                    <label>Description</label>
+                </div>
+                <div class="col-md-9">
+                    @Html.TextAreaFor(model => model.ServiceModel.Description, htmlAttributes: new { @class="form-control"})
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12" id="file-option" style="padding-bottom:12px;">
+
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12 text-right">
+                    <input type="button" class="btn btn-default"  id="btnsubmit" value="Submit" style="margin-right:15px;margin-bottom:20px;"/>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+<div>
+    @{Html.RenderPartial("_Acknowledgement");}
+</div>
+
+
+<script>
+    function AdditionalInfo() {
+        return {
+            //rid: $('#RegistrationId').val()
+            rid: 10000013
+        }
+    }
+
+    function FilterDepartment() {
+        return { departmentId: 1 }
+    }
+
+    function ChangeService() {
+        var id = $('#ServiceModel_ServiceId').val();
+        if (id == '@NAService.Extension') {
+            $('#div-extension').show();
+            $('#div-transfer').css("display", "none");
+            $('#div-mortgage').css("display", "none");
+            $('#div-mutation').css("display", "none");
+            $('#div-cic').css("display", "none");
+            $('#div-gpa').css("display", "none");
+            $('#div-rent').css("display", "none");
+        }
+        else if (id == '@NAService.Transfer') {
+            $('#div-extension').css("display", "none");
+            $('#div-transfer').show();
+            $('#div-mortgage').css("display", "none");
+            $('#div-mutation').css("display", "none");
+            $('#div-cic').css("display", "none");
+            $('#div-gpa').css("display", "none");
+            $('#div-rent').css("display", "none");
+        }
+        else if (id == '@NAService.CIC') {
+            $('#div-extension').css("display", "none");
+            $('#div-transfer').css("display", "none");
+            $('#div-mortgage').css("display", "none");
+            $('#div-mutation').css("display", "none");
+            $('#div-cic').show();
+            $('#div-gpa').css("display", "none");
+            $('#div-rent').css("display", "none");
+        }
+        else if (id == '@NAService.Mortgage') {
+            $('#div-extension').css("display", "none");
+            $('#div-transfer').css("display", "none");
+            $('#div-mortgage').show();
+            $('#div-mutation').css("display", "none");
+            $('#div-cic').css("display", "none");
+            $('#div-gpa').css("display", "none");
+            $('#div-rent').css("display", "none");
+        }
+        else if (id == '@NAService.Mutation') {
+            $('#div-extension').css("display", "none");
+            $('#div-transfer').css("display", "none");
+            $('#div-mortgage').css("display", "none");
+            $('#div-mutation').show();
+            $('#div-cic').css("display", "none");
+            $('#div-gpa').css("display", "none");
+            $('#div-rent').css("display", "none");
+        }
+        else if (id == '@NAService.Rent') {
+            $('#div-extension').css("display", "none");
+            $('#div-transfer').css("display", "none");
+            $('#div-mortgage').css("display", "none");
+            $('#div-mutation').css("display", "none");
+            $('#div-cic').css("display", "none");
+            $('#div-gpa').css("display", "none");
+            $('#div-rent').show();
+        }
+        else if (id == '@NAService.GPA') {
+            $('#div-extension').css("display", "none");
+            $('#div-transfer').css("display", "none");
+            $('#div-mortgage').css("display", "none");
+            $('#div-mutation').css("display", "none");
+            $('#div-cic').css("display", "none");
+            $('#div-gpa').show();
+            $('#div-rent').css("display", "none");
+        }
+        else {
+            $('#div-extension').css("display", "none");
+            $('#div-transfer').css("display", "none");
+            $('#div-mortgage').css("display", "none");
+            $('#div-mutation').css("display", "none");
+            $('#div-cic').css("display", "none");
+            $('#div-gpa').css("display", "none");
+            $('#div-rent').css("display", "none");
+        }
+        GetFileUploadOption();
+    }
+
+    function GetFileUploadOption() {
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ departmentId: $('#ServiceModel_DepartmentId').val(), serviceId: $('#ServiceModel_ServiceId').val() }),
+            url: '/Customer/Property/GetFileUploadOptionsForService',
+            success: function (result) {
+                if (result != "NotExist") {
+                    $('#file-option').html(result);
+                    $('#file-option').show();
+                }
+                else {
+                    $('#file-option').css("display", "none");
+                    $('#file-option').html("");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+            }
+        });
+    }
+
+    $('#btnsubmit').click(function () {
+        var flag = ValidateBasicFields();
+        if (flag) {
+            var service = $('#ServiceModel_ServiceId').val();
+            if (service == '@NAService.Transfer') {
+                SaveTransferRequest();
+            }
+            else if (service == '@NAService.Rent') {
+                SaveRentRequest();
+            }
+            else if (service == '@NAService.CIC') {
+                SaveCICRequest();
+            }
+            else if (service == '@NAService.Extension') {
+                SaveExtensionRequest();
+            }
+            else if (service == '@NAService.Mortgage') {
+                SaveMortgageRequest();
+            }
+            else if (service == '@NAService.Mutation') {
+                SaveMutationRequest();
+            }
+            else if (service == '@NAService.GPA') {
+                SaveGPARequest();
+            }
+        }
+    });
+
+    function SubmitServiceRequestForm() {
+        var sname = $('#ServiceModel_ServiceId').data("kendoDropDownList").text();
+        var dname = $('#ServiceModel_SubDepartmentId').data("kendoDropDownList").text();
+        $('#ServiceModel_ServiceName').val(sname);
+        $('#ServiceModel_SubDepartment').val(dname);
+        var formData = new FormData($('form').get(0));
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: false, // Not to set any content header
+            processData: false, // Not to process data
+            data: formData,
+            url: '/Customer/Property/ServiceRequest',
+            success: function (result) {
+                $('#CreatedDate').text(ToJavaScriptDate(result.ServiceModel.Created_Date));
+                $('#ServiceRequestId').text(result.ServiceModel.Id);
+                $('#Name').text(result.ServiceModel.ApplicantName);
+                $('#Property_No').text(result.ServiceModel.PropertyNo);
+                $('#DepartmentName').text(result.ServiceModel.DepartmentName);
+                $('#SubDepartment').text(result.ServiceModel.SubDepartment);
+                $('#Mobile').text(result.ServiceModel.Mobile);
+                $('#ServiceName').text(result.ServiceModel.ServiceName);
+                $('#lblDescription').text(result.ServiceModel.Description);
+                //var win = $(".popup-window").data("kendoWindow");
+                $(".popup-window").data("kendoWindow").center();
+                $(".popup-window").data("kendoWindow").open();
+                //ClearFields();
+            },
+            error: function (ajaxRequest, strError) {
+                alertify.error("Network error, try again later");
+            }
+        });
+    }
+
+    function ToJavaScriptDate(value) {
+        var pattern = /Date\(([^)]+)\)/;
+        var results = pattern.exec(value);
+        //return value;
+        if (results != null) {
+            var dt = new Date(parseFloat(results[1]));
+            return (dt.getMonth() + 1) + "/" + dt.getDate() + "/" + dt.getFullYear();
+        }
+    }
+
+    function ValidateBasicFields() {
+        var flag = true;
+        if ($('#ServiceModel_ServiceId').val() == '') {
+            alertify.error("Select Service name");
+            flag = false;
+        }
+        else if ($('#ServiceModel_Mobile').val() == '') {
+            alertify.error("Enter mobile number");
+            flag = false;
+        }
+        else if ($('#ServiceModel_Email').val() == '') {
+            alertify.error("Enter Email id.");
+            flag = false;
+        }
+        else if ($('#ServiceModel_Description').val() == '') {
+            alertify.error("Enter Description");
+            flag = false;
+        }
+        return flag;
+    }
+
+    function ClearFields() {
+        $('#ServiceModel_ServiceId').data("kendoDropDownList").value('');
+        $('#ServiceModel_SubDepartmentId').data("kendoDropDownList").value('');
+        $('#ServiceModel_Mobile').val('');
+        $('#ServiceModel_Email').val('');
+        $('#ServiceModel_Description').val('');
+    }
+
+
+    var IsError = false;
+    function CheckFileSize() {
+        var reqID = $("#ServiceModel_ServiceId").val();
+        if (reqID <= 9 && reqID != 5) {
+            var files = $(".single");
+            if ($(".single").length > 0) {
+                var strErrorMsg = "";
+
+                for (i = 0; i < $(".single").length; i++) {
+                    var FileNoCount = i + 1;
+                    if ($(".single")[i].value.trim() != "") {
+
+                        var size = ($(".single")[i].files[0].size / 1024);
+                        var FileName = $(".single")[i].files[0].name;
+                        var extension = $(".single")[i].value.substr(($(".single")[i].value.lastIndexOf('.') + 1));
+                        if (extension.toLowerCase() == "pdf" || extension.toLowerCase() == "jpg" || extension.toLowerCase() == "jpeg") {
+                            IsError = true;
+                        }
+                        else {
+                            IsError = false;
+                            alertify.error(FileNoCount + " " + FileName + " not allowed.");
+                            return IsError;
+                        }
+
+                        if (size < 10) {
+                            IsError = false;
+                            alertify.error(FileNoCount + " " + FileName + " Min 10kb file size is allowed");
+                            return IsError;
+                        }
+
+                        if (size / 1024 > 5) {
+                            IsError = false;
+                            alertify.error(FileNoCount + " " + FileName + " Max 5Mb file size is allowed");
+                            return IsError;
+                        }
+                    }
+                    else {
+
+                        IsError = false;
+                        alertify.error("Please upload documents.");
+                        return IsError;
+                    }
+                }
+            }
+            else {
+                if ($(".single").length == 0) {
+                    return IsError = true;
+                }
+                else {
+                    alertify.alert("Upload Documents", "No file found to upload.");
+                    return IsError;
+                }
+
+            }
+            return IsError;
+        }
+        else
+            return true;
+    }
+
+
+
+</script>
+
+
+

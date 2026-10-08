@@ -1,0 +1,401 @@
+﻿@model NA.PMS.Model.MortgageModel
+@using Kendo.Mvc.UI;
+@{
+    ViewBag.Title = "MortgageApproved";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .hide {
+        display: none !important;
+    }
+
+    .show {
+        display: block !important;
+    }
+
+    .disable_a_href {
+        pointer-events: none;
+    }
+    /*.k-window{
+        width:39%;
+        min-height:180px;
+    }*/
+</style>
+
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Mortgage Request</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 col-btn">
+                    <input type="hidden" value="@Model.StatusId" id="hdnStatusID" />
+                    @if (Model.StatusId == @NA.PMS.Common.Constants.Approved)
+                    {
+                        <i class=" glyphicon glyphicon-ok-sign" aria-hidden="true"></i>
+                        <strong style="color: lightgreen;">  @Html.DisplayFor(model => model.StatusName)</strong>
+                    }
+                    else if (Model.StatusId == @NA.PMS.Common.Constants.RejectedProp)
+                    {
+                        <strong style="color: red;"><i class="glyphicon glyphicon-remove-sign" aria-hidden="true"></i>  @Html.DisplayFor(model => model.StatusName)</strong>
+                    }
+                    <a href="#" id="btnViewComments" class="" style="display:none">View Comments</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <h2 class="blck-heading">Mortgage Information</h2>
+                <div class="form-bx">
+                    <input type="hidden" id="hdnRid" value="@Model.RID" />
+                    @{Html.RenderPartial("_AddEditMortgage", Model);}
+                </div>
+            </div>
+
+            <div class="box-button text-center">
+                <button type="button" value="Cancel" class="btn btn-default" onclick="javascript: window.location = '@Url.Action("ManageMortgage", "PropertyRegistration")';">Back</button>
+
+                @if (Model.StatusId == @NA.PMS.Common.Constants.Approved)
+                {
+                    <button type="button" class="btn btn-default" value="Submit" id="btnGenerateMortgageLetter">Generate Mortgage Letter</button>
+                    <button type='submit' id="btnInValidMortgage" class='btn btn-default'>InValid Mortgage</button>
+                }
+                else if (Model.StatusId == @NA.PMS.Common.Constants.RejectedProp || Model.StatusId == @NA.PMS.Common.Constants.Cancelled)
+                {
+                    <button type="button" class="btn btn-add" value="Submit" id="btnReSubmit">Re-Submit Request for Approval</button>
+                }
+                else if (Model.StatusId == @NA.PMS.Common.Constants.InProgress)
+                {
+                    <button type="button" class="btn btn-default" value="Submit" id="btnCancelRequest">Cancel Request</button>
+                }
+            </div>
+        </div>
+
+
+        @*<div id='divCommentPost' class='adminfeediv'>
+                <div>
+                    <div>
+                        @Html.Label("Enter Comment :      ")
+                    </div><div>
+                        @Html.TextAreaFor(model => model.Comment, new { style = "width: 200px; height:30px;", @maxlength = "500" })
+                    </div>
+                </div>
+                <button type='submit' id="btnCommentPostApprove" class='btn btn-default' value='Save'>Post</button>
+                <button type='button' class='btn btn-default' value='Cancel' onclick="CloseCommnetPostPopUp();">Close</button>
+            </div>*@
+
+    </div>
+</div>
+
+
+<div id='DivCommentView'>
+    <div>
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("From :")
+            </div>
+            <div class="col-md-9 col-sm-9 col-xs-12 form-group">
+                @Html.DisplayFor(model => model.ApproverName)
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Date :")
+            </div>
+            <div class="col-md-9 col-sm-9 col-xs-12 form-group">
+                @Html.DisplayFor(model => model.CommentDate)
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Comment :")
+            </div>
+            <div class="col-md-9 col-sm-9 col-xs-12 form-group">
+                @Html.TextAreaFor(model => model.GetComment, new { style = "height:80px;margin:0;padding:0;border:0;", @Readonly = "readonly" })
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12 col-sm-12 col-xs-12 form-group" style="text-align:center">
+                <input type="button" class="btn btn-default" onclick="CloseCommnetPopUp();" value="Close" />
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id='divAssineRequetApproval' class='adminfeediv'>
+    <div class="row topSpace">
+        <div class="col-md-2 col-md-offset-1">
+            @Html.LabelFor(model => model.User)
+        </div>
+        <div class="col-md-4 form-group">
+            @(Html.Kendo().DropDownListFor(model => model.User)
+                .DataTextField("text")
+                .DataValueField("id")
+                .Filter("contains")
+                .OptionLabel("Select")
+                .DataSource(source =>
+                {
+                    source.Read(read =>
+                    {
+                        read.Action("GetAssineTo", "Allotment");
+                    });
+                })
+                .HtmlAttributes(new { style = "width:100%" })
+            )
+            @Html.ValidationMessageFor(model => model.User)
+        </div>
+    </div>
+    <div style="text-align:center;padding-top:50px;padding-right:50px;">
+        <button type='submit' id="btnReRequetForApproval" class='btn btn-default' value='Save'>Submit</button>
+        <button type='button' class='btn btn-default' value='Cancel' onclick="CloseCommnetPopUpForApproval();">Close</button>
+    </div>
+</div>
+
+<div id="divPrintChallan" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="padding-top:40px;">
+    <div class="modal-dialog" style="width: 60%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">  <b>Mortgage Letter</b></h4>
+            </div>
+            <div class="modal-body" style="overflow:auto; height:400px;">
+                <div id="divChallanBody"></div>
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="submit" id="btnPrintDiv" class="k-button" data-dismiss="modal" onclick="PrintDiv();">Print</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        GetPreviousMortgageBankDetails();
+        FieldReadonly();
+        //$("#OnlineRequestNo").attr("readonly","readonly");
+        if(($('#hdnStatusID').val()== @NA.PMS.Common.Constants.Approved) || ($('#hdnStatusID').val()== @NA.PMS.Common.Constants.RejectedProp))
+        {
+            $('#btnViewComments').show();
+        }
+        var datepicker = $("#ApproveDate").data("kendoDatePicker");
+        datepicker.readonly();
+        var ridDropDown = $("#RID").data("kendoDropDownList");
+        ridDropDown.readonly();
+        GetPropertyDetails();
+        //$('#btnInValidMortgage').hide();
+        $("#btnReSubmit").click(function () {
+            if (ValidateMortgage())
+                OpenAssineRequetApprovalPopUp();
+        });
+        $("#btnViewComments").click(function () {
+            OpenCommentViewPopUp();
+        });
+        $("#divAssineRequetApproval").kendoWindow({
+            modal: true,
+            title: "Assign Request to Approver",
+            visible: false,
+            //width: "30%"
+        });
+        $("div[id='divCommentPost']").kendoWindow({
+            modal: true,
+            visible: false,
+            //width: "30%"
+        });
+        $("div[id='DivCommentView']").kendoWindow({
+            title: "Comment",
+            modal: true,
+            visible: false,
+            //width: "30%"
+        });
+    });
+
+    function OpenAssineRequetApprovalPopUp() {
+        var win = $("#divAssineRequetApproval").data("kendoWindow");
+        win.center();
+        win.open();
+    }
+
+    function CloseCommnetPopUpForApproval() {
+        var win = $("#divAssineRequetApproval").data("kendoWindow");
+        win.close();
+    }
+
+    $("#btnReRequetForApproval").click(function () {
+        var mortgageDate = $("#MortgageDate").val();
+        var bankName = $("#BankName").val();
+        var mortgageType = $("#MortgageType").val();
+        var branchAddress = $("#BranchAddress").val();
+        var processingFee = $("#ProcessingFee").val();
+        var rid = $("#RID").val();
+        var requestId = $('#RequestNo').val();
+        var user = $("#User").val();
+        var previousLoanNoc = $("#PreviousLoanNoc").val();
+        var sanctionedAmount = "0";
+        if($('#SanctionedAmount').val()!=""){ sanctionedAmount=$('#SanctionedAmount').val(); }
+        if (user != "") {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ requestId: requestId, mortgageDate: mortgageDate, bankName: bankName, mortgageType: mortgageType, previousLoanNoc: previousLoanNoc, branchAddress: branchAddress, processingFee: processingFee,sanctionedAmount:sanctionedAmount, user: user, rid: rid }),
+                url: '/PropertyRegistration/UpdateMortgage',
+                success: function (result) {
+                    if (result == true) {
+                        window.location.href = '@Url.Action("ManageMortgage", "PropertyRegistration")';;
+                        return false;
+                    }
+                    else {
+                        return true;
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    alert(respText);
+                }
+            });
+        }
+        else {
+            alert("Please Select Assine To.");
+        }
+    });
+
+
+    $("#btnCancelRequest").click(function () {
+        var requestId = $('#RequestNo').val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ requestId: requestId}),
+            url: '/PropertyRegistration/CancelMortgageRequest',
+            success: function (result) {
+                if (result == true) {
+                    window.location.href = '@Url.Action("ManageMortgage", "PropertyRegistration")';;
+                    return false;
+                }
+                else {
+                    return true;
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    });
+
+    @*$("#PreviousLoanNoc").change(function (){
+        var invalidval=@NA.PMS.Common.Constants.InValid;
+        if ($("#PreviousLoanNoc").val() == invalidval)
+            $('#btnInValidMortgage').show();
+    });*@
+
+    $("#btnInValidMortgage").click(function () {
+        OpenCommentPostPopUp();
+    });
+
+    $("#btnCommentPostApprove").click(function () {
+        var requestNo = $("#RequestNo").val();
+        var comment = $("#Comment").val();
+        var acceptReject = @NA.PMS.Common.Constants.InValid;
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ requestNo: requestNo, comment: comment}),
+            url: '/PropertyRegistration/InValidMortgageRequest',
+            success: function (result) {
+                if (result == true) {
+                    window.location.href = '@Url.Action("ManageMortgage", "PropertyRegistration")';;
+                    return false;
+                }
+                else {
+                    alertify.error("Comment not updated.");
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    });
+
+    function OpenCommentPostPopUp() {
+        var win = $("#divCommentPost").data("kendoWindow");
+        win.center();
+        win.open();
+    }
+    function OpenCommentViewPopUp() {
+        var win = $("#DivCommentView").data("kendoWindow");
+        win.center();
+        win.open();
+    }
+    function CloseCommnetPopUp() {
+        var win = $("#DivCommentView").data("kendoWindow");
+        win.close();
+    }
+
+    function CloseCommnetPostPopUp() {
+        var win = $("#divCommentPost").data("kendoWindow");
+        win.close();
+    }
+
+    $("#btnGenerateMortgageLetter").click(function () {
+        var rId = $("#RID").val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rid: rId }),
+            url: '/PropertyRegistration/GenerateMortgageLetter',
+            success: function (result) {
+                $("#divChallanBody").html(result);
+                $("#divPrintChallan").modal('show');
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    });
+
+    function PrintDiv() {
+        var contents = document.getElementById("divChallanBody").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+
+    function FieldReadonly()
+    {
+        $("#OnlineRequestNo").attr("readonly","readonly");
+        $("#MortgageDate").attr("readonly","readonly");
+        $("#SanctionedAmount").attr("readonly","readonly");
+        $("#BankName").attr("readonly","readonly");
+        $("#BranchAddress").attr("readonly","readonly");
+        $("#MortgageType").data("kendoDropDownList").enable(false);
+        $("#ValidUpto").attr("readonly","readonly");
+        $("#ProcessingFee").attr("readonly","readonly");
+        $("#PreviousLoanNoc").data("kendoDropDownList").enable(false);
+    }
+</script>

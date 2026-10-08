@@ -1,0 +1,49 @@
+﻿@model NA.PMS.Model.MutationModel
+
+    <input type="file" onchange="FileSelection()" name="fileDoc" id="fileDoc" />
+@if (Model != null)
+{
+    if (Model.TransDeedFile != null)
+    {
+        <a href=@Model.TransDeedFile
+           target="_blank">
+            View File
+        </a>
+    }
+}
+<script type="text/javascript">
+    function FileSelection() {
+        //var fileDoc = $("#fileDoc").val();
+        var allowedFiles = ['pdf'];//, 'png', 'jpg', 'jpeg'];
+        var regex = new RegExp("([a-zA-Z0-9\s_\\.\-:])+(" + allowedFiles.join('|') + ")$");
+        if (!regex.test($("#fileDoc").val().toLowerCase())) {
+            alertify.error('Invalid file type. Please select a valid .pdf file.');
+            $("#fileDoc").val('');
+            return false;
+        }
+        if (!regex.test($("#fileDoc").val().toLowerCase())) {
+            alertify.error('Invalid file type. Please select a valid .pdf file.');
+            $("#fileDoc").val('');
+            return false;
+        }
+        var fileSize = $("#fileDoc").get(0).files[0].size;
+        if (fileSize > 1024000) {
+            alertify.error('File size should not be greater than 1MB.');
+            $("#fileDoc").val('');
+            return false;
+        }
+
+        //var arrayFileMeterSealing = fileMeterSealing.split('.');
+        //if (arrayFileMeterSealing[1] != "pdf") {
+        //    alert("Only pdf files are allowed");
+        //    $("#fileMeterSealing").val('');
+        //    $("#MeterSealing").prop('checked', false);
+        //    $("#MeterSealing").prop('disabled', false);
+        //    return false;
+        //}
+        //else {
+        //    $("#MeterSealing").prop('checked', true);
+        //    $("#MeterSealing").prop('disabled', true);
+        //}
+    }
+</script>

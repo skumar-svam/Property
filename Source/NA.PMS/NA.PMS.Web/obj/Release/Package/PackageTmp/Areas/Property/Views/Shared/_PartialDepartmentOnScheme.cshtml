@@ -1,0 +1,43 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@model NA.PMS.Model.PropertyAllotmentModel
+
+<div class="row form-group">
+    <div class="col-sm-6">
+        <label>Scheme</label><span class="text-danger">*</span>
+        @(Html.Kendo().DropDownListFor(model => model.SchemeId)
+                      .Name("SchemeId")
+                      .DataTextField("schemeName")
+                      .DataValueField("schemeId")
+                      .OptionLabel(" -- Please Select --")
+                      .DataSource(source => source.Read(read => read.Action("GetSchemeListForAllotment", "PropertyAllotment")))
+                      .Enable(true)
+                      .AutoBind(true)
+                      .Filter("contains")
+        )
+        @Html.ValidationMessageFor(model => model.SchemeId, "", new { @class = "text-danger" })
+    </div>
+    <div class="col-sm-6">
+        <label>Department</label><span class="text-danger">*</span>
+        @(Html.Kendo().DropDownListFor(model => model.DepartmentId)
+                      .Name("DepartmentId")
+                      .DataTextField("DepartmentName")
+                      .DataValueField("DepartmentId")
+                      .OptionLabel(" -- Please Select --")
+                      .DataSource(source => source.Read(read => read.Action("FilterDepartmentOnScheme", "PropertyAllotment").Data("FilterDepartment"))
+                                                          .ServerFiltering(true))
+                      .Enable(false)
+                      .AutoBind(false)
+                              .Filter("contains")
+                      .CascadeFrom("SchemeId")
+        )        @Html.ValidationMessageFor(model => model.DepartmentId, "", new { @class = "text-danger" })
+    </div>
+</div>
+
+<script>
+
+    function FilterDepartment() {
+        return { SchemeId: $("#SchemeId").val() };
+    }
+
+</script>

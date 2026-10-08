@@ -1,0 +1,513 @@
+﻿@using Kendo.Mvc.UI
+@model NA.PMS.Model.LeaseDeedProperty
+@{
+    ViewBag.Title = "View Lease Deed";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .k-window {
+        width: 39%;
+        height: 180px;
+    }
+
+    #challanWindow {
+        padding-top: 25px;
+    }
+
+    .topSpace {
+        padding-top: 25px;
+    }
+</style>
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">View Lease Deed</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 col-btn">
+                    <input type="button" value="Print Lease Deed" id="btnPrintDeed" class="btn btn-add" />
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+
+                <h2 class="blck-heading">Select Registration Id</h2>
+
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Registration Id")</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                @Html.DisplayFor(m => m.RId)
+                            </span>
+                            @Html.HiddenFor(m => m.RId)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Document Charges")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                @Html.DisplayFor(m => m.DocCharges)
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Lease Deed Execution Date")</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DatePickerFor(m => m.LeaseDeedExecutionDate)
+                                          .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" }))
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Signatory Authority")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                @Html.DisplayFor(m => m.SignatoryAuthority)
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <h2 class="blck-heading">Leased Deed Details</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Allottee Name")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                <div id="lblAN">
+                                    @Html.DisplayFor(m => m.AllotteeName)
+                                </div>
+                            </span>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Father's Name")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                <div id="lblFN">
+                                    @Html.DisplayFor(m => m.FatherName)
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Department")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                <div id="lblDeptt">
+                                    @Html.DisplayFor(m => m.DepttName)
+                                </div>
+                            </span>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Property Type")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <input type="hidden" id="hdnPropType" /><span class="lbl-form-control">
+                                <div id="lblPT">
+                                    @Html.DisplayFor(m => m.PropTypeName)
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Property Number")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                <div id="lblPN">
+                                    @Html.DisplayFor(m => m.PropertyNumber)
+                                </div>
+                            </span>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Property Cost")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                <div id="lblPC">
+                                    @Html.DisplayFor(m => m.PropertyCost)
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Stamp Duty Amount (INR)")</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                <div id="lblSDA">
+                                    @Html.DisplayFor(m => m.StampDutyAmount)
+                                </div>
+                            </span>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Duplicate Stamp Value (INR)")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                <div id="lblDSV">
+                                    @Html.DisplayFor(m => m.DuplicateStampValue)
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Previous Dues (INR)")</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                <div id="lblPD">
+                                    @Html.DisplayFor(m => m.PreviousDues)
+                                </div>
+                            </span>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Balance Due till Date")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                <div id="lblBDD">
+                                    @Html.DisplayFor(m => m.BalanceDues)
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Registry Type")</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                <div id="lblRT">
+                                    @Html.DisplayFor(m => m.RegistryType)
+                                </div>
+                            </span>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Lease Deed Due Date")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <div id="lblLDDD">
+                                @(Html.Kendo().DatePickerFor(m => m.LeaseDeedDueDate)
+                                          .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" }))
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Lease Rent (Annual)")</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                @Html.DisplayFor(m => m.LeaseRent)
+                            </span>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="blck-heading">Witnesses</h2>
+                <div class="form-bx">
+                    <h2 class="blck-heading">Witness 1</h2>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Name")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                @Html.DisplayFor(m => m.Witness1Name)
+                            </span>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Address")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                @Html.DisplayFor(m => m.Witness1Add)
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Mobile")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                @Html.DisplayFor(m => m.Witness1Mob)
+                            </span>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                        </div>
+                    </div>
+                    <h2 class="blck-heading">Witness 2</h2>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Name")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                @Html.DisplayFor(m => m.Witness2Name)
+                            </span>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Address")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                @Html.DisplayFor(m => m.Witness2Add)
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Mobile")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                @Html.DisplayFor(m => m.Witness2Mob)
+                            </span>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                        </div>
+                    </div>
+
+
+                    <h2 class="blck-heading">Witness 3</h2>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Name")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                @Html.DisplayFor(m => m.Witness3Name)
+                            </span>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Address")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                @Html.DisplayFor(m => m.Witness3Add)
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Mobile")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                @Html.DisplayFor(m => m.Witness3Mob)
+                            </span>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                        </div>
+                    </div>
+                    <h2 class="blck-heading">Witness 4</h2>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Name")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                @Html.DisplayFor(m => m.Witness4Name)
+                            </span>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Address")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                @Html.DisplayFor(m => m.Witness4Add)
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Mobile")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                @Html.DisplayFor(m => m.Witness4Mob)
+                            </span>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                        </div>
+                    </div>
+                    @Html.HiddenFor(m => m.DepttId)
+                    @Html.HiddenFor(m => m.SchemeId)
+                    @Html.HiddenFor(m => m.PropId)
+                </div>
+            </div>
+            <div class="box-button text-center">
+                <input type="button" value="Generate Lease Rent Challan" class="btn btn-add" id="btnGenerateChallan" />
+                <input type="button" class="btn btn-default" value="Back" id="btnBack" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@(Html.Kendo().Window().Name("challanWindow").Title("Generate Challan").Modal(true).Visible(false).Content(@<text>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-5 col-sm-6 col-md-offset-1 form-group">
+                    @Html.Label("Lease Rent Type ")
+                </div>
+                <div class="col-md-5 col-sm-6 form-group">
+                    @(Html.Kendo().DropDownListFor(m => m.ChallanOption)
+                        .DataTextField("text")
+                        .DataValueField("id")
+                        .OptionLabel("Select")//.Filter("conatins")
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetChallanOptions", "PropertyRegistration");
+                            });
+                        })
+                    )
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-10 col-md-offset-1 topSpace" style="text-align:center">
+                    <input type="button" class="btn btn-add" id="btnPopupSubmit" value="Ok" />
+                    <input type="button" id="closePopup" class="btn btn-default" value="Close" />
+                </div>
+            </div>
+        </div>
+</text>)
+.Draggable()
+.Resizable()
+//.Width(400)
+.Actions(actions => actions.Close())
+)
+
+@*PopUp to print*@
+<div id="divPrintChallan" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="width: 60%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">  <b>Lease Rent Challan</b></h4>
+            </div>
+            <div class="modal-body" id="divChallanBody">
+
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="submit" id="btnPrintDiv" class="btn btn-add" data-dismiss="modal" onclick="PrintDiv();">Print</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*Prints Lease Deed*@
+<div id="divPrintLetters" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="padding-top:40px;">
+    <div class="modal-dialog" style="width: 60%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">  <b>Lease Deed</b></h4>
+            </div>
+            <div class="modal-body" style="overflow:auto; height:400px;">
+                <div id="divLetterBody"></div>
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="submit" id="btnPrintDiv" class="k-button" data-dismiss="modal" onclick="PrintDiv1();">Print</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#LeaseDeedDueDate').data('kendoDatePicker').enable(false);
+        $('#LeaseDeedExecutionDate').data('kendoDatePicker').enable(false);
+
+        $("#btnBack").click(function () {
+            window.location.href = '@Url.Action("ManageLeaseDeed", "PropertyRegistration")';
+        });
+
+        $("#btnGenerateChallan").click(function () {
+            $("#challanWindow").data("kendoWindow").center();
+            $("#challanWindow").data("kendoWindow").open();
+        });
+
+        $("#closePopup").click(function () {
+            $("#challanWindow").data("kendoWindow").close();
+        });
+
+        $("#btnPrintDeed").click(function () {
+            var rId = $("#RId").val();
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ rId: rId }),
+                url: '/PropertyRegistration/PrintLeaseDeedByRId',
+                success: function (result) {
+                    $("#divLetterBody").html(result);
+                    $("#divPrintLetters").modal('show');
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        });
+
+        $("#btnPopupSubmit").click(function () {
+            var type = $("#ChallanOption").val();
+            if (type == '') {
+                alertify.error('Please select Lease Rent Type');
+                return false;
+            }
+            $("#challanWindow").data("kendoWindow").close();
+
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ rId: $('#RId').val(), deptId: $('#DepttId').val(), type: type, propId: $('#PropId').val(), schemeId: $('#SchemeId').val() }),
+                url: '/DocParser/PrintLeaseDeedChallan',
+                success: function (result) {
+                    $("#divChallanBody").html(result);
+                    $("#divPrintChallan").modal('show');
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    //alert(respText);
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            });
+        });
+    });
+
+    function PrintDiv() {
+        var contents = document.getElementById("divChallanBody").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+    function PrintDiv1() {
+        var contents = document.getElementById("divLetterBody").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+</script>

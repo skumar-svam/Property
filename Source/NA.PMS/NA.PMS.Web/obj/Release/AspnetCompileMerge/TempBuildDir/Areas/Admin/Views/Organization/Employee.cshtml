@@ -1,0 +1,264 @@
+﻿@model NA.PMS.UserManagement.NDAUserViewModel
+@using NA.PMS.Model
+@using NA.PMS.Common
+@{
+    ViewBag.Title = "Employee";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .k-textbox {
+        width: 100%;
+    }
+</style>
+
+@using (Html.BeginForm("SaveUser", "Organization", FormMethod.Post, new { enctype = "multipart/form-data", id = "userform" }))
+{
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Register Employee</h1></div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+                </div>
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="col-md-12 content-top-spce">
+                <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                    <h2 class="blck-heading">Employee Information</h2>
+                    <div class="form-bx">
+                        <div class="row">
+                            <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                                @Html.LabelFor(u => u.UserName, htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(u => u.UserName, new { @class = "form-control", @maxlength = "15", @onchange= "ValidateUserName()" })
+                            </div>
+                            <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                                @Html.LabelFor(u => u.FirstName, htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(u => u.FirstName, new { @class = "form-control", @maxlength = "100" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                                @Html.LabelFor(u => u.MiddleName)
+                            </div>
+                            <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(u => u.MiddleName, new { @class = "form-control", @maxlength = "100" })
+                            </div>
+                            <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                                @Html.LabelFor(u => u.LastName, htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(u => u.LastName, new { @class = "form-control", @maxlength = "100" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                                @Html.LabelFor(u => u.MobileNo, htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(u => u.MobileNo, new { @class = "form-control", Value = "", @maxlength = "10", @onchange = "ValidateMobileNo()" })
+                            </div>
+                            <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                                @Html.LabelFor(u => u.Email, htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(u => u.Email, new { @class = "form-control", @maxlength = "150" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                                @Html.LabelFor(u => u.UserProfile, htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(u => u.UserProfile, new { @class = "form-control", Value = "", @maxlength = "30" })
+                            </div>
+                            <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                                @Html.LabelFor(u => u.UserProfileId, htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(u => u.UserProfileId, new { @class = "form-control", @maxlength = "150" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                                @Html.LabelFor(u => u.UserOptionalId, htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(u => u.UserOptionalId, new { @class = "form-control", Value = "", @maxlength = "2" })
+                            </div>
+                            <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                                
+                            </div>
+                            <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                               
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Department(s)", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-10 col-sm-9 col-xs-12 form-group" style="width:80%;">
+                                @for (var i = 0; i < Model.DepartmentList.Count(); i++)
+                                {
+                                    @Html.HiddenFor(u => u.DepartmentList[i].Id)
+                                    @Html.CheckBoxFor(u => u.DepartmentList[i].IsChecked)
+                                    @Html.Raw("&nbsp;")
+                                    @Html.DisplayFor(u => u.DepartmentList[i].CheckBoxName)
+                                    @Html.Raw("&nbsp;&nbsp;&nbsp;")
+                                }
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Sub Department(s)", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-10 col-sm-9 col-xs-12 form-group" style="width:80%;">
+                                @for (var i = 0; i < Model.SubDepartmentList.Count(); i++)
+                                {
+                                    @Html.HiddenFor(u => u.SubDepartmentList[i].Id)
+                                    @Html.CheckBoxFor(u => u.SubDepartmentList[i].IsChecked)
+                                    @Html.Raw("&nbsp;")
+                                    @Html.DisplayFor(u => u.SubDepartmentList[i].CheckBoxName)
+                                    @Html.Raw("&nbsp;&nbsp;&nbsp;")
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="box-button text-center">
+                    <input type="button" id="btnCancel" value="Cancel" class="btn btn-default" />
+                    <input type="button" id="btnSubmit" value="Add" class="btn btn-add" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+
+<script>
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+
+    $(document).ready(function () {
+
+        $("#btnCancel").click(function () {
+
+        });
+
+        $("#btnSubmit").click(function () {
+            if ($('input:checked').length < 1) {
+                alertify.error("Please select atleast one Department");
+                return false;
+            }
+            else {
+                SaveEmployeeDetail();
+            }
+        });
+
+        //var subdepartlist = [];
+        //$("input[name='subdepartment']:checked").change(function () {
+        //    $.each($("input[name='subdepartment']:checked"), function () {
+        //        subdepartlist.push($(this).val());
+        //    });
+        //    $("#subDepartment").val(subdepartlist);
+        //    $("#SubDepartmentList").val(subdepartlist);
+        //});
+    });
+
+    function ValidateDeptt() {
+        if ($('input:checked').length < 1) {
+            alert("Please select atleast one Department");
+            return false;
+        }
+    }
+
+    function ValidateUserName() {
+        var uname = $('#UserName').val();
+        if (uname != undefined && uname != "") {
+            var umodel = {
+                UserName: uname,
+                ActionType: "ValidateUserName"
+            }
+            ValidateEmployeeData(umodel);
+        }
+    }
+
+    function ValidateMobileNo() {
+        var mobile = $('#MobileNo').val();
+        if (mobile != undefined && mobile != "") {
+            var umodel = {
+                MobileNo: mobile,
+                ActionType: "ValidateMobile"
+            }
+            ValidateEmployeeData(umodel);
+        }
+    }
+
+    function ValidateEmployeeData(umodel) {
+        if (umodel != undefined && umodel != null) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ model: umodel }),
+                url: '/Admin/Organization/ValidateUserDetail',
+                success: function (result) {
+                    if (result != null) {
+                        if (umodel.ActionType == "ValidateUserName" && result.ReturnTypeId == '@ReturnType.Exist') {
+                            alertify.message("UserName already exist.");
+                        }
+                        if (umodel.ActionType == "ValidateMobile" && result.ReturnTypeId == '@ReturnType.Exist') {
+                            alertify.message("Mobile No already exist.");
+                        }
+                    }
+                    else
+                        alertify.error("Provider failed to update Info, try later.");
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+    }
+
+    function SaveEmployeeDetail() {
+        var formData = new FormData($('form').get(0));
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: false, // Not to set any content header
+            processData: false, // Not to process data
+            data: formData,
+            url: '/Admin/Organization/SaveAuthorityEmployee',
+            success: function (result) {
+                if (result != null) {
+                    if (result.ReturnTypeId == '@ReturnType.Saved') {
+                        alertify.alert("Employee Info","Congratulations! Employee Info saved successfully.");
+                    }
+                    window.location.reload(true);
+                }
+                else {
+                    alertify.error("Provider failed to save employee info");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                alertify.error("Network error, try again later");
+                $('#btn-form-submit').prop("disabled", false);
+            }
+        });
+    }
+
+
+
+</script>

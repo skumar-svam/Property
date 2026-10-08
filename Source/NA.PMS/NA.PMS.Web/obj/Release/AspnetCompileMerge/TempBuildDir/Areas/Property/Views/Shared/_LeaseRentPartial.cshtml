@@ -1,0 +1,438 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions
+@model NA.PMS.Model.PaymentSchedule
+@using NA.PMS.Common;
+
+<div class="col-md-12" style=" margin-top: 20px;">
+    <div class="row blck-heading-grid">
+        <div class="col-md-6 col-sm-6 col-xs-12">
+            <span>Lease Rent Details</span>
+        </div>
+    </div>
+</div>
+<div class="col-md-12 k-grid-content">
+    @(Html.Kendo().Grid<NA.PMS.Model.LeaseRentViewModel>()
+        .Name("GridLeaseRentDues")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.Id).Title("Id").Hidden(true);
+            columns.Bound(c => c.LeaseRentPremium).Title("Lease Rent Per Year (<span class='fa fa-rupee'></span>)").ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+            columns.Bound(c => c.PaidUptoDate).Title("Paid Upto Date").Format("{0:dd-MMM-yyyy}");
+            //columns.Bound(c => c.CurrentDues).Width(150).Title("Dues (<span class='fa fa-rupee'></span>)").ClientTemplate("<label class='hyperlink' onclick='ShowLeaseRentDetail(#=Id#)'>#= CurrentDues #</label>").ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+            //columns.Bound(c => c.CurrentDues).Title("Lease Rent Dues (<span class='fa fa-rupee'></span>)").ClientTemplate("<label class='hyperlink' onclick='ShowLeaseRentDetail(#=Id#, #=RegistrationId#, #=DepartmentId#)'>#= CurrentDues #</label>").ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+            columns.Bound(c => c.LeaseRentDues).Title("Lease Rent Dues (<span class='fa fa-rupee'></span>)").ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+            columns.Bound(c => c.DuesInterest).Title("Dues Interest (<span class='fa fa-rupee'></span>)").ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+            columns.Bound(c => c.CurrentDues).Title("Total Dues (<span class='fa fa-rupee'></span>)").ClientTemplate("<label class='hyperlink' onclick='ShowLeaseRentDetail(#=Id#, #=RegistrationId#, #=DepartmentId#)'>#= CurrentDues #</label>").ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+            columns.Bound(c => c.CurrentDuesDate).Title("Dues Upto Date").Format("{0:dd-MMM-yyyy}");
+            //columns.Bound(c => c.IsDuesUptoDate).Title(" ").Width(250).ClientTemplate("<center><input class='leaserentDate' id='hdnLeaseRentDateTime_#= Id #' value='" + DateTime.Now + "' title='datepicker' /> <a onclick='javascript:CalculateDuesUptoDate2(hdnLeaseRentDateTime_#= Id #,#=RegistrationId#);'><span class='fa fa-refresh hyperlink'></span></a></center> ");
+        })
+        .Events(m => m.DataBound("KendoDataBound"))
+        .Resizable(resize => resize.Columns(true))
+        //.ClientDetailTemplateId("template")
+        .DataSource(dataSource => dataSource
+                .Ajax().ServerOperation(true)
+                .Model(model => model.Id(p => p.Id))
+                .Read(read => read.Action("GetMultiplePaymentStatusList", "Payment", new { area = "Revenue" }).Data("LeaseRent")).PageSize(10)
+                .Aggregates(aggregates => aggregates.Add(p => p.LeaseRentPremium).Sum())
+                .Aggregates(aggregates => aggregates.Add(p => p.LeaseRentDues).Sum())
+                .Aggregates(aggregates => aggregates.Add(p => p.DuesInterest).Sum())
+                .Aggregates(aggregates => aggregates.Add(p => p.CurrentDues).Sum())
+            )
+    )
+</div>
+
+<div class="col-md-12" style="padding:4px 0;">
+    <div class="row">
+        <div class="col-md-3 col-sm-12 col-xs-12" style="">
+            
+        </div>
+        <div class="col-md-3 col-sm-12 col-xs-12" style="">
+            <input id="leaserent-current-duesdate" value="@DateTime.Now" title="datepicker" style="width:100%;"/>
+        </div>
+        <div class="col-md-3 col-sm-12 col-xs-12" style="text-align:right;border-radius:0;">           
+            <input type="button" class="k-button" id="btn-calculate-leaserent" value="Calculate Dues" style="width:90%;"/>
+        </div>
+        <div class="col-md-3 col-sm-12 col-xs-12" style="text-align:right;border-radius:0;">
+            <button id="btn-leaserent-demand" class="k-button" style="">Generate Lease Rent Demand</button>
+        </div>
+    </div>
+</div>
+
+<div id="PopupWindow" class="container-fluid">
+    <div class="row">
+        <style>
+            .print-row {
+                padding: 6px 20px 6px 20px;
+            }
+
+            #Report .row.print-row:nth-child(2n+0) {
+                background: #f5faed;
+            }
+        </style>
+        <div id="LeaseRentHtml"></div>
+
+        <div id="div-rent-calculation" class="k-grid-content">
+            @(Html.Kendo().Grid<NA.PMS.Model.LeaseRentViewModel>()
+                    .Name("GridLeaseRentDues2")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(c => c.LeaseRentPremium).Title("Lease Rent (<span class='fa fa-rupee'></span>)");//.ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+                        columns.Bound(c => c.PanelInterest).Title("Penal Interest");
+                        columns.Bound(c => c.DepositAmount).Title("Deposit Amount");
+                        //columns.Bound(c => c.DuesAmount).Title("Dues (<span class='fa fa-rupee'></span>)");//.ClientTemplate("<label class='hyperlink' onclick='ShowLeaseRentDetail(#=Id#, #=RegistrationId#, #=DepartmentId#)'>#= CurrentDues #</label>").ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+                        columns.Bound(c => c.TotalAmount).Title("Dues (<span class='fa fa-rupee'></span>)");
+                        columns.Bound(c => c.CurrentDuesDate).Title("Dues Date").Format("{0:dd-MMM-yyyy}");
+                        columns.Bound(c => c.DepositDate).Title("Deposit Date").Format("{0:dd-MMM-yyyy}");
+                    })
+                    .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(new[] { 10, 50, 100, 500 }).Info(true).PreviousNext(true).Input(true).Numeric(true).ButtonCount(10))
+                    .DataSource(dataSource => dataSource
+                            .Ajax().ServerOperation(true)
+                            .Model(model => model.Id(p => p.Id))
+                            .Read(read => read.Action("GetLeaseRentDetailsByIdAndProcedure", "Payment", new { area = "Revenue" }).Data("ParamLeaseRent")).PageSize(100)
+                    //.Aggregates(aggregates => aggregates.Add(p => p.LeaseRentPremium).Sum())
+                    //.Aggregates(aggregates => aggregates.Add(p => p.CurrentDues).Sum())
+                        )
+            )
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-sm-12" style="text-align:center;padding-top:10px;">
+            <button id="btnPopupSubmit" class="k-button" style="min-width:100px;" onclick="PrintDiv1();">Print1</button>
+            <button id="btnPopupCancel" class="k-button" style="min-width:100px;">close</button>
+        </div>
+    </div>
+</div>
+
+
+<div class="col-md-12" id="demand-note-type" style="min-height:150px;">
+    <div class="row" style="padding-top:25px;">
+        <div class="col-md-4 form-group">
+            <label>Demand Type</label>
+        </div>
+        <div class="col-md-7 form-group">
+            @(Html.Kendo().DropDownList()
+                .Name("DDLDemandType")
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .OptionLabel(" --- Select ---")
+                .BindTo(new List<SelectListItem>() {
+                    new SelectListItem() { Text = "One Time Lease Rent", Value = "OneTimeLeaseRent" },
+                    new SelectListItem() { Text = "Normal Lease Rent", Value = "LeaseRent" },
+                    //new SelectListItem() { Text = "Lease Rent with Compensation", Value = "Leaserent-Compensation" }
+                })
+                .HtmlAttributes(new { style = "width: 100%;" })
+            )
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 form-group">
+            <label>Dues Upto Date</label>
+        </div>
+        <div class="col-md-7 form-group">
+            @(Html.Kendo().DatePicker().Name("PPCurrentDuesDate").HtmlAttributes(new { style = "width:100%" }))
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 form-group">
+
+        </div>
+        <div class="col-md-7 form-group" style="padding-top:20px;text-align:center">
+            <input type="button" class="k-button" id="btn-demand-note" value="Generate Demand Note" style="background:#299a8b;color:#fff; width:100%;" />
+        </div>
+    </div>
+</div>
+
+
+<script id="template" type="text/kendo-tmpl">
+    @(Html.Kendo().Grid<NA.PMS.Model.LeaseRentViewModel>()
+            .Name("grid_#=Id#")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Title("Id").Width(50).Hidden(true);
+                columns.Bound(c => c.LeaseRentPremium).Title("Lease Rent Premium (<span class='fa fa-rupee'></span>)");
+                columns.Bound(c => c.DepositDate).Title("Due Date").Format("{0:dd-MMM-yyyy}");
+            })
+            .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+            .DataSource(dataSource => dataSource
+                    .Ajax()
+                    .Model(model => model.Id(p => p.Id))
+                    .ServerOperation(true)
+                    .Read(read => read.Action("GetLeaseRentPaymentTransDetailsById", "Payment", new { area = "Revenue", Id = "#=Id#" }))
+            )
+            .ToClientTemplate()
+    )
+
+</script>
+<script>
+    function dataBound() {
+        this.expandRow(this.tbody.find("tr.k-master-row").first());
+    }
+</script>
+
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#leaserent-current-duesdate").kendoDatePicker();
+
+        $('#demand-note-type').kendoWindow({
+            modal: true,
+            title: "Select Demand Note Type",
+            visible: false,
+            width: "35%"
+        });
+
+
+        $('#btn-demand-note').click(function () {
+            if ($('#DDLDemandType').val() == "") {
+                alertify.error("Please select Demand Type");
+                return false;
+            }
+            if ($('#PPCurrentDuesDate').val().trim() == "") {
+                alertify.error("Please select Dues Upto Date");
+                return false;
+            }
+            else {
+                var dues = $('#lbl-dues-amuont').html();
+                var penal = $('#lbl-penal-interest').html();
+                var principal = $('#lbl-principal-amuont').html();
+                var rid = $("#RID").val();
+                PrintLeaseRentDemandNote(rid, dues, penal, principal);
+                //PrintLeaseRentDemandNote2();
+            }
+        });
+
+        $("#btn-calculate-leaserent").click(function () {
+            var caldate = $('#leaserent-current-duesdate').val();
+            var rid = $('#Rid').val();
+            CalculateFromInstallmentDuesCal(caldate, rid);
+            //UpdateLeaseRentDuesPayment();
+        });
+
+        $('#btn-leaserent-demand').click(function () {
+            //var dues = $('#lbl-dues-amuont').html();
+            //var penal = $('#lbl-penal-interest').html();
+            //var principal = $('#lbl-principal-amuont').html();
+            //var rid = $("#RID").val();
+            //PrintLeaseRentDemandNote(rid, dues, penal, principal);
+
+            $("#demand-note-type").data("kendoWindow").center();
+            $("#demand-note-type").data("kendoWindow").open();
+        });
+    });
+
+    function KendoDataBound() {
+        //$("#grid_trans").data("kendoGrid").dataSource.read();
+        $(".leaserentDate").kendoDatePicker();
+        
+    }
+
+    function LeaseRent() {
+        registrationId = $("#hdnRID").val();
+        var model = { RegistrationId: registrationId, ActionType: "LeaseRent" };
+        return model;
+    }
+
+    function CalculateDuesUptoDate2(e, rid) {
+        //alert(e);
+        var id = e.id;
+        if (id != '') {
+            var leaseDate = $("#" + id).data("kendoDatePicker").value();
+        }
+        if (leaseDate != "") {
+            var flag = confirm("Are You sure to update Lease Rent of RID " + rid);
+            if (rid != 0 && flag == true) {
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ RegistrationId: rid, ActionType: "LeaseRent", CurrentDuesDate: leaseDate }),
+                    url: '/Revenue/Payment/UpdateLeaseRentDuesPaymentById',
+                    success: function (result) {
+                        if (result != null && result.ReturnTypeId == '@ReturnType.Updated') {
+                            $("#GridLeaseRentDues").data("kendoGrid").dataSource.read();
+                            alertify.success("Dues Updated successfully");
+                        }
+                        else {
+                            alertify.error("Dues is not Updated.");
+                        }
+                    },
+                    error: function (ajaxRequest, strError) {
+                        var respText = ajaxRequest.responseText;
+                        alertify.error("Some Error in save database.");
+                    }
+                });
+            }
+        } else { alertify.error("select lease date."); }
+    }
+
+    function CalculateFromInstallmentDuesCal(caldate, rid) {
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ RegistrationId: rid, ActionType: "LeaseRent", CurrentDuesDate: caldate, DepartmentId: $("#hdnDeptId").val() }),
+            url: '/Revenue/Payment/UpdateLeaseRentDuesPaymentById',
+            success: function (result) {
+                if (result != null && result.ReturnTypeId == '@ReturnType.Updated') {
+                    $("#GridLeaseRentDues").data("kendoGrid").dataSource.read();
+                    $("#GridLeaseRentTrans").data("kendoGrid").dataSource.read();
+                    alertify.success("Lease Rent Dues Updated successfully");
+                }
+                else {
+                    alertify.error("Lease Rent Dues is not Updated.");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Some Error in save database.");
+            }
+        });
+    }
+
+
+
+    function UpdateLeaseRentDuesPayment() {
+        var widget = $("#GridLeaseRentDues").data("kendoGrid");
+        kendo.ui.progress(widget.element, true);
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ RegistrationId: $('#Rid').val(), ActionDate: $('#leaserent-current-duesdate').val(), ActionTye:"LeaseRent" }),
+            url: '/Revenue/Payment/UpdateLeaseRentDuesPaymentById',
+            //url: '/Revenue/Payment/CalculateInstallmentDuesById',
+            success: function (result) {
+                //if (result.IsOneTimeLeaseRentPaid == true) {
+                //    $('#lbl-leaserent-amount').html(result.LeaseRentStatus);
+                //}
+                //else {
+                //    $('#lbl-leaserent-amount').html(result.CurrentDues);
+                //    //$('#lbl-leasernet-upto').html(result.CurrentDuesDate);
+                //    $('#CurrentDuesDate').data("kendoDatePicker").value(result.CurrentDuesDate);
+                //}
+                
+                kendo.ui.progress(widget.element, false);
+
+                $("#GridLeaseRentDues").data("kendoGrid").dataSource.read();
+                $("#GridLeaseRentTrans").data("kendoGrid").dataSource.read();
+                alertify.success("Dues Updated successfully");
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Some Error in save database.");
+            }
+        });
+    }
+
+    function PrintLeaseRentDemandNote(rid, dues, penal, principal) {
+        if ($('#DDLDemandType').val() == "") {
+            alertify.error("Please select Demand Type");
+            return false;
+        }
+        else if ($('#PPCurrentDuesDate').val() == "") {
+            alertify.error("Please select Current Dues Date");
+            return false;
+        }
+        else {
+            var widget = $("#demand-note-type").data("kendoWindow");
+            kendo.ui.progress(widget.element, true);
+            var leaseModel = { RegistrationId: $("#RID").val(), CurrentDuesDate: $('#PPCurrentDuesDate').val(), ActionDate: $('#PPCurrentDuesDate').val(), ActionType: $('#DDLDemandType').val(), FilterType: $('#DDLDemandType').val() };
+
+            //var duesDate = $('#leaserent-current-duesdate').val();
+            //var rid = $("#RID").val();
+            //var leaseModel = { RegistrationId: rid, ActionType: "LeaseRent", CurrentDuesDate: duesDate };
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ model: leaseModel }),
+                //url: '/Revenue/Finance/PrintDemandNote',
+                url: '/Revenue/Finance/PrintLeaseRentDuesDemandNote',
+                success: function (result) {
+                    $('#DDLDemandType').data("kendoDropDownList").value('');
+                    $('#PPCurrentDuesDate').data("kendoDatePicker").value('');
+                    $("#demand-note-type").data("kendoWindow").close();
+                    kendo.ui.progress(widget.element, false);
+
+                    $("#divApplicationForm").modal('hide');
+                    $("#divSchemeForm").html(result);
+                    $("#divPrintSchemeForm").modal('show');
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    alertify.error("Some Error in save database.");
+                }
+            });
+        }
+        
+    }
+
+    function ShowLeaseRentDetail(row,rid,deptid) {
+        //$('#hdn-departmentId').val(deptid);
+        //$('#hdn-rid').val(rid);
+        if ($('#leaserent-current-duesdate').val().trim() != "") {
+            $("#GridLeaseRentDues2").data("kendoGrid").dataSource.read();
+            $("#PopupWindow").data("kendoWindow").center();
+            $("#PopupWindow").data("kendoWindow").open();
+        }
+        else {
+            alertify.error("Enter Current Dues Date");
+        }
+    }
+
+    $('#PopupWindow').kendoWindow({
+        modal: true,
+        title: "Lease Rent Report",
+        visible: false,
+        width: "70%"
+    });
+
+    function ParamLeaseRent() {
+        var model = { DepartmentId: $("#hdnDeptId").val(), RegistrationId: $("#hdnRID").val(), CurrentDuesDate: $('#leaserent-current-duesdate').val() };
+        return model;
+    }
+
+    $('#btnPopupCancel').click(function () {
+        $("#PopupWindow").data("kendoWindow").close();
+    });
+
+    $('#btnPopupSubmit').click(function () {
+        //PrintDiv();
+    });
+
+    function PrintDiv1() {
+        //alert("hello");
+        //generateBarcode();
+        //var contents = document.getElementById("divmodalbody").innerHTML;
+        var contents = document.getElementById("div-rent-calculation").innerHTML;
+        //var contents = document.getElementById("divBarcode").innerHTML;
+        var frame1 = document.createElement('iframe');
+        //alert(frame1);
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('<style>#Report{width:100%;} table{width:1000px;}  tr{ width:100%;}  td{width:120px;}</style>');
+        //frameDoc.document.write('<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">');
+        //frameDoc.document.write('<style>#Report .col-md-2{width:15%;float:left;display:inline-block;} #Report col-md-1{width:8%;float:left;display:inline-block;}</style>');
+        ////frameDoc.document.write('');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+</script>

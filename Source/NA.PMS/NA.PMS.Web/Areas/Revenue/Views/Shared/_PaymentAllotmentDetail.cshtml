@@ -1,0 +1,499 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@using NA.PMS.Common;
+@model NA.PMS.Model.PaymentViewModel
+
+<style>
+    .form-control {
+        width: 95%;
+        float: right;
+    }
+
+    .k-button {
+        min-width: 80px;
+    }
+    .k-numerictextbox{
+        float:right;
+    }
+</style>
+
+<div class="manage-payment">
+    <h2 class="blck-heading" style="margin-bottom:15px;">Allotment Account Detail</h2>
+    <div class="form-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+        <div class="row">
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>RegistrationId</label>
+                @Html.TextBoxFor(model => model.RegistrationId, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Department</label>
+                @Html.TextBoxFor(model => model.Department, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+            </div>
+            <div class="col-md-6 col-sm-12 col-xs-12 form-group">
+                <label>Allottee Name</label>
+                @Html.TextBoxFor(model => model.Applicant, htmlAttributes: new { @class = "form-control", @maxlength = "50" })
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Property No</label>
+                @Html.TextBoxFor(model => model.PropertyNo, htmlAttributes: new { @class = "form-control", @maxlength = "8" })
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Allotment Date</label>
+                @(Html.Kendo().DatePickerFor(model => model.AllotmentDate).Events(e=>e.Change("AlotAllotmentDateChangeEvent")).HtmlAttributes(new { @id = "alot-allotment-date", style = "width:95%;float:right;" }))
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Allotted Area(sqm)</label>
+                @(Html.Kendo().NumericTextBoxFor(m => m.AllottedArea).Name("alot-allotted-area")
+                    .Min(0).Max(9999999999999999)
+                    .Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right" })
+                )
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Allotment Rate(psqm)</label>
+                @(Html.Kendo().NumericTextBoxFor(m => m.AllotmentRate).Name("alot-allotment-rate")
+                    .Min(0).Max(999999)
+                    .Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right" })
+                )
+            </div>
+            
+        </div>
+
+        <div class="row">           
+            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                @Html.Label("Location Type", htmlAttributes: new { @class = "" })
+                @(Html.Kendo().DropDownListFor(m => m.LocationId)
+                    .Name("alot-location-id")
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel("---Select---")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => { transport.Read(read => read.Action("GetLocationTypeListAsDataSource", "Finance", new { area = "Revenue" }).Data("FilterDepartmentId")); })
+                        .Schema(schema => { schema.Data("Data").Total("Total"); })
+                        .PageSize(100);
+                    })
+                    .HtmlAttributes(new { style = "width:95%;float:right;" })
+                    .Events(e => e.Change("LocationTypeChangeEvent"))
+                )
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                @Html.Label("Location Charge(%)", htmlAttributes: new { @class = "" })
+                @(Html.Kendo().NumericTextBoxFor(m => m.LocationCharge).Name("alot-location-charge-rate")
+                    .Min(0).Max(99)
+                    .Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 95%", @maxlength = "16", @class = "text-right" })
+                    .Events(e => e.Change("LocationChargeChangeEvent"))
+                )
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Location Charge(INR psqm)</label>
+                @(Html.Kendo().NumericTextBoxFor(m => m.LocationChargeRate).Name("alot-location-charge")
+                    .Min(0).Max(9999999999)
+                    .Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right" })                           
+                )
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Total Allotment Rate(psqm)</label>
+                @(Html.Kendo().NumericTextBoxFor(m => m.TotalAllotmentRate).Name("alot-total-allotment-rate")
+                    .Min(0).Max(9999999999)
+                    .Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right" })
+                )
+            </div>
+            
+        </div>
+        
+        <div class="row">
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Allotment Money</label>
+                @(Html.Kendo().NumericTextBoxFor(m => m.AllotmentMoney).Name("alot-allotment-money")
+                    .Min(0).Max(9999999999999999)
+                    .Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right" })
+                    .Events(e => e.Change("CalculateAllotmentMoney"))
+                )
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Earnest Money</label>
+                @(Html.Kendo().NumericTextBoxFor(m => m.RegistrationAmount).Name("alot-registration-money")
+                    .Min(0).Max(9999999999)
+                    .Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right" })
+                    .Events(e => e.Change("EarnestMoneyChageEvent"))
+                )
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Balance Allotment Money</label>
+                @(Html.Kendo().NumericTextBoxFor(m => m.BalanceAllotmentAmount).Name("alot-balance-money")
+                    .Min(0).Max(9999999999)
+                    .Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right" })
+                )
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Total Property Cost</label>
+                @(Html.Kendo().NumericTextBoxFor(m => m.TotalPremiumAmount).Name("alot-total-property-cost")
+                    .Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right" })
+                )
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Lease Rent(%)</label>
+                @(Html.Kendo().NumericTextBoxFor(m => m.LeaseRent).Name("alot-leaserent-percent")
+                    .Min(0).Max(99)
+                    .Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right" })
+                    .Events(e => e.Change("AdvanceLeaseRentChangeEvent"))
+                )
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>One Year Advance Lease Rent</label>
+                @(Html.Kendo().NumericTextBoxFor(m => m.AdvanceLeaseRentAmount).Name("alot-advance-leaserent")
+                    .Min(0).Max(9999999999)
+                    .Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right" })
+                    //.Events(e => e.Change("AdvanceLeaseRentChangeEvent"))
+                )
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label title="Balance Allotment Money + Advance Lease Rent">Payable Amount</label>
+                @(Html.Kendo().NumericTextBoxFor(m => m.TotalAllotmentAmount).Name("alot-total-allotment-amount")
+                    .Min(0).Max(9999999999)
+                    .Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right" })
+                )
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Valid Upto Date</label>
+                @(Html.Kendo().DatePickerFor(model => model.ValidUptoDate).HtmlAttributes(new { @class = "", @id = "alot-valid-uptodate", style = "width:95%; float:right;" }))
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Penal Interest(%)</label>
+                @(Html.Kendo().NumericTextBoxFor(m => m.PenalInterest).Name("alot-penal-interest")
+                    .Min(0).Max(9999999999)
+                    .Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right" })
+                )
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Interest(Balance A/Money)</label>
+                @(Html.Kendo().NumericTextBoxFor(m => m.NormalInterest).Name("alot-normal-interest")
+                    .Min(0).Max(9999999999)
+                    .Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right" })
+                )
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Total Payable Allotment Money</label>
+                @(Html.Kendo().NumericTextBoxFor(m => m.PayableAllotmentAmount).Name("alot-payable-allotment-amount")
+                    .Min(0).Max(9999999999999)
+                    .Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 95%;", @maxlength = "19", @class = "text-right" })
+                )
+            </div>
+            
+        </div>
+
+        <div class="row">
+            <div class="col-md-12" style="text-align:right;">
+                <input type="button" class="btn btn-default update-allotment" value="Update Allotment" />
+                <input type="button" class="btn btn-default" value="NDA Calculation" />
+                <input type="button" class="btn btn-default" value="Calculation Of Allotment Money" />
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.PaymentViewModel>()
+            .Name("GridAllotmentPayment")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.ReceiptId).Title("Receipt Id").Width(140);//.ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+                columns.Bound(c => c.ReceiptHeadName).Title("Receipt Head");
+                columns.Bound(c => c.ReceiptSubHeadName).Title("Receipt Subhead").ClientFooterTemplate("<span>Total:-</span>");
+                //columns.Bound(c => c.DuesAmount).Title("Dues (<span class='fa fa-rupee'></span>)");//.ClientTemplate("<label class='hyperlink' onclick='ShowLeaseRentDetail(#=Id#, #=RegistrationId#, #=DepartmentId#)'>#= CurrentDues #</label>").ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+                columns.Bound(c => c.Amount).Title("Paid Amount (<span class='fa fa-rupee'></span>)").ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>").Width(120);
+                columns.Bound(c => c.ChallanId).Title("Challan Id").Width(120);
+                columns.Bound(c => c.DepositDate).Title("Deposit Date").Format("{0:dd-MMM-yyyy}").Width(120);
+            })
+            .Filterable().Resizable(resize => resize.Columns(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))//.AutoBind(false)
+            .DataSource(dataSource => dataSource
+                   .Ajax().ServerOperation(true)
+                   .Model(model => model.Id(p => p.Id))
+                   .Read(read => read.Action("GetAllotmentDuesCalculationDetailAsDataSource", "Finance", new { area = "Revenue" }).Data("FilterRegistrationId")).PageSize(10)
+                   .Aggregates(aggregates => aggregates.Add(p => p.Amount).Sum())
+           )
+        )
+    </div>
+
+</div>
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        //$(".k-grid#DepositDate").kendoDatePicker();
+        
+        var rid = $('#hdn-registration-id').val();
+        if (rid != "") {
+            GetAllottedPropertyCostDetail(rid);
+        }
+        
+        $('.update-allotment').click(function () {
+            SaveAllotmentDetail();
+        });
+    });
+
+    function FilterDepartmentId() {
+        return { DepartmentId: $('#DepartmentId').val() };
+    }
+
+    function AlotAllotmentDateChangeEvent() {
+        if ($('#alot-allotment-date').val() != "") {
+            var alotmentDate = new Date($('#alot-allotment-date').val());
+            var date = new Date(alotmentDate);
+            var newdate = new Date(date);
+            newdate.setDate(newdate.getDate() + 30);
+            var dd = newdate.getDate();
+            var mm = newdate.getMonth() + 1;
+            var y = newdate.getFullYear();
+            var someFormattedDate = mm + '/' + dd + '/' + y;
+            $('#alot-valid-uptodate').data("kendoDatePicker").value(someFormattedDate);
+        }
+    }
+
+    function CalculatePaidAmount() {
+        var amount = $('#pop-input-amount').val();
+        var gst = $('#GSTAmount').val();
+        amount = amount != "" ? parseInt(amount) : 0;
+        gst = gst != "" ? parseInt(gst) : 0;
+        var total = parseInt(amount) + parseInt(gst);
+
+        $('#DepositAmount').val(total);
+        $('#DepositAmount').attr("readonly", true);
+    }
+
+    function GetAllottedPropertyCostDetail(rid) {
+        if (rid != "") {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ RegistrationId: rid }),
+                url: "/Revenue/Finance/GetAllottedPropertyCostDetailById",
+                success: function (result) {
+                    if (result != null) {
+                        $("#alot-allotment-date").data("kendoDatePicker").value(result.AllotmentDate);
+                        $("#alot-allotted-area").data("kendoNumericTextBox").value(result.AllottedArea);
+                        $("#alot-allotment-money").data("kendoNumericTextBox").value(result.AllotmentMoney);
+                        $("#alot-allotment-rate").data("kendoNumericTextBox").value(result.AllotmentRate);
+                        //$("#alot-location-charege").data("kendoNumericTextBox").value(result.LocationCarge);
+                        $("#alot-total-allotment-rate").data("kendoNumericTextBox").value(result.TotalAllotmentRate);
+                        $("#alot-total-property-cost").data("kendoNumericTextBox").value(result.TotalPropertyCost);//alot-total-property-cost  
+                        $("#alot-registration-money").data("kendoNumericTextBox").value(result.EarnestMoney);
+                        $("#alot-allotment-money").data("kendoNumericTextBox").value(result.AllotmentMoney);
+                        $("#alot-advance-leaserent").data("kendoNumericTextBox").value(result.AdvanceLeaseRentAmount);
+                        //$("#alot-total-allotment-amount").data("kendoNumericTextBox").value(result.PayableAllotmentAmount);
+                        //$("#InstallmentScheduleGrid").data("kendoGrid").dataSource.read();
+                        LocationChargeChangeEvent();
+                        EarnestMoneyChageEvent();
+                        AdvanceLeaseRentChangeEvent();
+                        AlotAllotmentDateChangeEvent();
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                }
+            })
+        }
+    }
+
+    function SaveAllotmentDetail() {
+        if (ValidatePaymentDetail()) {
+            //var kendoWidget = $('.kendo-popup-window').data("kendoWindow");
+            //kendo.ui.progress(kendoWidget.element, true);
+            var paymodel = {
+                RegistrationId: $('#hdn-registration-id').val(),
+                PropertyId: $('#PropertyId').val(),
+                DepartmentId: $('#DepartmentId').val(),
+                AllotmentDate: $("#alot-allotment-date").data("kendoDatePicker").value(),
+                AllottedArea: $("#alot-allotted-area").data("kendoNumericTextBox").value(),
+                AllotmentMoney: $("#alot-allotment-money").data("kendoNumericTextBox").value(),
+                AllotmentRate: $("#alot-allotment-rate").data("kendoNumericTextBox").value(),
+                EarnestMoney: $("#alot-registration-money").data("kendoNumericTextBox").value(),
+                AllotmentMoney: $("#alot-allotment-money").data("kendoNumericTextBox").value(),
+                TotalAllotmentRate: $("#alot-total-allotment-rate").data("kendoNumericTextBox").value(),
+                TotalPremiumAmount: $("#alot-total-property-cost").data("kendoNumericTextBox").value(),
+                TotalAllotmentAmount: $("#alot-total-allotment-amount").data("kendoNumericTextBox").value(),
+                PropertyCost: $("#alot-total-property-cost").data("kendoNumericTextBox").value(),
+                TotalPropertyCost: $("#alot-total-property-cost").data("kendoNumericTextBox").value(),
+                ValidUptoDate: $("#alot-valid-uptodate").data("kendoDatePicker").value(),
+                LeaseRent: $("#alot-leaserent-percent").data("kendoNumericTextBox").value(),
+                AdvanceLeaseRent: $("#alot-advance-leaserent").data("kendoNumericTextBox").value(),
+                LocationId: $('#alot-location-id').val(),
+                LocationCharge: $("#alot-location-charge-rate").data("kendoNumericTextBox").value(),
+                LocationChargeRate: $("#alot-location-charge").data("kendoNumericTextBox").value(),
+                PenalInterest: $("#alot-penal-interest").data("kendoNumericTextBox").value(),
+                NormalInterest: $("#alot-normal-interest").data("kendoNumericTextBox").value(),
+                PayableAllotmentAmount: $("#alot-payable-allotment-amount").data("kendoNumericTextBox").value(),
+            };
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ model: paymodel }),
+                //url: "/Revenue/Finance/AddInstallmentPaymentBySchedule",
+                url: '/Revenue/Finance/SavePropertyCostAsPerScheme',
+                success: function (result) {
+                    if (result == '@ReturnType.Updated') {
+                        //ClearChallanInputFields();
+                        $('#InstallmentScheduleGrid').data('kendoGrid').dataSource.read();
+                        //$('.kendo-popup-window').data("kendoWindow").close();
+                        //kendo.ui.progress(kendoWidget.element, false);
+                        alertify.success("Record has been updated successfully.");
+                    }
+                    if (result == '@ReturnType.None') {
+                        $('#InstallmentScheduleGrid').data('kendoGrid').dataSource.read();
+                        //kendo.ui.progress(kendoWidget.element, false);
+                        //$('.kendo-popup-window').data("kendoWindow").close();
+                        alertify.error("Records aren't updated.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                }
+            })
+        }
+    }
+
+
+
+    function ValidatePaymentDetail() {
+        var flag = true;
+        //if ($('#RegistrationId').val() == "") {
+        //    alertify.error("Please Select Registration Id.");
+        //    return flag = false;
+        //}
+        //if ($('#BankId').val() == "") {
+        //    alertify.error("Please Select Bank Name.");
+        //    return flag = false;
+        //}
+        //if ($('#PaymentMode').val() == "") {
+        //    alertify.error("Please Select Payment mode.");
+        //    return flag = false;
+        //}
+        //if ($('#TransactionId').val() == "") {
+        //    alertify.error("Please enter challan Id.");
+        //    return flag = false;
+        //}
+        //if ($('#DepositDate').val() == "") {
+        //    alertify.error("Please enter diposit date.");
+        //    return flag = false;
+        //}
+        return flag;
+    }
+
+
+    function LocationChargeChangeEvent() {
+        //var charge = $('#alot-location-charge').val().trim();
+        var charge = $('#alot-location-charge-rate').val().trim();
+        if ($("#alot-location-id").val() != '') {
+            if (charge != "") {
+                charge = parseFloat(charge).toFixed(2);
+                var allotmentRate = $('#alot-allotment-rate').val();
+                allotmentRate == allotmentRate == "" ? 0 : parseFloat(allotmentRate).toFixed(2);
+                var locationrate = parseFloat(allotmentRate * charge / 100).toFixed(2);
+                var totalrate = Number(allotmentRate) + Number(locationrate);
+
+                $('#alot-location-charge').data("kendoNumericTextBox").value(locationrate);
+                $('#alot-total-allotment-rate').data("kendoNumericTextBox").value(parseFloat(totalrate).toFixed(2));
+                CalculatePropertyCost();
+            }
+            else {
+                $('#alot-location-charge-rate').data("kendoNumericTextBox").value('');
+                $('#alot-location-charge').data("kendoNumericTextBox").value('');
+                CalculatePropertyCost();
+            }
+        }       
+        else {
+            //alertify.error("Please select Location Type");
+            $('#alot-location-charge-rate').data("kendoNumericTextBox").value('');
+            $('#alot-location-charge').data("kendoNumericTextBox").value('');
+            CalculatePropertyCost();
+        }
+        CalculateAllotmentMoney();
+        AdvanceLeaseRentChangeEvent();
+    }
+
+    function CalculateAllotmentMoney() {
+        var allotment = $("#alot-allotment-money").data("kendoNumericTextBox").value();
+        if (allotment != "") {
+            var totalcost = $("#alot-total-property-cost").val();
+            allotment = parseFloat(allotment).toFixed(2);
+            totalcost = parseFloat(totalcost).toFixed(2);
+            $("#alot-allotment-money").data("kendoNumericTextBox").value(parseFloat(totalcost * 30 / 100).toFixed(2));
+            //$("#alot-allotment-money").data("kendoNumericTextBox").value(parseFloat(totalcost * allotment / 100).toFixed(2));
+        }
+    }
+
+    function CalculatePropertyCost() {
+        var rate = $('#alot-total-allotment-rate').val();
+        var area = $('#alot-allotted-area').val();
+        rate = rate == "" ? 0 : parseFloat(rate).toFixed(2);
+        area = area == "" ? 0 : parseFloat(area).toFixed(2);
+        var totalcost = parseFloat(rate * area).toFixed(2);
+        $('#alot-total-property-cost').data("kendoNumericTextBox").value(totalcost);
+    }
+
+    function EarnestMoneyChageEvent() {
+        var earnestMoney = $('#alot-registration-money').val();
+        var allotmentMoney = $('#alot-allotment-money').val();
+        earnestMoney = earnestMoney != "" ? parseFloat(earnestMoney).toFixed(2) : 0;
+        allotmentMoney = allotmentMoney != "" ? parseFloat(allotmentMoney).toFixed(2) : 0;
+        var balance = Number(allotmentMoney - earnestMoney);
+        $('#alot-balance-money').data("kendoNumericTextBox").value(parseFloat(balance).toFixed(2));//alot-total-allotment-amount
+        //$('#alot-total-allotment-amount').data("kendoNumericTextBox").value(parseFloat(balance).toFixed(2));//alot-total-allotment-amount
+        AdvanceLeaseRentChangeEvent();
+    }
+
+    function AdvanceLeaseRentChangeEvent() {
+        var rentInPercent = $('#alot-leaserent-percent').val();
+        var totalCost = $('#alot-total-property-cost').val();
+        //var payableCost = $('#alot-total-allotment-amount').val();
+        var balanceAllotmentMoney = $('#alot-balance-money').val() == "" ? 0 : parseFloat($('#alot-balance-money').val()).toFixed(2);
+        rentInPercent = rentInPercent == "" ? 0 : parseFloat(rentInPercent).toFixed(2);
+        totalCost = totalCost == "" ? 0 : parseFloat(totalCost).toFixed(2);
+        var leaserent = parseFloat(rentInPercent * totalCost / 100).toFixed(2);
+        var payableCost = Number(leaserent) + Number(balanceAllotmentMoney);
+        $('#alot-advance-leaserent').data("kendoNumericTextBox").value(leaserent);
+        $('#alot-total-allotment-amount').data("kendoNumericTextBox").value(parseFloat(payableCost).toFixed(2));
+        $('#alot-payable-allotment-amount').data("kendoNumericTextBox").value(parseFloat(payableCost).toFixed(2));
+    }
+
+    function LocationTypeChangeEvent() {
+        //CalculateAllotmentMoney();
+        EarnestMoneyChageEvent();
+        LocationChargeChangeEvent();
+    }
+ 
+</script>
+
+
+
+
+

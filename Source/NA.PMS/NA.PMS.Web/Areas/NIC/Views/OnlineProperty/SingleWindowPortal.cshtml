@@ -1,0 +1,109 @@
+﻿@model NA.PMS.Model.WBasicDetailsPostModel
+@{
+    ViewBag.Title = "Single Window Portal";
+    Layout = "~/Views/Shared/_LayoutNIC.cshtml";
+}
+
+@using (Html.BeginForm("SchemeInformation", "OnlineProperty", FormMethod.Post, new { enctype = "multipart/form-data", id = "requestform" }))
+{
+    <div class="single-window-portal">
+        <div class="col-md-12">
+            <div class="row" style="margin-top:6px">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Single Window Portal</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce" id="nic-form">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <h2 class="blck-heading">NIC Online Services/Scheme Form Detail</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group"></div>
+                        <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                            <label class="radio-inline" style="padding-left:20px"><input type="radio" name="ServiceType" value="SchemeForm" checked>Scheme Form</label>
+                            <label class="radio-inline" style=""><input type="radio" name="ServiceType" value="Services">Services (Nivesh Mitra)</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            <label>Control Id :</label>
+                        </div>
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            <input type="text" class="form-control" name="TxtControlID" id="TxtControlID" value="UPSWP190000206" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            <label>Unit Id :</label>
+                        </div>
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            <input type="text" class="form-control" name="TxtUnitID" id="TxtUnitID" value="UPSWP19000020601" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            <label>Service Id :</label>
+                        </div>
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            <input type="text" class="form-control" name="TxtServiceID" id="TxtServiceID" value="SC22002" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            <label>Process Industry Id :</label>
+                        </div>
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            <input type="text" class="form-control" name="TxtProcessIndustryID" id="TxtProcessIndustryID" value="" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            <label>Application Id :</label>
+                        </div>
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            <input type="text" class="form-control" name="TxtApplicationID" id="TxtApplicationID" value="" />
+                        </div>
+                    </div>
+
+                    <div class="row row-scheme">
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            <label>Select Scheme :</label>
+                        </div>
+                        <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                            <label class="radio-inline" style="padding-left:20px"><input type="radio" name="SchemeType" value="Open End Scheme" checked>Open End Scheme</label>
+                            <label class="radio-inline"><input type="radio" name="SchemeType" value="Industrial Scheme">Industrial Plot Scheme</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="box-button text-center" id="div-box-button">
+                    <input type="submit" value="Submit" id="btn-submit" class="btn btn-add" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+<script>
+    $(document).ready(function () {
+        var urlAction = "/NIC/OnlineProperty/SchemeInformation";
+        $('#requestform').attr('action', urlAction);
+
+        $('input[type=radio][name=ServiceType]').change(function () {
+            if (this.value == 'SchemeForm') {
+                urlAction = "/NIC/OnlineProperty/SchemeInformation";
+                //alert(urlAction);
+                $('#requestform').attr('action', urlAction);
+                $('.row-scheme').show();
+            }
+            else if (this.value == 'Services') {
+                urlAction = "/NIC/NiveshMitraServices/NMUnitCheck";
+                //alert(urlAction);
+                $('#requestform').attr('action', urlAction);
+                $('.row-scheme').css("display", "none");
+            }
+        });
+    });
+</script>

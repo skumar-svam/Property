@@ -1,0 +1,435 @@
+﻿@model NA.PMS.Model.AllotmentModel
+@using Kendo.Mvc.UI;
+
+@Styles.Render("~/Content/others")
+@Styles.Render("~/bundles/KendoCSS")
+@Scripts.Render("~/bundles/jquery")
+@Scripts.Render("~/bundles/others")
+@Scripts.Render("~/bundles/KendoJS")
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    <div class="container-fluid">
+        <fieldset>
+            <legend>View Allotment Details</legend>
+            <div class="row">
+                <div class="col-md-10">
+                    @{Html.RenderPartial("_PartialDepartmentOnScheme", Model.PropertyAllotment);}
+                    @Html.HiddenFor(model => model.ApplicationId)
+                    @Html.HiddenFor(model => model.FormNo, new { @id = "formno" })
+                    @Html.HiddenFor(model => model.PropertyId, new { @id = "PropertyId" })
+                    @Html.HiddenFor(model => model.isStatus)
+                </div>
+                <div class="col-md-2">
+                    @if (Model.isStatus == "Approved")
+                    {
+                        <i style="font-size: 18px; " class=" glyphicon glyphicon-ok-sign" aria-hidden="true"></i>
+                        <strong style="color: lightgreen;font-size: 18px; padding-right: 10px; ">  @Html.DisplayFor(model => model.isStatus)</strong>
+                    }
+                    else if (Model.isStatus == "Rejected")
+                    {
+                        <strong style="color: red;font-size: 16px; padding-right: 10px; "><i class="glyphicon glyphicon-remove-sign" aria-hidden="true"></i>  @Html.DisplayFor(model => model.isStatus)</strong>
+                    }
+                </div>
+            </div>
+            <div class="row">
+                <fieldset>
+                    <legend>Applicant Details</legend>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="_FormID">Form Number: </label>
+                            </div>
+                            <div class="col-md-4">
+                                @Html.DisplayFor(model => model.FormNo)
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="_Gender">Gender: </label>
+                            </div>
+                            <div class="col-md-4">
+                                <label id="Gender"></label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="_Mobile">Mobile Number: </label>
+                            </div>
+                            <div class="col-md-4">
+                                <label id="Mobile"></label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="_occupation">Occupation: </label>
+                            </div>
+                            <div class="col-md-4">
+                                <label id="occupation"></label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="_Religion">Religion: </label>
+                            </div>
+                            <div class="col-md-4">
+                                <label id="Religion"></label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="_PanCard">PAN Details: </label>
+                            </div>
+                            <div class="col-md-4">
+                                <label id="PanCard"></label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="_ApplicantName">Applicant's Name: </label>
+                            </div>
+                            <div class="col-md-4">
+                                <label id="ApplicantName"></label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="_Father">Father's Name: </label>
+                            </div>
+                            <div class="col-md-4">
+                                <label id="Father"></label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="_Address">Address: </label>
+                            </div>
+                            <div class="col-md-4">
+                                <label id="Address"></label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="_Category">Category: </label>
+                            </div>
+                            <div class="col-md-4">
+                                <label id="Category"></label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="_AnnualIncome">Annual Income: </label>
+                            </div>
+                            <div class="col-md-4">
+                                <label id="AnnualIncome"></label>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="row">
+                <fieldset>
+                    <legend>Applicant Payment Details</legend>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="_AmountDeposited">Amount Deposited : </label>
+                            </div>
+                            <div class="col-md-4">
+                                <label id="AmountDeposited"></label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="_BranchName">Branch Name: </label>
+                            </div>
+                            <div class="col-md-4">
+                                <label id="BranchName"></label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="_DDNumber">DD Number: </label>
+                            </div>
+                            <div class="col-md-4">
+                                <label id="DDNumber"></label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="_IssueDate">Issue Date: </label>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" id="IssueDate" />
+                                <input type="hidden" id="IssuedateValue" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="_BankName">Bank Name: </label>
+                            </div>
+                            <div class="col-md-4">
+                                <label id="BankName"></label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="_PaymentType">Payment Type: </label>
+                            </div>
+                            <div class="col-md-4">
+                                <label id="PaymentType"></label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="_IssueBank">Issuing Bank: </label>
+                            </div>
+                            <div class="col-md-4">
+                                <label id="IssueBank"></label>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="row">
+                <fieldset>
+                    <legend>Property Details</legend>
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="_Property">Property Number</label>
+                            </div>
+                            <div class="col-md-4">
+                                @Html.DisplayFor(model => model.PropertyId)
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4"><label id="_Sector">Sector: </label></div>
+                            <div class="col-md-4">
+                                <label id="Sector"></label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="_Area">Area (Sq.Mtr): </label>
+                            </div>
+                            <div class="col-md-4">
+                                @Html.TextBoxFor(model => model.TotalArea, new { htmlAttributes = new { @class = "form-control" } })
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="_totPropertycost">Total Property Cost: </label>
+                            </div>
+                            <div class="col-md-4">
+                                <label id="totPropertycost"></label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="_totnoofinstallment">Total No. of Installment: </label>
+                            </div>
+                            <div class="col-md-4">
+                                <label id="totnoofinstallment"></label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="_allotmentDate">Allotment Date: </label>
+                            </div>
+                            <div class="col-md-4">
+                                <label id="allotmentDate">@(Html.Kendo().DatePickerFor(model => model.AllotmentDate).HtmlAttributes(new { @class = "DisableKeyboardInput" }))</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+
+                        <div class="row">
+                            <div class="col-md-4"><label id="_Block">Block: </label></div>
+                            <div class="col-md-4">
+                                <label id="Block"></label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="_Propertytype">Property Type: </label>
+                            </div>
+                            <div class="col-md-4">
+                                <label id="Propertytype"></label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="_allotmentmoney">Allotment Money: </label>
+                            </div>
+                            <div class="col-md-4">
+                                <label id="allotmentmoney"></label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="_civilcost">Civil Cost: </label>
+                            </div>
+                            <div class="col-md-4">
+                                <label id="civil"></label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label id="_installmentStartDate">Installment Start Date: </label>
+                            </div>
+                            <div class="col-md-4">
+                                <label id="installmentStartDate">@(Html.Kendo().DatePickerFor(model => model.InstalmentStartDate).HtmlAttributes(new { @class = "DisableKeyboardInput" }))</label>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+            <div class="row">
+                <div class="col-md-5">
+                </div>
+                <div class="col-md-7">
+                    <button type="button" id="btnPrint" value="Print" class="btn-primary"> Print</button>
+                    <button type="button" value="Cancel" class="btn-danger" onclick="javascript: window.location = '@Url.Action("ManageAllotment", "Allotment")';"> Close</button>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        GetApplicantDetails();
+        GetPropertyDetails();
+        GetApplicantPaymentDetails();
+        $("#IssueDate").kendoDatePicker().closest(".k-widget").attr("id", "datepicker_wrapper");
+
+        var isStatus = $("#isStatus").val();
+        if (isStatus == "Approved") {
+            $('#btnallotMoney').show();
+            $('#btnPaySche').show();
+            $('#btnGenerateletter').show();
+        }
+        else {
+            $('#btnallotMoney').hide();
+            $('#btnPaySche').hide();
+            $('#btnGenerateletter').hide();
+        }
+    });
+    function filterForms() {
+        return {
+            SchemeId: $("#SchemeId").val(),
+            DepartmentId: $("#DepartmentId").val()
+        };
+    }
+    function GetApplicantDetails() {
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ formno: $("#formno").val(), schemeID: $("#SchemeId").val(), departmentID: $("#DepartmentId").val() }),
+            url: "/Allotment/GetApplicantDetails",
+            success: function (data) {
+                if (data != null) {
+                    $('#ApplicantName').html(data.FirstName);
+                    $('#Gender').html(data.GenderName);
+                    $('#Father').html(data.FatherName);
+                    $('#Mobile').html(data.MobileNumber);
+                    $('#Address').html(data.CorrespondingAddress);
+                    $('#Earnest').html(data.earnestMoney);
+                    $('#ApplicationId').val(data.ApplicationId);
+                    $('#AnnualIncome').html(data.AnnualIncome);
+                    $('#PanCard').html(data.PanNumber);
+                    $('#occupation').html(data.OccupationName);
+                    $('#Religion').html(data.ReligionName);
+                    $('#Category').html(data.CategoryName);
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert("error");
+            }
+        });
+    }
+
+
+    function GetPropertyDetails() {
+        $('#Block').empty();
+        $('#Sector').empty();
+        $('#Propertytype').empty();
+        $('#TotalArea').empty();
+        $('#allotmentmoney').empty();
+        $('#totPropertycost').empty();
+        $('#civil').empty();
+        $('#totnoofinstallment').empty();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ propertyId: $('#PropertyId').val(), schemeID: $("#SchemeId").val(), departmentID: $("#DepartmentId").val() }),
+            url: "/Allotment/GetPropertyDetails",
+            success: function (data) {
+                if (data != null) {
+                    $('#Block').html(data.BlockName);
+                    $('#Sector').html(data.SectorName);
+                    $('#Propertytype').html(data.PropertyTypeName);
+                    $('#TotalArea').val(data.TotalArea);
+                    $('#allotmentmoney').html(data.AllotmentMoney);
+                    $('#totPropertycost').html(data.TotalPropertyCost);
+                    $('#civil').html(data.CivilCost);
+                    $('#totnoofinstallment').html(data.TotalnoofInstallment);
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert("error");
+            }
+        });
+    }
+    function GetApplicantPaymentDetails() {
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ formno: $("#formno").val(), applicationId: $("#ApplicationId").val() }),
+            url: "/Allotment/GetApplicantPaymentDetails",
+            success: function (data) {
+                if (data != null) {
+                    $('#AmountDeposited').html(data.AmountDeposited);
+                    $('#BranchName').html(data.BranchName);
+                    $('#DDNumber').html(data.DdNo);
+                    $('#IssuedateValue').val(data.DdIssueDate);
+                    $('#PaymentType').html(data.PaymentMode);
+                    $('#BankName').html(data.BankName);
+                    $('#PaymentType').html(data.AnnualIncome);
+                    $('#IssueBank').html(data.DdIssueBank);
+                    var datepicker = $("#IssueDate").data("kendoDatePicker");
+                    datepicker.value($("#IssuedateValue").val());
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert("error");
+            }
+        });
+    }
+    function printDiv() {
+        var printContents = $("#mainMaster").html();
+        var originalContents = $('#body-wrapper').html();
+        $('#body-wrapper').html(printContents);
+        $('#btnPrint').hide();
+        window.print();
+        $('#btnPrint').show();
+        $('#body-wrapper').html(originalContents);
+    }
+
+    $('#btnPrint').click(function () {
+        printDiv();
+    });
+</script>

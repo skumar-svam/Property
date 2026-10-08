@@ -1,0 +1,359 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@using NA.PMS.Common;
+@*@model NA.PMS.Model.LeaseRentAndInstallmentDashboard*@
+
+
+<style>
+    .hyperlink {
+        color: darkblue;
+        font: bold;
+    }
+</style>
+
+<div class="ManageScheduleDues">
+    @*<div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Dues Report By Month</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+
+            </div>
+        </div>
+    </div>*@
+    @*<div class="col-md-12 blnk-rw"></div>*@
+    <div class="col-md-12 content-top-spce" style="padding-top:8px;">
+        <div class="inr-bx" style="">
+            <div class="form-bx">
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label>Department</label>
+                        @(Html.Kendo().DropDownList()//(m => m.DepartmentId)
+                            .Name("DDDepartmentId")
+                            .Filter("contains")
+                            .DataTextField("Text")
+                            .DataValueField("Id")
+                            .OptionLabel(" --- select ---")
+                            .DataSource(source =>
+                            {
+                                source.Custom()
+                                .ServerFiltering(true)
+                                .ServerPaging(true)
+                                .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                .Transport(transport => transport.Read(read => read.Action("GetDepartmentList", "Finance", new { area = "Revenue" })))
+                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                .PageSize(7);
+                            })
+                            .Events(events => { events.Change("ChangeDepartmentEvent"); })
+                            .HtmlAttributes(new { @class = "input-disabled", style = "width:90%; float:right;" })
+                        )
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label>Dues Type</label>
+                        @(Html.Kendo().DropDownList()
+                            .Name("DDLActionType")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel(" --- Select ---")
+                            .BindTo(new List<SelectListItem>() {
+                                new SelectListItem() { Text = "Installment", Value = "Installment" },
+                                new SelectListItem() { Text = "Lease Rent", Value = "LeaseRent" },
+                                new SelectListItem() { Text = "Lease Rent & Installment", Value = "LeaseRent_Installment" }
+                            })
+                            .HtmlAttributes(new { style = "width: 90%; float:right;" })
+                            .Events(e => e.Change("ChangeActionType"))
+                        )
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group" style="text-align:right;">
+                        <label>Month</label>
+                        @(Html.Kendo().DatePicker()
+                          .Name("DDMonth")
+                          .Start(CalendarView.Year)
+                          .Depth(CalendarView.Year)
+                          .Format("MMMM yyyy")
+                          .Value(DateTime.Now)
+                          .Min(DateTime.Now)
+                          .HtmlAttributes(new { style = "width: 90%; float:right;", onkeydown = "return false;" })
+                          .Events(e => e.Change("DateChange"))
+                        )
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 col-btn" style="text-align:right;padding:20px;">
+                        @Html.ActionLink("Dues Reminder Log", "ManageReminder", new { controller = "Report", area = "Reports" }, htmlAttributes: new { target = "_blank" })
+                    </div>
+                </div>
+            </div>
+
+            <h2 id="grid-head" class="blck-heading" style="margin-bottom: 0px;">Lease Rent Details</h2>
+            <div class="col-md-12 k-grid-content" id="leaserent-dues-grid">
+                @(Html.Kendo().Grid<NA.PMS.Model.LeaseRentAndInstallmentDashboard>()
+                        .Name("GridLeaseRentDuesList")
+                        .Excel(excel => excel.AllPages(true).Filterable(true).FileName("LeaseRentReport.xlsx"))
+                        .ToolBar(toolsExcel => toolsExcel.Excel())
+                        .Columns(columns =>
+                        {
+                            columns.Bound(c => c.RegistrationId).Title("Registration Id").ClientTemplate("<a href='" + "/Property/PropertyAllotment/PropertyDetails/#= RegistrationId #'>#= RegistrationId #</a>").Filterable(true);
+                            columns.Bound(c => c.PropertyNo).Title("Property No");
+                            //columns.Bound(c => c.Sector).Title("Sector");
+                            //columns.Bound(c => c.Block).Title("Block");
+                            //columns.Bound(c => c.PlotNo).Title("PlotNo");
+                            columns.Bound(c => c.LeaseDeedDate).Title("LeaseDeed Date").Format("{0:dd-MMM-yyyy}");
+                            columns.Bound(c => c.leaserentduedate).Title("Due Date").Format("{0:dd-MMM-yyyy}");
+                            columns.Bound(c => c.PremiumLeaseRent).Title("Lease Rent Per Year (<span class='fa fa-rupee'></span>)");
+                            columns.Bound(c => c.PremiumPaidUptoDate).Title("Paid Upto Date").Format("{0:dd-MMM-yyyy}");
+                            columns.Bound(c => c.CurrentDues).Title("Dues (<span class='fa fa-rupee'></span>)");
+                            columns.Bound(c => c.KYAStatus).Title("KYA Status");
+                            columns.Bound(c => c.RegistrationId).Title("Action").ClientTemplate("#if(KYAStatus=='Approved'){#<label class='hyperlink' onclick='javascript:SendMsg(#= RegistrationId #)'>Send Reminder</label>#}#");
+                            ////columns.Bound(c => c.CurrentDuesDate).Title("Current Due Date").Format("{0:dd-MMM-yyyy}");
+                        })
+                        .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                        .DataSource(dataSource => dataSource
+                                .Ajax().ServerOperation(true)
+                            //.Model(model => model.Id(p => p.Id))
+                                .Read(read => read.Action("GetAlloteeListByDueDate", "Payment", new { area = "Revenue" }).Data("LeaseRent")).PageSize(10)
+                            )
+                )
+            </div>
+            <div class="col-md-12 k-grid-content" id="installment-dues-grid">
+                @(Html.Kendo().Grid<NA.PMS.Model.LeaseRentAndInstallmentDashboard>()
+                        .Name("GridInstallmentList")
+                        .Excel(excel => excel.AllPages(true).Filterable(true).FileName("InstallmentReport.xlsx"))
+                        .ToolBar(toolsExcel => toolsExcel.Excel())
+                        .Columns(columns =>
+                        {
+                            columns.Bound(c => c.RegistrationId).Title("Registration Id").ClientTemplate("<a href='" + "/Property/PropertyAllotment/PropertyDetails/#= RegistrationId #'>#= RegistrationId #</a>").Filterable(true);
+                            columns.Bound(c => c.PropertyNo).Title("Property No");
+                            //columns.Bound(c => c.Sector).Title("Sector");
+                            //columns.Bound(c => c.Block).Title("Block");
+                            //columns.Bound(c => c.PlotNo).Title("PlotNo");
+                            columns.Bound(c => c.leaserentduedate).Title("Premium Due Date").Format("{0:dd-MMM-yyyy}");
+                            columns.Bound(c => c.PremiumLeaseRent).Title("Premium (<span class='fa fa-rupee'></span>)");
+                            columns.Bound(c => c.PremiumPaidUptoDate).Title("Paid Upto Date").Format("{0:dd-MMM-yyyy}");
+                            columns.Bound(c => c.CurrentDues).Title("Premium Dues (<span class='fa fa-rupee'></span>)");
+                            //columns.Bound(c => c.LeaseDeedDate).Title("LeaseDeed Date").Format("{0:dd-MMM-yyyy}");
+                            //columns.Bound(c => c.CurrentDuesDate).Title("Current Installment Due Date").Format("{0:dd-MMM-yyyy}");
+
+                            columns.Bound(c => c.KYAStatus).Title("KYA Status");
+                            columns.Bound(c => c.RegistrationId).Title("Action").ClientTemplate("#if(KYAStatus=='Approved'){#<label class='hyperlink' onclick='javascript:SendMsg(#= RegistrationId #)'>Send Reminder</label>#}#");
+
+                        })
+                        .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                        .DataSource(dataSource => dataSource
+                                .Ajax().ServerOperation(true)
+                            //.Model(model => model.Id(p => p.Id))
+                                .Read(read => read.Action("GetAlloteeListByDueDate", "Payment", new { area = "Revenue" }).Data("LeaseRent")).PageSize(10)
+                            )
+                )
+            </div>
+
+            <div class="col-md-12 k-grid-content" id="leaserent-installment-dues-grid">
+                @(Html.Kendo().Grid<NA.PMS.Model.LeaseRentAndInstallmentDashboard>()
+                        .Name("GridLeaserentAndInstallmentList")
+                        .Excel(excel => excel.AllPages(true).Filterable(true).FileName("InstallmentReport.xlsx"))
+                        .ToolBar(toolsExcel => toolsExcel.Excel())
+                        .Columns(columns =>
+                        {
+                            columns.Bound(c => c.RegistrationId).Title("Registration Id").ClientTemplate("<a href='" + "/Property/PropertyAllotment/PropertyDetails/#= RegistrationId #'>#= RegistrationId #</a>").Filterable(true);
+                            columns.Bound(c => c.PropertyNo).Title("Property No");
+                            //columns.Bound(c => c.Sector).Title("Sector");
+                            //columns.Bound(c => c.Block).Title("Block");
+                            //columns.Bound(c => c.PlotNo).Title("PlotNo");
+                            columns.Bound(c => c.leaserentduedate).Title("Due Date").Format("{0:dd-MMM-yyyy}");
+                            columns.Bound(c => c.PremiumLeaseRent).Title("LeaseRent Per Year (<span class='fa fa-rupee'></span>)");
+                            //columns.Bound(c => c.PremiumPaidUptoDate).Title("Paid Upto Date").Format("{0:dd-MMM-yyyy}");
+                            columns.Bound(c => c.CurrentDues).Title("Total Dues (<span class='fa fa-rupee'></span>)");
+                            //columns.Bound(c => c.LeaseDeedDate).Title("LeaseDeed Date").Format("{0:dd-MMM-yyyy}");
+                            //columns.Bound(c => c.CurrentDuesDate).Title("Current Installment Due Date").Format("{0:dd-MMM-yyyy}");
+
+                            columns.Bound(c => c.KYAStatus).Title("KYA Status");
+                            columns.Bound(c => c.RegistrationId).Title("Action").ClientTemplate("#if(KYAStatus=='Approved'){#<label class='hyperlink' onclick='javascript:SendMsg(#= RegistrationId #)'>Send Reminder</label>#}#");
+
+                        })
+                        .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                        .DataSource(dataSource => dataSource
+                                .Ajax().ServerOperation(true)
+                            //.Model(model => model.Id(p => p.Id))
+                                .Read(read => read.Action("GetAlloteeListByDueDate", "Payment", new { area = "Revenue" }).Data("LeaseRent")).PageSize(10)
+                            )
+                )
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#installment-dues-grid').hide();
+        $('#GridLeaseRentDuesList').hide();
+        $('#GridLeaserentAndInstallmentList').hide();
+        $('#grid-head').hide();
+        //UpdateTotalCount();
+        //$('#lrcount').show();
+        //$('#ipcount').hide();
+    });
+
+    function ChangeActionType() {
+        var actionType = $('#DDLActionType').val();
+        if (actionType == "LeaseRent") {
+            $("#GridLeaseRentDuesList").data("kendoGrid").dataSource.read();
+            $('#installment-dues-grid').hide();
+            $('#GridLeaserentAndInstallmentList').hide();
+            $('#GridLeaseRentDuesList').show();
+            $('#grid-head').show();
+            $('#grid-head').text("Lease Rent List");
+            //$('#lrcount').show();
+            //$('#ipcount').hide();
+            //UpdateTotalCount();
+        }
+        else if (actionType == "Installment") {
+            $("#GridInstallmentList").data("kendoGrid").dataSource.read();
+            $('#GridLeaseRentDuesList').hide();
+            $('#GridLeaserentAndInstallmentList').hide();
+            $('#installment-dues-grid').show();
+            $('#grid-head').show();
+            $('#grid-head').text("Installment List");
+            //$('#lrcount').hide();
+            //$('#ipcount').show();
+            //UpdateTotalCount();
+        }
+        else if (actionType == "LeaseRent_Installment") {
+            $("#GridLeaserentAndInstallmentList").data("kendoGrid").dataSource.read();
+            $('#GridLeaseRentDuesList').hide();
+            $('#installment-dues-grid').hide();
+            $('#GridLeaserentAndInstallmentList').show();
+            $('#grid-head').show();
+            $('#grid-head').text("LeaseRent And Installment List");
+        }
+    }
+
+    function DateChange() {
+        if ($('#DDLActionType').val() == "") {
+            alertify.error("Select Action Type.");
+            return false;
+        }
+        else if ($('#DDDepartmentId').val() == "") {
+            alertify.error("Select Department.");
+            return false;
+        }
+        else {
+            ChangeActionType();
+        }
+    }
+
+    function ChangeDepartmentEvent() {
+        ChangeActionType();
+    }
+
+
+    function ChangeEvent() {
+        if ($('#DDLActionType').val() == "") {
+            alertify.error("Select Action Type.");
+            return false;
+        }
+        else if ($('#DDDepartmentId').val() == "") {
+            alertify.error("Select Department.");
+            return false;
+        }
+        else if ($('#DDMonth').val() == "") {
+            alertify.error("Select Month.");
+            return false;
+        }
+        else {
+            ChangeActionType();
+        }
+    }
+
+    function LeaseRent() {
+        var month = $('#DDMonth').val();
+        var year = null;
+        var d = new Date();
+        var currentYr = d.getFullYear();
+        if (year==null){
+            currentDate = '1 ' + month //+ '-' + currentYr
+        }
+        else{
+            currentDate = '1 ' + month //+ '-' + year
+        }
+
+        //var currentDues = $('#DPCurrentDuesDate').val();
+        var actionType = $('#DDLActionType').val() == "" ? "LeaseRent" : $('#DDLActionType').val();
+        var deptId = $("#DDDepartmentId").val() == "" ? "1" : $("#DDDepartmentId").val();
+        var model = { DepartmentId: deptId, ActionType: actionType, CurrentDate: currentDate };
+        return model;
+    }
+
+    function UpdateTotalCount() {
+        var currentDues = $('#DPCurrentDuesDate').val();
+        var actionType = $('#DDLActionType').val() == "" ? "LeaseRent" : $('#DDLActionType').val();
+        var deptId = $("#DDDepartmentId").val() == "" ? "1" : $("#DDDepartmentId").val();
+        $.ajax({
+            type: "post",
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            data: JSON.stringify({ DepartmentId: deptId, ActionType: actionType, CurrentDate: currentDues }),
+            url: '@Url.Action("GetTotalCountByActionType", "Payment", new { area = "Revenue" })',
+            success: function (result) {
+                if (result != null) {
+                    $('#lrcount').text("LeaseRent: " + result.TotalLeaseRentCount);
+                    $('#ipcount').html("Installment: " + result.TotalInstallmentCount);
+
+                    //if (actionType == "LeaseRent") {
+                    //    $('#lrcount').show();
+                    //    $('#ipcount').hide();
+                    //}
+                    //else {
+                    //    $('#ipcount').show();
+                    //    $('#lrcount').hide();
+                    //}
+
+                }
+                else {
+                    alertify.error("Report is not updated");
+                    return false;
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Something is wrong, try again later");
+            }
+        });
+    }
+
+    function SendMsg(rid) {
+        //var rid = $("#RegistrationId").val();
+        $.ajax({
+            type: "post",
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            data: JSON.stringify({ Rid: rid}),
+            url: '@Url.Action("SendReminderToAllottee", "Payment", new { area = "Revenue" })',
+            success: function (result) {
+                if (result == '@ReturnType.Success') {
+                    alertify.success("Message Sent Successfully");
+                }
+                else {
+                    alertify.error("Message Not Sent");
+                    return false;
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Network Error,Please try again later");
+            }
+        });
+    }
+
+    //var presentDate = "March 2019"//new Date();
+
+
+    //$(function () {
+    //    var datepicker = $('#DDMonth').kendoDatePicker({
+    //        value: presentDate,
+    //        min: presentDate,
+    //    }).data('kendoDatePicker');
+    //});
+
+</script>
+
+

@@ -1,0 +1,134 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@{
+    ViewBag.Title = "ManageLetter";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .lbl-vl{
+        padding-left:10px;
+    }
+</style>
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Search Letter</h1></div>
+            <div class="col-md-6 col-sm-6 col-xs-12 mandatory"></div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 content-top-spce">
+        <div id="DivPropertyInformation" class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            <h2 class="blck-heading">Property Information</h2>
+            <div class="form-bx">             
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.Label("Barcode Value:")
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <input type="text" id="txtBarcode" class="form-control" placeholder="bar-code-value" maxlength="25" />
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <input type="button" id="btnSearch" class="k-button" value="Search" />
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label id="">Property No:</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label id="lblPropertyNo" style="padding-left:10px;"></label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label>Registration Id:</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label id="lblRegistrationId"></label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group" style="display:none;">
+                        <label>Mobile:</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group" style="display:none;">
+                        <label id="lblMobile" style="padding-left:10px;"></label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label>Applicant:</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label id="lblApplicant" style="padding-left:10px;"></label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label>Address:</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label id="lblAddress" style="padding-left:10px;"></label>
+                    </div>
+                </div>
+            </div>
+
+
+            <h2 class="blck-heading" style="margin-bottom:0;">Letter</h2>
+            <div class="" style="background:#fff;">
+                <div id="divLetterBody" style="background:#fff; margin:20px;"></div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+
+<script>
+   
+    $('#btnSearch').click(function () {
+        var brcode = $('#txtBarcode').val();
+        if (brcode == "") {
+            alertify.error("Please enter value");
+            return false;
+        }
+        //if (brcode.length <= 10 || brcode.length > 25) {
+        //    alertify.error("Please enter correct barcode ");
+        //    return false;
+        //}
+        else {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json, charset=utf-8",
+                data: JSON.stringify({ barcode: brcode }),
+                url: "/CustomerServiceRequest/GetLetterByBarcode",
+                success: function (result) {
+                    if (result == null) {
+                        alertify.error("Letter is not available");
+                    }
+                    if (result.LetterContent != null) {
+                        $('#divLetterBody').html(result.LetterContent);
+                        $('#lblPropertyNo').html(result.PropertyNo);
+                        $('#lblMobile').html(result.MobileNo);
+                        $('#lblApplicant').html(result.ApplicantName);
+                        $('#lblAddress').html(result.CorresspondentAddress);
+                        $('#lblRegistrationId').html(result.Rid);
+
+                        $('#divLetterBody').show();
+                    }
+                    else {
+                        alertify.error("Please try again");
+                        $('#divLetterBody').hide();
+                    }
+                    
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                }
+            });
+        }       
+    });
+</script>

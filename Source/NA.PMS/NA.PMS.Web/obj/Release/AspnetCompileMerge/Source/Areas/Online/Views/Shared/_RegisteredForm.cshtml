@@ -1,0 +1,575 @@
+﻿@model NA.PMS.Model.OnlineFormViewModel
+@using Kendo.Mvc.UI
+@using NA.PMS.Common
+
+
+
+<div class="row-prnt" id="formview">
+
+    <h2 class="blck-heading" style="margin-bottom:6px;">Applicant Information</h2>
+    <div class="form-bx row-prnt">
+        <div>
+            @Html.HiddenFor(model => model.Id)
+            @Html.HiddenFor(model => model.ApplicantType)
+            @Html.HiddenFor(model => model.ApplicationFormId)
+            @Html.HiddenFor(m => m.ApplicationFormType)
+            @Html.HiddenFor(m => m.ExpansionType)
+            @Html.HiddenFor(m => m.IsApplicationFeePaid)
+        </div>
+        <div class="row row-prnt">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                <label>Application From</label>
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group" id="ApplicantTypeGroup">
+                <label>@Html.RadioButtonFor(m => m.ApplicationFormType, "General", new { @class = "", @checked = true, @id = "Individual" }) General</label>
+                <label>@Html.RadioButtonFor(m => m.ApplicationFormType, "Startup", new { @class = "", @id = "" }) Startup</label>
+                <label>@Html.RadioButtonFor(m => m.ApplicationFormType, "Expansion", new { @class = "", @id = "" }) Expansion</label>
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group" id="divExpansionType">
+                <label>@Html.RadioButtonFor(m => m.ExpansionType, "ExistingAllottee", new { @class = "", @checked = true, @id = "" }) Existing Allottee</label>
+                <label>@Html.RadioButtonFor(m => m.ExpansionType, "RentPermission", new { @class = "", @id = "" }) Under Rent Permission</label>
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+
+            </div>
+        </div>
+       
+        <div class="row row-prnt row-prnt-pc">
+            <div class="col-md-6 row-prnt-hf-lt">
+                <div class="row row-prnt">
+                    <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                        <label>Applicant Type</label>
+                    </div>
+                    <div class="col-md-8 col-sm-3 col-xs-12 form-group rdio-bx" id="FormType">
+                        <label>@Html.RadioButtonFor(m => m.ApplicantType, "individual", new { @class = "", @checked = true, @id = "Individual" }) Individual</label>
+                        <label>@Html.RadioButtonFor(m => m.ApplicantType, "company", new { @class = "", @id = "Company" }) Company</label>
+                    </div>
+                </div>
+                @if (!string.IsNullOrEmpty(Model.PreviousFormNo))
+                {
+                    <div class="row row-prnt">
+                        <div class="col-md-4 col-sm-6 col-xs-12 form-group col-prnt-lt">@Html.Label("Previous Form No If Refund Not Taken", htmlAttributes: new { @class = "" })</div>
+                        <div class="col-md-8 col-sm-6 col-xs-12 form-group col-prnt-rt">
+                            @Html.TextBoxFor(model => model.PreviousFormNo, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                        </div>
+                    </div>
+                }
+                <div class="row row-prnt">
+                    <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt-lt">
+                        @Html.Label("Applicant Constitution", htmlAttributes: new { @class = "required" })
+                    </div>
+                    <div class="col-md-8 col-sm-3 col-xs-12 form-group col-prnt-rt">
+                        @Html.TextBoxFor(model => model.CompanyType, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                </div>
+                <div class="row row-prnt">
+                    <div class="col-md-4 col-sm-6 col-xs-12 form-group col-prnt-lt">
+                        @Html.Label("Scheme Name", htmlAttributes: new { @class = "" })
+                    </div>
+                    <div class="col-md-8 col-sm-6 col-xs-12 form-group col-prnt-rt">
+                        @Html.TextBoxFor(model => model.SchemeName, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                </div>
+                <div class="row row-prnt">
+                    <div class="col-md-4 col-sm-6 col-xs-12 form-group col-prnt-lt">
+                        @Html.Label("Department", htmlAttributes: new { @class = "" })
+                    </div>
+                    <div class="col-md-8 col-sm-6 col-xs-12 form-group cl-prnt-rt">
+                        @Html.TextBoxFor(model => model.Department, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt-lt">
+                        @Html.Label("Area Range", htmlAttributes: new { @class = "required" })
+                    </div>
+                    <div class="col-md-8 col-sm-3 col-xs-12 form-group col-prnt-lt">
+                        @Html.TextBoxFor(model => model.AreaRange, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 row-prnt-hf-rt" style="">
+                <div class="row">
+                    <div class="col-md-12 text-right" style="margin-bottom:5px;">
+                        <img id="userphoto" src="@Model.UserImage" alt="your image" height="150px" width="140px" name="userImage2" />
+                    </div>
+                    <div class="col-md-12 text-right">
+                        <img id="signature" src="@Model.SignImage" alt="your sign" height="40px" width="140px" name="usersign" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row row-company row-prnt" id="divCompanyInfo">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">@Html.Label("Applicant", htmlAttributes: new { @class = "required" })</div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.Applicant, htmlAttributes: new { @class = "form-control", placeholder = "", @readonly = "readonly" })
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Signing Authority", htmlAttributes: new { @class = "required" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.SigningAuthority, new { @class = "form-control", @maxlength = "150", placeholder = "", @readonly = "readonly" })
+            </div>
+        </div>
+
+        <div class="row row-company row-prnt" id="">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Signatory's Father Name", htmlAttributes: new { @class = "" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.ApplicantMaster, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Signatory Status", htmlAttributes: new { @class = "required" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.SignatoryStatus, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+            </div>
+        </div>
+        
+        <div class="row row-individual row-prnt" id="divFirstAndMiddleName">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("First Name", htmlAttributes: new { @class = "" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.FirstName, new { @class = "form-control", @readonly = "readonly" })
+
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Middle Name")
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.MiddleName, new { @class = "form-control", @readonly = "readonly" })
+            </div>
+        </div>
+        <div class="row row-individual row-prnt">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Last Name", new { @class = "", id = "lblLastName" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.LastName, new { @class = "form-control", @readonly = "readonly" })
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Gender", htmlAttributes: new { @class = "" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.Gender, new { @class = "form-control", @readonly = "readonly" })
+            </div>
+        </div>
+        <div class="row row-individual row-prnt" id="divParentsName">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Father's Name", new { @class = "", @id = "lblFatherName" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.FatherName, new { @class = "form-control", @readonly = "readonly" })
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Mother's Name", htmlAttributes: new { @class = "" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.MotherName, new { @class = "form-control", @readonly = "readonly" })
+            </div>
+        </div>
+        <div class="row row-individual row-prnt">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Date Of Birth", htmlAttributes: new { @class = "" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @*@(Html.Kendo().DatePickerFor(model => model.DOB).HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" }).Enable(false))*@
+                @{ 
+                    if (Model.DOB != null)
+                    {
+                        @Html.TextBox("dob", Model.DOB.Value.ToString("dd-MM-yyyy"), new { @class = "form-control", @readonly = "readonly" });
+                    }                  
+                 }
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Marital Status", htmlAttributes: new { @class = "" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.MaritalStatus, new { @class = "form-control", @readonly = "readonly" })
+            </div>
+        </div>
+        <div class="row row-prnt" style="display:none">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Category", htmlAttributes: new { @class = "" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.CategoryName, new { @class = "form-control", @readonly = "readonly" })
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Occupation", htmlAttributes: new { @class = "" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.Occupation, new { @class = "form-control", @readonly = "readonly" })
+            </div>
+        </div>
+    </div>
+    <div id="CommonInfo" class="form-bx row-prnt">
+        <div class="row row-prnt">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Permanent Address", htmlAttributes: new { @class = "required lbl-permanent-address" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextAreaFor(model => model.PermanentAddress, new { @class = "form-control", @maxlength = "500", placeholder = "", @readonly = "readonly" })
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Correspondence Address", htmlAttributes: new { @class = "" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextAreaFor(model => model.CorrespondingAddress, new { @class = "form-control", @maxlength = "500", placeholder = "", @readonly = "readonly" })
+            </div>
+        </div>
+        <div class="row row-prnt">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Email", htmlAttributes: new { @class = "", @id = "lblCompanyEmail" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @(Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control", @maxlength = "150", placeholder = "", @readonly = "readonly" } }))
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Mobile Number", htmlAttributes: new { @class = "" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.MobileNumber, new { @class = "form-control", @maxlength = "10", placeholder = "", @readonly = "readonly" })
+            </div>
+        </div>
+        <div class="row row-prnt">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Phone Number")
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.PhoneNumber, new { @class = "form-control", @maxlength = "14", placeholder = "", @readonly = "readonly" })
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Aadhar Number", htmlAttributes: new { @class = "required", @id = "lblPanNumber" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.AadharNumber, new { @class = "form-control", @maxlength = "16", placeholder = "0000 1111 2222 3333", @readonly = "readonly" })
+            </div>
+        </div>
+        <div class="row row-prnt">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("PAN", htmlAttributes: new { @class = "", @id = "lblPanNumber" })
+            </div>
+
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.PanNumber, new { @class = "form-control", placeholder = "", @maxlength = "10", @readonly = "readonly" })
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Annual Income", htmlAttributes: new { @class = "" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.AnnualIncome, new { @class = "form-control textBoxValueRightAlign", @maxlength = "15", @readonly = "readonly" })
+            </div>
+        </div>
+        <div class="row row-prnt" style="display:none">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Property Detail", htmlAttributes: new { @class = "required", @id = "lblSector" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.PropertyNo, new { @class = "form-control", placeholder = "", @maxlength = "10" })
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Dispatch Date", htmlAttributes: new { @class = "" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @(Html.Kendo().DatePickerFor(model => model.DispatchDate).HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" }))
+            </div>
+        </div>
+
+        <div class="row row-rent row-prnt" id="divRentPermission">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Letter Date", htmlAttributes: new { @class = "" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @(Html.Kendo().DatePickerFor(model => model.LetterDate).HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput", @readonly = "readonly" }))
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Rent Letter No", htmlAttributes: new { @class = "" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.LetterCode, new { @class = "form-control", @maxlength = "11", placeholder = "", @readonly = "readonly" })
+            </div>
+        </div>
+        <div class="row row-prnt">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("GST Number", htmlAttributes: new { @class = "", @id = "" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.ApplicantGSTNumber, new { @class = "form-control", @readonly = "readonly" })
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-rent col-prnt">
+                @Html.Label("Rented Property", htmlAttributes: new { @class = "", @id = "lblSector" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-rent col-prnt">
+                @Html.TextBoxFor(model => model.PropertyNo, new { @class = "form-control", @readonly = "readonly" })
+            </div>
+        </div>
+
+        @*<div class="row row-rent row-prnt" >
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Rented Property", htmlAttributes: new { @class = "" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+               @Html.TextBoxFor(model => model.PropertyNo, new { @class = "form-control", placeholder = "sector/block-plot", @maxlength = "10" })
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+               
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                
+            </div>
+        </div>*@
+
+        <div class="row row-prnt" id="divExistingAllottee">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Existing Property", htmlAttributes: new { @class = "" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.ExistingProperty, new { @class = "form-control", @maxlength = "11", @readonly="readonly" })
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Allotment Date", htmlAttributes: new { @class = "" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @(Html.Kendo().DatePickerFor(model => model.AllottmentDate).HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput", @readonly="readonly" }))
+            </div>
+        </div>
+    </div>
+    <h2 class="blck-heading">Payment Information</h2>
+    <div class="form-bx row-prnt">
+        <div class="row row-prnt">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Form Fee (INR)", htmlAttributes: new { @class = "required" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.ApplicationFee, new { @readonly = "readonly", @class = "form-control textBoxValueRightAlign", @maxlength = "15", onkeypress = "return IsNumeric(event);" })
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Processing Fee", htmlAttributes: new { @class = "required" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.ProcessingCharge, new { @readonly = "readonly", @class = "form-control textBoxValueRightAlign", @maxlength = "15", onkeypress = "return IsNumeric(event);" })
+            </div>
+        </div>
+        <div class="row row-prnt">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("GST(18%) on Form Fee ", htmlAttributes: new { @class = "" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.FormFeeGST, new { @readonly = "readonly", @class = "form-control textBoxValueRightAlign", @maxlength = "15", onkeypress = "return IsNumeric(event);" })
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("GST(18%) on Processing Charge", htmlAttributes: new { @class = "" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.ProcessingChargeGST, new { @readonly = "readonly", @class = "form-control textBoxValueRightAlign", @maxlength = "15", onkeypress = "return IsNumeric(event);" })
+            </div>
+        </div>
+        <div class="row row-prnt">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Earnest Money (INR)", htmlAttributes: new { @class = "required" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.EarnestMoney, new { @readonly = "readonly", @class = "form-control textBoxValueRightAlign", @maxlength = "15", onkeypress = "return IsNumeric(event);" })
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Amount Payable (INR)", htmlAttributes: new { @class = "required" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.TotalAmount, new { @readonly = "readonly", @class = "form-control textBoxValueRightAlign", @maxlength = "15", onkeypress = "return IsNumeric(event);" })
+            </div>
+        </div>
+    </div>
+    <h2 class="blck-heading">Refund Information</h2>
+    <div class="form-bx row-prnt">
+        <div class="row row-prnt">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Bank Name", htmlAttributes: new { @class = "" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.RefundBank, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Branch Name", htmlAttributes: new { @class = "" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.BranchName, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+            </div>
+        </div>
+        <div class="row row-prnt">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Infavour of", htmlAttributes: new { @class = "" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.RefundInfaverof, new { @class = "form-control", @maxlength = "150", placeholder = "", @readonly = "readonly" })
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Account No", htmlAttributes: new { @class = "" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.RefundAccountNo, new { @class = "form-control textBoxValueRightAlign", @maxlength = "16", placeholder = "", @readonly = "readonly" })
+            </div>
+        </div>
+        <div class="row row-prnt">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("IFSC Code", htmlAttributes: new { @class = "" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.IFSCCode, new { @class = "form-control textBoxValueRightAlign", @maxlength = "16", placeholder = "", @readonly = "readonly" })
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+            </div>
+        </div>
+    </div>
+
+    <h2 class="blck-heading" style="">Proposed Project</h2>
+    <div class="form-bx row-prnt" id="ProposedCompany">
+
+        <div class="row">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Proposed Project", new { @class = "required" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.ProposedModel.ProposedProject, new { @class = "form-control", @readonly = "readonly" })
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Estimated Cost", htmlAttributes: new { @class = "required" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.ProposedModel.TotalCost, new { @class = "form-control", @readonly = "readonly" })
+            </div>
+        </div>
+
+        <div class="row row-prnt">
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.Label("Implementation Time (In year)", htmlAttributes: new { @class = "required" })
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                @Html.TextBoxFor(model => model.ProposedModel.ImplementationTime, new { @class = "form-control", @readonly = "readonly" })
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+
+            </div>
+            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+
+            </div>
+        </div>
+    </div>
+
+    <h2 class="blck-heading" style="margin-bottom:0px;">Director's Information</h2>
+    <div class="row row-prnt">
+        <div class="col-md-12 k-grid-content row-prnt DirectorGrid">
+            @(Html.Kendo().Grid<NA.PMS.Model.onlineDirectorViewModel>()
+                .Name("gridDirectors")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.DirectorId).Hidden();
+                    columns.Bound(c => c.Id).Title("SNo").Width(50).Filterable(false).Sortable(false);
+                    columns.Bound(c => c.DirectorName).Title("Name").Width(80).Filterable(false).Sortable(false);
+                    columns.Bound(c => c.DirectorType).Title("Type").Width(50).Filterable(false).Sortable(false);
+                    columns.Bound(c => c.DirectorShare).Title("Share (In %)").Width(80).Filterable(false).Sortable(false);
+                    columns.Bound(c => c.PAN).Title("PAN").Width(80).Filterable(false).Sortable(false);
+                    columns.Bound(c => c.DirectorId).Hidden(true).Title("Action");
+                    //columns.Bound(c => c.DirectorId).Title("Action").ClientTemplate("<a href='##' onclick='javascript: return RemoveRecord(this);' id='RemoveTag'>Remove</a>").Width(50).Filterable(false).Sortable(false);
+                })
+                .Sortable()
+                .Filterable()
+                .Resizable(resize => resize.Columns(true))
+                //.Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .AutoBind(true)
+                .DataSource
+                (
+                    dataSource => dataSource
+                .Ajax().Model(model => model.Id(p => p.Id))
+                .ServerOperation(true)
+                .Read(read => read.Action("GetDirectorDetails", "Application", new { area = "Online" }).Data("FilterFormId"))
+                .PageSize(5)
+                )
+            )
+        </div>
+    </div>
+
+</div>
+
+
+<script type="text/javascript">
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+
+    $(document).ready(function () {
+
+        var formType = $('#ApplicationFormType').val();
+        if (formType.trim() == "Expansion") {
+            $('#divExpansionType').show();
+        }
+        else {
+            $('#divExpansionType').css("display", "none");
+            $('#divRentPermission').css("display", "none");
+            $('.row-rent').css("display", "none");
+            $('.col-rent').css("display", "none");
+            $('#divExistingAllottee').css("display", "none");
+        }
+
+        var expansionType = $('#ExpansionType').val();
+        if (expansionType.trim() == "RentPermission") {
+            $('#divRentPermission').show();
+            $('.row-rent').show();
+            $('.col-rent').show();
+            $('#divExistingAllottee').css("display", "none");
+        }
+        if (expansionType == "ExistingAllottee") {
+            $('#divRentPermission').css("display", "none");
+            $('.row-rent').css("display", "none");
+            $('.col-rent').css("display", "none");
+            $('#divExistingAllottee').show();
+        }
+
+        var radiobtnVal = $('#ApplicantType').val();
+        if (radiobtnVal == "Company") {
+            $('.lbl-permanent-address').text("Registered Office");
+            $('.row-individual').css("display", "none");
+            $('.row-company').show();
+        }
+        else if (radiobtnVal == "Individual") {
+            $('.lbl-permanent-address').text("Permanent Address");
+            $('.row-individual').show();
+            $('.row-company').css("display", "none");
+        }
+
+        $("input[type='radio']").attr("disabled", "disabled");
+
+    });
+
+
+    function OpenUserDoc(row) {
+        $("#windowDiv").empty();
+        var tr = $(row).parent().parent();
+        var link = $(tr).children("td:eq(2)").text();
+        //alert(link);
+        $("#windowDiv").append($('<iframe src=' + link + ' style="width:900px; height:500px;"></iframe>'));
+        $("#IDWindow").data("kendoWindow").center();
+        $("#IDWindow").data("kendoWindow").open();
+    }
+
+    function OpenDocument(row) {
+        $("#windowDiv").empty();
+        var tr = $(row).parent().parent();
+        var link = $(tr).children("td:eq(3)").text();
+        $("#windowDiv").append($('<iframe src=' + link + ' style="width:900px; height:500px;"></iframe>'));
+        $("#IDWindow").data("kendoWindow").center();
+        $("#IDWindow").data("kendoWindow").open();
+    }
+
+
+   
+
+</script>

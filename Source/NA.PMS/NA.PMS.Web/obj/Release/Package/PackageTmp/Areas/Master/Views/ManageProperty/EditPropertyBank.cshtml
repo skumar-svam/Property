@@ -1,0 +1,93 @@
+﻿@model NA.PMS.Model.PropertyModel
+@using Kendo.Mvc.UI
+@using NA.PMS.Model
+
+@{
+    ViewBag.Title = "Add Property Bank";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using (Html.BeginForm("SavePropertyBankDetail", "ManageProperty", FormMethod.Post, new { enctype = "multipart/form-data", id = "propertyform" }))
+{
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Edit Property Bank</h1></div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+                </div>
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="col-md-12 content-top-spce">                
+                @Html.HiddenFor(m => m.refId)
+                @{Html.RenderPartial("_PropertyBank");}
+
+                <div class="box-button text-center">
+                    <input type="button" id="btnCancel" value="Cancel" class="btn btn-default" />
+                    <input value="Update" type="button" id="btnSubmit" class="btn btn-add" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<script type="text/javascript">
+
+    $('#btnSubmit').click(function () {
+        if ($("#plotProperty").val().trim() == '') {
+            alertify.error("Please enter Property/Plot No Number");
+            $("#plotProperty").val('');
+            return false;
+        }
+        else {
+            if (!isNaN(parseFloat($("#plotProperty").val().trim()))) {
+                if ((parseFloat($("#plotProperty").val().trim())) == 0) {
+                    alertify.error("Please enter Property/Plot No other than 0");
+                    $("#plotProperty").val('');
+                    return false;
+                }
+            }
+        }
+        var dropdownlist = $("#floorId").data("kendoDropDownList");
+        var totalArea = $("#totalArea").val();
+        var totalAreaNum = $("#totalArea").data("kendoNumericTextBox");
+        if ($("#departmentId").val() != 5) {
+            if (dropdownlist.text().includes(">")) {
+                var areaRange = dropdownlist.text().split(">");
+                if (totalArea < parseInt(areaRange[1].trim())) {
+                    alertify.error("Please select Total Area within Area Range.");
+                    totalAreaNum.value('');
+                    return false;
+                }
+            }
+            else {
+                var areaRange = dropdownlist.text().split("-");
+                if (totalArea < parseFloat(areaRange[0].trim()) || totalArea > parseFloat(areaRange[1].trim())) {
+                    alertify.error("Please select Total Area within Area Range.");
+                    totalAreaNum.value('');
+                    return false;
+                }
+            }
+        }
+        $.ajax({
+            url: '@(Url.Action("CheckDuplicateProperty", "ManageProperty"))',
+            type: 'POST',
+            dataType: 'json',
+            data: { deptId: $("#departmentId").val(), propTypeId: $("#propertyTypeId").val(), secotrId: $("#sectorId").val(), blockId: $("#blockId").val(), plotNo: $("#plotProperty").val(), refId: $("#refId").val() },
+            success: function (result) {
+                if (result == true) {
+                    alertify.error("Property already exists");
+                    //document.getElementById("btnSubmit").disabled = false;
+                    return false;
+                }
+                else {
+                    $('#propertyform').submit();
+                    alertify.success("Property updated successfully.")
+                }
+            }
+        });
+    });
+   
+    $("#btnCancel").click(function () {
+        window.location.href = '@Url.Action("AddPropertyBank", "ManageProperty")';
+    });
+</script>

@@ -1,0 +1,419 @@
+﻿@model NA.PMS.Model.Property.AddMergeSplitRequestModel
+
+@using Kendo.Mvc.UI
+@using NA.PMS.Common
+@using NA.PMS.Model.Property
+
+@{
+    ViewBag.Title = "View Amalgamation Request";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12">
+                    <h1 class="gridTitle">View Amalgamation Request</h1>
+                </div>
+                <div class="col-md-6 col-sm-6 col-xs-12 col-btn">
+                    @if (Model.Status > 0)
+                    {
+                        if (Model.Status == Constants.Approved)
+                        {
+                            <strong style="color: lightgreen;font-size: 18px">
+                                <i class=" glyphicon glyphicon-ok-sign" aria-hidden="true"></i>
+                                Approved
+                            </strong>
+                        }
+                        else if (Model.Status == Constants.RejectedProp)
+                        {
+                            <strong style="color: red;font-size: 18px">
+                                <i class="glyphicon glyphicon-remove-sign" aria-hidden="true"></i>
+                                Rejected
+                            </strong>
+                        }
+                        else if (Model.Status == Constants.Cancelled)
+                        {
+                            <strong style="color: red;font-size: 18px">
+                                <i class="glyphicon glyphicon-remove-sign" aria-hidden="true"></i>
+                                Cancelled
+                            </strong>
+                        }
+                    }
+                    <a href="#" id="btnViewComments" class="">View Comment</a>
+                </div>
+            </div>
+        </div>
+        @Html.HiddenFor(m => m.PropertyNumber)
+        @Html.HiddenFor(m => m.SchemeName)
+        @Html.HiddenFor(m => m.BlockName)
+        @Html.HiddenFor(m => m.SectorName)
+
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border: solid #e2e3e4; border-width: 0 1px 1px">
+               
+                <h2 class="blck-heading">Filter Property</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.LabelFor(m => m.DepartmentName)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(m => m.DepartmentId)
+                            .Filter("contains")
+                            .OptionLabel("-Select-")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .BindTo(Model.DepartmentCollection)
+                            .Enable(false)
+                                    //.Events(events => { events.Change("DepartmentSelection"); })
+                            .HtmlAttributes(new { style = "width: 100%", TabIndex = 1 })
+                            )
+                        </div>
+
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.LabelFor(m => m.SectorName)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(m => m.SectorId)
+                            .Filter("contains")
+                                    //.CascadeFrom("DepartmentId")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("-Select-")
+                                    //.Events(events => { events.Change("SectorSelection"); })
+                                    //.BindTo(Model.DepartmentCollection)
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetSectorsByDeptId", "MergeSplitProperties")
+                                    .Data("FilterSectorValuesByDeptId");
+                                })
+                                .ServerFiltering(true);
+                            })
+                            .HtmlAttributes(new { style = "width: 100%", TabIndex = 4 })
+                            .Enable(false)
+                            .AutoBind(true)
+                            )
+                        </div>
+                        <script>
+                            function FilterSectorValuesByDeptId() {
+                                return {
+                                    departmentId: $("#DepartmentId").val()
+                                };
+                            }
+                        </script>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.LabelFor(m => m.BlockName)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(m => m.BlockId)
+                            .Filter("contains")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("-Select-")
+                                    //.Events(events => { events.Change("BlockSelection"); })
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetBlocksByDeptAndSectorId", "MergeSplitProperties")
+                                    .Data("FilterBlockBySector");
+                                })
+                                .ServerFiltering(true);
+                            })
+                            .HtmlAttributes(new { style = "width: 100%", TabIndex = 5 })
+                                    //.CascadeFrom("SectorId")
+                            .Enable(false)
+                            .AutoBind(true)
+                            )
+                        </div>
+                        <script>
+                            function FilterBlockBySector() {
+                                return {
+                                    departmentId: $("#DepartmentId").val(),
+                                    sectorId: $("#SectorId").val()
+                                };
+                            }
+                        </script>
+
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Registration Id")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(m => m.Rid)
+                            .Filter("contains")
+                                    //.CascadeFrom("BlockId")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel("-Select-")
+                                    //.Events(events => { events.Change("RidSelection"); })
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetAllRIDsForSplitMerge", "MergeSplitProperties")
+                                    .Data("FilterRIDs");
+                                })
+                                .ServerFiltering(true);
+                            })
+                            .HtmlAttributes(new { style = "width: 100%", TabIndex = 5 })
+
+                            .Enable(false)
+                            .AutoBind(true)
+                            )
+                        </div>
+                        <script>
+                            function FilterRIDs() {
+                                return {
+                                    departmentId: $("#DepartmentId").val(),
+                                    sectorId: $("#SectorId").val(),
+                                    blockId: $("#BlockId").val()
+                                };
+                            }
+                        </script>
+                    </div>
+                </div>
+
+                <h2 class="blck-heading">Property Detail</h2>
+            <div class="form-bx">
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.LabelFor(m => m.ApplicantName)
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.TextBoxFor(m => m.ApplicantName, new {@Readonly = "readonly", @class = "form-control"})
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.LabelFor(m => m.DepartmentName)
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.TextBoxFor(m => m.DepartmentName, new {@Readonly = "readonly", @class = "form-control"})
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.LabelFor(m => m.PropertyType)
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.TextBoxFor(m => m.PropertyType, new {@Readonly = "readonly", @class = "form-control"})
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.LabelFor(m => m.TotalArea)
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.TextBoxFor(m => m.TotalArea, new {@Readonly = "readonly", @class = "form-control"})
+                    </div>
+                </div>
+                @Html.HiddenFor(m => m.CoveredArea)
+                @Html.HiddenFor(m => m.ActualArea)
+                @Html.HiddenFor(m => m.TotalPropertyCost)     
+                
+                <div class="row" style="margin-left:30px;">
+                    <div class="k-grid-content">
+                        @(Html.Kendo().Grid<MergeSplitPropertyGrid>
+                              ()
+                              .Name("gridMergeProperties") 
+                              .AutoBind(true)
+                              .Columns(columns =>
+                              {
+                                  columns.Bound(c => c.CoveredArea).Hidden(true);
+                                  columns.Bound(c => c.ActualArea).Hidden(true);
+                                  columns.Bound(c => c.TotalArea).Hidden(true);
+                                  columns.Bound(c => c.TotalPropertyCost).Hidden(true);
+                                  columns.Bound(c => c.Rid).Title("Registration Id");
+                                  columns.Bound(c => c.DepartmentName).Title("Department");
+                                  columns.Bound(c => c.PropertyNumber).Title("Property Number");
+                              })
+                              .DataSource(dataSource => dataSource
+                                  .Ajax()
+                                  .Read(read => read.Action("GetPropertiesToMergeByRequestId", "MergeSplitProperties").Data("getRequestId"))
+                                  .PageSize(20)
+                              )
+                        )
+
+                    </div>
+                    <script>
+                        function getRequestId() {
+                            return {
+                                requestId: $("#RequestId").val()
+                            };
+                        }
+                    </script>
+                </div>           
+            </div>
+                
+                
+                <h2 class="blck-heading">New Property Detail</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.LabelFor(m => m.PropertyNumber)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.PropertyNumber, new { @Readonly = "readonly", @id = "txtPropertyNumber", @class = "form-control" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.LabelFor(m => m.SchemeName)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.SchemeName, new { @Readonly = "readonly", @class = "form-control", @id = "txtSchemeName" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.LabelFor(m => m.DepartmentName)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.DepartmentName, new { @Readonly = "readonly", @class = "form-control", @id = "txtDepartmentName" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.LabelFor(m => m.PropertyType)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.PropertyType, new { @Readonly = "readonly", @class = "form-control", @id = "txtPropertyType" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.LabelFor(m => m.SectorName)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.SectorName, new { @Readonly = "readonly", @class = "form-control", @id = "txtSectorName" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.LabelFor(m => m.BlockName)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.BlockName, new { @Readonly = "readonly", @class = "form-control", @id = "txtBlockName" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.LabelFor(m => m.CoveredArea)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.CoveredArea, new { @Readonly = "readonly", @class = "form-control", @id = "txtCoveredArea" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.LabelFor(m => m.ActualArea)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.ActualArea, new { @Readonly = "readonly", @class = "form-control", @id = "txtActualArea" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.LabelFor(m => m.TotalArea)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.TotalArea, new { @Readonly = "readonly", @class = "form-control", @id = "txtTotalArea" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.LabelFor(m => m.TotalPropertyCost)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.TotalPropertyCost, new { @Readonly = "readonly", @class = "form-control", @id = "txtTotalPropertyCost" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.LabelFor(m => m.Charges)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.Charges, new { @Readonly = "readonly", @class = "form-control", @id = "txtMergeCharges" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box-button text-center">
+                <input type="button" id="btnBack" value="Back" class="btn btn-default" />
+
+                @*<input type="button" id="btnApprove" class="btn btn-add" value="Approve" />*@
+            </div>
+            @Html.HiddenFor(m => m.PropertyId)
+            @Html.HiddenFor(m => m.RequestId)
+            @Html.HiddenFor(m => m.Status)
+        </div>
+    </div>
+    @Html.HiddenFor(m => m.ListMergeSplitPropertyGrid)
+    <input type="hidden" id="hdnAllRids" />
+</div>
+
+@(Html.Kendo().Window().Name("popUpViewComments").Title("Comments").Modal(true).Visible(false).Content(@<text>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-3">@Html.LabelFor(m => m.AssignedTo) :</div>
+                <div class="col-sm-9">
+                    @Html.DisplayFor(m => m.AssignedTo)
+                </div>                 
+            </div>
+            <div class="row">
+                <div class="col-sm-3">@Html.LabelFor(m => m.RequestDate) :</div>
+                <div class="col-sm-9">
+                    @Html.DisplayFor(m => m.RequestDate)
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-3">@Html.LabelFor(m => m.Comments) :</div>
+                <div class="col-sm-9">
+                    @Html.TextAreaFor(m => m.Comments, new { @class="form-control", @rows="6",style="margin:0;padding:0;"})
+                    @*@Html.TextAreaFor(m => m.Comments, new { @cols = "50", @rows = "6" })*@
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12 form-group" style="text-align:right;">
+                    @*<input type="submit" class="btn btn-default" id="btnPopupComments" value="Submit" />*@
+                    <input type="button" class="btn btn-default closePopup" value="Close" />
+                </div>
+            </div>
+        </div>
+</text>)
+    .Draggable()
+    .Resizable()
+    //.Width(400)
+    .Actions(actions => actions.Close())
+)
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $(".closePopup").click(function () {
+            $("#popUpViewComments").data("kendoWindow").close();
+        });
+
+        //alert($("#Status").val());
+        if ($("#Status").val() > 0) {
+            $("#btnViewComments").show();
+        } else {
+            $("#btnViewComments").hide();
+        }
+    });
+
+
+    $("#btnViewComments").click(function () {
+        $("#popUpViewComments").data("kendoWindow").center();
+        $("#popUpViewComments").data("kendoWindow").open();
+    });
+
+    $("#btnCancel").click(function () {
+        window.location.href = '@Url.Action("MergeProperties", "MergeSplitProperties")';
+    });
+
+    $("#btnBack").click(function () {
+        window.location.href = '@Url.Action("MergeProperties", "MergeSplitProperties")';
+    });
+    
+
+
+</script>

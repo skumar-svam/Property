@@ -1,0 +1,686 @@
+﻿@model NA.PMS.Model.OnlineFormViewModel
+@using Kendo.Mvc.UI
+@using NA.PMS.Common
+@using NA.PMS.Model
+
+@{
+    ViewBag.Title = "Industrial Project Detail";
+    Layout = "~/Views/Shared/_LayoutNIC.cshtml";
+}
+
+<style>
+    /*#btn-skip {
+        display: none;
+    }*/
+</style>
+
+@using (Html.BeginForm("SaveProjectAndRefund", "Application", FormMethod.Post, new { enctype = "multipart/form-data", id = "ProposedProjectForm" }))
+{
+    <div class="project-refund" id="project-refund-form">
+        <div class="col-md-12">
+            <div class="row" style="margin-top:6px;">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Proposed Project And Refund</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory"><h1 class="gridTitle">Form No :- @Model.ApplicationFormId</h1></div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce" id="first-form">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <h2 class="blck-heading" style="margin-bottom:6px;">Proposed Project And Refund Information</h2>
+                <div class="form-bx">
+                    <div class="hidden-fields">
+                        @Html.HiddenFor(model => model.Id)
+                        @Html.HiddenFor(model => model.ApplicationFormId)
+                        @Html.HiddenFor(model => model.SchemeId)
+                        @Html.HiddenFor(model => model.DepartmentId)
+                        @Html.HiddenFor(model => model.AreaRangeId)
+                        @Html.HiddenFor(model => model.SchemeType)
+                        @Html.HiddenFor(model => model.ApplicationFormType)
+                        @Html.HiddenFor(model => model.EncryptedFormId)
+                        @Html.HiddenFor(model => model.ApplicantType)
+                        @Html.HiddenFor(model => model.FormType, htmlAttributes: new { @id = "hdnFormType" })
+                                        
+                        @*@Html.HiddenFor(model => model.ApplicationFee)*@
+                        @*@Html.HiddenFor(model => model.EarnestMoney)*@
+                        @*@Html.HiddenFor(model => model.ProcessingCharge)*@
+                        @*@Html.HiddenFor(model => model.FormFeeGST)*@
+                        @Html.HiddenFor(model => model.FormFeeWithGST)
+                        @*@Html.HiddenFor(model => model.ProcessingChargeGST)*@
+                        @*@Html.HiddenFor(model => model.TotalAmount)*@
+                        @Html.HiddenFor(model => model.AppType)
+
+                        @Html.HiddenFor(model => model.NICApplicationId)
+                        @Html.HiddenFor(model => model.NICControlId)
+                        @Html.HiddenFor(model => model.NICServiceId)
+                        @Html.HiddenFor(model => model.NICProcessIndustryId)
+                        @Html.HiddenFor(model => model.NICUnitId)
+                        @Html.HiddenFor(model => model.IsFromNIC)
+
+                        @Html.HiddenFor(model => model.IsProposedProjectSaved)
+
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Annual_Turnover)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.ApplicationID)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Company_Name)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Control_ID)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.ControlID)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Expected_date_construction)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Expected_date_production)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Fee_Amount)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Fee_Status)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Industry_Address)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Industry_District)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Industry_District_Id)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Industry_Type_ID)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Industry_Type_Name)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Installed_Capacity)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Occupier_Name)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Occupier_PAN)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Occupier_Pin_Code)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Occupier_Mobile_No)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Occupier_Email_ID)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Occupier_Address)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Occupier_DOB)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Occupier_District_ID)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.OnlineApplicationId)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Unit_Id)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Nature_of_Activity)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Employees)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Project_Cost)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Nature_of_Operation)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Organization_Type_ID)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Organization_Type)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Unit_Category)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Items_Manufactured)
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-4 col-sm-6 col-xs-12 form-group">
+                                    @Html.Label("Scheme Name", htmlAttributes: new { @class = "required" })
+                                </div>
+                                <div class="col-md-8 col-sm-6 col-xs-12 form-group">
+                                    @Html.TextBoxFor(model => model.SchemeName, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 col-sm-6 col-xs-12 form-group">@Html.Label("Department", htmlAttributes: new { @class = "required" })</div>
+                                <div class="col-md-8 col-sm-6 col-xs-12 form-group">
+                                    @Html.TextBoxFor(model => model.Department, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 col-sm-6 col-xs-12 form-group">@Html.Label("Applicant", htmlAttributes: new { @class = "required" })</div>
+                                <div class="col-md-8 col-sm-6 col-xs-12 form-group">
+                                    @Html.TextBoxFor(model => model.Applicant, htmlAttributes: new { @class = "form-control", placeholder = "", @readonly = "readonly" })
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt-lt4">
+                                    @Html.Label("Area Range", htmlAttributes: new { @class = "required" })
+                                </div>
+                                <div class="col-md-8 col-sm-3 col-xs-12 form-group col-prnt-lt4">
+                                    @Html.TextBoxFor(model => model.AreaRange, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6" style="">
+                            <div class="row">
+                                <div class="col-md-4 col-sm-6 col-xs-12">
+
+                                </div>
+                                <div class="col-md-8 col-sm-6 col-xs-12 form-group">
+                                    <div class="row">
+                                        <div class="col-md-12 text-right" style="margin-bottom:5px;">
+                                            <img id="userphoto" src="@Model.UserImage" alt="your image" height="150px" width="140px" name="userImage2" />
+                                        </div>
+                                        <div class="col-md-12 text-right">
+                                            <img id="signature" src="@Model.SignImage" alt="your sign" height="40px" width="140px" name="usersign" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <h2 class="blck-heading">Payment Information</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Form Fee (INR)", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.ApplicationFee, new { @readonly = "readonly", @class = "form-control textBoxValueRightAlign", @maxlength = "15", onkeypress = "return IsNumeric(event);" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Processing Fee", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.ProcessingCharge, new { @readonly = "readonly", @class = "form-control textBoxValueRightAlign", @maxlength = "15", onkeypress = "return IsNumeric(event);" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("GST(18%) on Form Fee ", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.FormFeeGST, new { @readonly = "readonly", @class = "form-control textBoxValueRightAlign", @maxlength = "15", onkeypress = "return IsNumeric(event);" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("GST(18%) on Processing Charge", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.ProcessingChargeGST, new { @readonly = "readonly", @class = "form-control textBoxValueRightAlign", @maxlength = "15", onkeypress = "return IsNumeric(event);" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Earnest Money (INR)", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.EarnestMoney, new { @readonly = "readonly", @class = "form-control textBoxValueRightAlign", @maxlength = "15", onkeypress = "return IsNumeric(event);" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Amount Payable (INR)", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.TotalAmount, new { @readonly = "readonly", @class = "form-control textBoxValueRightAlign", @maxlength = "15", onkeypress = "return IsNumeric(event);" })
+                        </div>
+                    </div>
+                </div>
+                <h2 class="blck-heading">Refund Information</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Bank Name", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(m => m.RefundBankId)
+                                .Filter("contains")
+                                .DataTextField("Text")
+                                .DataValueField("Id")
+                                .OptionLabel("---Select---")
+                                .DataSource(source => source.Read(read => read.Action("GetBankListforOnline", "OnlineProperty", new { area="NIC"})))
+                                .HtmlAttributes(new { @class = "schemeForms", style = "width: 100%" })
+                            )
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Branch Name", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.BranchName, new { @class = "form-control", @maxlength = "150", placeholder = "" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Infavour of", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.RefundInfaverof, new { @class = "form-control", @maxlength = "150", placeholder = "name" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Account No", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.RefundAccountNo, new { @class = "form-control textBoxValueRightAlign", @maxlength = "16", placeholder = "110000001100011" })
+                            @Html.ValidationMessageFor(model => model.RefundAccountNo, "", new { @class = "text-danger" })
+                            <small class="text-info">Refund Account No Should Be Minimun 11 Digits</small>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("IFSC Code", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.IFSCCode, new { @class = "form-control", @maxlength = "11", placeholder = "AAAA1111111" })
+                            @Html.ValidationMessageFor(model => model.IFSCCode, "", new { @class = "text-danger" })
+                            <small class="text-info">Format Like AAAA1111111</small>
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <h2 class="blck-heading" style="">Proposed Project Detail</h2>
+                <div class="form-bx" id="ProposedCompany">
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Proposed Project Name", new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.ProposedModel.ProposedProject, new { @class = "form-control", @maxlength = "100" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Estimated Cost  (In lakhs)", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.ProposedModel.TotalCost, new { @class = "form-control", @maxlength = "8", onkeypress = "return IsNumeric(event);" })
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Implementation Time (In year)", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.ProposedModel.ImplementationTime, new { @class = "form-control", @maxlength = "2", onkeypress = "return IsNumeric(event);" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="blck-heading" style="">Director's Information</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Director's Name", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.DirectorModel.DirectorName, new { @class = "form-control", @maxlength = "99" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Director's Share(%)", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.DirectorModel.DirectorShare, new { @class = "form-control", @maxlength = "7" })
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Director Type", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(model => model.DirectorModel.DirectorTypeId)
+                                .DataTextField("Text")
+                                .DataValueField("Id")
+                                .OptionLabel("--Select--")
+                                .DataSource(source => source.Read(read => read.Action("GetDirectorTypeList", "OnlineProperty", new { area = "NIC" })))
+                                .HtmlAttributes(new { @class = "", style = "width:100%;" })
+                            )
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("PAN")
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.DirectorModel.PAN, new { @class = "form-control", @maxlength = "10", @onchange = "Directors_PAN_Change();" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @if (Model.SchemeEndDate != null && Model.SchemeEndDate.Value.AddHours(30) >= DateTime.Now)
+                            {
+                                <input type="button" class="k-button" value="Add" id="btnAdd" style="width:100px;" />
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row row-director-grid" id="divDirectors">
+                    <div class="col-md-12 k-grid-content">
+                        @(Html.Kendo().Grid<NA.PMS.Model.onlineDirectorViewModel>()
+                            .Name("DirectorsGrid")
+                            .Columns(columns =>
+                            {
+                                columns.Bound(c => c.DirectorId).Hidden();
+                                columns.Bound(c => c.Id).Title("SNo").Width(50);
+                                columns.Bound(c => c.DirectorName).Title("Name").Width(80);
+                                columns.Bound(c => c.DirectorType).Title("Type").Width(50);
+                                columns.Bound(c => c.DirectorShare).Title("Share (In %)").Width(80);
+                                columns.Bound(c => c.PAN).Title("PAN").Width(80);
+                                columns.Bound(c => c.DirectorId).Hidden(true).Title("Action");
+                                columns.Bound(c => c.DirectorId).Title("Action").ClientTemplate("<a href='##' onclick='javascript: return RemoveRecord(this);' id='RemoveTag'>Remove</a>").Width(50).Filterable(false).Sortable(false);
+                            })
+                            .Sortable().Filterable().Resizable(resize => resize.Columns(true)).AutoBind(true)
+                            .Events(e => e.DataBound("GridDatabindChangeEvent"))
+                            .DataSource
+                            (
+                                dataSource => dataSource
+                                .Ajax().Model(model => model.Id(p => p.Id))
+                                .ServerOperation(true)
+                                .Read(read => read.Action("GetDirectorDetailsAsDataSource", "OnlineProperty", new { area = "NIC" }).Data("FilterFormId"))
+                            )
+                        )
+                    </div>
+                </div>
+
+                <div class="box-button text-center" id="div-box-button">
+                    <input type="button" class="btn btn-default" id="btn-cancel" value="Cancel" onclick="window.history.back()" />
+                    @if (Model.IsProposedProjectSaved == true)
+                    {
+                        <input type="button" class="btn btn-default" id="btn-skip" value="Skip" />
+                    }
+                    else
+                    {
+                        if (Model.SchemeEndDate != null && Model.SchemeEndDate.Value.AddHours(30) >= DateTime.Now)
+                        {
+                            <input type="button" class="btn btn-default" id="btn-submit" value="Submit" />
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#btnAdd').click(function () {
+            SaveDirector();
+        });
+
+        $('#btn-submit').click(function () {
+            SaveProjectAndRefund();
+        });
+
+        $('#btn-skip').click(function () {
+            window.location.href = '/NIC/OnlineProperty/IndustrialDocument?id=' + $('#EncryptedFormId').val();
+        });
+
+        var data = $('#DirectorsGrid').data("kendoGrid").dataSource;
+        if (data._total == undefined || data._total == 0) {
+            $('#divDirectors').css("display", "none");
+        }
+        else {
+            $('#divDirectors').show();
+        }
+    });
+
+    function GridDatabindChangeEvent() {
+        //alert("directors grid");
+        var data = $('#DirectorsGrid').data("kendoGrid").dataSource;
+        if (data._total == undefined || data._total == 0) {
+            $('#divDirectors').css("display", "none");
+        }
+        else {
+            $('#divDirectors').show();
+        }
+    }
+
+    function SaveProjectAndRefund() {
+        var flag = ValidateProposedCompany();
+        if (flag) {
+            var formData = new FormData($('form').get(0));
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: false, // Not to set any content header
+                processData: false, // Not to process data
+                data: formData,
+                url: '/NIC/OnlineProperty/SaveProjectAndRefundDetailForOpenEndScheme',
+                success: function (result) {
+                    if (result != null) {
+                        if (result.IsDirectorDetailsSaved == true) {
+                            alertify.success("Director Details saved successfully.");
+                            //$('#btn-skip').show();
+                            window.location.reload(true);
+                            //window.location.href = '/NIC/OnlineProperty/IndustrialDocument?id=' + result.EncryptedFormId;
+                        }
+                        else {
+                            alertify.error("Refund Info and Director Details not saved");
+                        }
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    alertify.error("Network error, try again later");
+                }
+            });
+        }
+    }
+
+
+    function FilterFormId() {
+        return { formId: $('#ApplicationFormId').val() };
+    }
+
+
+    function Directors_PAN_Change() {
+        if ($("#DirectorModel_PAN").val().trim() == '') {
+            $("#DirectorModel_PAN").val('');
+        }
+        var bool = Check_PAN_Format();
+        if (bool == false) {
+            alertify.error("Pan Number format is wrong.");
+            $("#DirectorModel_PAN").val('');
+            return false;
+        }
+        else {
+
+        }
+    }
+
+    function Check_PAN_Format() {
+        var value = $("#DirectorModel_PAN").val().trim();
+        var regex1 = /^[A-Z]{5}\d{4}[A-Z]{1}$/;
+        if (!regex1.test(value) || value.length != 10) {
+            return false;
+        }
+        return true;
+    }
+
+    function ValidateProposedCompany() {
+        var flag = true;
+        var projname = $('#ProposedModel_ProposedProject').val();
+        var cost = $('#ProposedModel_TotalCost').val();
+        var time = $('#ProposedModel_ImplementationTime').val();
+        //var dflag = $("#chkboxDeclaration").prop("checked");
+        var director = $('#DirectorsGrid').data("kendoGrid").dataSource.total();
+        if (projname == "") {
+            alertify.error("Please enter proposed project name.");
+            flag = false;
+        }
+        if (cost == "") {
+            alertify.error("Please enter Estimated cost.");
+            flag = false;
+        }
+        if (time == "") {
+            alertify.error("Please enter Estimated Time to implement.");
+            flag = false;
+        }
+        if (director == 0) {
+            alertify.error("Please add atleast one director.");
+            flag = false;
+        }
+        if ($('#RefundBankId').val().trim() == '') {
+            alertify.error("Please select bank for refund.");
+            flag = false;
+        }
+        if ($('#BranchName').val().trim() == '') {
+            alertify.error("Please enter branch name.");
+            flag = false;
+        }
+        if ($('#RefundInfaverof').val().trim() == '') {
+            alertify.error("Please enter name for refund.");
+            flag = false;
+        }
+        if ($('#RefundAccountNo').val().trim() == '') {
+            alertify.error("Please enter refund account No.");
+            flag = false;
+        }
+        if ($('#IFSCCode').val().trim() == '') {
+            alertify.error("Please enter IFSC code.");
+            flag = false;
+        }
+        return flag;
+    }
+
+
+    function ValidateDirector() {
+        var flag = true;
+        var director = $('#DirectorsGrid').data("kendoGrid").dataSource.total();
+
+        if (director == 0) {
+            alertify.error("Please add atleast one director.");
+            flag = false;
+        }
+        return flag;
+    }
+
+    function SaveDirector() {
+        var formId = $('#ApplicationFormId').val();
+        var name = $('#DirectorModel_DirectorName').val();
+        var share = $('#DirectorModel_DirectorShare').val();
+        var type = $('#DirectorModel_DirectorTypeId').val();
+        var typetext = $('#DirectorModel_DirectorTypeId').data('kendoDropDownList').text();
+        var pan = $('#DirectorModel_PAN').val();
+        var grid = $("#DirectorsGrid").data("kendoGrid");
+        var data = grid.dataSource._data;
+
+        if (name.trim() == "") {
+            alertify.error("Please enter Director name.");
+            return false;
+        }
+        if (share.trim() == "") {
+            alertify.error("Please enter Director's share.");
+            return false;
+        }
+        if (isNaN(share.trim())) {
+            $('#DirectorModel_DirectorShare').val('');
+            alertify.error("Please enter a number for share.");
+            return false;
+        }
+        if (share.trim() != "" && share.trim() > 100) {
+            alertify.error("Director's share can't be more than 100.");
+            return false;
+        }
+
+        if (type.trim() == "") {
+            alertify.error("Please select Director's type.");
+            return false;
+        }
+        if (pan.trim() == "") {
+            alertify.error("Please enter Director's PAN.");
+            return false;
+        }
+        share = parseFloat($('#DirectorModel_DirectorShare').val()).toFixed(2);
+        var sum = 0.0000;
+        var flag = false;
+        var tpan;
+        $.each(data, function (p, row) {
+            sum = sum + (row.DirectorShare);
+            if (pan == row.PAN) {
+                flag = true;
+            }
+        });
+        sum = parseFloat(sum) + parseFloat(share);
+        if (parseFloat(sum).toFixed(4) > 100) {
+            alertify.error("Sum of Shares can't exceed 100%");
+            return false;
+        }
+        //if (parseFloat(sum).toFixed(4) < 100) {
+        //    alertify.error("Sum of Shares should be 100%");
+        //    return false;
+        //}
+        if (flag == true) {
+            alertify.error("PAN can't be same for other person");
+            return false;
+        }
+        else {
+            var model = {
+                ApplicationFormId: formId,
+                DirectorName: name,
+                DirectorShare: share,
+                DirectorType: typetext,
+                DirectorTypeId: type,
+                PAN: pan,
+                ActionType: "Save",
+                status: true
+            };
+
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ model: model }),
+                url: "/NIC/OnlineProperty/SaveDirectorDetailsForOpenScheme",
+                success: function (data) {
+                    if (data != null && data.ActionTypeId == '@ReturnType.Saved') {
+                        $("#DirectorsGrid").data("kendoGrid").dataSource.read();
+                        $('.row-director-grid').show();
+                        alertify.success("Record added successfully.");
+                        ClearDirectorFields();
+                    }
+                    else {
+                        alertify.error("Please try again later.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    //alert("error");
+                }
+            });
+        }
+    }
+
+    function RemoveRecord(row) {
+        var tr = $(row).parent().parent();
+        var directorId = $(tr).children("td:eq(0)").text();
+        var formId = $('#ApplicationFormId').val();
+        //var formId = 143143;
+        var bflag = false;
+
+        if (confirm("Are you sure? You want to remove this record.")) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ DirectorId: directorId, ActionType:"Delete" }),
+                url: "/NIC/OnlineProperty/SaveDirectorDetailsForOpenScheme",
+                success: function (result) {
+                    if (result != null && result.ActionTypeId == '@ReturnType.Removed') {
+                        event.preventDefault();
+                        $("#DirectorsGrid").data("kendoGrid").dataSource.read();
+                        alertify.success("Record deleted successfully.");
+                        if (($("#DirectorsGrid").data("kendoGrid").dataSource._total) == 0) {
+                            $('.row-director-grid').css("display", "none");
+                        }
+                        else {
+                            $('.row-director-grid').show();
+                        }
+                    }
+                    else {
+                        alertify.error("Please try again later.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                }
+            });
+            return false;
+        }
+        else {
+            event.preventDefault();
+            //event.defaultPrevented();
+        }
+    }
+
+    function ClearDirectorFields() {
+        $('#DirectorModel_DirectorName').val('');
+        $('#DirectorModel_DirectorShare').val('');
+        $('#DirectorModel_PAN').val('');
+        $('#DirectorModel_DirectorTypeId').data("kendoDropDownList").value('');
+    }
+
+</script>
+

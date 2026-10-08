@@ -1,0 +1,361 @@
+﻿@model NA.PMS.Model.PropertyViewModel
+@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@using NA.PMS.Common
+
+@{
+    ViewBag.Title = "Account Detail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    #AddPropertyAllotmentId {
+        float: right;
+    }
+</style>
+
+<div class="property-content">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Property Account Summery</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                @*<a href="#" id="btnAddScheme" class="" onclick="javascript:CreateScheme(event);">Create Scheme</a>*@
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12" style="border:solid #e2e3e4; border-width:0 1px 1px">
+        <div class="row" style="padding:10px 30px 0px 0;">
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                @Html.Label("Scheme Name")
+                @(Html.Kendo().DropDownListFor(m => m.SchemeId)
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel(" -- Select --")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetMasterSearchParameterAsDataSource", "PropertyAllotment", new { area = "Property" }).Data("FilterSchemeParameter")))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(100);
+                    })
+                    .Events(events => { events.Change("ChangeInScheme"); })
+                    .HtmlAttributes(new { @class = "input-disabled", style = "width:90%; float:right;" })
+                )
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                @Html.Label("Department")
+                @(Html.Kendo().DropDownListFor(m => m.DepartmentId)
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel(" -- Select --")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetMasterSearchParameterAsDataSource", "PropertyAllotment", new { area = "Property" }).Data("FilterDepartmentParameter")))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(100);
+                    })
+                    .Events(events => { events.Change("ChangeInDepartment"); })
+                    .HtmlAttributes(new { @class = "input-disabled", style = "width:90%; float:right;" })
+                )
+            </div>
+
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                @Html.Label("Sector")
+                @(Html.Kendo().DropDownListFor(model => model.SectorId)
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel(" -- Select --")
+                    .Enable(true)
+                    .AutoBind(true)
+                    .Filter("contains")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetMasterSearchParameterAsDataSource", "PropertyAllotment", new { area = "Property" }).Data("FilterSectorParameter")))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(100);
+                    })
+                    .HtmlAttributes(new { style = "width:90%; float:right;", @class = "input-disabled" })
+                    .Events(e => e.Change("ChangeInSector"))
+                )
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                @Html.Label("Block")
+                @(Html.Kendo().DropDownListFor(m => m.BlockId)
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel(" -- Select --")
+                    .CascadeFrom("SectorId")
+                    .CascadeFromField("SectorId")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetMasterSearchParameterAsDataSource", "PropertyAllotment", new { area = "Property" }).Data("FilterBlockParameter")))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(100);
+                    })
+                   .Events(events => { events.Change("ReadPropertyGridEvent"); })
+                   .HtmlAttributes(new { @class = "input-disabled", style = "width:90%; float:right;" })
+                )
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12 alot-prop-grid k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.PropertyViewModel>()
+            .Name("GridAllottedProperty")
+            .ToolBar(tools => tools.Excel())
+            .Excel(excel => excel.AllPages(true).Filterable(true).FileName("AccountSummery.xlsx"))
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Hidden(true);
+                columns.Bound(c => c.PropertyId).Hidden(true);
+                columns.Bound(c => c.RegistrationId).Title("Registration Id").Width(150).ClientTemplate("#if(IsActive==true){#<a target='_blank' href='/Property/PropertyAllotment/PropertyDetails/#=RegistrationId#'>#=RegistrationId#</a>#}else{#<label>#=RegistrationId#</label>#}#");
+                columns.Bound(c => c.Department).Title("Department").Width(140);
+                columns.Bound(c => c.SectorName).Title("Sector").Width(100);
+                columns.Bound(c => c.BlockName).Title("Block").Width(100);
+                columns.Bound(c => c.PlotNo).Title("Plot").Width(90);
+                columns.Bound(c => c.Applicant).Title("Applicant (Allottee)");
+                columns.Bound(c => c.AllotmentDate).Title("Allotment").Width(130).Format("{0:dd-MMM-yyyy}");
+                columns.Bound(c => c.RegistryDate).Title("Lease Deed").Width(130).Format("{0:dd-MMM-yyyy}");
+                //columns.Bound(c => c.IsActive).Title("Active").Width(100).ClientTemplate("#if(IsActive==true){#<label>Active</label>#}else{#<label>InActive</label>#}#");               
+                columns.Bound(c => c.Status).Title("Status").Width(100);
+                columns.Bound(c => c.ActualArea).Title("Actual Area").Hidden(true);
+                columns.Bound(c => c.CoveredArea).Title("Covered Area").Hidden(true);
+                columns.Bound(c => c.TotalArea).Title("Total Area").Hidden(true);
+                columns.Bound(c => c.LandRate).Title("Land Rate").Hidden(true);
+                columns.Bound(c => c.CivilCost).Title("Civil Cost").Hidden(true);
+                columns.Bound(c => c.PropertyCost).Title("Property Cost").Hidden(true);
+                columns.Bound(c => c.TotalPropertyCost).Title("Total Cost").Hidden(true);
+                columns.Bound(c => c.AllotmentMoney).Title("Allotment Money").Hidden(true);
+                columns.Bound(c => c.FirstApplicant).Title("First Allottee").Hidden(true);
+            })
+            .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+            .ClientDetailTemplateId("template")
+            .AutoBind(true)
+            .DataSource
+            (
+                dataSource => dataSource
+                .Ajax().ServerOperation(true)
+                .Model(model => model.Id(p => p.Id))                
+                .Read(read => read.Action("GetPropertyAccountSummery", "Finance", new { area = "Revenue" }).Data("FilterSearchParameter"))
+                .Sort(s => s.Add(x => x.AllotmentDate).Descending()).PageSize(10)
+            ))
+    </div>
+</div>
+
+<script id="template" type="text/kendo-tmpl">
+    @(Html.Kendo().Grid<NA.PMS.Model.PropertyViewModel>()
+            .Name("grid_#=Id#") // template expression, to be evaluated in the master context
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Hidden(true);
+                columns.Bound(c => c.RegistrationId).Hidden(true);
+                columns.Bound(c => c.PropertyId).Title("Property Id").Width(110).Hidden(true);
+                columns.Bound(c => c.ActualArea).Title("Actual Area").Width(100);
+                columns.Bound(c => c.CoveredArea).Title("Covered Area").Width(100);
+                columns.Bound(c => c.TotalArea).Title("Total Area").Width(100);
+                columns.Bound(c => c.LandRate).Title("Land Rate").Width(100);
+                columns.Bound(c => c.CivilCost).Title("Civil Cost").Width(110);
+                columns.Bound(c => c.PropertyCost).Title("Property Cost").Width(110);
+                columns.Bound(c => c.TotalPropertyCost).Title("Total Cost").Width(110);
+                columns.Bound(c => c.AllotmentMoney).Title("Allotment Money").Width(110);
+            })
+            .ClientDetailTemplateId("template2").AutoBind(true)
+            .DataSource(dataSource => dataSource
+                .Ajax()
+                .PageSize(10)
+                .Read(read => read.Action("GetPropertyAccountSummery", "Finance", new { area = "Revenue", RegistrationId = "#=RegistrationId#" }))
+            )
+            .ToClientTemplate()
+    )
+</script>
+<script>
+    function dataBound() {
+        this.expandRow(this.tbody.find("tr.k-master-row").first());
+    }
+</script>
+
+
+<script id="template2" type="text/kendo-tmpl">
+    @(Html.Kendo().Grid<NA.PMS.Model.PropertyViewModel>()
+            .Name("grid2_#=Id#") // template expression, to be evaluated in the master context
+            .Columns(columns =>
+            {
+                columns.Group(group => group
+                    .Title("First Allottee")
+                    .Columns(info =>
+                    {
+                        info.Bound(c => c.FirstApplicant).Title("Name");
+                        info.Bound(c => c.FirstApplicantAdd).Title("Address");
+                    })
+                    .HeaderHtmlAttributes(new { @class = "group-column", style = "text-align:center;background:CornflowerBlue" })
+                );
+                columns.Group(group => group
+                    .Title("Current Allottee")
+                    .Columns(info =>
+                    {
+                        info.Bound(c => c.Applicant).Title("Name");
+                        info.Bound(c => c.ApplicantAddress).Title("Address");
+                    })
+                    .HeaderHtmlAttributes(new { style = "text-align:center;background:CornflowerBlue" })
+                );
+            })
+            .DataSource(dataSource => dataSource
+                .Ajax()
+                .PageSize(10)
+                .Read(read => read.Action("GetPropertyAccountSummery", "Finance", new { area = "Revenue", RegistrationId = "#=RegistrationId#" }))
+            )
+            .ToClientTemplate()
+    )
+</script>
+
+
+<script>
+    $(document).ready(function () {
+        var exportFlag = false;
+        $("#GridServiceRequest").data("kendoGrid").bind("excelExport", function (e) {
+            if (!exportFlag) {
+                //e.sender.hideColumn(10);
+                e.sender.showColumn(11);
+                e.sender.showColumn(12);
+                e.sender.showColumn(13);
+                e.sender.showColumn(14);
+                e.sender.showColumn(15);
+                e.sender.showColumn(16);
+                e.sender.showColumn(17);
+                e.sender.showColumn(18);
+                e.sender.showColumn(19);
+                e.preventDefault();
+                exportFlag = true;
+                setTimeout(function () {
+                    e.sender.saveAsExcel();
+                });
+
+            } else {
+                //alert(1);
+                //e.sender.showColumn(10);
+                e.sender.hideColumn(11);
+                e.sender.hideColumn(12);
+                e.sender.hideColumn(13);
+                e.sender.hideColumn(14);
+                e.sender.hideColumn(15);
+                e.sender.hideColumn(16);
+                e.sender.hideColumn(17);
+                e.sender.hideColumn(18);
+                e.sender.hideColumn(19);
+                exportFlag = false;
+            }
+        });
+    });
+
+    function ChangeInDropdownFilter() {
+        $('#SchemeId').data('kendoDropDownList').dataSource.read();
+        $('#DepartmentId').data('kendoDropDownList').dataSource.read();
+        $('#SectorId').data('kendoDropDownList').dataSource.read();
+        $('#BlockId').data('kendoDropDownList').dataSource.read();
+        $('#GridAllottedProperty').data('kendoGrid').dataSource.read();
+    }
+
+    function ChangeInScheme() {
+        //$('#ActionType').val("Scheme");
+        ChangeInDropdownFilter();
+    }
+    function FilterSchemeParameter() {
+        return {
+            ActionType: "Scheme",
+            SchemeId: $('#SchemeId').val(),
+            DepartmentId: $('#DepartmentId').val(),
+            SectorId: $('#SectorId').val(),
+            BlockId: $('#BlockId').val()
+        };
+    }
+
+    function ChangeInDepartment() {
+        //$('#ActionType').val("Department");
+        ChangeInDropdownFilter();
+    }
+    function FilterDepartmentParameter() {
+        return {
+            ActionType: "Department",
+            SchemeId: $('#SchemeId').val(),
+            DepartmentId: $('#DepartmentId').val(),
+            SectorId: $('#SectorId').val(),
+            BlockId: $('#BlockId').val()
+        };
+    }
+
+    function ChangeInSector() {
+        //$('#ActionType').val("Sector");
+        ChangeInDropdownFilter();
+    }
+    function FilterSectorParameter() {
+        return {
+            ActionType: "Sector",
+            SchemeId: $('#SchemeId').val(),
+            DepartmentId: $('#DepartmentId').val(),
+            SectorId: $('#SectorId').val(),
+            BlockId: $('#BlockId').val()
+        };
+    }
+
+    function ChangeInBlock() {
+        //$('#ActionType').val("Block");
+        ChangeInDropdownFilter();
+    }
+    function FilterBlockParameter() {
+        return {
+            ActionType: "Block",
+            SchemeId: $('#SchemeId').val(),
+            DepartmentId: $('#DepartmentId').val(),
+            SectorId: $('#SectorId').val(),
+            BlockId: $('#BlockId').val()
+        };
+    }
+
+
+    function ReadPropertyGridEvent() {
+        $('#GridAllottedProperty').data('kendoGrid').dataSource.read();
+    }
+    //var action = "Scheme";
+    function FilterSearchParameter() {
+        return {
+            ActionType: $('#ActionType').val(),
+            SchemeId: $('#SchemeId').val(),
+            DepartmentId: $('#DepartmentId').val(),
+            SectorId: $('#SectorId').val(),
+            BlockId: $('#BlockId').val()
+        };
+    }
+
+    function SearchPropertyByParameter() {
+        var model = {
+            SchemeId: $('#SchemeId').val(),
+            DepartmentId: $('#DepartmentId').val(),
+            SectorId: $('#SectorId').val(),
+            BlockId: $('#BlockId').val()
+        };
+        return model;
+    }
+
+
+</script>
+

@@ -1,0 +1,59 @@
+﻿@model NA.PMS.Model.LitigationViewModel
+@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+
+@{
+    ViewBag.Title = "Manage Litigation";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="litigation-content">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Litigation</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn"> <a href="/Member/Authority/Litigation" target="_blank">Add Legal</a> </div>
+        </div>
+    </div>
+    <div class="col-md-12  blnk-rw"></div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.LitigationViewModel>()
+            .Name("gridLitigation")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.CaseNo).Title("Case No").Width(80);
+                columns.Bound(c => c.Department).Title("Department").Width(80);
+                columns.Bound(c => c.Description).Title("Description").Width(80);
+                columns.Bound(c => c.Address).Title("Address").Width(80);
+                columns.Bound(c => c.LegalDate).Title("Legal Date").Format("{0:dd/MM/yyyy}").Width(80);
+                columns.Bound(c => c.Advocate).Title("Advocate").Width(80);
+            })
+            .Sortable()
+            .Filterable()
+            .Resizable(resize => resize.Columns(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+            .DataSource
+            (
+                dataSource => dataSource
+                .Ajax()
+                .Model(model => model.Id(p => p.Id))
+                .ServerOperation(true)
+                .Read(read => read.Action("GetLitigationDataList", "Property", new { area = "Customer" }))
+                .PageSize(10)
+            )
+        )
+    </div>
+</div>
+
+
+
+<script>
+    $(document).ready(function () {
+        
+    });
+</script>
+
+
+
+
+

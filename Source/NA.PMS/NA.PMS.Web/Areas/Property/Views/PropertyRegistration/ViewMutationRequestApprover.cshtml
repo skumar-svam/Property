@@ -1,0 +1,193 @@
+﻿@model NA.PMS.Model.MutationModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@{
+    ViewBag.Title = "View Mutation Request";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">View Mutation Request</h1></div>
+                <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                    <a href="#" id="btnComment" class="" >View Comments</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <input type="hidden" value="@Model.RId" id="hdnRId" />
+                @{Html.RenderPartial("_PartialMutation", Model);}
+            </div>
+            <div class="box-button text-center">
+                <input type="button" value="Back" id="btnBack" class="btn btn-default" />
+                <input type="button" id="btnApprove" value="Approve" class="btn btn-add" />
+                <input type="submit" id="btnReject" value="Reject" class="btn btn-default" />              
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@(Html.Kendo().Window().Name("commentsWindow").Title("Please Provide a Comment").Modal(true).Visible(false).Content(@<text>
+        <div class="container-fluid">
+            <div class="row topSpace">
+                <div class="col-md-3 col-sm-12">
+                    @Html.Label("Comment :")
+                </div>
+                <div class="col-md-9 col-sm-12">
+                    @Html.TextAreaFor(m => m.ApproverComments, new { @maxlength="499", style="width:100%"})
+                </div>
+            </div>
+            <div class="row topSpace bottomSpace">
+                <div class="col-md-9 col-sm-12 col-md-offset-3">
+                <input type="button" id="btnSubmit" value="Submit" />
+            </div>
+        </div>
+        </div>
+</text>)
+.Draggable()
+.Resizable()
+//.Width(400)
+.Actions(actions => actions.Close())
+)
+
+@(Html.Kendo().Window().Name("viewCommentsWindow").Title("View Comments").Modal(true).Visible(false).Content(@<text>
+        <div class="container-fluid">
+            <div class="row topSpace">
+                <div class="col-md-3 col-sm-12">
+                @Html.Label("From :")
+                </div>
+                <div class="col-md-9 col-sm-12">
+                    @Html.DisplayFor(model => model.From)
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 col-sm-12">
+                    @Html.Label("Date :")
+                </div>
+                <div class="col-md-9 col-sm-12">
+                    @Convert.ToString(string.Format("{0:dd/MM/yyyy}", Model.SubmittedDate))
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 col-md-12">
+                    @Html.Label("Comments :")
+                </div>
+                <div class="col-md-3 col-md-12">
+                    @Html.TextAreaFor(model => model.Comment, new { @disabled = "disabled", @style = "width:100%;" })
+                </div>              
+            </div>
+            <div class="row topSpace bottomSpace">
+                <input type="button" class="btn-danger closePopup" value="Close" />
+            </div>
+        </div>
+</text>)
+.Draggable()
+.Resizable()
+//.Width(400)
+.Actions(actions => actions.Close())
+)
+
+<script type="text/javascript">
+    var i = 0;//To check whether "Approve" or "Reject" has been clicked.
+    $(document).ready(function () {
+        $("#RId").data('kendoDropDownList').value($("#hdnRId").val());
+        $("#fileDoc").hide();
+        // $("#divUpload").hide(); //Resolved Bug#262
+
+        //Disable fields in the case of View Request
+        $('#MutationDate').data('kendoDatePicker').enable(false);
+        $('#TransferDeedDate').data('kendoDatePicker').enable(false);
+        $('#BahiNo').attr("disabled", true);
+        $('#BahiZildNo').attr("disabled", true);
+        $('#BahiPageNo').attr("disabled", true);
+        $('#SINo').attr("disabled", true);
+        var dropDown = $("#RId").data("kendoDropDownList");
+        dropDown.enable(false);
+
+        //Hide buttons according to Status.
+        var status = $("#Status").val();
+        if (status == '@NA.PMS.Common.AllotmentStatus.Cancelled') {
+            $("#btnApprove").hide();
+            $("#btnReject").hide();
+        }
+
+        else if (status == '@NA.PMS.Common.AllotmentStatus.Approved') {
+            $("#btnApprove").hide();
+            $("#btnReject").hide();
+        }
+
+        else if (status == '@NA.PMS.Common.AllotmentStatus.Rejected') {
+            $("#btnApprove").hide();
+            $("#btnReject").hide();
+        }
+
+        $("#btnBack").click(function () {
+            var PendencyReq = '@Request.QueryString["pr"]';
+            if (PendencyReq == 'true') {
+                window.location.href = '@Url.Action("PendencyReport", "Report", new { Area = "Reports" })';
+            }
+            else { window.location.href = '@Url.Action("ManageMutationApprover", "PropertyRegistration")'; }
+            });
+
+            $("#btnApprove").click(function () {
+                $("#commentsWindow").data("kendoWindow").center();
+                $("#commentsWindow").data("kendoWindow").open();
+                i = 1;
+            });
+            $("#btnReject").click(function () {
+                $("#commentsWindow").data("kendoWindow").center();
+                $("#commentsWindow").data("kendoWindow").open();
+                i = 2;
+            });
+
+            $("#btnSubmit").click(function () {
+                var comments = $("#ApproverComments").val();
+                var ReqNo = $("#ReqNo").val();
+                if (i == 2) {
+                    if ($("#ApproverComments").val() == "") {
+                        alertify.error("Please enter Comments.");
+                        return false;
+                    }
+                }
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ comments: comments, intStatus: i, ReqNo: ReqNo }),
+                    url: '/PropertyRegistration/SaveApprovalStatus',
+                    success: function (result) {
+                        if (result == true) {
+                            $("#commentsWindow").data("kendoWindow").close();
+                            $("#ApproverComments").val('');
+                            $("#btnApprove").hide();
+                            $("#btnReject").hide();
+                            alertify.success("Request saved successfully.");
+                        }
+                        else {
+                            alertify.error("Some error occured. Please try again later.");
+                        }
+                    },
+                    error: function (objAjaxRequest, strError) {
+                        var respText = objAjaxRequest.responseText;
+                        //alert(respText);
+                    }
+                });
+            });
+
+            $(".closePopup").click(function () {
+                $("#viewCommentsWindow").data("kendoWindow").close();
+                $("#commentsWindow").data("kendoWindow").close();
+            });
+
+            $("#btnComment").click(function () {
+                $("#viewCommentsWindow").data("kendoWindow").center();
+                $("#viewCommentsWindow").data("kendoWindow").open();
+            });
+        });
+</script>

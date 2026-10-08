@@ -1,0 +1,596 @@
+﻿@model NA.PMS.Model.ChallanModel
+
+<style>
+    .tbl_2 {
+        vertical-align: text-top;
+        font-size: 11px;
+        font-family: Arial;
+        background-color: Transparent;
+        /*font-weight:bold;*/
+        border-bottom: groove 1pt black;
+        border: groove 1pt black;
+        color: black;
+        /*height: 115px;*/
+        width: 700px;
+    }
+
+    .tbl_3 {
+        vertical-align: text-top;
+        font-size: 11px;
+        font-family: Arial;
+        background-color: Transparent;
+        font-weight: bold;
+        border-bottom: groove 1pt black;
+        color: black;
+        /*height: 115px;*/
+    }
+
+    .tbl_4 {
+        vertical-align: text-bottom;
+        font-size: 11px;
+        font-family: Arial;
+        background-color: Transparent;
+        font-weight: bold;
+        border-bottom: groove 1pt black;
+        color: black;
+        /*height: 115px;*/
+        text-align: Left;
+        height: 15px;
+    }
+
+    .tbl_5 {
+        vertical-align: text-top;
+        font-size: 11px;
+        font-family: Arial;
+        background-color: Transparent;
+        font-weight: bold;
+        color: Black;
+        /*height: 115px;*/
+        text-align: left;
+    }
+
+    .tbl_6 {
+        vertical-align: text-top;
+        font-size: 12px;
+        font-family: Arial;
+        background-color: Transparent;
+        color: black;
+        /*height: 115px;*/
+    }
+</style>
+
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>ChallanPrint</title>
+</head>
+<body>
+    <div>
+
+        <table style="width:80%" align="center">
+            <tr>
+                <td>
+                    <div>
+
+                        <table width="100%" class="tbl_2">
+                            <tr>
+                                <td colspan="4" class="headertext"><center><b>Bank Copy</b></center></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="headertext">
+                                    <b>NEW OKHLA IDUSTRIAL DEVELOPMENT AUTHORITY</b>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="tbl_6">
+                                    Registration Id:&nbsp;@Model.RID
+                                </td>
+                                <td class="tbl_6">
+                                    Property Type: &nbsp;@Model.PropertyTypeName
+                                </td>
+                                <td class="tbl_6" colspan="2">
+                                    Challan No.:&nbsp;____________
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="tbl_6">
+                                    Please find enclose herewith
+                                    ____________
+                                    &nbsp;
+                                    Dated &nbsp;
+                                    ____________
+                                    for Rs.
+                                    ____________
+                                    drawn on &nbsp;
+                                    ____________ &nbsp; against
+                                    the payment of property Allotted / Leased / Subleased to me by Noida Authority.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" align="left" valign="top">
+                                    <table class="tbl_1" cellspacing="0" align="left" valign="top" style="width:100%">
+                                        <tr><td class="tbl_3">Sno.</td><td class="tbl_3">Description</td><td class="tbl_3">Amount(Rs.)</td></tr>
+                                        @{
+
+                                            if (Model.CompletionCharges == null)
+                                            {
+                                                <tr>
+                                                    <td class="tbl_3">1.</td>
+                                                    <td class="tbl_3">
+
+                                                        Installment
+
+                                                    </td>
+                                                    <td class="tbl_3">
+                                                        @Model.AllotmentMoney
+                                                    </td>
+                                                </tr>
+                                            }
+                                            else
+                                            {
+                                                <tr>
+                                                    <td class="tbl_3">1.</td>
+                                                    <td class="tbl_3">
+                                                        Completion Charges
+                                                    </td>
+                                                    <td class="tbl_3">
+                                                        @Model.CompletionCharges
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                        <tr><td></td><td></td></tr>
+                                        <tr style="height:120px"><td class="tbl_3"></td><td class="tbl_3"></td><td class="tbl_3"></td></tr>
+                                        <tr>
+                                            <td></td>
+                                            <td class="tbl_3">Total Amount</td>
+                                            <td class="tbl_3">
+@{
+
+                                            if (Model.CompletionCharges != null)
+                                            {
+                                                @Model.CompletionCharges
+                                            }
+                                            }
+                                                @*@{
+                                                        if (Model.TotalAmountDue != 0)
+                                                        {
+                                                            <label></label>
+                                                        }
+                                                        else
+                                                        {
+                                                            <label></label>
+                                                        }
+                                                    }*@
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                </td>
+                                <td colspan="2">
+                                    <table class="tbl_1" cellspacing="0">
+                                        <tr>
+                                            <td colspan="4" class="tbl_3">
+                                                Bank Name
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" class="tbl_5">
+                                                Property Location
+                                            </td>
+                                            <td colspan="2" class="tbl_5" style="border-bottom:solid 1px black;">
+                                                Sector  &nbsp;@Model.SectorName Block  &nbsp;@Model.BlockName
+                                                Plot No.@Model.PropertyTypeName
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2">&nbsp;</td>
+                                            <td colspan="2" class="tbl_4"></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" class="tbl_5">
+                                                Allottee Name:
+                                            </td>
+                                            <td colspan="2" class="tbl_4">@Model.ApplicationForm.FirstName</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" class="tbl_5">
+                                                Address:
+                                            </td>
+                                            <td colspan="2" class="tbl_4">@Model.ApplicationForm.CorrespondingAddress</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" class="tbl_5">
+                                                E-mail:
+                                            </td>
+                                            <td colspan="2" class="tbl_4">@Model.ApplicationForm.Email</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" class="tbl_5">
+                                                Date Of deposit:
+                                            </td>
+                                            <td colspan="2" class="tbl_4"></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" class="tbl_5">
+                                                Ph No.:
+                                            </td>
+                                            <td colspan="2" class="tbl_4">@Model.ApplicationForm.MobileNumber</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" class="tbl_5">
+                                                Total Rupees:
+                                            </td>
+                                            <td colspan="2" class="tbl_5" id="totalAmount1" style="width:55px"></td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" style="height: 20px;"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="tbl_5">
+                                    Bank Authorised Signatory
+                                </td>
+                                <td colspan="2" class="tbl_5">
+                                    Depositors Signature
+                                </td>
+                            </tr>
+                        </table>
+                        Note:Payment alone will not secure any right to allottee.
+                    </div>
+
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-----------------------------------------------------Cut Here-----------------------------------------------------
+
+                </td>
+            </tr>
+
+
+        </table>
+        <table style="width:80%" align="center">
+            <tr>
+                <td>
+                    <div>
+
+                        <table width="100%" class="tbl_2">
+                            <tr>
+                                <td colspan="4" class="headertext"><center><b>Noida Copy</b></center></td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="headertext">
+                                    <b>NEW OKHLA IDUSTRIAL DEVELOPMENT AUTHORITY</b>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="tbl_6">
+                                    Registration Id:&nbsp;@Model.RID
+                                </td>
+                                <td class="tbl_6">
+                                    Property Type: &nbsp;@Model.PropertyTypeName
+                                </td>
+                                <td class="tbl_6" colspan="2">
+                                    Challan No.:&nbsp;____________
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="tbl_6">
+                                    Please find enclose herewith
+                                    ____________
+                                    &nbsp;
+                                    Dated &nbsp;
+                                    ____________
+                                    for Rs.
+                                    ____________
+                                    drawn on &nbsp;
+                                    ____________ &nbsp; against
+                                    the payment of property Allotted / Leased / Subleased to me by Noida Authority.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" align="left" valign="top">
+                                    <table class="tbl_1" cellspacing="0" align="left" valign="top" style="width:100%">
+                                        <tr><td class="tbl_3">Sno.</td><td class="tbl_3">Description</td><td class="tbl_3">Amount(Rs.)</td></tr>
+
+                                        @*<tr><td class="tbl_3">1.</td><td class="tbl_3">Installment</td><td class="tbl_3">@Model.AllotmentMoney</td></tr>*@
+                                        @{
+
+                                            if (Model.CompletionCharges == null)
+                                            {
+                                                <tr>
+                                                    <td class="tbl_3">1.</td>
+                                                    <td class="tbl_3">
+
+                                                        Installment
+
+                                                    </td>
+                                                    <td class="tbl_3">
+                                                        @Model.AllotmentMoney
+                                                    </td>
+                                                </tr>
+                                            }
+                                            else
+                                            {
+                                                <tr>
+                                                    <td class="tbl_3">1.</td>
+                                                    <td class="tbl_3">
+                                                        Completion Charges
+                                                    </td>
+                                                    <td class="tbl_3">
+                                                        @Model.CompletionCharges
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+
+                                        <tr><td></td><td></td></tr>
+                                        <tr style="height:120px"><td class="tbl_3"></td><td class="tbl_3"></td><td class="tbl_3"></td></tr>
+                                        <tr><td></td><td class="tbl_3">Total Amount</td><td class="tbl_3">@{
+
+                                            if (Model.CompletionCharges != null)
+                                            {
+                                                @Model.CompletionCharges
+                                            }
+                                        }</td></tr>
+                                    </table>
+
+                                </td>
+                                <td colspan="2">
+                                    <table class="tbl_1" cellspacing="0">
+                                        <tr>
+                                            <td colspan="4" class="tbl_3">
+                                                Bank Name
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" class="tbl_5">
+                                                Property Location
+                                            </td>
+                                            <td colspan="2" class="tbl_5" style="border-bottom:solid 1px black;">
+                                                Sector  &nbsp;@Model.SectorName Block  &nbsp;@Model.BlockName
+                                                Plot No.@Model.PropertyTypeName
+
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2">&nbsp;</td>
+                                            <td colspan="2" class="tbl_4"></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" class="tbl_5">
+                                                Allottee Name:
+                                            </td>
+                                            <td colspan="2" class="tbl_4">@Model.ApplicationForm.FirstName</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" class="tbl_5">
+                                                Address:
+                                            </td>
+                                            <td colspan="2" class="tbl_4">@Model.ApplicationForm.CorrespondingAddress</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" class="tbl_5">
+                                                E-mail:
+                                            </td>
+                                            <td colspan="2" class="tbl_4">@Model.ApplicationForm.Email</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" class="tbl_5">
+                                                Date Of deposit:
+                                            </td>
+                                            <td colspan="2" class="tbl_4"></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" class="tbl_5">
+                                                Ph No.:
+                                            </td>
+                                            <td colspan="2" class="tbl_4">@Model.ApplicationForm.MobileNumber</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" class="tbl_5">
+                                                Total Rupees:
+                                            </td>
+                                            <td colspan="2" class="tbl_5" id="totalAmount2" style="width:55px"></td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" style="height: 20px;"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="tbl_5">
+                                    Bank Authorised Signatory
+                                </td>
+                                <td colspan="2" class="tbl_5">
+                                    Depositors Signature
+                                </td>
+                            </tr>
+                        </table>
+                        Note:Payment alone will not secure any right to allottee.
+                    </div>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-----------------------------------------------------Cut Here-----------------------------------------------------
+                </td>
+            </tr>
+
+
+        </table>
+
+        <table style="width:80%" align="center">
+            <tr>
+                <td>
+                    <div>
+
+                        <table width="100%" class="tbl_2">
+                            <tr>
+                                <td colspan="4" class="headertext">
+                                    <center><b>Allottee Copy</b></center>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="headertext">
+                                    <b>NEW OKHLA IDUSTRIAL DEVELOPMENT AUTHORITY</b>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="tbl_6">
+                                    Registration Id:&nbsp;@Model.RID
+                                </td>
+                                <td class="tbl_6">
+                                    Property Type: &nbsp;@Model.PropertyTypeName
+                                </td>
+                                <td class="tbl_6" colspan="2">
+                                    Challan No.:&nbsp;____________
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" class="tbl_6">
+                                    Please find enclose herewith
+                                    ____________
+                                    &nbsp;
+                                    Dated &nbsp;
+                                    ____________
+                                    for Rs.
+                                    ____________
+                                    drawn on &nbsp;
+                                    ____________ &nbsp; against
+                                    the payment of property Allotted / Leased / Subleased to me by Noida Authority.
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" align="left" valign="top">
+                                    <table class="tbl_1" cellspacing="0" align="left" valign="top" style="width:100%">
+                                        <tr><td class="tbl_3">Sno.</td><td class="tbl_3">Description</td><td class="tbl_3">Amount(Rs.)</td></tr>
+                                        @*<tr><td class="tbl_3">1.</td><td class="tbl_3">Installment</td><td class="tbl_3">@Model.AllotmentMoney</td></tr>*@
+                                        @{
+
+                                            if (Model.CompletionCharges == null)
+                                            {
+                                                <tr>
+                                                    <td class="tbl_3">1.</td>
+                                                    <td class="tbl_3">
+
+                                                        Installment
+
+                                                    </td>
+                                                    <td class="tbl_3">
+                                                        @Model.AllotmentMoney
+                                                    </td>
+                                                </tr>
+                                            }
+                                            else
+                                            {
+                                                <tr>
+                                                    <td class="tbl_3">1.</td>
+                                                    <td class="tbl_3">
+                                                        Completion Charges
+                                                    </td>
+                                                    <td class="tbl_3">
+                                                        @Model.CompletionCharges
+                                                    </td>
+                                                </tr>
+                                            }
+                                        }
+                                        <tr><td></td><td></td></tr>
+                                        <tr style="height:120px"><td class="tbl_3"></td><td class="tbl_3"></td><td class="tbl_3"></td></tr>
+                                        <tr><td></td><td class="tbl_3">Total Amount</td><td class="tbl_3">
+                                            @{
+                                            if (Model.CompletionCharges != null)
+                                            {
+                                                @Model.CompletionCharges
+                                            }
+                                        }</td></tr>
+                                    </table>
+
+                                </td>
+                                <td colspan="2">
+                                    <table class="tbl_1" cellspacing="0">
+                                        <tr>
+                                            <td colspan="4" class="tbl_3">
+                                                Bank Name
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" class="tbl_5">
+                                                Property Location
+                                            </td>
+                                            <td colspan="2" class="tbl_5" style="border-bottom:solid 1px black;">
+                                                Sector &nbsp;@Model.SectorName Block  &nbsp;@Model.BlockName
+                                                Plot No.@Model.PropertyTypeName
+
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2">&nbsp;</td>
+                                            <td colspan="2" class="tbl_4"></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" class="tbl_5">
+                                                Allottee Name:
+                                            </td>
+                                            <td colspan="2" class="tbl_4">@Model.ApplicationForm.FirstName</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" class="tbl_5">
+                                                Address:
+                                            </td>
+                                            <td colspan="2" class="tbl_4">@Model.ApplicationForm.CorrespondingAddress</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" class="tbl_5">
+                                                E-mail:
+                                            </td>
+                                            <td colspan="2" class="tbl_4">@Model.ApplicationForm.Email</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" class="tbl_5">
+                                                Date Of deposit:
+                                            </td>
+                                            <td colspan="2" class="tbl_4"></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" class="tbl_5">
+                                                Ph No.:
+                                            </td>
+                                            <td colspan="2" class="tbl_4">@Model.ApplicationForm.MobileNumber</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2" class="tbl_5">
+                                                Total Rupees:
+                                            </td>
+                                            <td colspan="2" class="tbl_5" id="totalAmount3" style="width:55px"></td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" style="height: 20px;"></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" class="tbl_5">
+                                    Bank Authorised Signatory
+                                </td>
+                                <td colspan="2" class="tbl_5">
+                                    Depositors Signature
+                                </td>
+                            </tr>
+                        </table>
+                        Note:Payment alone will not secure any right to allottee.
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+</body>
+</html>

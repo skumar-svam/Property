@@ -1,0 +1,298 @@
+﻿@using System.Web.Optimization;
+@using NA.PMS.Common.Helpers;
+@using NA.PMS.Web.Models;
+@using System.Web.Mvc;
+@using NA.PMS.Model;
+@using NA.PMS.Common;
+@using NA.PMS.OnlineScheme;
+@{
+    var displayMiniProfiler = SettingsHelper.IsMiniProfilerEnabled;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="template">
+    <title>@ViewBag.Title</title>
+
+    @Styles.Render("~/Content/others")
+    @Styles.Render("~/bundles/KendoCSS")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/others")
+    @Scripts.Render("~/bundles/KendoJS")
+
+    <link href="~/Content/CSS/style-new.css" rel="stylesheet" />
+    <link href="~/Content/CSS/responsive.css" rel="stylesheet" />
+    <link href="~/Content/CSS/open-top-bx.css" rel="stylesheet" />
+    <script src="~/Scripts/kendo.aspnetmvc.min.js"></script>
+
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script>
+        $(document).ready(function () {
+            $(".mbl-menu-btn").click(function () {
+                $(".menu-wrapper").toggle("slide");
+            });
+            //Disable Keyboard for Kendo Date Picker
+            $(".DisableKeyboardInput").keypress(function () {
+                return false;
+            });
+            $(".input-disabled").keypress(function () {
+                return false;
+            });
+        });
+    </script>
+    <style type="text/css">
+        .navbar-collapse.collapse { display: block !important; }
+
+        .navbar-nav > li, .navbar-nav { float: left !important; }
+
+        .navbar-nav.navbar-right:last-child { /*margin-right: -15px !important;*/ }
+
+        .navbar-right { float: right !important; }
+
+        .col-20{ width:20% !important; }
+        .col-30{ width:30% !important; }
+        .col-40{ width:40% !important; }
+        .col-60{ width:60% !important; }
+        .contentWrapper{ width: 80% !important }
+        iframe{border-width: 0px;}
+        #header-full{
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            z-index: 100;
+        }
+        .k-loading-mask .k-loading-image {
+            background-image: url('/Content/Images/Chimply_progress.gif');
+        }
+         @@media only screen and (max-width: 320px) {
+            [class*="col-"] {
+            width: 100% !important;
+            }
+        }
+    </style>
+   
+</head>
+<body>
+    <div id="mainWrapper" class="grad1">
+        <nav id="header-full" class="navbar navbar-default navbar-fixed-top nav-bg">
+            <div class="container-fluid">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                    <div class="brand-wrap">
+                        <a class="navbar-brand" href="#"></a>
+                    </div>
+                </div>
+                <div class="collapse navbar-collapse" id="mainNav">
+                    @{if (Session["SchemeUserLoginDetails"] != null)
+                    {
+                        var dataUser = (NA.PMS.OnlineScheme.SchemeFormViewModel)Session["OnlineSchemeLoginDetail"];
+                        <ul class="nav navbar-nav  top-links hidden-xs" style="padding-left:135px;margin-top:25px;">
+                            <li>
+                                @if (string.IsNullOrEmpty(ViewBag.SchemeHeaderName))
+                                {
+                                    <h2 class="header-title-main" style=" color:#fff;text-align:center; font-weight:700;"><b>ONLINE SCHEME FOR PROPERTY ALLOTMENT</b></h2>
+                                }
+                                else
+                                {
+                                    <h2 class="header-title-main" style="color:green"><b>@ViewBag.SchemeHeaderName</b></h2>
+                                }
+                               
+                            </li>
+                            <li class="dropdown">
+                                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                    <i class="fa fa-user" aria-hidden="true"></i>
+                                    <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu" style="display: none;">
+                                    <li>
+                                        <span>
+                                            Welcome @dataUser.ApplicationFormId <br> 
+                                        </span>
+                                    </li>
+                                   
+                                    <li class="divider"></li>
+                                    <li><a href="#" id="a-layout-reset-password">Change Password</a></li>
+                                    <li class="divider"></li>
+                                    <li><a href="#" id="a-layout-scheme-logout">Logout</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    }
+                    else
+                    {
+                       if (string.IsNullOrEmpty(ViewBag.SchemeHeaderName))
+                       {
+                        <h2 class="header-title-main" style="margin-top:25px; color:green;padding-left:25%;font-weight:700;text-transform: uppercase;"><b>ONLINE SCHEME FOR PROPERTY ALLOTMENT</b></h2>
+                       }
+                       else
+                       {
+                        <h2 class="header-title-main" style="margin-top:25px; color:green;padding-left:25%;font-weight:700;text-transform: uppercase;"><b>@ViewBag.SchemeHeaderName</b></h2>
+                       }
+                    }
+                }
+                </div>
+                <!-- /.navbar-collapse -->
+            </div><!-- /.container-fluid -->
+            <div class="row" style="text-align:center">
+                <label style="padding-left:15px; color:yellow;">Help line No: 8527036431 (10:00 AM - 5:00 PM, Saturday & Sunday off)</label>
+            </div>
+            
+        </nav>
+        <br />
+        <div class="container-fluid contentWrapper main" id="mainMaster" style="padding-top:110px;">
+            @RenderBody()
+        </div>
+
+        <div class="col-md-12" id="div-layout-password-window">
+            <div class="form-bx" style="min-height:250px;">
+                <div class="row" style="padding-top:25px;">
+                    <div class="col-md-4 col-sm-6 col-xs-12 form-group" style="">
+                        <label><b>Application Form No:</b></label>
+                    </div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                        <input type="text" class="k-textbox" id="LayoutTxtSchemeFormNo" name="LayoutTxtSchemeFormNo" maxlength="12" placeholder="Enter Application Form No" style="width:100%" />
+                    </div>
+                </div>
+                <div class="row row-login">
+                    <div class="col-md-4 col-sm-6 col-xs-12 form-group" style="">
+                        <label><b>Password:</b></label>
+                    </div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                        <input type="password" class="k-textbox" id="LayoutTxtPassword" name="LayoutTxtPassword" maxlength="20" placeholder="Enter Password" style="width:100%" />
+                    </div>
+                </div>
+                <div class="row row-password">
+                    <div class="col-md-4 col-sm-6 col-xs-12 form-group" style="">
+                        <label><b>New Password:</b></label>
+                    </div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                        <input type="text" class="k-textbox" id="LayoutTxtNewPassword" name="LayoutTxtNewPassword" maxlength="20" placeholder="Enter New password" style="width:100%" />
+                    </div>
+                </div>
+                <div class="row row-password">
+                    <div class="col-md-4 col-sm-6 col-xs-12 form-group" style="">
+                        <label><b>Confirm New Password:</b></label>
+                    </div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                        <input type="text" class="k-textbox" id="LayoutTxtConfirmNewPassword" name="LayoutTxtConfirmNewPassword" maxlength="40" placeholder="Confirm Password" style="width:100%" />
+                    </div>
+                </div>
+                <div class="row" style="">
+                    <div class="col-md-4 col-sm-6 col-xs-12 form-group">
+                        <input type="hidden" id="LayoutTxtActionType" name="LayoutTxtActionType" value="ResetPassword" />
+                    </div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                        <input class="btn btn-success" type="button" value="Reset Password" id="btn-layout-password-reset" />
+                        <input class="btn btn-danger" type="button" value="Cancel" id="btn-layout-password-cancel" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12 col-xs-12 copyright text-center">
+                        Copyright © @DateTime.Now.Year <b>NOIDA</b>. Developed and Maintained by <a href="http://www.svam.com">North Shore Technologies</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+    $(function () {
+        $(".dropdown").hover(
+            function () {
+                $('.dropdown-menu', this).stop(true, true).fadeIn("fast");
+                $(this).toggleClass('open');
+            },
+            function () {
+                $('.dropdown-menu', this).stop(true, true).fadeOut("fast");
+                $(this).toggleClass('open');
+            }
+		);
+    });
+
+    $(document).ready(function () {
+        $("#cssmenu > ul > li:last-child").addClass("last-child");
+
+        $('#div-layout-password-window').kendoWindow({
+            modal: true,
+            title: "Reset Password Window",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "25%"
+            },
+            width: "50%", height: "auto"
+        });
+
+        $('#a-layout-reset-password').click(function () {
+            var layoutpasswordwindow = $('#div-layout-password-window').data("kendoWindow");
+            layoutpasswordwindow.center();
+            layoutpasswordwindow.open();
+            layoutpasswordwindow.pin();
+        });
+
+        $('#a-layout-scheme-logout').click(function () {
+            var osmodel = {
+                ActionType: "SchemeLogout"
+            }
+            SchemeUserLoginAction(osmodel);
+        });
+
+        $('#btn-layout-password-reset').click(function () {
+            var osmodel = {
+                ActionType: "ResetPassword",
+                ApplicationFormId: $('#LayoutTxtSchemeFormNo').val(),
+                Password: $('#LayoutTxtPassword').val(),
+                NewPassword: $('#LayoutTxtNewPassword').val(),
+                ConfirmPassword: $('#LayoutTxtConfirmNewPassword').val()
+            }
+            SchemeUserLoginAction(osmodel);
+        });
+
+        $('#btn-layout-password-cancel').click(function () {
+            $('#LayoutTxtSchemeFormNo').val('');
+            $('#LayoutTxtPassword').val('');
+            $('#LayoutTxtNewPassword').val('');
+            $('#LayoutTxtConfirmNewPassword').val('');
+            $('#div-layout-password-window').data("kendoWindow").close();
+        });
+    });
+
+    function SchemeUserLoginAction(osmodel) {
+        if (osmodel != undefined) {
+            var lurl = '/Online/Default/ResetPasswordForOnlineSchemeForm';
+            if (osmodel.ActionType == "SchemeLogout") lurl = '/Online/Default/LogoutSchemeform';
+            $.ajax({
+                url: lurl,
+                type: 'POST',
+                data: { model: osmodel },
+                success: function (result) {
+                    if (result != null && result.ActionType == "SchemeLogout") {
+                        if (result.ReturnTypeId == '@OSReturnTypeId.Success') {
+                            window.location.href = '/Online/Institutional/SchemeInformation';
+                        }
+                    }
+                    if (result != null && result.ActionType == "ResetPassword") {
+                        if (result.IsPasswordChanged == true) {
+                            alertify.success("Password changed successfully.");
+                            window.location.reload(true);
+                        }
+                        else {
+                            //alertify.error("Invalid Scheme Form No.");
+                        }
+                    }
+                }
+            });
+        }
+    }
+</script>

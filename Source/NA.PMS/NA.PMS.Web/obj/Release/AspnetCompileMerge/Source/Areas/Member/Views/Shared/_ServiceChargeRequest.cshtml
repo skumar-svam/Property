@@ -1,0 +1,529 @@
+﻿@model NA.PMS.Model.ServiceRequestViewModel
+@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions;
+@using NA.PMS.Common;
+@using NA.PMS.Web.Models
+
+@using (Html.BeginForm("UpdateCustomerServiceRequestStatus", "ServiceRequest", new { area = "Member" }, FormMethod.Post, new { enctype = "multipart/form-data", id = "userform2" }))
+{
+    <div class="col-md-12 divPopupWindow" id="divStatusMaster" >
+        <div class="row form-group" style="padding-top:15px;">
+            <div class="col-md-2">
+                <label>Service Status</label>
+            </div>
+            <div class="col-md-6">
+                @(Html.Kendo().DropDownListFor(model => model.ServiceModel.StatusId)
+                .Filter("contains")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .OptionLabel(" -- Select --")
+                .DataSource(source =>
+                {
+                    source.Custom()
+                    .ServerFiltering(true)
+                    .ServerPaging(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    .Transport(transport => transport.Read(read => read.Action("GetStatusMasterAsDataSource", "ServiceRequest", new { area = "Member" }).Data("FilterService")))
+                    .Schema(schema => schema.Data("Data").Total("Total"))
+                    .PageSize(100);
+                })
+                .Events(events => { events.Change("ChangeStatusIdEvent"); })
+                .HtmlAttributes(new { @class = "input-disabled", style = "width:100%; float:right;" })
+                )
+            </div>
+        </div>
+        <div class="row form-group row-approver">
+            <div class="col-md-2 col-sm-12 col-xs-12 form-group">
+                <label>Forward To</label>
+            </div>
+            <div class="col-md-6">
+                @(Html.Kendo().DropDownListFor(model => model.ServiceModel.ApproverId)
+                .Filter("contains")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .OptionLabel(" -- Select --")
+                .DataSource(source =>
+                {
+                    source.Custom()
+                    .ServerFiltering(true)
+                    .ServerPaging(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    .Transport(transport => transport.Read(read => read.Action("GetApproverIdList", "Authority", new { area = "Member" })))
+                    .Schema(schema => schema.Data("Data").Total("Total"))
+                    .PageSize(100);
+                })
+        //.Events(events => { events.Change("ChangeDepartmentEvent"); })
+                .HtmlAttributes(new { @class = "input-disabled", style = "width:100%; float:right;" })
+                )
+            </div>
+        </div>
+
+        <div class="row form-group row-checkbox-selection">
+            <div class="col-md-2 col-sm-12 col-xs-12 form-group">
+
+            </div>
+            <div class="col-md-3 col-sm-12 col-xs-12 form-group">
+                <label style="padding-left:0;">Is Document Required</label>
+                <input type="checkbox" id="doc-checkbox" />
+                @Html.HiddenFor(model=>model.ServiceModel.IsDocumentRequired)
+            </div>
+            <div class="col-md-3 col-sm-12 col-xs-12 form-group">
+                <label style="padding-left:0;">Is Charge to pay</label>
+                <input type="checkbox" id="charge-checkbox" />
+                @Html.HiddenFor(model => model.ServiceModel.IsChargesRequired)
+            </div>
+        </div>
+        <div class="row" id="div-document-selection">
+            <div class="col-md-2 col-sm-12 col-xs-12 form-group">
+                <label>Document Type</label>
+            </div>
+            <div class="col-md-6 col-sm-12 col-xs-12 form-group">
+                @(Html.Kendo().DropDownListFor(model => model.ServiceModel.DocumentId)
+                .Filter("contains")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .OptionLabel(" -- Select --")
+                .DataSource(source =>
+                {
+                    source.Custom()
+                    .ServerFiltering(true)
+                    .ServerPaging(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    .Transport(transport => transport.Read(read => read.Action("GetDocumentTypeListAsDataSource", "ServiceRequest", new { area = "Member" }).Data("FilterParamForDocument")))
+                    .Schema(schema => schema.Data("Data").Total("Total"))
+                    .PageSize(100);
+                })
+                .HtmlAttributes(new { @class = "input-disabled", style = "width:100%; float:right;" })
+                )
+            </div>
+            <div class="col-md-2 col-sm-12 col-xs-12 form-group" style="text-align:center;">
+                <input type="button" class="k-button btn-document" value="Add Document" />
+            </div>
+        </div>
+        <div class="row form-group" id="row-document-grid">
+            <div class="col-md-2"></div>
+            <div class="col-md-10 k-grid-content col-document-grid" style="">
+                @(Html.Kendo().Grid<NA.PMS.Model.DocumentViewModel>()
+                    .Name("gridRequiredDocuments")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(c => c.Id).Hidden(true);
+                        columns.Bound(c => c.RegistrationId).Hidden(true);
+                        columns.Bound(c => c.RequestRefId).Hidden(true);
+                        columns.Bound(c => c.SerialNo).Title("SNo").Width(70);
+                        columns.Bound(c => c.DocumentName).Title("Document");
+                        columns.Bound(c => c.Id).Title("").Width(110).ClientTemplate("<a onclick='javascript:RemoveTempDocument(this);'class='hyperlink'>Remove</a>").Filterable(false).Sortable(false);
+                    })
+                        .Resizable(resize => resize.Columns(true))
+                        .Events(e => e.DataBound("RequiredDocumentsGridEvent"))
+                        .DataSource(dataSource => dataSource
+                        .Ajax().Model(model => model.Id(c => c.Id))
+                        .ServerOperation(true)
+                        .Read(read => read.Action("GetSavedDocumentTypeListByIdAsDataSource", "ServiceRequest", new { area = "Member" }).Data("FilterSearchParameter"))
+                        )
+                )
+            </div>
+
+        </div>
+        <div class="row form-group" id="div-charges-selection">
+            <div class="col-md-2 col-sm-12 col-xs-12 form-group">
+
+            </div>
+            <div class="col-md-3 col-sm-12 col-xs-12 form-group">
+                <label style="padding-left:0;">Account Head</label>
+                @(Html.Kendo().DropDownListFor(model => model.ServiceModel.AccountHeadId)
+                            .DataTextField("Text")
+                            .DataValueField("Id")
+                            .OptionLabel("---select---")
+                            .DataSource(source =>
+                            {
+                                source.Custom().ServerFiltering(true)//.ServerPaging(true).Type("aspnetmvc-ajax")
+                                .Transport(transport => transport.Read("GetAccountHeadList", "Authority", new { area = "Member" }))
+                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                .PageSize(100);
+                            })
+                            .HtmlAttributes(new { style = "width: 90%;" })
+                )
+            </div>
+            <div class="col-md-3 col-sm-12 col-xs-12 form-group">
+                <label style="padding-left:0;">Account SubHead</label>
+                @(Html.Kendo().DropDownListFor(model => model.ServiceModel.AccountSubHeadId)
+                            .DataTextField("Text")
+                            .DataValueField("Id")
+                            .OptionLabel("---select---")
+                            .DataSource(source =>
+                            {
+                                source.Custom().ServerFiltering(true)//.ServerPaging(true).Type("aspnetmvc-ajax")
+                                .Transport(transport => transport.Read(read => read.Action("GetAccountSubHeadList", "Authority", new { area = "Member" }).Data("FilterAccountHeadId")))
+                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                .PageSize(100);
+                            })
+                            .CascadeFrom("ServiceModel_AccountHeadId")
+                            .HtmlAttributes(new { style = "width: 90%;" })
+                )
+            </div>
+            <div class="col-md-2 col-sm-12 col-xs-12 form-group">
+                <label style="padding-left:0;">Amount</label>
+                <input type="text" class="k-textbox" id="txt-amount" maxlength="10"/>
+            </div>
+            <div class="col-md-2 col-sm-12 col-xs-12 form-group" style="text-align:center">
+                <input type="button" id="btn-add-amount" value="Add Amount" class="k-button" style="width:100px;margin-top:22px;" />
+            </div>
+        </div>
+        
+        <div class="row form-group">
+            <div class="col-md-12 k-grid-content" id="div-charges-grid" style="display:block;">
+                @(Html.Kendo().Grid<NA.PMS.Model.ChallanViewModel>()
+                    .Name("gridChargeDetails")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(c => c.Id).Hidden(true);
+                        columns.Bound(c => c.RegistrationId).Hidden(true);
+                        columns.Bound(c => c.AccountHead).Title("Account Head").ClientFooterTemplate("<div>Total Amount :-</div>");
+                        columns.Bound(c => c.AccountSubHead).Title("Account Sub Head");
+                        columns.Bound(c => c.Amount).Title("Amount").Width(130).ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+                        columns.Bound(c => c.Id).Title("").Width(110).ClientTemplate("<a onclick='javascript:RemoveChallanDetails(this);'class='hyperlinkcss'>Remove</a>").Filterable(false).Sortable(false);
+                    })
+                        .Resizable(resize => resize.Columns(true))
+                        .Events(e => e.DataBound("ChargeDetailGridEvent"))
+                        .DataSource(dataSource => dataSource
+                        .Ajax().Model(model => model.Id(c => c.Id))
+                        .ServerOperation(true)
+                        .Read(read => read.Action("GetTempChallanChargesAsDataSource", "Authority", new { area = "Member" }).Data("FilterSearchParameter"))
+                        .Aggregates(aggregates => aggregates.Add(p => p.Amount).Sum())
+                        )
+                )
+            </div>
+
+        </div>
+
+        <div class="row form-group">
+            <div class="col-md-2">
+                <label>Comment</label>
+            </div>
+            <div class="col-md-10">
+                @Html.TextAreaFor(model => model.ServiceModel.Comment, htmlAttributes: new { @class = "k-textbox", style = "width:96%;height:70px;" })
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-2">
+                <label></label>
+            </div>
+            <div class="col-md-9 doc" style="">
+                <input type="file" class="lettersingle k-upload" name="letterfiles" id="letterfiles" />
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-md-12" style="text-align:center;">
+                <input type="button" class="k-button" id="btnStatusSubmit" value="Submit" style="min-width:100px;" />
+                <input type="button" class="k-button" id="btnStatusClose" value="Close" style="min-width:100px;" />
+            </div>
+        </div>
+
+
+    </div>
+} 
+
+
+<script>
+    $(document).ready(function () {
+        $('.btn-document').click(function () {
+            AddDocument();
+        });
+
+        $("#btn-add-amount").click(function () {
+            AddChallanDetail()
+        });
+
+        $("#doc-checkbox").click(function () {
+            ToggleDocumentCheckbox();
+        });
+
+        $("#doc-checkbox").change(function () {
+            ToggleDocumentCheckbox();
+        });
+
+        $("#charge-checkbox").click(function () {
+            ToggleChargeCheckbox();
+        });
+
+        $("#charge-checkbox").change(function () {
+            ToggleChargeCheckbox();
+        });
+
+        ToggleDocumentCheckbox();
+        ToggleChargeCheckbox();
+        //ChargeDetailGridEvent();
+        //RequiredDocumentsGridEvent();
+    });
+
+    function FilterParamForDocument() {
+        return {
+            DepartmentId: $("#ServiceModel_DepartmentId").val(),
+            ServiceId: $("#ServiceModel_ServiceId").val(),
+        };
+    }
+
+    function FilterAccountHeadId() {
+        return {
+            id: $("#ServiceModel_AccountHeadId").val()
+        };
+    }
+
+    function FilterSearchParameter() {
+        return {
+            RegistrationId: $("#ServiceModel_RegistrationId").val(),
+            RequestRefId: $("#ServiceModel_RequestId").val(),
+        }
+    }
+
+    function ToggleObjectionStatus() {
+        if ($('#ServiceModel_StatusId').val() == '@NAStatusId.Objection') {
+            $('.row-checkbox-selection').show();
+        }
+        else {
+            $("#doc-checkbox").prop("checked", false);
+            $("#charge-checkbox").prop("checked", false);
+
+            $('.row-checkbox-selection').css("display", "none");
+            $('#div-document-selection').css("display", "none");
+            $('#div-charges-selection').css("display", "none");
+        }
+        RequiredDocumentsGridEvent();
+        ChargeDetailGridEvent();
+    }
+
+    function ToggleDocumentCheckbox() {
+        if ($("#doc-checkbox").is(':checked')) {
+            $('#div-document-selection').show();
+            //$('#row-document-grid').css("display", "block");
+            //$('.col-document-grid').css("display", "block");
+        }
+        else {
+            $('#div-document-selection').css("display", "none");
+            //$('#row-document-grid').css("display", "none");
+            //$('.col-document-grid').css("display", "none");
+        }
+        RequiredDocumentsGridEvent();
+    }
+
+    function ToggleChargeCheckbox() {
+        if ($("#charge-checkbox").is(':checked')) {
+            $('#div-charges-selection').show();
+            //$('#div-charges-grid').css("display", "block");
+        }
+        else {
+            $('#div-charges-selection').css("display", "none");
+            //$('#div-charges-grid').css("display", "none");
+        }
+        ChargeDetailGridEvent();
+    }
+
+    function ChargeDetailGridEvent() {
+        if ($('#gridChargeDetails').data("kendoGrid").dataSource.total() == 0) {
+            $('#div-charges-grid').css("display", "none");
+        }
+        else {
+            //var rid = $('#gridChargeDetails').data("kendoGrid").dataSource._data[0].RegistrationId;
+            if ($("#charge-checkbox").is(':checked')) {
+                $('#div-charges-grid').css("display", "block");
+                $('#gridChargeDetails').show();
+            }
+            else {
+                $('#div-charges-grid').css("display", "none");
+            }
+        }
+    }
+
+    function RequiredDocumentsGridEvent() {
+        if ($('#gridRequiredDocuments').data("kendoGrid").dataSource.total() == 0) {
+            $('#row-document-grid').css("display", "none");
+            $('.col-document-grid').css("display", "none");
+        }
+        else {
+            //var rid = $('#gridChargeDetails').data("kendoGrid").dataSource._data[0].RegistrationId;
+            if ($("#doc-checkbox").is(':checked')) {
+                $('#row-document-grid').css("display", "block");
+                $('.col-document-grid').css("display", "block");
+            }
+            else {
+                $('#row-document-grid').css("display", "none");
+                $('.col-document-grid').css("display", "none");
+            }
+        }
+    }
+
+    function AddDocument() {
+        if ($('#ServiceModel_DocumentId').val() != "") {
+            var document = {
+                RegistrationId: $("#ServiceModel_RegistrationId").val(),
+                DepartmentId: $("#ServiceModel_DepartmentId").val(),
+                RequestRefId: $("#ServiceModel_RequestId").val(),
+                DocumentId: $("#ServiceModel_DocumentId").val(),
+                Id: $("#ServiceModel_DocumentId").val(),
+                DocumentName: $("#ServiceModel_DocumentId").data("kendoDropDownList").text(),
+                ActionType: "Add"
+            };
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ model: document }),
+                url: '/Member/ServiceRequest/SaveDocumentTypesInSession',
+                success: function (result) {
+                    if (result == '@ReturnType.Saved') {
+                        $("#ServiceModel_DocumentId").data("kendoDropDownList").value("");
+                        $("#gridRequiredDocuments").data("kendoGrid").dataSource.read();
+                        $("#row-document-grid").show();
+                        alertify.success("Data saved successfully.");
+                        return false;
+                    }
+                    else {
+                        alertify.error("Data is not saved.");
+                        return true;
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    alertify.error("Network error, Please try again later.");
+                }
+            });
+        }
+       
+        
+        }
+
+
+        function AddChallanDetail() {
+           
+            if ($("#ServiceModel_AccountHeadId").val() == "") {
+                alertify.error("Please select Account Head.");
+                return false;
+            }
+            if ($("#ServiceModel_AccountSubHeadId").val() == "") {
+                alertify.error("Please select Sub Account Head.");
+                return false;
+            }
+            if ($("#txt-amount").val() == "") {
+                alertify.error("Please enter  Amount.");
+                return false;
+            }
+            else{
+            var challan = {
+                RegistrationId: $("#ServiceModel_RegistrationId").val(),
+                DepartmentId: $("#ServiceModel_DepartmentId").val(),
+                AccountHeadId: $("#ServiceModel_AccountHeadId").val(),
+                AccountSubHeadId: $("#ServiceModel_AccountSubHeadId").val(),
+                AccountHead: $("#ServiceModel_AccountHeadId").data("kendoDropDownList").text(),
+                AccountSubHead: $("#ServiceModel_AccountSubHeadId").data("kendoDropDownList").text(),
+                //Amount: $("#ServiceModel_Amount").val()
+                Amount: $("#txt-amount").val()
+            };
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ model: challan }),
+                url: '/Member/Authority/SaveTempChallanChargeDetail',
+                success: function (result) {
+                    if (result == '@ReturnType.Saved') {
+                        $("#ServiceModel_AccountHeadId").data("kendoDropDownList").value("");
+                        $("#ServiceModel_AccountSubHeadId").data("kendoDropDownList").value("");
+                        //$("#ServiceModel_Amount").data("kendoNumericTextBox").value("");
+                        $("#gridChargeDetails").data("kendoGrid").dataSource.read();
+                        $("#div-charges-grid").css("display", "block");
+                        //$("#gridChargeDetails").show();
+                        alertify.success("Data saved successfully.");
+                        return false;
+                    }
+                    else {
+                        alertify.error("Data is not saved.");
+                        return true;
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    alertify.error("Network error, Please try again later.");
+                }
+            });
+            }
+        }
+
+
+        function RemoveChallanDetails(row) {
+            var tr = $(row).parent().parent();
+            var id = $(tr).children("td:eq(0)").text();
+            var rid = $(tr).children("td:eq(1)").text();
+            var headname = $(tr).children("td:eq(2)").text();
+            var subheadname = $(tr).children("td:eq(3)").text();
+            var amount = $(tr).children("td:eq(4)").text();
+            var removeNotification = confirm('Are you sure to remove this details?');
+            if (removeNotification) {
+                var challan = {
+                    Id: id,
+                    RegistrationId: rid,
+                    AccountHead: headname,
+                    AccountSubHead: subheadname,
+                    Amount: amount
+                };
+                $.ajax({
+                    type: 'POST',
+                    data: { model: challan },
+                    url: '@(Url.Action("RemoveTempChallanChargeDetail", "Authority", new { area="Member"}))',
+                    success: function (result) {
+                        if (result == '@ReturnType.Removed') {
+                            $('#gridChargeDetails').data('kendoGrid').dataSource.read();
+                            //$('#gridChargeDetails').data('kendoGrid').refresh();
+                            alertify.success("Charges removed successfully.");
+                        }
+                        else {
+                            alert("Charge Detail is not removed");
+                            return false;
+                        }
+                    }
+                });
+            }
+            else {
+                return false;
+            }
+        }
+
+        function RemoveTempDocument(row) {
+            var tr = $(row).parent().parent();
+            var id = $(tr).children("td:eq(0)").text();
+            var rid = $(tr).children("td:eq(1)").text();
+            var requestId = $(tr).children("td:eq(2)").text();
+            var serialNo = $(tr).children("td:eq(3)").text();
+            var docname = $(tr).children("td:eq(4)").text();
+            var removeNotification = confirm('Are you sure to remove this details?');
+            if (removeNotification) {
+                var document = {
+                    Id: id,
+                    RegistrationId: rid,
+                    RequestId: requestId,
+                    SerialNo: serialNo,
+                    DocumentName: docname,
+                    ActionType: "Remove"
+                };
+                $.ajax({
+                    type: 'POST',
+                    data: { model: document },
+                    @*url: '@(Url.Action("RemoveTempChallanChargeDetail", "Authority", new { area="Member"}))',*@
+                    url: '/Member/ServiceRequest/SaveDocumentTypesInSession',
+                    success: function (result) {
+                        if (result == '@ReturnType.Removed') {
+                            $('#gridRequiredDocuments').data('kendoGrid').dataSource.read();
+                            alertify.success("Document removed successfully.");
+                        }
+                        else {
+                            alert("Document is not removed");
+                            return false;
+                        }
+                    }
+                });
+            }
+            else {
+                return false;
+            }
+        }
+</script>

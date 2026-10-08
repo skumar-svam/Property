@@ -1,0 +1,73 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@using NA.PMS.Common;
+@using NA.PMS.Model
+@model NA.PMS.Model.PaymentViewModel
+
+
+
+<h2 class="blck-heading" style="margin-bottom:0px;">Payment History</h2>
+<div class="col-md-12 k-grid-content" id="div-payment-history">
+    @(Html.Kendo().Grid<NA.PMS.Model.PaymentReceipt>()
+        .Name("gridPaymentReceipt")
+        .ToolBar(t=>t.Template("<button class='k-button' onclick='javascript:PrintPaymentHistory()'>Print</button>"))
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.RECEIPT_ID).Title("Receipt No").Width(130);
+            columns.Bound(c => c.CHALLAN_ID).Title("Challan No").Width(130);
+            //columns.Bound(c => c.RECEIPT_HEAD_Name).Title("Receipt Head");
+            columns.Bound(c => c.DEPOSIT_DATE).Title("Clearing Date").Format("{0:dd-MMM-yyyy}").Width(140);
+            columns.Bound(c => c.DEPOSIT_DATE).Title("Deposit Date").Format("{0:dd-MMM-yyyy}").Width(140);
+            columns.Bound(c => c.RECEIPT_SUBHEAD_Name).Title("Receipt Head").ClientGroupFooterTemplate("<div>Total: </div>");
+            columns.Bound(c => c.AMOUNT_PAID).Title("Amount Paid").Width(150).ClientGroupFooterTemplate("<div><span class='fa fa-rupee'></span>#=sum#</div>");
+        })
+        //.Groupable()
+        .Filterable().Resizable(resize => resize.Columns(true))
+        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(new[] { 10, 50, 100, 500 }).Info(true).PreviousNext(true).Input(true).Numeric(true).ButtonCount(10))
+        .DataSource
+        (
+            dataSource => dataSource
+                .Ajax().Sort(sort=>sort.Add(a=>a.DEPOSIT_DATE))
+                .Model(model => model.Id(p => p.ID))
+                .ServerOperation(true)
+                .Read(read => read.Action("GetReceiptSchedule", "PropertyAllotment", new { area="Property"}).Data("AdditionalInfo")).PageSize(100)
+                .Group(g => g.Add(f => f.DEPOSIT_DATE))
+                .Aggregates(aggregates => aggregates.Add(p => p.AMOUNT_PAID).Sum())
+                .Sort(s => s.Add(i => i.DEPOSIT_DATE).Ascending())
+        )
+    )
+</div>
+
+<script type="text/javascript">
+    function AdditionalInfo() {
+        return {
+            rid: $('#hdn-registration-id').val()
+        }
+    }
+
+
+    function PrintPaymentHistory() {
+        var contents = document.getElementById("div-payment-history").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('<style>#div-payment-history{width:100%;} table{width:1000px;}  tr{ width:100%;}  td{width:120px;}</style>');
+        frameDoc.document.write('<style>.k-grid-pager{display:none;}</style>');
+        frameDoc.document.write('<style>#div-payment-histor .k-grid table tr.k-group-footer{border:1px solid black;}</style>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+</script>

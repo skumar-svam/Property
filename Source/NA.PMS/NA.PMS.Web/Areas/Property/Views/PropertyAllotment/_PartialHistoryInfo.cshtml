@@ -1,0 +1,377 @@
+﻿@model NA.PMS.Model.AllottedPropertyViewModel
+@using Kendo.Mvc.UI;
+
+
+<div class="col-md-12 nav-sub-group" style="padding-top:5px;">
+    <ul class="nav nav-tabs content-tabs" id="ulProperty" role="tablist" style="float:right;">
+        <li class="active"><a href="#transfer-history" role="tab" data-toggle="tab">Transfer</a></li>
+        <li><a href="#mortgage-history" role="tab" data-toggle="tab">Mortgage</a></li>
+        <li><a href="#extension-history" role="tab" data-toggle="tab">Extension</a></li>
+        <li><a href="#rent-history" role="tab" data-toggle="tab">Rent Permission</a></li>
+        <li><a href="#cic-history" role="tab" data-toggle="tab">CIC</a></li>
+        <li><a href="#functional-history" role="tab" data-toggle="tab">Functional</a></li>
+    </ul>
+</div>
+
+<div class="col-md-12 tabbable tab-content" style="border:solid #e2e3e4; border-width:0 1px">
+    <div class="row tab-pane fade in active" id="transfer-history">
+        <div class="col-md-12 k-grid-content">
+            <h2 class="blck-heading-grid">Transfer</h2>
+            @(Html.Kendo().Grid<NA.PMS.Model.TransferViewModel>()
+                .Name("TransferHistoryGrid")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.RegistrationId).Hidden(true);
+                    columns.Group(group => group
+                        .Title("Transferee").HeaderHtmlAttributes(new {style="text-align:center" })
+                        .Columns(info =>
+                        {
+                            info.Bound(x => x.Transferee).Title("Name");
+                            info.Bound(x => x.TransfereeAddress).Title("Address");
+                        })
+                    );
+                    columns.Group(group => group
+                        .Title("Applicant").HeaderHtmlAttributes(new { style = "text-align:center" })
+                        .Columns(info =>
+                        {
+                            info.Bound(x => x.Applicant).Title("Name");
+                            info.Bound(x => x.ApplicantAddress).Title("Address");
+                        })
+                    );
+                    columns.Group(group => group
+                        .Title(" ").HeaderHtmlAttributes(new { style = "text-align:center" })
+                        .Columns(info =>
+                        {
+                            info.Bound(x => x.TransferDate).Title("Date").Width(110).Format("{0:dd-MMM-yyyy}");
+                            info.Bound(x => x.TransferType).Title("Type").Width(100);
+                        })
+                    );
+                    columns.Group(group => group
+                        .Title("Status").HeaderHtmlAttributes(new { style = "text-align:center" })
+                        .Columns(info =>
+                        {
+                            info.Bound(x => x.TransferStatus).Title(" ").Width(100);
+                            info.Bound(x => x.IsActive).Title(" ").Width(100).ClientTemplate("#if(IsActive){#<label>Active</label>#}else{#<label>InActive</label>#}#");
+                        })
+                    );
+                })
+                .Resizable(resize => resize.Columns(true))
+                //.Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .AutoBind(true)
+                .DataSource
+                (
+                     dataSource => dataSource
+                    .Ajax().Model(model => model.Id(p => p.RegistrationId))
+                    .ServerOperation(true)
+                    .Read(read => read.Action("GetTransferHistoryByIdAsDataSource", "PropertyAllotment", new { area = "Property" }).Data("AdditionalInfo"))
+                    //.PageSize(10)
+                )
+            )
+        </div>
+
+        <div class="col-md-12 k-grid-content">
+            <h2 class="blck-heading-grid">GPA</h2>
+            @(Html.Kendo().Grid<NA.PMS.Model.TransferViewModel>()
+                .Name("GPAHistoryGrid")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.Id).Hidden(true);
+                    columns.Bound(c => c.GPAHolderName).Title("Name");
+                    columns.Bound(c => c.GPAHolderAddress).Title("Address");
+                    columns.Bound(c => c.GPAEffectiveFrom).Title("From").Width(110).Format("{0:dd-MMM-yyyy}");
+                    columns.Bound(c => c.GPAEffectiveTo).Title("To").Width(110).Format("{0:dd-MMM-yyyy}");
+                    columns.Bound(c => c.Relation).Title("Relation").Width(120);
+                    columns.Bound(c => c.IsActive).Title("Status").Width(100).ClientTemplate("#if(IsActive){#<label>Active</label>#}else{#<label>InActive</label>#}#");
+                })
+                .Resizable(resize => resize.Columns(true))
+                //.Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .AutoBind(true)
+                .DataSource
+                (
+                        dataSource => dataSource
+                    .Ajax().Model(model => model.Id(p => p.RegistrationId))
+                    .ServerOperation(true)
+                    .Read(read => read.Action("GetTransferHistoryByIdAsDataSource", "PropertyAllotment", new { area = "Property" }).Data("AdditionalInfoG"))
+                    //.PageSize(10)
+                )
+            )
+        </div>
+
+        <div class="col-md-12 k-grid-content" id="div-nominee-grid">
+            <h2 class="blck-heading-grid">Nominee</h2>
+            @(Html.Kendo().Grid<NA.PMS.Model.TransferViewModel>()
+                .Name("NomineeHistoryGrid")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.Id).Hidden(true);
+                    columns.Bound(c => c.Nominee).Title("Name");
+                    columns.Bound(c => c.Relation).Title("Relation");
+                    columns.Bound(c => c.ApprovedDate).Title("Date").Format("{0:dd/MM/yyyy}");
+                    columns.Bound(c => c.IsActive).Title("Status").Width(100).ClientTemplate("#if(IsActive){#<label>Active</label>#}else{#<label>InActive</label>#}#");
+                })
+                .Resizable(resize => resize.Columns(true))
+                //.Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .AutoBind(true)
+                .Events(e=>e.DataBound("NomineeGridDataEvent"))
+                .DataSource
+                (
+                     dataSource => dataSource
+                    .Ajax().Model(model => model.Id(p => p.RegistrationId))
+                    .ServerOperation(true)
+                    .Read(read => read.Action("GetTransferHistoryByIdAsDataSource", "PropertyAllotment", new { area = "Property" }).Data("AdditionalInfoN"))
+                    //.PageSize(10)
+                )
+            )
+        </div>
+    </div>
+
+    <div class="row tab-pane fade" id="mortgage-history">
+        <div class="col-md-12 k-grid-content">
+            <h2 class="blck-heading-grid">Mortgage</h2>
+            @(Html.Kendo().Grid<NA.PMS.Model.MortgageViewModel>()
+                .Name("MortgageHistoryGrid")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.RegistrationId).Hidden(true);
+                    columns.Bound(c => c.BankName).Title("Bank").Width(180);
+                    columns.Bound(c => c.BranchAddress).Title("Branch");
+                    columns.Bound(c => c.MortgageDate).Title("Date").Width(110).Format("{0:dd-MMM-yyyy}");
+                    columns.Bound(c => c.ProcessingFee).Title("Charge").Width(110);
+                    columns.Bound(c => c.SanctionedAmount).Title("Sanctioned(Rs).").Width(130);
+                    columns.Bound(c => c.ValidUpto).Title("Validity").Width(110).Format("{0:dd-MMM-yyyy}");
+                    columns.Bound(c => c.MortgageStatus).Title("Status").Width(100);
+                })
+                .Resizable(resize => resize.Columns(true))
+                //.Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .AutoBind(true)
+                .DataSource
+                (
+                        dataSource => dataSource
+                    .Ajax().Model(model => model.Id(p => p.RegistrationId))
+                    .ServerOperation(true)
+                    .Read(read => read.Action("GetMortgageHistoryByIdAsDataSource", "PropertyAllotment", new { area = "Property" }).Data("AdditionalInfoM"))
+                    //.PageSize(10)
+                )
+            )
+        </div>
+    </div>
+
+    <div class="row tab-pane fade" id="extension-history">
+         <div class="col-md-12 k-grid-content">
+            <h2 class="blck-heading-grid">Extension</h2>
+            @(Html.Kendo().Grid<NA.PMS.Model.ExtensionViewModel>()
+                .Name("ExtensionHistoryGrid")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.RegistrationId).Hidden(true);
+                    columns.Bound(c => c.ExtensionGivenDate).Title("Given Date").Format("{0:dd/MM/yyyy}");
+                    columns.Bound(c => c.ExtensionDueDate).Title("Due Date").Format("{0:dd/MM/yyyy}");
+                    columns.Bound(c => c.CompletionDueDate).Title("Completion Due Date").Format("{0:dd/MM/yyyy}");
+                    columns.Bound(c => c.ExtensionCharge).Title("Charge");
+                    columns.Bound(c => c.ApprovedDate).Title("Approved").Format("{0:dd/MM/yyyy}");
+                    columns.Bound(c => c.ExtensionStatus).Title("Status");
+                })
+                .Resizable(resize => resize.Columns(true))
+                //.Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .AutoBind(true)
+                .DataSource
+                (
+                     dataSource => dataSource
+                    .Ajax().Model(model => model.Id(p => p.RegistrationId))
+                    .ServerOperation(true)
+                    .Read(read => read.Action("GetExtensionHistoryByIdAsDataSource", "PropertyAllotment", new { area = "Property" }).Data("AdditionalInfoE"))
+                    //.PageSize(10)
+                )
+            )
+            </div>
+    </div>
+
+    <div class="row tab-pane fade" id="rent-history">
+        <div class="col-md-12 k-grid-content">
+            <h2 class="blck-heading-grid">Renting</h2>
+            @(Html.Kendo().Grid<NA.PMS.Model.RentingViewModel>()
+                .Name("RentGrid")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.Id).Hidden(true);
+                    columns.Bound(c => c.Applicant).Title("Applicant's Name");
+                    columns.Bound(c => c.RequestDate).Title("Request Date").Format("{0:dd-MM-yyyy}"); 
+                    columns.Bound(c => c.RentStatus).Title("Status");
+                    columns.Bound(c => c.TenantName).Title("Tenant Name");
+                })
+                .Resizable(resize => resize.Columns(true))
+                //.Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .DataSource(dataSource => dataSource
+                    .Ajax().Model(model => model.Id(p => p.Id))
+                    .ServerOperation(true).Sort(sort => sort.Add(m=>m.Id).Descending())
+                    .Read(read => read.Action("GetRentingHistoryByIdAsDataSource", "PropertyAllotment").Data("AdditionalInfoR"))//.PageSize(10)
+                    //.Model(model => model.Id(backup => backup.RID))
+                    )
+            )
+        </div>
+    </div>
+
+    <div class="row tab-pane fade" id="cic-history">
+        <div class="col-md-12 k-grid-content">
+            <h2 class="blck-heading-grid">Director/Shareholder</h2>
+            @(Html.Kendo().Grid<NA.PMS.Model.CICViewModel>()
+                .Name("DirectorGrid")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.Id).Hidden(true);
+                    columns.Bound(c => c.DirectorName).Title("Name");
+                    columns.Bound(c => c.DirectorShare).Title("Share(%)").Width(100);
+                    columns.Bound(c => c.TypeName).Title("Type").Width(150);
+                    columns.Bound(c => c.CICCharge).Title("Charge").Width(100);
+                    columns.Bound(c => c.RequestDate).Title("Request Date").Width(130).Format("{0:dd-MMM-yyyy}");
+                    columns.Bound(c => c.ApprovedDate).Title("Approval Date").Width(130).Format("{0:dd-MMM-yyyy}");
+                    columns.Bound(c => c.IsCICActive).Title("Status").Width(100).HtmlAttributes(new { @class = "td-active" }).ClientTemplate("#if(IsCICActive==1){#<label>Active</label>#}else{#<label class='lbl-active'>InActive</label>#}#");
+                })
+                //.Sortable().Filterable()
+                .Resizable(resize => resize.Columns(true))
+                .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .DataSource(dataSource => dataSource
+                    .Ajax().Model(model => model.Id(p => p.Id))
+                    .ServerOperation(true).Sort(sort => sort.Add(m => m.Id).Descending())
+                    .Read(read => read.Action("GetCICHistoryByIdAsDataSource", "PropertyAllotment", new { area="Property"}).Data("AdditionalInfoCICD")).PageSize(10)
+                    //.Model(model => model.Id(backup => backup.RID))
+                    )
+            )
+        </div>
+
+        <div class="col-md-12 k-grid-content">
+            <h2 class="blck-heading-grid">Firm/Product</h2>
+            @(Html.Kendo().Grid<NA.PMS.Model.CICViewModel>()
+                .Name("FirmProductGrid")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.Id).Hidden(true);
+                    columns.Bound(c => c.OldFirmName).Title("Old Firm").Sortable(false).Filterable(false);
+                    columns.Bound(c => c.OldFirmStatus).Title("Old Status");
+                    columns.Bound(c => c.NewFirmName).Title("New Firm");
+                    columns.Bound(c => c.NewFirmStatus).Title("New Status");
+                    columns.Bound(c => c.RequestDate).Title("Request Date").Format("{0:dd-MMM-yyyy}");
+                    columns.Bound(c => c.ApprovedDate).Title("Approval Date").Format("{0:dd-MMM-yyyy}");
+                    columns.Bound(c => c.IsCICActive).Title("Share").ClientTemplate("#if(IsCICActive==1){#<label>Active</label>#}else{#<label id='lbl-inactive'>InActive</label>#}#");
+                })
+                //.Sortable().Filterable()
+                .Resizable(resize => resize.Columns(true))
+                    //.Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .DataSource(dataSource => dataSource
+                    .Ajax().Model(model => model.Id(p => p.Id))
+                    .ServerOperation(true).Sort(sort => sort.Add(m => m.Id).Descending())
+                    .Read(read => read.Action("GetCICHistoryByIdAsDataSource", "PropertyAllotment", new { area="Property"}).Data("AdditionalInfoCICF"))//.PageSize(10)
+                    //.Model(model => model.Id(backup => backup.RID))
+                    )
+            )
+        </div>
+    </div>
+
+    <div class="row tab-pane fade" id="functional-history">
+        <div class="col-md-12 k-grid-content">
+            <h2 class="blck-heading-grid">Functional</h2>
+            @(Html.Kendo().Grid<NA.PMS.Model.FunctionalViewModel>()
+                .Name("FunctionalGrid")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.Id).Hidden(true);
+                    //columns.Bound(c => c.Applicant).Title("Applicant");
+                    columns.Bound(c => c.FunctionalDueDate).Title("Due Date").Format("{0:dd-MMM-yyyy}");
+                    columns.Bound(c => c.FunctionalDate).Title("Done Date").Format("{0:dd-MMM-yyyy}");
+                    columns.Bound(c => c.FunctionalCharge).Title("Charge");
+                    columns.Bound(c => c.IsFunctional).Title("Status").ClientTemplate("#if(IsFunctional){#<label>Functional</label>#}else{#<label>Not Functional</label>#}#");
+                    columns.Bound(c => c.IsRegistered).Title("Registration").ClientTemplate("#if(IsRegistered){#<label>Registered</label>#}else{#<label>Not Registered</label>#}#");
+                    columns.Bound(c => c.IsMeterSealed).Title("Meter").ClientTemplate("#if(IsMeterSealed){#<label>Sealed</label>#}else{#<label>Not Sealed</label>#}#");
+                })
+                .Resizable(resize => resize.Columns(true))
+                //.Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .DataSource(dataSource => dataSource
+                    .Ajax().Model(model => model.Id(p => p.Id))
+                    .ServerOperation(true).Sort(sort => sort.Add(m => m.Id).Descending())
+                    .Read(read => read.Action("GetFunctionalHistoryByIdAsDataSource", "PropertyAllotment").Data("AdditionalInfoF"))//.PageSize(10)
+                    //.Model(model => model.Id(backup => backup.RID))
+                    )
+            )
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        
+    });
+
+    function NomineeGridDataEvent(event) {
+        var grid = event.sender;
+
+        if ($('#NomineeHistoryGrid').data("kendoGrid").dataSource.total() == 0) {
+            $('#div-nominee-grid').hide();
+        }
+        else {
+            $('#div-nominee-grid').show();
+        }
+    }
+
+    function AdditionalInfo() {
+        return {
+            //rid: $('#CustomerModel_RegistrationId').val()
+            RegistrationId: 20000133,
+            ActionType: "Transfer"
+        }
+    }
+    function AdditionalInfoG() {
+        return {
+            //rid: $('#CustomerModel_RegistrationId').val()
+            RegistrationId: 20000133,
+            ActionType: "GPA"
+        }
+    }
+    function AdditionalInfoN() {
+        return {
+            //rid: $('#CustomerModel_RegistrationId').val()
+            RegistrationId: 20000133,
+            ActionType: "Nominee"
+        }
+    }
+
+    function AdditionalInfoM() {
+        return {
+            //rid: $('#CustomerModel_RegistrationId').val()
+            RegistrationId: 40005318// 90100459
+        }
+    }
+    function AdditionalInfoE() {
+        return {
+            //rid: $('#CustomerModel_RegistrationId').val()
+            RegistrationId: 40011757// 90100459
+        }
+    }
+    function AdditionalInfoR() {
+        return {
+            //rid: $('#CustomerModel_RegistrationId').val()
+            RegistrationId: 40002456
+        }
+    }
+
+    function AdditionalInfoF() {
+        return {
+            //rid: $('#CustomerModel_RegistrationId').val()
+            RegistrationId: 40002135
+        }
+    }
+
+    function AdditionalInfoCICD() {
+        return {
+            //rid: $('#CustomerModel_RegistrationId').val()
+            RegistrationId: 40011524,
+            ActionType: "Directors"
+        }
+    }
+    function AdditionalInfoCICF() {
+        return {
+            //rid: $('#CustomerModel_RegistrationId').val()
+            RegistrationId: 40001154,
+            ActionType: "FirmName"
+        }
+    }
+</script>

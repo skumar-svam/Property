@@ -1,0 +1,173 @@
+﻿
+@model NA.PMS.Model.PaymentLedgerViewModel
+@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+
+@{
+    ViewBag.Title = "ManageLedger";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1" id="bank-challan">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Payment Ledger</h1></div>            
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw" style="margin-bottom:20px;"></div>
+    <div class="col-md-12 content-top-spce">
+        <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px;">
+            <div class="form-bx form-box">
+                <div class="row">
+                    <div class="col-md-10">
+                        <div class="col-md-3 col-sm-4 col-xs-12 form-group">
+                            @Html.Label("Registration Id", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-4 col-xs-12 form-group" id="divDropDownRid">
+                            @(Html.Kendo().DropDownListFor(m => m.RegistrationId)
+                            .Filter("contains")
+                            .DataTextField("Text")
+                            .DataValueField("Id")
+                            .OptionLabel("---Select---")
+                            .Enable(true)
+                            .AutoBind(true)
+                            .DataSource(source =>
+                            {
+                                source.Custom()
+                                .ServerFiltering(true)
+                                .ServerPaging(true)
+                                .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                .Transport(transport => { transport.Read("GetRegistrationIdList", "Payment", new { area = "Revenue" }); })
+                                .Schema(schema => { schema.Data("Data").Total("Total"); })
+                                .PageSize(100);
+                            })
+                            //.Events(events => { events.Change("CheckRidExistOrNot"); })
+                            .HtmlAttributes(new { @class = "col-custom", style = "width:90%; float:right;" })
+                            )
+                        </div>
+                        <div class="col-md-3 col-sm-4 col-xs-12 form-group verify-btn">
+
+                        </div>
+                        <div class="col-md-3 col-sm-4 col-xs-12 form-group verify-btn">
+                            <input type="button" value="Generate Ledger" id="btnLedger" class="btn btn-default" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row" id="LedgerHeader">
+                    <div style="text-align:center;margin-bottom:10px;"><h4 style="font-weight:700;">Payment Ledger</h4></div>
+                    @Html.HiddenFor(m => m.Id)
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12" id="divPaymentLedger" style="padding-left:30px;">
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 form-group" style="text-align:center;padding:10px;">
+                        <button id="btnPrint" class="btn btn-default" onclick="javascript:PrintChallan()">Print</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#LedgerHeader").hide();
+        $("#btnPrint").hide();
+        $("#btnLedger").click(function () {
+            var rid = $("#RegistrationId").val();
+            if (rid == "") {
+                alertify.error("Please enter Registration Id");
+                return false;
+            }
+
+            if (rid != "") {
+                if (rid.length != 8) {
+                    alertify.error("Registration Id should be of 8 digits.");
+                    return false;
+                }
+            }
+        });
+
+        $('#btnLedger').click(function () {
+            CheckRidExistOrNot();
+        });
+    });
+
+
+
+    function CheckRidExistOrNot() {
+        var rid = $('#RegistrationId').val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ RegistrationId: rid }),
+            url: '/Revenue/Payment/IsPaymentExistForRid',
+            success: function (result) {
+                if (result =='@ReturnType.Exist') {
+                    ViewLedger();
+                }
+                else {
+                    alertify.error("Payment doesn't exist for this RId");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Network Error, please try again later.");
+            }
+        });
+    }
+
+    function ViewLedger() {
+        var RID = $('#RegistrationId').val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ RegistrationId: RID }),
+            url: '/Revenue/Payment/GetGeneratedLedgerByRId',
+            success: function (result) {
+                if (result != null && result != '') {
+                    $('#Id').val(result.Id);
+                    $("#LedgerHeader").show();
+                    $("#btnPrint").show();
+                    $("#divPaymentLedger").html(result);
+                }
+                else {
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Network Error, please try again later.");
+            }
+        });
+    }
+    function PrintChallan() {
+        var contents = document.getElementById("divPaymentLedger").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<style>.td-amount {padding-right: 30px;}#divPaymentLedger {padding: 5px;font-size:10pt;}#authorityChallan {border: 1px solid black;padding: 5px;} .h4-dept{margin-top:0px; margin-bottom:0px;}.h4-noida{margin-bottom:2px;}</style>');
+        frameDoc.document.write('</head><body style="font-size:10pt;">');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+</script>

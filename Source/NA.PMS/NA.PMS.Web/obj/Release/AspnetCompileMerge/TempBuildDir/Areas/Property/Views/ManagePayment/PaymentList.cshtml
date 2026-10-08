@@ -1,0 +1,51 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@model NA.PMS.Model.PaymentViewModel
+
+@{
+    ViewBag.Title = "Manage Payment";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="ManagePayment">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Payments</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                @Html.ActionLink("Add Payment", "Payment")
+                @*<a href="#" id="btnRequest" class="" onclick="javascript: AddPayment(event);">Add Payment</a>*@
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.PaymentViewModel>()
+            .Name("gridManagePayment")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.EncodedRid).Hidden();
+                columns.Bound(c => c.ReceiptId).Title("Receipt ID");
+                columns.Bound(c => c.RegistrationNo).Title("Registration Id").ClientTemplate("<a href='" + "/Property/ManagePayment/Payment/#= EncodedRid #'>#=RegistrationNo#</a>");
+                columns.Bound(c => c.DepartmentName).Title("Department");
+                columns.Bound(c => c.AllotteeName).Title("Applicant");
+                columns.Bound(c => c.PropertyNo).Title("Property No.");
+                columns.Bound(c => c.Amount).Title("Amount");
+                columns.Bound(c => c.DepositDate).Title("Deposit Date").Format("{0:dd-MM-yyyy}");
+                columns.Bound(c => c.EntryDate).Title("Entry Date").Format("{0:dd-MM-yyyy}");
+            })
+            .Sortable()
+            .Filterable()
+            .Groupable()
+                //.Events(e => e.DataBound("onDataBound"))
+            .Resizable(resize => resize.Columns(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+            .DataSource
+            (
+                dataSource => dataSource
+                    .Ajax().Model(model => model.Id(p => p.ReceiptId)).ServerOperation(true)//.Sort(sort => sort.Add("RECEIPT_ID").Descending())
+                    .Read(read => read.Action("GetPropertyPaymentDetails_Read", "ManagePayment")).PageSize(12)//.Group(g => g.Add(r => r.RID_NO))
+            )
+        )
+    </div>
+</div>

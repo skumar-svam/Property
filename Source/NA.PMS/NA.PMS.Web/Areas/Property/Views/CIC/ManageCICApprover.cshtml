@@ -1,0 +1,86 @@
+﻿@model NA.PMS.Model.CICModel
+@using Kendo.Mvc.UI;
+@{
+    ViewBag.Title = "ManageCICApprover";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="ManageCICApprover">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Change In Directors (CID)</h1></div>
+            <div class="col-md-6 col-sm-6 col-xs-12 mandatory"></div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12" style="border:solid #e2e3e4; border-width:0 1px 0 1px">
+        <ul class="nav nav-tabs content-tabs" id="ulProperty" role="tablist">
+            <li class="active"><a href="#one" role="tab" data-toggle="tab">Directors/Shareholders</a></li>
+            <li><a href="#two" role="tab" data-toggle="tab">Firm Name/Status/Product Name</a></li>
+        </ul>
+    </div>
+    <div class="col-md-12 tab-content">
+        <div class="tab-pane fade in active k-grid-content" id="one">
+            <h2 class="blck-heading-grid">Change In Constitution</h2>
+            @(Html.Kendo().Grid<NA.PMS.Model.CICModel>()
+               .Name("gridCIC")
+              .Columns(columns =>
+              {
+                  columns.Bound(c => c.Director_Id).Title("Request No").Width(130).ClientTemplate("<a href='" + "/Property/CIC/ViewCICApproval/" + "?ReqID=#= Director_Id #&Type=#=Change_Type#'" + ">#=Director_Id#</a>");
+                  //columns.Bound(c => c.Director_Id).Title("Request No").Width(40).ClientTemplate("<a href='" + "/Property/CIC/ViewCIC/" + "?ReqID=#= Director_Id #&Type=#=Change_Type#'" + ">#=Director_Id#</a>");
+                  columns.Bound(c => c.Rid).Title("Registration Id").Width(150);
+                  columns.Bound(c => c.DepartmentName).Title("Department Name");
+                  columns.Bound(c => c.PropNo).Title("Property Number");
+                  columns.Bound(c => c.Request_Date).Title("Requested Date").Format("{0:dd/MM/yyyy}");
+                  columns.Bound(c => c.Approved_Date).Title("Approved Date").Format("{0:dd/MM/yyyy}");
+                  columns.Bound(c => c.Change_Type).Hidden(true);
+                  columns.Bound(c => c.AssignTo).Title("AssignTo");
+                  columns.Bound(c => c.StatusName).Title("Status");
+              })
+              .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+              .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+              .DataSource
+              (
+                 dataSource => dataSource
+                .Ajax().Model(model => model.Id(p => p.Director_Id))
+                .ServerOperation(true).Sort(sort => sort.Add("Director_Id").Descending()).Read(read => read.Action("GetAllCICByApprover", "CIC"))
+                .PageSize(10)
+              )
+            )
+        </div>
+
+        <div class="tab-pane fade  k-grid-content" id="two">
+            <h2 class="blck-heading-grid">Change In Firm Name/Firm Status/Product Name</h2>
+            @(Html.Kendo().Grid<NA.PMS.Model.CICModel>()
+                       .Name("gridFirmProductStatus")
+              .Columns(columns =>
+              {
+                  columns.Bound(c => c.Director_Id).Title("Request No").Width(130).ClientTemplate("<a href='" + "/Property/CIC/ViewCICApproval/" + "?ReqID=#= Director_Id #&Type=#=Change_Type#'" + ">#=Director_Id#</a>");
+                  columns.Bound(c => c.Rid).Title("Registration Id").Width(150);
+                  columns.Bound(c => c.DepartmentName).Title("Department Name");
+                  columns.Bound(c => c.PropNo).Title("Property No");
+                  columns.Bound(c => c.ChangeTypeName).Title("CIC Type");
+                  columns.Bound(c => c.Request_Date).Title("Request Date").Format("{0:dd/MM/yyyy}");
+                  columns.Bound(c => c.Approved_Date).Title("Approver Date").Format("{0:dd/MM/yyyy}");
+                  columns.Bound(c => c.Change_Type).Hidden(true);
+                  columns.Bound(c => c.AssignTo).Title("AssignTo");
+                  columns.Bound(c => c.StatusName).Title("Status");
+              })
+              .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+              .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+              .DataSource
+              (
+                 dataSource => dataSource
+                        .Ajax().Model(model => model.Id(p => p.Director_Id))
+                         .ServerOperation(true).Sort(sort => sort.Add("Director_Id").Descending()).Read(read => read.Action("GetAllFirmProductStatusByApprover", "CIC"))
+                .PageSize(10)
+              )
+            )
+        </div>
+    </div>
+
+
+</div>
+
+
+

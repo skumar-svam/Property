@@ -1,0 +1,1171 @@
+﻿@using Kendo.Mvc.UI
+@using NA.PMS.Common
+@using System.Linq
+@{
+    <link href="~/Content/MvcGrid/mvc-grid.css" rel="stylesheet" />
+}
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Areas/Reports/Views/Dashboard/_DashboardLayout.cshtml";
+}
+@{
+    Html.RenderPartial("_PartialFilterNiveshMitra");
+    <br />
+}
+<style>
+    .k-grid .k-grid-header .k-header .k-link {
+        overflow: visible !important;
+        white-space: normal !important;
+        text-align: center;
+        font-weight: 800;
+        /*color: white;*/
+    }
+
+    #GridSeviceTimeline .k-grid-footer {
+        background-color: cornsilk;
+    }
+
+    .k-footer-template td {
+        background: #78c3b9;
+        color: black;
+    }
+
+    /*.k-grid td{
+        padding:0.6em 0.0em;
+    }*/
+
+    /*CSS for sticky div*/
+    .header {
+     padding: 6px 16px;
+     background: #fff;
+     color: #f1f1f1;
+     z-index: 1000;
+     border: 1px solid #ccccccb3;
+    }
+    .content {
+      padding: 16px;
+    }
+    .sticky {
+      position: fixed;
+      top: 0;
+      width: 100%
+    }
+
+    .sticky + .content {
+      padding-top: 102px;
+    }
+
+</style>
+<div id="container">
+    <div id="_departmenttabs" style="display: none" class="header">
+        <ul class="nav nav-pills">
+            <li class="nav-item active">
+                <a class="nav-link active" href="#_alldeptchart" data-toggle="tab" id="AllDepartments" onclick="fnGetAllDeptGrid()">All Departments</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#_showInstitutional" data-toggle="tab" id="Institutional" onclick="ServiceByDepartment('1')">Institutional</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#_showCommercial" data-toggle="tab" id="Commercial" onclick="ServiceByDepartment('2')">Commercial</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#_showResidential" data-toggle="tab" id="Residential" onclick="ServiceByDepartment('3')">Residential</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#_showIndustrial" data-toggle="tab" id="Industrial" onclick="ServiceByDepartment('4')">Industrial</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#_showHousing" data-toggle="tab" id="Housing" onclick="ServiceByDepartment('5')">Housing</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#_showGroupHousing" data-toggle="tab" id="GroupHousing" onclick="ServiceByDepartment('6')">Group Housing</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#_showAbadi" data-toggle="tab" id="Abadi" onclick="ServiceByDepartment('7')">5% Abaadi</a>
+            </li>
+        </ul>
+    </div>
+    <div id="_alldept" class="tab-content">
+        <div id="_alldeptchart" class="chart-container tab-pane fade in active show" style="height:80vh; width:80vw">
+            <canvas id="myBarChart"></canvas>
+        </div>
+        <div class="tab-pane fade chart-container" id="_showInstitutional" style="height:80vh; width:80vw">
+            <canvas id="institutionalBarChart"></canvas>
+        </div>
+        <div class="tab-pane fade chart-container" id="_showCommercial" style="height:80vh; width:80vw">
+            <canvas id="commercialBarChart"></canvas>
+        </div>
+        <div class="tab-pane fade chart-container" id="_showResidential" style="height:80vh; width:80vw">
+            <canvas id="ResidentialBarChart"></canvas>
+        </div>
+        <div class="tab-pane fade chart-container" id="_showIndustrial" style="height:80vh; width:80vw">
+            <canvas id="IndustrialBarChart"></canvas>
+        </div>
+        <div class="tab-pane fade chart-container" id="_showHousing" style="height:80vh; width:80vw">
+            <canvas id="HousingBarChart"></canvas>
+        </div>
+        <div class="tab-pane fade chart-container" id="_showGroupHousing" style="height:80vh; width:80vw">
+            <canvas id="GroupHousingBarChart"></canvas>
+        </div>
+        <div class="tab-pane fade chart-container" id="_showAbadi" style="height:80vh; width:80vw">
+            <canvas id="AbadiBarChart"></canvas>
+        </div>
+    </div>
+    <br />
+    <br />
+    <div id="_alldeptgrid">
+        <div class="row rw-spce" id="_allgriddata">
+            <div class="col-md-12">
+                <input type="hidden" id="DeptId" />
+                @*<h2 class=" blck-heading" style="border-left:1px solid white;border-right:1px solid white;margin-bottom:0;color:white;background-color:#3f3f92;" id="ServiceHead">Timeline Of Services ( Online and JSK )</h2>*@
+                @*<h2 class=" blck-heading" style="" id="ServiceHead">Timeline Of Services ( Online & JSK )</h2>*@
+                <div class="col-md-12 k-grid-content">
+                    @(Html.Kendo().Grid<NA.PMS.MTC.MasterDashboardModel>()
+                    .Name("GridSeviceTimeline")
+                    .Excel(excel => excel
+                    .AllPages(true).Filterable(true)
+                    .FileName("AllPropertyDepartment.xlsx"))
+                    .ToolBar(toolsExcel => toolsExcel.Excel())
+                    .Columns(columns =>
+                    {
+                        columns.Bound(c => c.DepartmentId).Hidden(true);
+                        columns.Bound(c => c.Department).Title("Department").Width(110).ClientFooterTemplate("Total Count:").Width(200).HeaderHtmlAttributes(new { style = "text-align: center;background-color:#fff8dc;" });
+                        columns.Bound(c => c.TotalReceived).Title("Total Request").Width(110).ClientFooterTemplate("#=sum#").HeaderHtmlAttributes(new { style = "text-align: center;background-color:#fff8dc;" });
+                        columns.Group(g =>
+                            g.Title("Completed").HeaderHtmlAttributes(new { style = "text-align: center;background-color:#63d827;" })//background-color:#63d827;
+                            .Columns(info =>
+                            {
+                                info.Bound(x => x.CompletedWithinTime).Title("Within Time").ClientFooterTemplate("#=sum#").HeaderHtmlAttributes(new { style = "text-align: center;background-color:#fff8dc;" });//.HeaderHtmlAttributes(new { style = "background-color:lawngreen;" });compBackClr                                                                                                                                                                                                                                                                      // info.Bound(x => x.CompletedWithinTime).Title("Within Time").ClientFooterTemplate("#=sum#").ClientTemplate("<label class='btn_successround '>#= CompletedWithinTime #</label>");
+                                info.Bound(x => x.CompletedBeyondTime).Title("Beyond Time").ClientFooterTemplate("#=sum#").HeaderHtmlAttributes(new { style = "text-align: center;background-color:#fff8dc;" });//.HeaderHtmlAttributes(new { style = "background-color:#ffa500;" })compBeyondBackClr
+                                //info.Bound(x => x.TotalReject).Title("Rejected").ClientFooterTemplate("#=sum#");
+                                //info.Bound(x => x.WithDrawn).Title("Withdrawn").ClientFooterTemplate("#=sum#");
+                            })
+                        );
+                        columns.Group(g =>
+                            g.Title("Pending").HeaderHtmlAttributes(new { style = "text-align: center;background-color:#ffdab3;font-weight:900;" })
+                            .Columns(info =>
+                            {
+                                info.Bound(x => x.PendingWithTime).Title("Within Time").ClientFooterTemplate("#=sum#").HeaderHtmlAttributes(new { style = "text-align: center;background-color:#fff8dc;"});//.HeaderHtmlAttributes(new { style = "background-color:yellow" })pendingwithinBackClr
+                                info.Bound(c => c.PendingMoreThanWeek).Title("More Than a Week").ClientFooterTemplate("#=sum#").HeaderHtmlAttributes(new { style = "text-align: center;background-color:#fff8dc;" });//.HeaderHtmlAttributes(new { style = "background-color:#fa8072;" })MoreThanWeekBackClr
+                                info.Bound(c => c.PendingMoreThanFortNight).Title("More Than Fortnight").ClientFooterTemplate("#=sum#").HeaderHtmlAttributes(new { style = "text-align: center;background-color:#fff8dc;" });
+                                info.Bound(c => c.PendingMoreThanOneMonth).Title("More Than a Month").ClientFooterTemplate("#=sum#").HeaderHtmlAttributes(new { style = "text-align: center;background-color:#fff8dc;" });//.HeaderHtmlAttributes(new { style = "background-color:#8b0000;" })MoreThanMonthBackClr
+                                info.Bound(c => c.TotalObjection).Title("Objection").ClientFooterTemplate("#=sum#").HeaderHtmlAttributes(new { style = "text-align: center;background-color:#fff8dc;" });
+                            })
+                        );
+                        columns.Bound(c => c.AverageProcessingTime).ClientFooterTemplate("#=average#").HeaderHtmlAttributes(new { style = "text-align: center;background-color:#fff8dc;" });
+                        columns.Bound(c => c.AverageDelaytime).ClientFooterTemplate("#=average#").HeaderHtmlAttributes(new { style = "text-align: center;background-color:#fff8dc;" });
+                    })
+                    .Resizable(resize => resize.Columns(true))
+                    //.Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                    .AutoBind(true)
+                    .DataSource
+                    (
+                        dataSource => dataSource
+                        .Ajax().ServerOperation(true)
+                        .Read(read => read.Action("GetServiceTimelineReportsAsDataSource", "Dashboard", new { area = "MasterDashboard" }).Data("FilterParameterTimeline"))
+                        .Aggregates(aggregates =>
+                        {
+                            aggregates.Add(p => p.TotalReceived).Sum();
+                            aggregates.Add(p => p.CompletedWithinTime).Sum();
+                            aggregates.Add(p => p.CompletedBeyondTime).Sum();
+                            aggregates.Add(p => p.PendingWithTime).Sum();
+                            aggregates.Add(p => p.PendingMoreThanWeek).Sum();
+                            aggregates.Add(p => p.PendingMoreThanFortNight).Sum();
+                            aggregates.Add(p => p.PendingMoreThanOneMonth).Sum();
+                            aggregates.Add(p => p.TotalReject).Sum();
+                            aggregates.Add(p => p.TotalObjection).Sum();
+                            aggregates.Add(p => p.WithDrawn).Sum();
+                            aggregates.Add(p => p.AverageProcessingTime).Average();
+                            aggregates.Add(p => p.AverageDelaytime).Average();
+                        })
+                    )
+                        )
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="Servicegrid">
+        <div class="row rw-spce" id="ServiceDepartmentWise">
+            <div class="col-md-12">
+                <input type="hidden" id="hdSubType" />
+                <input type="hidden" id="hdServiceId" />
+                <div class="col-md-12 k-grid-content">
+                    @(Html.Kendo().Grid<NA.PMS.MTC.MasterDashboardModel>() //NA.PMS.Model.MasterDashboardModel
+                    .Name("GridServiceDetailsDeptWise")
+                    //.Scrollable()
+                    .Columns(columns =>
+                    {
+                        columns.Bound(c => c.ServiceId).Hidden(true);
+                        columns.Bound(c => c.ServiceName).Title("Service Name").ClientFooterTemplate("Total Count:").Width(200).HeaderHtmlAttributes(new { style = "text-align: center;background-color:#fff8dc;" });
+                        columns.Bound(c => c.TotalReceived).Title("Total Request").ClientTemplate("<input type='button' value='#= TotalReceived #' class='k-button btn_total TotalBackClr' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,1)'>").ClientFooterTemplate("#=sum#").HeaderHtmlAttributes(new { style = "text-align: center;background-color:#fff8dc;" });//TotalBackClr
+                        //columns.Bound(c => c.AverageProcessingTime).Title("Average Processing Time").ClientTemplate("<input type='button' value='#= TotalObjection #' class='k-button btn_successround objectionBackClr' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,9)'>").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "" });
+                        //columns.Bound(c => c.AverageDelaytime).Title("Average Delay Time").ClientTemplate("<input type='button' value='#= TotalObjection #' class='k-button btn_successround objectionBackClr' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,9)'>").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "" });
+                        columns.Group(g =>
+                        g.Title("Completed").HeaderHtmlAttributes(new { style = "text-align: center;background-color:#63d827" })//background-color:#63d827;
+                        .Columns(info =>
+                        {
+                            info.Bound(x => x.CompletedWithinTime).Title("Within Time").ClientTemplate("<input type='button' value='#= CompletedWithinTime #' class='k-button btn_successround compBackClr' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,2)'>").ClientFooterTemplate("#=sum#").HeaderHtmlAttributes(new { style = "text-align: center;background-color:#fff8dc;" });
+                            info.Bound(x => x.CompletedBeyondTime).Title("Beyond Time").ClientTemplate("<input type='button' value='#= CompletedBeyondTime #' class='k-button btn_successround compBeyondBackClr' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,3)'>").ClientFooterTemplate("#=sum#").HeaderHtmlAttributes(new { style = "text-align: center;background-color:#fff8dc;" });
+                            //info.Bound(x => x.TotalReject).Title("Rejected").Width(85).ClientTemplate("<input type='button' value='#= TotalReject #' class='k-button btn_successround RejectBackClr' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,8)'>").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "" });
+                            //info.Bound(x => x.WithDrawn).Title("Withdrawn").ClientTemplate("<input type='button' value='#= WithDrawn #' class='k-button btn_successround withdrawnBackClr' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,10)'>").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "" });
+                        })
+                    );
+                        columns.Group(g =>
+                            g.Title("Pending").HeaderHtmlAttributes(new { style = "text-align: center;background-color:#ff9f5e" })//background-color:orange;
+                            .Columns(info =>
+                            {
+                                info.Bound(x => x.PendingWithTime).Title("Within Time").ClientTemplate("<input type='button' value='#= PendingWithTime #' class='k-button btn_successround pendingwithinBackClr' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,4)'>").ClientFooterTemplate("#=sum#").HeaderHtmlAttributes(new { style = "text-align: center;background-color:#fff8dc;" });
+                                info.Bound(c => c.PendingMoreThanWeek).Title("More Than a Week").ClientTemplate("<input type='button' value='#= PendingMoreThanWeek #' class='k-button btn_successround MoreThanWeekBackClr' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,5)'>").ClientFooterTemplate("#=sum#").HeaderHtmlAttributes(new { style = "text-align: center;background-color:#fff8dc;" });
+                                info.Bound(c => c.PendingMoreThanFortNight).Title("More Than Fortnight").ClientTemplate("<input type='button' value='#= PendingMoreThanFortNight #' class='k-button btn_successround MoreThanFortnightBackClr' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,6)'>").ClientFooterTemplate("#=sum#").HeaderHtmlAttributes(new { style = "text-align: center;background-color:#fff8dc;" });
+                                info.Bound(c => c.PendingMoreThanOneMonth).Title("More Than a Month").ClientTemplate("<input type='button' value='#= PendingMoreThanOneMonth #' class='k-button btn_successround MoreThanMonthBackClr' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,7)'>").ClientFooterTemplate("#=sum#").HeaderHtmlAttributes(new { style = "text-align: center;background-color:#fff8dc;" });
+                                info.Bound(c => c.TotalObjection).Title("Objection").ClientTemplate("<input type='button' value='#= TotalObjection #' class='k-button btn_successround objectionBackClr' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,9)'>").ClientFooterTemplate("#=sum#").HeaderHtmlAttributes(new { style = "text-align: center;background-color:#fff8dc;" });
+                                //info.Bound(c => c.AverageProcessingTime).Title("Average Processing Time").ClientTemplate("<input type='button' value='#= TotalObjection #' class='k-button btn_successround objectionBackClr' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,9)'>").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "" });
+                                //info.Bound(c => c.AverageDelaytime).Title("Average Delay Time").ClientTemplate("<input type='button' value='#= TotalObjection #' class='k-button btn_successround objectionBackClr' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,9)'>").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "" });
+                            })
+                        );
+                        columns.Bound(c => c.AverageProcessingTime).ClientFooterTemplate("#=average#").Format("{0:n2}").HeaderHtmlAttributes(new { style = "text-align: center;background-color:#fff8dc;" });
+                        columns.Bound(c => c.AverageDelaytime).ClientFooterTemplate("#=average#").Format("{0:n2}").HeaderHtmlAttributes(new { style = "text-align: center;background-color:#fff8dc;" });
+                    })
+                    .Resizable(resize => resize.Columns(true))
+                    .AutoBind(true)
+                    .Events(events => events
+                    .DataBound("Autocolumnwidth")
+                    )
+                    .DataSource
+                    (
+                        dataSource => dataSource
+                        .Ajax().ServerOperation(true)
+                        .Read(read => read.Action("GetServiceTimelineReportsAsDataSource", "Dashboard", new { area = "MasterDashboard" }).Data("FilterData"))
+                        .Aggregates(aggregates =>
+                        {
+                        aggregates.Add(p => p.TotalReceived).Sum();
+                        aggregates.Add(p => p.CompletedWithinTime).Sum();
+                        aggregates.Add(p => p.CompletedBeyondTime).Sum();
+                        aggregates.Add(p => p.PendingWithTime).Sum();
+                        aggregates.Add(p => p.PendingMoreThanWeek).Sum();
+                        aggregates.Add(p => p.PendingMoreThanFortNight).Sum();
+                        aggregates.Add(p => p.PendingMoreThanOneMonth).Sum();
+                        aggregates.Add(p => p.TotalObjection).Sum();
+                        aggregates.Add(p => p.TotalReject).Sum();
+                        aggregates.Add(p => p.WithDrawn).Sum();
+                        aggregates.Add(p => p. AverageProcessingTime).Average();
+                        aggregates.Add(p => p.AverageDelaytime).Average();
+                        })
+                        
+                    ))
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+    <br>
+    
+    <br />
+    <br />
+</div>
+<div id="myModal" class="modal fade" role="dialog">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Service Requests</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title"></h4>
+            </div>
+            <div class="modal-body">
+                <div id="grid2">
+                    <div class="row rw-spce" id="ServiceDetailsDeptWise">
+                        <div class="col-md-12">
+                            @*<h2 class=" blck-heading" style="border-left:1px solid green;border-right:1px solid green;margin-bottom:0;" id="service">Service Details</h2>*@
+                            <div class="col-md-12 k-grid-content">
+                                @(Html.Kendo().Grid<NA.PMS.MTC.MasterDashboardModel>()
+                                .Name("GridSeviceDetails")
+                                .Excel(excel => excel
+                                .AllPages(true).Filterable(true)
+                                .FileName("PropertyServiceRequestReport.xlsx"))
+                                .ToolBar(toolsExcel => toolsExcel.Excel())
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(c => c.RequestId).Title("Ref No").Width(110).ClientTemplate("<a href='" + "/Member/ServiceRequest/RequestDetail/#= RequestId #" + "' target='_blank'>#=RequestId#</a>");
+                                    columns.Bound(c => c.RegistrationNo).Title("RegistrationId").Width(110);
+                                    columns.Bound(c => c.PropertyNo).Title("Property No").Width(110);
+                                    columns.Bound(c => c.Applicant).Title("Applicant Name").Width(160);
+                                    columns.Bound(c => c.RequestDate).Title("Request Date").Width(110).Format("{0:dd-MMM-yyyy}");
+                                    columns.Bound(c => c.Status).Title("Status").Width(110);
+                                    columns.Bound(c => c.Approver).Title("Forwarded To").Width(110);
+                                    columns.Bound(c => c.ValidationDate).Title("Forwarded Date").Width(110).Format("{0:dd-MMM-yyyy}");
+                                    columns.Bound(c => c.ApprovalDate).Title("Approval Date").Width(110).Format("{0:dd-MMM-yyyy}");
+                                })
+                                .Resizable(resize => resize.Columns(true))
+                                .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                                .AutoBind(true)
+                                .DataSource
+                                (
+                                    dataSource => dataSource
+                                    .Ajax().ServerOperation(true)
+                                    .Read(read => read.Action("GetServiceTimelineReportsAsDataSource", "Dashboard", new { area = "MasterDashboard" }).Data("FilterDataByServiceId"))
+                                ))
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#_allgriddata').hide();
+        $('#ServiceDepartmentWise').hide();
+        $('#ServiceDetailsDeptWise').hide();
+    });
+    var deptid = 0;
+    var myBarChart = null;
+    var institutionalBarChart = null;
+    var commercialBarChart = null;
+    var ResidentialBarChart = null;
+    var IndustrialBarChart = null;
+    var HousingBarChart = null;
+    var GroupHousingBarChart = null;
+    var AbadiBarChart = null;
+
+    var institutional = [];
+    var commercial = [];
+    var residential = [];
+    var industrial = [];
+    var housing = [];
+    var grouphousing = [];
+    var abaadi = [];
+    function OnSuccess(data) {
+        debugger
+        $('#_departmenttabs').show();
+        institutional.length = 0;
+        commercial.length = 0;
+        residential.length = 0;
+        industrial.length = 0;
+        housing.length = 0;
+        grouphousing.length = 0;
+        abaadi.length = 0;
+
+        for (var it in data) {
+            if (data[it].DepartmentId == "1") {
+                institutional.push(data[it].TotalReceived);
+                institutional.push(data[it].WithDrawn);
+                institutional.push(data[it].CompletedWithinTime);
+                institutional.push(data[it].CompletedBeyondTime);
+                institutional.push(data[it].PendingWithTime);
+                institutional.push(data[it].PendingMoreThanWeek);
+                institutional.push(data[it].PendingMoreThanFortNight);
+                institutional.push(data[it].PendingMoreThanOneMonth);
+                institutional.push(data[it].TotalReject);
+                institutional.push(data[it].TotalObjection);
+                //institutional.push(data[it].Total);
+                institutional.push(data[it].AverageProcessingTime);
+                institutional.push(data[it].AverageDelaytime);
+                institutional.push(data[it].TotalCompleted);
+                institutional.push(data[it].TotalPending);
+            }
+            if (data[it].DepartmentId == "2") {
+                commercial.push(data[it].TotalReceived);
+                commercial.push(data[it].WithDrawn);
+                commercial.push(data[it].CompletedWithinTime);
+                commercial.push(data[it].CompletedBeyondTime);
+                commercial.push(data[it].PendingWithTime);
+                commercial.push(data[it].PendingMoreThanWeek);
+                commercial.push(data[it].PendingMoreThanFortNight);
+                commercial.push(data[it].PendingMoreThanOneMonth);
+                commercial.push(data[it].TotalReject);
+                commercial.push(data[it].TotalObjection);
+                //commercial.push(data[it].Total);
+                commercial.push(data[it].AverageProcessingTime);
+                commercial.push(data[it].AverageDelaytime);
+                commercial.push(data[it].TotalCompleted);
+                commercial.push(data[it].TotalPending);
+            }
+            if (data[it].DepartmentId == "3") {
+                residential.push(data[it].TotalReceived);
+                residential.push(data[it].WithDrawn);
+                residential.push(data[it].CompletedWithinTime);
+                residential.push(data[it].CompletedBeyondTime);
+                residential.push(data[it].PendingWithTime);
+                residential.push(data[it].PendingMoreThanWeek);
+                residential.push(data[it].PendingMoreThanFortNight);
+                residential.push(data[it].PendingMoreThanOneMonth);
+                residential.push(data[it].TotalReject);
+                residential.push(data[it].TotalObjection);
+                //residential.push(data[it].Total);
+                residential.push(data[it].AverageProcessingTime);
+                residential.push(data[it].AverageDelaytime);
+                residential.push(data[it].TotalCompleted);
+                residential.push(data[it].TotalPending);
+            }
+            if (data[it].DepartmentId == "4") {
+                industrial.push(data[it].TotalReceived);
+                industrial.push(data[it].WithDrawn);
+                industrial.push(data[it].CompletedWithinTime);
+                industrial.push(data[it].CompletedBeyondTime);
+                industrial.push(data[it].PendingWithTime);
+                industrial.push(data[it].PendingMoreThanWeek);
+                industrial.push(data[it].PendingMoreThanFortNight);
+                industrial.push(data[it].PendingMoreThanOneMonth);
+                industrial.push(data[it].TotalReject);
+                industrial.push(data[it].TotalObjection);
+                //industrial.push(data[it].Total);
+                industrial.push(data[it].AverageProcessingTime);
+                industrial.push(data[it].AverageDelaytime);
+                industrial.push(data[it].TotalCompleted);
+                industrial.push(data[it].TotalPending);
+            }
+            if (data[it].DepartmentId == "5") {
+                housing.push(data[it].TotalReceived);
+                housing.push(data[it].WithDrawn);
+                housing.push(data[it].CompletedWithinTime);
+                housing.push(data[it].CompletedBeyondTime);
+                housing.push(data[it].PendingWithTime);
+                housing.push(data[it].PendingMoreThanWeek);
+                housing.push(data[it].PendingMoreThanFortNight);
+                housing.push(data[it].PendingMoreThanOneMonth);
+                housing.push(data[it].TotalReject);
+                housing.push(data[it].TotalObjection);
+                //housing.push(data[it].Total);
+                housing.push(data[it].AverageProcessingTime);
+                housing.push(data[it].AverageDelaytime);
+                housing.push(data[it].TotalCompleted);
+                housing.push(data[it].TotalPending);
+            }
+            if (data[it].DepartmentId == "6") {
+                grouphousing.push(data[it].TotalReceived);
+                grouphousing.push(data[it].WithDrawn);
+                grouphousing.push(data[it].CompletedWithinTime);
+                grouphousing.push(data[it].CompletedBeyondTime);
+                grouphousing.push(data[it].PendingWithTime);
+                grouphousing.push(data[it].PendingMoreThanWeek);
+                grouphousing.push(data[it].PendingMoreThanFortNight);
+                grouphousing.push(data[it].PendingMoreThanOneMonth);
+                grouphousing.push(data[it].TotalReject);
+                grouphousing.push(data[it].TotalObjection);
+                //grouphousing.push(data[it].Total);
+                grouphousing.push(data[it].AverageProcessingTime);
+                grouphousing.push(data[it].AverageDelaytime);
+                grouphousing.push(data[it].TotalCompleted);
+                grouphousing.push(data[it].TotalPending);
+            }
+            if (data[it].DepartmentId == "7") {
+                abaadi.push(data[it].TotalReceived);
+                abaadi.push(data[it].WithDrawn);
+                abaadi.push(data[it].CompletedWithinTime);
+                abaadi.push(data[it].CompletedBeyondTime);
+                abaadi.push(data[it].PendingWithTime);
+                abaadi.push(data[it].PendingMoreThanWeek);
+                abaadi.push(data[it].PendingMoreThanFortNight);
+                abaadi.push(data[it].PendingMoreThanOneMonth);
+                abaadi.push(data[it].TotalReject);
+                abaadi.push(data[it].TotalObjection);
+                //abaadi.push(data[it].Total);
+                abaadi.push(data[it].AverageProcessingTime);
+                abaadi.push(data[it].AverageDelaytime);
+                abaadi.push(data[it].TotalCompleted);
+                abaadi.push(data[it].TotalPending);
+            }
+        }
+
+        //$('#myBarChart').css('display', 'block');
+        //************dispose old values in chart*****************//////
+        if (myBarChart) {
+            myBarChart.destroy();
+        }
+
+        var ctx = document.getElementById('myBarChart').getContext('2d');
+        myBarChart = new Chart(ctx, {
+            type: 'horizontalBar',
+            data: {
+                labels: ['Total Received', 'WithDraw', 'CompletedWithinTime', 'CompletedBeyondTime', 'PendingWithTime', 'PendingMoreThanWeek', 'PendingMoreThanFortNight', 'PendingMoreThanOneMonth', 'TotalReject', 'TotalObjection', 'AverageProcessingTime', 'AverageDelaytime', 'TotalCompleted', 'TotalPending'],
+                datasets: [{
+                    label: 'Institutional',
+                    data: institutional,
+                    backgroundColor: '#FFC0CB',
+                    barPercentage: 0.5,
+                    barThickness: 6,
+                    maxBarThickness: 6,
+                    minBarLength: 2,
+                },
+                {
+                    label: 'Commercial',
+                    data: commercial,
+                    backgroundColor: '#FFA07A',
+                    barPercentage: 0.5,
+                    barThickness: 6,
+                    maxBarThickness: 6,
+                    minBarLength: 2,
+                },
+                {
+                    label: 'Residential',
+                    data: residential,
+                    backgroundColor: '#00FFFF',
+                    barPercentage: 0.5,
+                    barThickness: 6,
+                    maxBarThickness: 6,
+                    minBarLength: 2,
+                },
+                {
+                    label: 'Industrial',
+                    data: industrial,
+                    backgroundColor: '#00BFFF',
+                    barPercentage: 0.5,
+                    barThickness: 6,
+                    maxBarThickness: 6,
+                    minBarLength: 2,
+                },
+                {
+                    label: 'Housing',
+                    data: housing,
+                    backgroundColor: '#2F4F4F',
+                    barPercentage: 0.5,
+                    barThickness: 6,
+                    maxBarThickness: 6,
+                    minBarLength: 2
+                },
+                {
+                    label: 'Group Housing',
+                    data: grouphousing,
+                    backgroundColor: '#000080',
+                    barPercentage: 0.5,
+                    barThickness: 6,
+                    maxBarThickness: 6,
+                    minBarLength: 2
+                },
+                {
+                    label: '5% Abadi',
+                    data: abaadi,
+                    backgroundColor: '#4169E1',
+                    barPercentage: 0.5,
+                    barThickness: 6,
+                    maxBarThickness: 6,
+                    minBarLength: 2
+                },
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    xAxes: [{
+                        stacked: true
+                    }],
+                    yAxes: [{
+                        barThickness: 15,
+                        stacked: true,
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+        fnGetAllDeptGrid();
+        fnPlotInstitutionalBarChart();
+        fnPlotCommercialBarChart();
+        fnPlotResidentialBarChart();
+        fnPlotIndustrialBarChart();
+        fnPlotHousingBarChart();
+        fnPlotGroupHousing();
+        fnPlotAbadiBarChart();
+    }
+    function fnPlotInstitutionalBarChart() {
+        if (institutionalBarChart) {
+            institutionalBarChart.destroy();
+        }
+        var ctx1 = document.getElementById('institutionalBarChart').getContext('2d');
+        institutionalBarChart = new Chart(ctx1, {
+            type: 'horizontalBar',
+            data: {
+                labels: ['Total Received', 'WithDraw', 'CompletedWithinTime', 'CompletedBeyondTime', 'PendingWithTime', 'PendingMoreThanWeek', 'PendingMoreThanFortNight', 'PendingMoreThanOneMonth', 'TotalReject', 'TotalObjection', 'AverageProcessingTime', 'AverageDelaytime', 'TotalCompleted', 'TotalPending'],
+                datasets: [{
+                    label: 'Institutional',
+                    data: institutional,
+                    backgroundColor: '#FFC0CB',
+                    barPercentage: 0.5,
+                    barThickness: 6,
+                    maxBarThickness: 8,
+                    minBarLength: 2,
+                },
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    xAxes: [{
+                        //stacked: true
+                    }],
+                    yAxes: [{
+                        barThickness: 20,
+                        //stacked: true,
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+    }
+    function fnPlotCommercialBarChart() {
+        if (commercialBarChart) {
+            commercialBarChart.destroy();
+        }
+        var ctx2 = document.getElementById('commercialBarChart').getContext('2d');
+        commercialBarChart = new Chart(ctx2, {
+            type: 'horizontalBar',
+            data: {
+                labels: ['Total Received', 'WithDraw', 'CompletedWithinTime', 'CompletedBeyondTime', 'PendingWithTime', 'PendingMoreThanWeek', 'PendingMoreThanFortNight', 'PendingMoreThanOneMonth', 'TotalReject', 'TotalObjection', 'AverageProcessingTime', 'AverageDelaytime', 'TotalCompleted', 'TotalPending'],
+                datasets: [{
+                    label: 'Commercial',
+                    data: commercial,
+                    backgroundColor: '#FFA07A',
+                    barPercentage: 0.5,
+                    barThickness: 6,
+                    maxBarThickness: 8,
+                    minBarLength: 2,
+                },
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    xAxes: [{
+                        //stacked: true
+                    }],
+                    yAxes: [{
+                        barThickness: 20,
+                        //stacked: true,
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+    }
+    function fnPlotResidentialBarChart() {
+        if (ResidentialBarChart) {
+            ResidentialBarChart.destroy();
+        }
+        var ctx3 = document.getElementById('ResidentialBarChart').getContext('2d');
+        ResidentialBarChart = new Chart(ctx3, {
+            type: 'horizontalBar',
+            data: {
+                labels: ['Total Received', 'WithDraw', 'CompletedWithinTime', 'CompletedBeyondTime', 'PendingWithTime', 'PendingMoreThanWeek', 'PendingMoreThanFortNight', 'PendingMoreThanOneMonth', 'TotalReject', 'TotalObjection', 'AverageProcessingTime', 'AverageDelaytime', 'TotalCompleted', 'TotalPending'],
+                datasets: [{
+                    label: 'Residential',
+                    data: residential,
+                    backgroundColor: '#00FFFF',
+                    barPercentage: 0.5,
+                    barThickness: 6,
+                    maxBarThickness: 8,
+                    minBarLength: 2,
+                },
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    xAxes: [{
+                        //stacked: true
+                    }],
+                    yAxes: [{
+                        barThickness: 20,
+                        //stacked: true,
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+    }
+    function fnPlotIndustrialBarChart() {
+        if (IndustrialBarChart) {
+            IndustrialBarChart.destroy();
+        }
+        var ctx4 = document.getElementById('IndustrialBarChart').getContext('2d');
+        IndustrialBarChart = new Chart(ctx4, {
+            type: 'horizontalBar',
+            data: {
+                labels: ['Total Received', 'WithDraw', 'CompletedWithinTime', 'CompletedBeyondTime', 'PendingWithTime', 'PendingMoreThanWeek', 'PendingMoreThanFortNight', 'PendingMoreThanOneMonth', 'TotalReject', 'TotalObjection', 'AverageProcessingTime', 'AverageDelaytime', 'TotalCompleted', 'TotalPending'],
+                datasets: [{
+                    label: 'Industrial',
+                    data: industrial,
+                    backgroundColor: '#00BFFF',
+                    barPercentage: 0.5,
+                    barThickness: 6,
+                    maxBarThickness: 8,
+                    minBarLength: 2,
+                },
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    xAxes: [{
+                        //stacked: true
+                    }],
+                    yAxes: [{
+                        barThickness: 20,
+                        //stacked: true,
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+    }
+    function fnPlotHousingBarChart() {
+        if (HousingBarChart) {
+            HousingBarChart.destroy();
+        }
+        var ctx5 = document.getElementById('HousingBarChart').getContext('2d');
+        HousingBarChart = new Chart(ctx5, {
+            type: 'horizontalBar',
+            data: {
+                labels: ['Total Received', 'WithDraw', 'CompletedWithinTime', 'CompletedBeyondTime', 'PendingWithTime', 'PendingMoreThanWeek', 'PendingMoreThanFortNight', 'PendingMoreThanOneMonth', 'TotalReject', 'TotalObjection', 'AverageProcessingTime', 'AverageDelaytime', 'TotalCompleted', 'TotalPending'],
+                datasets: [{
+                    label: 'Housing',
+                    data: housing,
+                    backgroundColor: '#2F4F4F',
+                    barPercentage: 0.5,
+                    barThickness: 6,
+                    maxBarThickness: 8,
+                    minBarLength: 2,
+                },
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    xAxes: [{
+                        //stacked: true
+                    }],
+                    yAxes: [{
+                        barThickness: 20,
+                        //stacked: true,
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+    }
+    function fnPlotGroupHousing() {
+        if (GroupHousingBarChart) {
+            GroupHousingBarChart.destroy();
+        }
+        var ctx6 = document.getElementById('GroupHousingBarChart').getContext('2d');
+        HousingBarChart = new Chart(ctx6, {
+            type: 'horizontalBar',
+            data: {
+                labels: ['Total Received', 'WithDraw', 'CompletedWithinTime', 'CompletedBeyondTime', 'PendingWithTime', 'PendingMoreThanWeek', 'PendingMoreThanFortNight', 'PendingMoreThanOneMonth', 'TotalReject', 'TotalObjection', 'AverageProcessingTime', 'AverageDelaytime', 'TotalCompleted', 'TotalPending'],
+                datasets: [{
+                    label: 'Group Housing',
+                    data: grouphousing,
+                    backgroundColor: '#000080',
+                    barPercentage: 0.5,
+                    barThickness: 6,
+                    maxBarThickness: 8,
+                    minBarLength: 2,
+                },
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    xAxes: [{
+                        //stacked: true
+                    }],
+                    yAxes: [{
+                        barThickness: 20,
+                        //stacked: true,
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+    }
+    function fnPlotAbadiBarChart() {
+        if (AbadiBarChart) {
+            AbadiBarChart.destroy();
+        }
+        var ctx7 = document.getElementById('AbadiBarChart').getContext('2d');
+        AbadiBarChart = new Chart(ctx7, {
+            type: 'horizontalBar',
+            data: {
+                labels: ['Total Received', 'WithDraw', 'CompletedWithinTime', 'CompletedBeyondTime', 'PendingWithTime', 'PendingMoreThanWeek', 'PendingMoreThanFortNight', 'PendingMoreThanOneMonth', 'TotalReject', 'TotalObjection', 'AverageProcessingTime', 'AverageDelaytime', 'TotalCompleted', 'TotalPending'],
+                datasets: [{
+                    label: '5% Abadi',
+                    data: abaadi,
+                    backgroundColor: '#4169E1',
+                    barPercentage: 0.5,
+                    barThickness: 6,
+                    maxBarThickness: 8,
+                    minBarLength: 2,
+                },
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    xAxes: [{
+                        //stacked: true
+                    }],
+                    yAxes: [{
+                        barThickness: 20,
+                        //stacked: true,
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+    }
+    function ServiceByDepartment(element) {
+        debugger
+        deptid = element;
+        //$('#depthead').html("Timeline Of Services Department Wise: " + row1);
+        //$('#GridSeviceTimeline').hide();
+        $('#_allgriddata').hide();
+        $('#ServiceDetailsDeptWise').hide();
+        $('#GridServiceDetailsDeptWise').data("kendoGrid").dataSource.read();
+        $('#ServiceDepartmentWise').show();
+    }
+    function FilterData() {
+        debugger
+        return {
+            ActionType: 'DepartmentWise',
+            //DepartmentId: $('#DeptId').val(),
+            DepartmentId: deptid,
+            StartDate: $('#StartDate').val(),
+            EndDate: $('#EndDate').val(),
+            RequestThrough: 'NIC Nivesh Mitra'
+        }
+    }
+    function ServiceDetailsByServiceId(deptId, serviceId, type) {
+        $('#DeptId').val(deptId);
+        $('#hdSubType').val(type);
+        $('#hdServiceId').val(serviceId);
+        $('#GridSeviceDetails').data("kendoGrid").dataSource.read();
+        $('#ServiceDetailsDeptWise').show();
+        $('#myModal').modal('show');
+    }
+    function FilterDataByServiceId() {
+        return {
+            ActionType: 'ServiceDetails',
+            DepartmentId: deptid,
+            StartDate: $('#StartDate').val(),
+            EndDate: $('#EndDate').val(),
+            ActionTypeId: $('#hdSubType').val(),
+            ServiceId: $('#hdServiceId').val(),
+            RequestThrough: 'NIC Nivesh Mitra'
+        }
+    }
+    function Autocolumnwidth(e) {
+        var grid = e.sender;
+        for (var i = 0; i < grid.columns.length; i++) {
+            grid.autoFitColumn(i);
+        }
+    }
+    function fnGetAllDeptGrid() {
+        debugger
+        $('#ServiceDepartmentWise').hide();
+        $('#ServiceDetailsDeptWise').hide();
+        $('#GridSeviceTimeline').data("kendoGrid").dataSource.read();
+        $('#_allgriddata').show();
+    }
+    function FilterParameterTimeline() {
+        debugger
+        return {
+            ActionType: 'All',
+            StartDate: $('#StartDate').val(),
+            EndDate: $('#EndDate').val(),
+            RequestThrough: 'NIC Nivesh Mitra'
+        }
+    }
+    //get all graphical data on ready call//
+    function GetAllDepartmentGraph() {
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ StatusDate: _StatusDate }),
+            url: '/MasterDashboard/Dashboard/GetDashboardReport',
+            success: function (result) {
+                if (result != null) {
+                    $('#_departmenttabs').show();
+                    institutional.length = 0;
+                    commercial.length = 0;
+                    residential.length = 0;
+                    industrial.length = 0;
+                    housing.length = 0;
+                    grouphousing.length = 0;
+                    abaadi.length = 0;
+
+                    for (var it in data) {
+                        if (data[it].DepartmentId == "1") {
+                            institutional.push(data[it].TotalReceived);
+                            institutional.push(data[it].WithDrawn);
+                            institutional.push(data[it].CompletedWithinTime);
+                            institutional.push(data[it].CompletedBeyondTime);
+                            institutional.push(data[it].PendingWithTime);
+                            institutional.push(data[it].PendingMoreThanWeek);
+                            institutional.push(data[it].PendingMoreThanFortNight);
+                            institutional.push(data[it].PendingMoreThanOneMonth);
+                            institutional.push(data[it].TotalReject);
+                            institutional.push(data[it].TotalObjection);
+                            //institutional.push(data[it].Total);
+                            institutional.push(data[it].AverageProcessingTime);
+                            institutional.push(data[it].AverageDelaytime);
+                            institutional.push(data[it].TotalCompleted);
+                            institutional.push(data[it].TotalPending);
+                        }
+                        if (data[it].DepartmentId == "2") {
+                            commercial.push(data[it].TotalReceived);
+                            commercial.push(data[it].WithDrawn);
+                            commercial.push(data[it].CompletedWithinTime);
+                            commercial.push(data[it].CompletedBeyondTime);
+                            commercial.push(data[it].PendingWithTime);
+                            commercial.push(data[it].PendingMoreThanWeek);
+                            commercial.push(data[it].PendingMoreThanFortNight);
+                            commercial.push(data[it].PendingMoreThanOneMonth);
+                            commercial.push(data[it].TotalReject);
+                            commercial.push(data[it].TotalObjection);
+                            //commercial.push(data[it].Total);
+                            commercial.push(data[it].AverageProcessingTime);
+                            commercial.push(data[it].AverageDelaytime);
+                            commercial.push(data[it].TotalCompleted);
+                            commercial.push(data[it].TotalPending);
+                        }
+                        if (data[it].DepartmentId == "3") {
+                            residential.push(data[it].TotalReceived);
+                            residential.push(data[it].WithDrawn);
+                            residential.push(data[it].CompletedWithinTime);
+                            residential.push(data[it].CompletedBeyondTime);
+                            residential.push(data[it].PendingWithTime);
+                            residential.push(data[it].PendingMoreThanWeek);
+                            residential.push(data[it].PendingMoreThanFortNight);
+                            residential.push(data[it].PendingMoreThanOneMonth);
+                            residential.push(data[it].TotalReject);
+                            residential.push(data[it].TotalObjection);
+                            //residential.push(data[it].Total);
+                            residential.push(data[it].AverageProcessingTime);
+                            residential.push(data[it].AverageDelaytime);
+                            residential.push(data[it].TotalCompleted);
+                            residential.push(data[it].TotalPending);
+                        }
+                        if (data[it].DepartmentId == "4") {
+                            industrial.push(data[it].TotalReceived);
+                            industrial.push(data[it].WithDrawn);
+                            industrial.push(data[it].CompletedWithinTime);
+                            industrial.push(data[it].CompletedBeyondTime);
+                            industrial.push(data[it].PendingWithTime);
+                            industrial.push(data[it].PendingMoreThanWeek);
+                            industrial.push(data[it].PendingMoreThanFortNight);
+                            industrial.push(data[it].PendingMoreThanOneMonth);
+                            industrial.push(data[it].TotalReject);
+                            industrial.push(data[it].TotalObjection);
+                            //industrial.push(data[it].Total);
+                            industrial.push(data[it].AverageProcessingTime);
+                            industrial.push(data[it].AverageDelaytime);
+                            industrial.push(data[it].TotalCompleted);
+                            industrial.push(data[it].TotalPending);
+                        }
+                        if (data[it].DepartmentId == "5") {
+                            housing.push(data[it].TotalReceived);
+                            housing.push(data[it].WithDrawn);
+                            housing.push(data[it].CompletedWithinTime);
+                            housing.push(data[it].CompletedBeyondTime);
+                            housing.push(data[it].PendingWithTime);
+                            housing.push(data[it].PendingMoreThanWeek);
+                            housing.push(data[it].PendingMoreThanFortNight);
+                            housing.push(data[it].PendingMoreThanOneMonth);
+                            housing.push(data[it].TotalReject);
+                            housing.push(data[it].TotalObjection);
+                            //housing.push(data[it].Total);
+                            housing.push(data[it].AverageProcessingTime);
+                            housing.push(data[it].AverageDelaytime);
+                            housing.push(data[it].TotalCompleted);
+                            housing.push(data[it].TotalPending);
+                        }
+                        if (data[it].DepartmentId == "6") {
+                            grouphousing.push(data[it].TotalReceived);
+                            grouphousing.push(data[it].WithDrawn);
+                            grouphousing.push(data[it].CompletedWithinTime);
+                            grouphousing.push(data[it].CompletedBeyondTime);
+                            grouphousing.push(data[it].PendingWithTime);
+                            grouphousing.push(data[it].PendingMoreThanWeek);
+                            grouphousing.push(data[it].PendingMoreThanFortNight);
+                            grouphousing.push(data[it].PendingMoreThanOneMonth);
+                            grouphousing.push(data[it].TotalReject);
+                            grouphousing.push(data[it].TotalObjection);
+                            //grouphousing.push(data[it].Total);
+                            grouphousing.push(data[it].AverageProcessingTime);
+                            grouphousing.push(data[it].AverageDelaytime);
+                            grouphousing.push(data[it].TotalCompleted);
+                            grouphousing.push(data[it].TotalPending);
+                        }
+                        if (data[it].DepartmentId == "7") {
+                            abaadi.push(data[it].TotalReceived);
+                            abaadi.push(data[it].WithDrawn);
+                            abaadi.push(data[it].CompletedWithinTime);
+                            abaadi.push(data[it].CompletedBeyondTime);
+                            abaadi.push(data[it].PendingWithTime);
+                            abaadi.push(data[it].PendingMoreThanWeek);
+                            abaadi.push(data[it].PendingMoreThanFortNight);
+                            abaadi.push(data[it].PendingMoreThanOneMonth);
+                            abaadi.push(data[it].TotalReject);
+                            abaadi.push(data[it].TotalObjection);
+                            //abaadi.push(data[it].Total);
+                            abaadi.push(data[it].AverageProcessingTime);
+                            abaadi.push(data[it].AverageDelaytime);
+                            abaadi.push(data[it].TotalCompleted);
+                            abaadi.push(data[it].TotalPending);
+                        }
+                    }
+
+                    //$('#myBarChart').css('display', 'block');
+                    //************dispose old values in chart*****************//////
+                    if (myBarChart) {
+                        myBarChart.destroy();
+                    }
+
+                    var ctx = document.getElementById('myBarChart').getContext('2d');
+                    myBarChart = new Chart(ctx, {
+                        type: 'horizontalBar',
+                        data: {
+                            labels: ['Total Received', 'WithDraw', 'CompletedWithinTime', 'CompletedBeyondTime', 'PendingWithTime', 'PendingMoreThanWeek', 'PendingMoreThanFortNight', 'PendingMoreThanOneMonth', 'TotalReject', 'TotalObjection', 'AverageProcessingTime', 'AverageDelaytime', 'TotalCompleted', 'TotalPending'],
+                            datasets: [{
+                                label: 'Institutional',
+                                data: institutional,
+                                backgroundColor: '#FFC0CB',
+                                barPercentage: 0.5,
+                                barThickness: 6,
+                                maxBarThickness: 6,
+                                minBarLength: 2,
+                            },
+                            {
+                                label: 'Commercial',
+                                data: commercial,
+                                backgroundColor: '#FFA07A',
+                                barPercentage: 0.5,
+                                barThickness: 6,
+                                maxBarThickness: 6,
+                                minBarLength: 2,
+                            },
+                            {
+                                label: 'Residential',
+                                data: residential,
+                                backgroundColor: '#00FFFF',
+                                barPercentage: 0.5,
+                                barThickness: 6,
+                                maxBarThickness: 6,
+                                minBarLength: 2,
+                            },
+                            {
+                                label: 'Industrial',
+                                data: industrial,
+                                backgroundColor: '#00BFFF',
+                                barPercentage: 0.5,
+                                barThickness: 6,
+                                maxBarThickness: 6,
+                                minBarLength: 2,
+                            },
+                            {
+                                label: 'Housing',
+                                data: housing,
+                                backgroundColor: '#2F4F4F',
+                                barPercentage: 0.5,
+                                barThickness: 6,
+                                maxBarThickness: 6,
+                                minBarLength: 2
+                            },
+                            {
+                                label: 'Group Housing',
+                                data: grouphousing,
+                                backgroundColor: '#000080',
+                                barPercentage: 0.5,
+                                barThickness: 6,
+                                maxBarThickness: 6,
+                                minBarLength: 2
+                            },
+                            {
+                                label: '5% Abadi',
+                                data: abaadi,
+                                backgroundColor: '#4169E1',
+                                barPercentage: 0.5,
+                                barThickness: 6,
+                                maxBarThickness: 6,
+                                minBarLength: 2
+                            },
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                xAxes: [{
+                                    stacked: true
+                                }],
+                                yAxes: [{
+                                    barThickness: 15,
+                                    stacked: true,
+                                    ticks: {
+                                        beginAtZero: true
+                                    }
+                                }]
+                            }
+                        }
+                    });
+                    fnGetAllDeptGrid();
+                    fnPlotInstitutionalBarChart();
+                    fnPlotCommercialBarChart();
+                    fnPlotResidentialBarChart();
+                    fnPlotIndustrialBarChart();
+                    fnPlotHousingBarChart();
+                    fnPlotGroupHousing();
+                    fnPlotAbadiBarChart();
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Network error, Please try again later.");
+            }
+        });
+    }
+
+
+    /*JS for sticky div*/
+    window.onscroll = function () { myFunction() };
+    var header = document.getElementById("_departmenttabs");
+    var sticky = header.offsetTop;
+    function myFunction() {
+        if (window.pageYOffset > sticky) {
+            header.classList.add("sticky");
+        } else {
+            header.classList.remove("sticky");
+        }
+    }
+</script>
+
+

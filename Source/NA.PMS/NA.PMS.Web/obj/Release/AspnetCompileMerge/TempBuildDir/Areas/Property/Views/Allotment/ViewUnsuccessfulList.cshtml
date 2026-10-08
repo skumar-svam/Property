@@ -1,0 +1,270 @@
+﻿@using Kendo.Mvc.UI
+@model NA.PMS.Model.UnsuccessfulApplicant
+@{
+    ViewBag.Title = "View Unsuccessful List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+
+@Html.HiddenFor(us => us.SchemeId)
+@Html.HiddenFor(us => us.DepttId)
+@Html.HiddenFor(us => us.CurrentStatus)
+<div>
+    @*<legend><img src="~/Content/Images/Manage_Allottee_List_Requests-1.png" style="height:60px;" />Manage Allotment</legend>*@
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Refunds - Unsuccessful Applicants</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                @*@if (Model != null)
+                {
+                    if (Model.CurrentStatus == "Approved" || Model.CurrentStatus == "RefundInitiated")
+                    {
+                        <i style="font-size: 18px; " class=" glyphicon glyphicon-ok-sign" aria-hidden="true"></i>
+                        <strong style="color: lightgreen;font-size: 18px; padding-right: 10px; ">  @Html.DisplayFor(model => model.CurrentStatus)</strong>
+                    }
+                    else
+                    {
+                        <strong style="color: red;font-size: 16px; padding-right: 10px; "><i class="glyphicon glyphicon-remove-sign" aria-hidden="true"></i>  @Html.DisplayFor(model => model.CurrentStatus)</strong>
+                    }
+                }*@
+                <input type="button" value="View Comments" id="btnComment" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+
+
+
+
+    <div class="k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.UnsuccessfulApplicant>()
+        .Name("gridRefunds")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.FormNo).Title("Form Number").Width(70);
+            columns.Bound(c => c.DepttName).Title("Department Name").Width(70);
+            columns.Bound(c => c.ApplicantName).Title("Applicant's Name").Width(150);
+            columns.Bound(c => c.MobileNo).Title("Mobile").Width(100);
+            columns.Bound(c => c.AmountDeposited).Title("Amount Deposited").Width(70);
+        })
+        .Sortable()
+                .Filterable()
+                                                    .Groupable()
+                .Resizable(resize => resize.Columns(true))
+        .Pageable(pageable => pageable
+                                               .Enabled(true)
+                                               .Refresh(true)
+                                               .PageSizes(true)
+                                            )
+        .DataSource(dataSource => dataSource
+        .Ajax().Model(model => model.Id(c => c.FormNo))
+        .ServerOperation(true)
+        .Read(read => read.Action("GetUnsuccessfulApplicants", "Allotment").Data("AdditionalData")).PageSize(20)
+        )
+        )
+    </div>
+
+    <div class="box-button text-center">
+       
+                <input type="button" value="Print" id="btnPrint" class="btn btn-default" />
+                <input type="button" value="Submit For Approval" id="btnSubmit" class="btn btn-default" />
+                <input type="button" value="Close" id="btnClose" class="btn btn-default" />
+            </div>     
+
+    </div>
+
+@(Html.Kendo().Window().Name("viewCommentsWindow").Title("View Comments").Modal(true).Visible(false).Content(@<text>
+        <div class="container-fluid">
+            <div class="row">
+                @Html.Label("From :      ")
+                @Html.DisplayFor(model => model.From)
+            </div>
+            <div class="row">
+                @Html.Label("Date :      ")
+                @Html.DisplayFor(model => model.SubmittedDate)
+            </div>
+            <div class="row">
+                @Html.Label("Comments : ")
+                @Html.TextAreaFor(model => model.Comment, new { @disabled = "disabled", @style = "width:250px;" })
+            </div>
+            <br />
+            <div class="row" style="text-align:right">
+                <input type="button" class="btn-danger closePopup" value="Close" />
+            </div>
+        </div>
+</text>)
+.Draggable()
+.Resizable()
+.Width(400)
+.Actions(actions => actions.Close())
+)
+
+@(Html.Kendo().Window().Name("assignToWindow").Title("Assign To").Modal(true).Visible(false).Content(@<text>
+        <div class="container-fluid">
+            <div class="row">
+                @Html.LabelFor(model => model.User)
+                @(Html.Kendo().DropDownListFor(model => model.User)
+                                      .Name("User")
+                              .DataTextField("text")
+                              .DataValueField("id")
+                      .OptionLabel("Select").Filter("contains")
+                      .DataSource(source =>
+                      {
+                          source.Read(read =>
+                          {
+                              read.Action("GetAssineTo", "Allotment");
+                          });
+                      })
+                )
+                @*@Html.ValidationMessageFor(model => model.User)*@
+            </div>
+            <br />
+            <div class="row" style="text-align:right">
+                <input type="button" class="btn-primary" id="btnPopupSubmit" value="Submit" />
+                <input type="button" class="btn-danger closePopup" value="Close" />
+            </div>
+        </div>
+</text>)
+.Draggable()
+.Resizable()
+.Width(400)
+.Actions(actions => actions.Close())
+)
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var hdnSt = $("#CurrentStatus").val();
+        if (hdnSt == "InProgress") {
+            $("#btnSubmit").attr("disabled", "disabled");
+            $("#btnComment").hide();
+        }
+        else if (hdnSt == "Approved") {
+            $("#btnSubmit").val("Initiate Refund");
+            //$("#btnSubmit").attr("disabled", "disabled");
+            $("#btnComment").hide();
+        }
+        else if (hdnSt == "RefundInitiated") {
+            $("#btnSubmit").val("Initiate Refund");
+            $("#btnSubmit").attr("disabled", "disabled");
+            $("#btnComment").hide();
+        }
+        else if (hdnSt == "NotSubmitted") {
+            $("#btnComment").hide();
+        }
+        else if (hdnSt == null || hdnSt == '') {
+            $("#btnPrint").hide();
+            $("#btnSubmit").hide();
+            //$("#btnClose").hide();
+            $("#btnComment").hide();
+        }
+
+        $("#btnSubmit").click(function () {
+            var statusVal = $("#CurrentStatus").val();
+            var scID = $("#SchemeId").val();
+            var depID = $("#DepttId").val();
+            if (statusVal == "NotSubmitted" || statusVal == "Rejected") {
+                $("#assignToWindow").data("kendoWindow").center();
+                $("#assignToWindow").data("kendoWindow").open();
+            }
+            else if (statusVal == "Approved") {
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ scID: scID, depID: depID, action: 2 }),
+                    url: '/Allotment/UnsuccessfulListAction',
+                    success: function (result) {
+                        if (result == true) {
+                            alertify.success("Refund initiated successfully.");
+                            $("#btnSubmit").val("Initiate Refund");
+                            $("#btnSubmit").attr("disabled", "disabled");
+                            $("#btnComment").hide();
+                        }
+                        else
+                            alertify.error("Some error occured. Please try again later.");
+                    },
+                    error: function (obj) {
+                        //alert('Error While Saving Record.');
+                    }
+                });
+            }
+        });
+
+        $("#btnClose").click(function () {
+            window.location.href = '@Url.Action("ManageRefunds", "Allotment")';
+        });
+
+        $(".closePopup").click(function () {
+            $("#viewCommentsWindow").data("kendoWindow").close();
+            $("#assignToWindow").data("kendoWindow").close();
+        });
+
+        $("#btnComment").click(function () {
+            $("#viewCommentsWindow").data("kendoWindow").center();
+            $("#viewCommentsWindow").data("kendoWindow").open();
+        });
+
+        $("#btnPopupSubmit").click(function () {
+            var userVal = $("#User").val();
+            var statusVal = $("#CurrentStatus").val();
+            var scID = $("#SchemeId").val();
+            var depID = $("#DepttId").val();
+            if (userVal == "" || userVal == null) {
+                alertify.error("Please select a User.");
+                return false;
+            }
+            else {
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ scID: scID, depID: depID, action: 1, userVal: userVal }),
+                    url: '/Allotment/UnsuccessfulListAction',
+                    success: function (result) {
+                        if (result == true) {
+                            alertify.success("List submitted for Approval.");
+                            $("#assignToWindow").data("kendoWindow").close();
+                            $("#btnSubmit").attr("disabled", "disabled");
+                            $("#btnComment").hide();
+                        }
+                        else {
+                            alertify.error("Some error occured. Please try again later.");
+                            $("#assignToWindow").data("kendoWindow").close();
+                        }
+                    },
+                    error: function (obj) {
+                        //alert('Error While Saving Record.');
+                    }
+                });
+            }
+        });
+
+        $("#btnPrint").click(function () {
+            var dataSource = $("#gridRefunds").data("kendoGrid").dataSource;
+            dataSource.pageSize(dataSource.total());
+            setTimeout(function () { PrintPage(); }, 1000);
+        });
+    });
+
+    function AdditionalData() {
+        var scID = $("#SchemeId").val();
+        var depID = $("#DepttId").val();
+        return {
+            scID: scID,
+            depID: depID
+        };
+    }
+
+    function PrintPage() {
+        var printContent = document.getElementById('gridRefunds');
+        var printWindow = window.open("All Records", "Print Panel", 'left=50000,top=50000,width=0,height=0');
+        printWindow.document.write(printContent.innerHTML);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+        var dataSource = $("#gridRefunds").data("kendoGrid").dataSource;
+        dataSource.pageSize(20);
+    }
+</script>

@@ -1,0 +1,126 @@
+﻿@model NA.PMS.Model.ServiceRequestViewModel
+@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions;
+@using NA.PMS.Common;
+
+@{
+    ViewBag.Title = "Service Detail";
+    Layout = "~/Views/Shared/_LayoutCustomer.cshtml";
+}
+
+<div class="container-content">
+    <div class="col-md-12">
+        <div class="row row-heading">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="h1-title">Service Request Detail</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 text-right">
+                <h1 class="h1-title">Registration No : 10000013</h1>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 hr-div"></div>
+    <div class="col-md-12 k-grid-content content-border">
+        <div class="row row-ff">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label>Request Id:</label></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="">@Model.Id</label></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="">Service Name:</label></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="">@Model.ServiceModel.ServiceName</label></div>
+        </div>
+        <div class="row row-f5">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="">Applicant:</label></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="">@Model.ServiceModel.Applicant</label></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="">Property No:</label></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="">@Model.ServiceModel.PropertyNo</label></div>
+        </div>
+        <div class="row row-ff">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="">Address:</label></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="">@Model.ServiceModel.ApplicantAddress</label></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="">Mobile:</label></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="">@Model.ServiceModel.MobileNo</label></div>
+        </div>
+        <div class="row row-f5">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="">Requestor:</label></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="">@Model.ServiceModel.Requestor</label></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="">Email:</label></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="">@Model.ServiceModel.Email</label></div>
+        </div>
+        <div class="row row-ff">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="">Department:</label></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="">@Model.ServiceModel.Department</label></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="">Sub Department:</label></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="">@Model.ServiceModel.SubDepartment</label></div>
+        </div>
+        <div class="row row-f5">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="">Date:</label></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="">@Model.ServiceModel.CreatedDate</label></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="">Status:</label></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="">@Model.ServiceModel.RequestStatus</label></div>
+        </div>
+        <div class="row row-ff" id="divDescription">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                <label>Description:</label>
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                <label>@Model.ServiceModel.Description</label>
+            </div>
+        </div>
+        @if (Model.ServiceModel.ServiceId == NAService.Transfer && Model.TransferModel != null)
+        {
+            <div class="row">
+                <div class="col-md-12">
+                    @{ Html.RenderPartial("_ViewTransferRequest", Model); }
+                </div>
+            </div>
+        }
+        @if (Model.ServiceModel.ServiceId == NAService.Rent && Model.RentModel != null)
+        {
+            <div class="row" style="">
+                <div class="col-md-12">
+                    @{ Html.RenderPartial("_ViewRentRequest", Model); }
+                </div>
+            </div>
+        }
+        @if (@Model.ServiceModel.ServiceId == NAService.Mortgage && Model.MortgageModel != null)
+        {
+            <div class="row">
+                <div class="col-md-12">
+                    @{ Html.RenderPartial("_ViewMortgageRequest", Model); }
+                </div>
+            </div>
+        }
+        @if (@Model.ServiceModel.ServiceId == NAService.Mutation && Model.MutationModel != null)
+        {
+            <div class="row">
+                <div class="col-md-12">
+
+                    @{ Html.RenderPartial("_ViewMutationRequest", Model); }
+                </div>
+            </div>
+        }
+        @if (@Model.ServiceModel.ServiceId == NAService.CIC && Model.CICModel != null)
+        {
+            <div class="row">
+                <div class="col-md-12">
+                    @{ Html.RenderPartial("_ViewCICRequest", Model); }
+                </div>
+            </div>
+        }
+        @if (Model.ServiceModel.ServiceId == NAService.GPA && Model.GPAModel != null)
+        {
+            <div class="row">
+                <div class="col-md-12">
+                    @{ Html.RenderPartial("_ViewGPARequest", Model); }
+                </div>
+            </div>
+        }
+
+        @if (Model.ServiceModel.ServiceId == NAService.Extension && Model.ExtensionModel != null)
+        {
+            <div class="row">
+                <div class="col-md-12">
+                    @{ Html.RenderPartial("_ViewExtensionRequest", Model); }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+

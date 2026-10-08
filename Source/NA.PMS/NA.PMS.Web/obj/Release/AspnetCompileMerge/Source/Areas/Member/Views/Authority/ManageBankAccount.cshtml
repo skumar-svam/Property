@@ -1,0 +1,198 @@
+﻿@model NA.PMS.Model.BankAccountViewModel
+@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+
+@{
+    ViewBag.Title = "ManageBankAccount";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .kendo-popup-window{
+        display:none;
+    }
+</style>
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1 account-content">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Bank Account</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                <a href="#" onclick="javascript:DisplayWindow()">Add/Update Account Detail</a> 
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12  blnk-rw"></div>
+    <div class="col-md-12" style="border-left:1px solid #abc;border-right:1px solid #abc;">
+        <div class="row form-group">
+            <div class="col-md-3 pad-left">
+                @Html.Label("Bank Name")
+                @(Html.Kendo().DropDownListFor(model => model.BankId)
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel(" -- Select --")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true).ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetBankListAsDataSource", "Authority", new { area = "Member" })))
+                        .Schema(schema => schema.Data("Data").Total("Total")).PageSize(100);
+                    })
+                    .Events(e => e.Change("ChangeInBankName"))
+                   .HtmlAttributes(new { style = "width:90%;float:right;", @class = "input-disabled" })
+                )
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.BankAccountViewModel>()
+            .Name("gridBankAccount")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Title("Id").Width(100);
+                columns.Bound(c => c.BankName).Title("Bank Name");
+                //columns.Bound(c => c.BranchAddress).Title("Branch Address");
+                //columns.Bound(c => c.AccountNo).Title("Account No").Width(200);
+                columns.Bound(c => c.IsActive).Title("Status").Width(110).ClientTemplate("<label class='hyperlink' onclick='javascript:ChangeBankStatus(this)'>#=BankStatus#</label>");
+            })
+            .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+            .ClientDetailTemplateId("template").AutoBind(true)
+            .DataSource
+            (
+                dataSource => dataSource
+                 .Ajax().ServerOperation(true).Sort(r => r.Add(s => s.BankId))
+                .Model(model => model.Id(p => p.Id))               
+                .Read(read => read.Action("GetBankAccountDetailList", "Authority", new { area = "Member" }).Data("FilterSearchParameter"))
+                .PageSize(10)                
+            )
+        )
+    </div>
+</div>
+
+<div class="col-md-12 kendo-popup-window" id="bank-window" style="background:url(/Content/Images/boxed-bg.jpg) repeat">
+   @{Html.RenderPartial("_PartialBankAccount");} 
+</div>
+
+<script id="template" type="text/kendo-tmpl">
+    @(Html.Kendo().Grid<NA.PMS.Model.BankAccountViewModel>()
+            .Name("grid_#=Id#") // template expression, to be evaluated in the master context
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Hidden(true);
+                columns.Bound(c => c.BankId).Title("Bank Id").Width(100);
+                columns.Bound(c => c.BranchId).Title("Branch Id").Width(100);
+                columns.Bound(c => c.BranchAddress).Title("Branch Address");
+                columns.Bound(c => c.IFSCCode).Title("IFSC Code");
+                columns.Bound(c => c.AccountNo).Title("Account No").Width(220);
+                columns.Bound(c => c.BranchStatus).Width(120).Title("Status");
+                //columns.Bound(c => c.IsBranchActive).Width(120).Title("Action").ClientTemplate("<label class='hyperlink' onclick='javascript:ChangeBranchStatus(this)'>Change Status</label>");
+                columns.Bound(c => c.BranchStatus).Width(120).Title("Action").ClientTemplate("<label class='hyperlink' onclick='javascript:ChangeBranchStatus(this)'>action</label>");
+            })
+            .DataSource(dataSource => dataSource
+                .Ajax().Read(read => read.Action("GetBranchDetailListByBankId", "Authority", new { area = "Member", bankId = "#=Id#" }))
+            )
+            .ToClientTemplate()
+    )
+</script>
+<script>
+    function dataBound() {
+        this.expandRow(this.tbody.find("tr.k-master-row").first());
+    }
+</script>
+
+<script>
+    $(document).ready(function () {
+        $('.kendo-popup-window').kendoWindow({
+            modal: true,
+            title: "Add/Update Bank Detail",
+            actions: ["Pin","Minimize","Maximize","Close"],
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "30%"
+            },
+            width: "70%",// height: "35%"
+        });
+    });
+
+    function DisplayWindow() {
+        $('.kendo-popup-window').data("kendoWindow").open();
+        $('.kendo-popup-window').data("kendoWindow").center();
+    }
+
+    function ChangeInBankName() {
+        $('#gridBankAccount').data("kendoGrid").dataSource.read();
+    }
+    function FilterSearchParameter() {
+        return {
+            BankId: $('#BankId').val(),
+            FilterType: "Bank"
+        }
+    }
+
+    function ChangeBankStatus(row) {
+        var flag = confirm("Are You sure to change this status");
+        if (flag) {
+            var tr = $(row).parent().parent();
+            var id = $(tr).children("td:eq(1)").text();
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ BankId: id, FilterType: "Bank" }),
+                url: '/Member/Authority/ActivateBanckAccountStatus',
+                success: function (result) {
+                    if (result == '@ReturnType.Updated') {
+                        alertify.success("Status updated successfully");
+                    }
+                    $("#gridBankAccount").data("kendoGrid").dataSource.read();
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again later");
+                }
+            });
+        }        
+    }
+    function ChangeBranchStatus(row) {
+        var flag = confirm("Are You sure to change this status");
+        if (flag) {
+            var tr = $(row).parent().parent();
+            var bankId = $(tr).children("td:eq(1)").text();
+            var branchId = $(tr).children("td:eq(2)").text();
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ BankId: bankId, BranchId: branchId, FilterType: "Branch" }),
+                url: '/Member/Authority/ActivateBanckAccountStatus',
+                success: function (result) {
+                    if (result == '@ReturnType.Updated') {
+                        alertify.success("Status updated successfully");
+                    }
+                    $("#grid_"+bankId).data("kendoGrid").dataSource.read();
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again later");
+                }
+            });
+        }
+       
+    }
+
+    $('.td-action').click(function () {
+        alert();
+        alert(this.Text());
+
+    });
+
+</script>
+
+
+
+
+

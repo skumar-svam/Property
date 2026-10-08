@@ -1,0 +1,142 @@
+﻿@model NA.PMS.Model.PaymentSchedule
+@using Kendo.Mvc.UI;
+
+<div class="col-md-12 k-grid-content" id="hdnRescheduleGrid">
+    <h2 class="blck-heading-grid">Payment Rescheduled</h2>
+    @(Html.Kendo().Grid<NA.PMS.Model.PaymentSchedule>()
+        .Name("gridPaymentReschedule")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.InstallmentNumber).Title("Number of Installment").Width(80);
+            columns.Bound(c => c.InstallmentDueDate).Format("{0:dd-MMM-yyyy}").Title("Installment Due Date").Width(80);
+            columns.Bound(c => c.PrincipalInstallmentAmount).Title("Principal Installment Amount").Width(80);
+            columns.Bound(c => c.InterestInstallmentAmount).Title("Interest Installment Amount").Width(80);
+            columns.Bound(c => c.TotalBalAmount).Title("Total Installment Amount").Width(80);
+            columns.Bound(c => c.PrincipalBalAmount).Title("Balance Principal Amount").Width(80);
+        })
+        .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+        .DataSource
+        (
+            dataSource => dataSource
+                .Ajax()
+                .Model(model => model.Id(p => p.Id))
+                .ServerOperation(true)
+                .Read(read => read.Action("GetPaymentReschedule", "PropertyAllotment").Data("AdditionalInfo"))
+                .PageSize(10)
+        )
+    )
+</div>
+
+<script type="text/javascript">
+    function AdditionalInfo() {
+        return {
+            rid: $('#Rid').val()
+        }
+    }
+
+    $(document).ready(function () {
+        var rId = $('#Rid').val();
+        var dueAmnt = $('#TotalDueAmount').val();
+        if (dueAmnt) { }
+        //$("#btnReschedule").click(function () {
+        //    $.ajax({
+        //        dataType: 'json',
+        //        type: 'Post',
+        //        contentType: 'application/json; charset=utf-8',
+        //        data: JSON.stringify({
+        //            rId: rId, dueAmnt: dueAmnt
+        //        }),
+        //        url: '/PropertyAllotment/ReschedulePayments',
+        //        success: function (result) {
+        //            if (result == true) {
+        //                //TODO:
+        //            }
+        //            else {
+        //                alertify.error("Some error occurred. Please try again after some time.");
+        //            }
+        //        },
+        //        error: function (objAjaxRequest, strError) {
+        //            var respText = objAjaxRequest.responseText;
+        //            alertify.error("Some error occurred. Please try again after some time.");
+        //            //alert(respText);
+        //        }
+        //    });
+        //});
+    });
+
+    function updateStatus(e, ScheduleId) {
+        var grid = $("#gridPaymentSchedule").data("kendoGrid");
+        var row = $(e).closest("tr");
+        var currentIndex = $("tr", grid.tbody).index(row);
+
+        var preIndex = currentIndex > 0 ? currentIndex - 1 : 0;
+        var postIndex = currentIndex + 1;
+        var rid = $('#Rid').val();
+        if (currentIndex == 0) {
+            var PostRow = grid.dataSource._data[postIndex];
+            if (PostRow != null) {
+                if (PostRow.IsInstallmentPaid == true) {
+                    alertify.error("Post Installment is paid.");
+                    return false;
+                }
+                else {
+                    UpdatePaidStatus(rid, ScheduleId);
+                }
+            }
+            else {
+                UpdatePaidStatus(rid, ScheduleId);
+            }
+        }
+        else if (preIndex > 0 || preIndex == 0) {
+            var PreviouRow = grid.dataSource._data[preIndex];
+            var PostRow = grid.dataSource._data[postIndex];
+            if (PreviouRow != null) {
+                if (PreviouRow.IsInstallmentPaid == true) {
+                    if (PostRow != null) {
+                        if (PostRow.IsInstallmentPaid == true) {
+                            alertify.error("Pre and Post Installments are paid.");
+                            return false;
+                        }
+                        else {
+                            UpdatePaidStatus(rid, ScheduleId);
+                        }
+                    }
+                    else {
+                        UpdatePaidStatus(rid, ScheduleId);
+                    }
+                }
+                else {
+                    alertify.error("Previous Installment is not paid.");
+                }
+            }
+        }
+    }
+
+    function UpdatePaidStatus(rid, scheduleId) {
+        if (scheduleId > 0) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({
+                    ScheduleId: scheduleId, Rid: rid
+                }),
+                url: '/PropertyAllotment/UpdatePaymentScheduleStatus',
+                success: function (result) {
+                    if (result == true) {
+                        alertify.success("updated");
+                        $("#gridPaymentSchedule").data('kendoGrid').dataSource.read();
+                    }
+                    else {
+                        alertify.error("Failed to update data. Please try again.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network Error. Please try again after some time.");
+                }
+            });
+        }
+    }
+</script>

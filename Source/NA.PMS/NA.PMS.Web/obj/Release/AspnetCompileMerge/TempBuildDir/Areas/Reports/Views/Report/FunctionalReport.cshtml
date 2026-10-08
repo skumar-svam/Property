@@ -1,0 +1,222 @@
+﻿@model NA.PMS.Model.FunctionalModel
+@using Kendo.Mvc.UI;
+@{
+    ViewBag.Title = "Functional Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/Scripts/_references.js"></script>
+<style>
+    .search-box{
+        /*margin-left:5px;
+        margin-right:5px;*/
+    }
+    .form-group{
+        /*margin-left:25px !important;*/
+    }
+</style>
+<div class="FunctionalReport">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Functional Report</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                <a href="#" id="btn-send-mail" class="" >Send Excel</a>
+                <a href="#" id="btnExportExcel" class="" onclick="javascript:ExportToExcel(event);">Export To Excel</a>
+                <a href="#" id="btnExportPdf" class="" onclick="javascript:ExportToPdf(event);">Export To PDF</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    
+    <div class="col-md-12 content-top-spce">
+        <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            <h2 class="blck-heading" style="margin-bottom:0">Search Report</h2>
+            <div class="" style="">
+               
+                <div class="row"> 
+                    <div class="col-md-2 col-sm-3 col-xs-12 form-group" style="padding-left:10px;">
+                        @Html.Label("Property Status")
+                        @(Html.Kendo().DropDownList()
+                            .Name("ddlFunctional")
+                            .DataTextField("text")
+                            .DataValueField("text")
+                            .OptionLabel("--Select--")
+                            .Filter("contains")
+                            .DataSource(source =>source.Read(read =>read.Action("GetFunctionalStatus", "Report")))
+                            .Events(e => e.Change("FilterProperty"))
+                            .HtmlAttributes(new { style = "width:96%;" })
+                        )
+                    </div>
+                    <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                        @Html.Label("Department")
+                        @(Html.Kendo().DropDownList()
+                            .Name("ddlDepartment")
+                            .DataTextField("text")
+                            .DataValueField("id")
+                            .OptionLabel("--Select--")
+                            .Filter("contains")
+                            .DataSource(source =>source.Read(read =>read.Action("GetDepartmentListForLoginUser", "Report")))
+                            .HtmlAttributes(new { style = "width:96%;margin-right:10px;" })
+                            .Events(e => e.Change("FilterProperty"))
+                        )
+                    </div>
+                    @Html.Hidden("ddlScheme","")
+                    <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                        @Html.Label("Sector")
+                        @Html.Kendo().TextBox().Name("SectorName").HtmlAttributes(new { style = "width:96%", @maxlength = "10" })
+                    </div>
+                    <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                        <label>Date From</label>
+                        @(Html.Kendo().DatePicker().Name("kendoStartDate").HtmlAttributes(new { style = "width:96%;" }).Events(e => e.Change("FilterProperty")))
+                    </div>
+                    <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                        <label>Date To</label>
+                        @(Html.Kendo().DatePicker().Name("kendoEndDate").HtmlAttributes(new { style = "width:96%;" }).Events(e => e.Change("FilterProperty")))
+                    </div>  
+                    <div class="col-md-2 col-sm-3 col-xs-12 form-group" style="text-align:right">
+                        @Html.Label("")<br />
+                        <input type="button" id="btnAdvanceSearch" class="btn btn-add" value="Search" />
+                        <input type="button" id="btnClear" class="btn btn-default" value="Clear" style="margin-right:10px;"/>
+                    </div>               
+                </div>
+
+
+            </div>
+
+            <div class="col-md-12 k-grid-content">
+                <div class="k-grid-content">
+                    @(Html.Kendo().Grid<NA.PMS.Model.FunctionalModel>()
+                        .Name("gridFunctional")
+                        .ToolBar(tools => tools.Excel())
+                        .Excel(excel => excel.FileName("FunctionalReport.xlsx").AllPages(true).Filterable(true).ProxyURL(Url.Action("Excel_Export_Save", "Report")))
+                        .ToolBar(tools => tools.Pdf())
+                        .Pdf(pdf => pdf
+                            .AllPages().AvoidLinks().TemplateId("page-template")
+                            .PaperSize("A4").Scale(0.8).Margin("2cm", "1cm", "1cm", "1cm").Landscape().RepeatHeaders()
+                            .FileName("FunctionalReport.pdf").ProxyURL(Url.Action("Pdf_Export_Save", "Report"))
+                        )
+                       .Columns(columns =>
+                      {
+                          //columns.Bound(c => c.RequestNo).Title("Request No").Width(130).ClientTemplate("<a href='" + "/Property/PropertyRegistration/ViewFunctionalDetails/#= RequestNo #'>#=RequestNo#</a>");
+                          columns.Bound(c => c.RId).Title("Registration Id").Width(150);
+                          columns.Bound(c => c.PropertyNumber).Title("Property No.");
+                          columns.Bound(c => c.ApplicantName).Title("Applicant");
+                          columns.Bound(c => c.DepttName).Title("Department");
+                          //columns.Bound(c => c.ApproveDate).Title("Approved Date").Format("{0:dd-MM-yyyy}");
+                          //columns.Bound(c => c.Status).Title("Status").Width(130);
+                          columns.Bound(c => c.FunctionalStatus).Title("Status");
+                          columns.Bound(c => c.ApproveDate).Title("Date").Format("{0:dd-MM-yyyy}");
+                      })
+                      .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                      .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                      .DataSource
+                      (
+                         dataSource => dataSource
+                        .Ajax().ServerOperation(true)
+                        .Model(model => model.Id(p => p.RequestNo))
+                        .Read(read => read.Action("SearchFunctionalReport", "Report").Data("FilterSearchField"))
+                        .PageSize(10)
+                      ) 
+                    )
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    
+</div>
+
+<script type="text/javascript">
+    function FilterStatus() {
+        return { status: $('#ddlFunctional').val() }
+    }
+    function FilterSearchField() {
+        return {
+            functionaldetail: $('#ddlFunctional').val(),
+            department: $('#ddlDepartment').val(),
+            scheme: $('#ddlScheme').val(),
+            sector: $('#SectorName').val(),
+            startDate: $('#kendoStartDate').val(),
+            endDate: $('#kendoEndDate').val()
+        }
+    }
+    function FilterProperty() {
+        $('#gridFunctional').data("kendoGrid").dataSource.read();
+    }
+    function ExportToPdf() {
+        $("#gridFunctional").data("kendoGrid").saveAsPDF();
+    }
+    function ExportToExcel() {
+        $("#gridFunctional").data("kendoGrid").saveAsExcel();
+    }
+    function ClearFields() {
+        $('#ddlFunctional').data("kendoDropDownList").value('');
+        $('#ddlDepartment').data("kendoDropDownList").value('');
+        //$('#ddlScheme').data("kendoDropDownList").value('');
+        $('#ddlScheme').val('');
+        $('#SectorName').val('');
+        $('#kendoStartDate').data("kendoDatePicker").value('');
+        $('#kendoEndDate').data("kendoDatePicker").value('');
+        $('#gridFunctional').data("kendoGrid").dataSource.read();
+    }
+
+    $('#btnAdvanceSearch').click(function () {
+        var functionaldetail = $('#ddlFunctional').val();
+        var department = $('#ddlDepartment').val();
+        var schemeName = $('#ddlScheme').val();
+        var sectorName = $('#SectorName').val();
+        var startDate = $('#kendoStartDate').val();
+        var endDate = $('#kendoEndDate').val();
+
+        if (functionaldetail == "" && department == "" && schemeName == "" && sectorName == "" && startDate == "" && endDate == "") {
+            alertify.error("Please select at least one field");
+        }
+        else {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ functionaldetail: functionaldetail, department: department, sector: sectorName, scheme: schemeName, startDate: startDate, endDate: endDate }),
+                url: '@Url.Action("SearchFunctionalReport", "Report")',
+                success: function (result) {
+                    if (result != null) {
+                        $('#gridFunctional').data("kendoGrid").dataSource.read();
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Something is wrong, try again later");
+                }
+            });
+        }
+    });
+
+    $('#btnClear').click(function () {
+        ClearFields();
+    });
+
+
+    $('#btn-send-mail').click(function () {
+        var modl = {
+            DepartmentId: 1,
+        };
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ model: modl }),
+            url: '@Url.Action("SendReportsInExcelFormat", "Report", new { area=""})',
+            @*url: '@Url.Action("DownloadReportsInExcelFormat", "Report", new { area = "" })',*@
+            success: function (result) {
+                if (result != null) {
+                    $('#gridFunctional').data("kendoGrid").dataSource.read();
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Something is wrong, try again later");
+            }
+        });
+    });
+
+</script>

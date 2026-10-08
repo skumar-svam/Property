@@ -1,0 +1,210 @@
+﻿@model NA.PMS.Model.UpdateAddress
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@{
+    ViewBag.Title = "Update Address";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using (Html.BeginForm("UpdateApplicationAddress", "Allotment", FormMethod.Post, new { enctype = "multipart/form-data", id = "UpdateAddressform" }))
+{
+    <input type="hidden" id="hdnAppId" />
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Update Address</h1></div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+                </div>
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="col-md-12 content-top-spce">
+                <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                    <h2 class="blck-heading">Registration Id</h2>
+                    <div class="form-bx">
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Registration Id", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(m => m.RID)
+                                .Filter("contains")
+                                .DataTextField("text")
+                                .DataValueField("id")
+                                .OptionLabel("Select")
+                                .DataSource(source =>
+                                {
+                                    source.Custom()
+                                   .ServerFiltering(true)
+                                    .ServerPaging(true)
+                                   .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                   .Transport(transport =>
+                                   {
+                                       transport.Read("GetRIDsForApplication", "Allotment");
+                                   }).Schema(schema =>
+                                   {
+                                       schema.Data("Data")
+                                       .Total("Total");
+                                   }).PageSize(100);
+                                })
+                                .Events(events => { events.Change("RIdChange"); })
+                                .HtmlAttributes(new { @class = "schemeForms", style = "width:100%" })
+                                )
+                            </div>
+
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <h2 class="blck-heading" id="allottee_detail_header">Application Details</h2>
+                    <div class="form-bx">
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Name", htmlAttributes: new { @class = "" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label id="lblName" class="lbl-form-control"></label>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Correspondence Address", htmlAttributes: new { @class = "" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label id="lblCorrAdd" class="lbl-form-control"></label>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Permanent Address", new { @class = "" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label id="lblPerAdd" class="lbl-form-control"></label>
+                            </div>
+                        </div>
+                    </div>
+                    <h2 class="blck-heading" id="transfer_detail_header">Update Address</h2>
+                    <div class="form-bx">
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Correspondence Address", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextAreaFor(m => m.TCorrespondenceAdd, new { @class = "form-control", @onchange = "CorrespondingAddressChange();", @maxlength = "500" })
+
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Permanent Address", new { @class = "lblIndividual required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextAreaFor(model => model.TPermanentAdd, new { @class = "form-control", @onchange = "PermanentAddressChange();", @maxlength = "500" })
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="box-button text-center">
+                    <input type="button" id="btnBack" value="Back" class="btn btn-default" />
+                    <input type="submit" id="btnUpdate" value="Update Address" class="btn btn-default" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#btnBack").click(function () {
+            window.location.href = '@Url.Action("Index", "Home", new { area = "" })';
+        });
+
+        $("#btnUpdate").click(function () {
+            var rId = $("#RID").val();
+            var hdnAppId = $("#hdnAppId").val();
+            var CorrespondenceAdd = $("#TCorrespondenceAdd").val();
+            var PermanentAdd = $("#TPermanentAdd").val();
+
+            if (rId == '') {
+                alertify.error("Please select an RID");
+                return false;
+            }
+
+            if (CorrespondenceAdd == "") {
+                alertify.error("Please enter Correspondence Address");
+                return false;
+            }
+
+            if (PermanentAdd == "") {
+                alertify.error("Please enter Permanent Address");
+                return false;
+            }
+
+        });
+
+    });
+
+    function RIdChange() {
+        var rId = $("#RID").val();
+        if (rId == '') {
+            ClearValues();
+            alertify.error("Please select an RID");
+            return false;
+        }
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rId: rId }),
+            url: '/Allotment/GetApplicationDetailsByRid',
+            success: function (result) {
+                if (result != null) {
+                    ClearValues();
+                    $("#hdnAppId").val(result.ApplicationId);
+                    $("#lblCorrAdd").html(result.TCorrespondenceAdd);
+                    $("#lblPerAdd").html(result.TPermanentAdd);
+                    $("#lblName").html(result.Name);
+                }
+                else {
+                    ClearValues();
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            },
+            error: function (obj) {
+                ClearValues();
+                alertify.error("Some error occured. Please try again later.");
+            }
+        });
+    }
+
+    function ClearValues() {
+        $("#hdnAppId").val('');
+        $("#lblCorrAdd").html('');
+        $("#lblPerAdd").html('');
+        $("#TCorrespondenceAdd").val('');
+        $("#TPermanentAdd").val('');
+    }
+
+
+    function CorrespondingAddressChange() {
+        if ($("#TCorrespondenceAdd").val().trim() == '') {
+            $("#TCorrespondenceAdd").val('');
+        }
+    }
+    function PermanentAddressChange() {
+        if ($("#TPermanentAdd").val().trim() == '') {
+            $("#TPermanentAdd").val('');
+        }
+    }
+
+</script>

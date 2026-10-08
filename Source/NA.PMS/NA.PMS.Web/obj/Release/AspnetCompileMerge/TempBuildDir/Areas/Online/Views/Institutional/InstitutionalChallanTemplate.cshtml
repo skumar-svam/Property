@@ -1,0 +1,379 @@
+﻿@using System.Web.Mvc.Html
+@model NA.PMS.OnlineScheme.SchemeChallanViewModel
+
+<style>
+    .panel-body.challan-body {
+        font-size: 11px;
+        font-family: Arial;
+        border: 1px solid black;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+
+    h4 {
+        margin: 0;
+        padding: 0;
+    }
+
+    br {
+        height: 2px;
+    }
+
+    th {
+        text-align: center;
+        font-size: 12px;
+        font-family: Arial;
+    }
+
+    td {
+        margin: 0px;
+    }
+
+    hr.challan-line {
+        display: block;
+        margin-top: 0;
+        margin-bottom: 0;
+        margin-left: auto;
+        margin-right: auto;
+        border-style: inset;
+        border-width: 1px;
+    }
+
+    .lbl-seperator {
+        width: 100%;
+        font-family: Arial;
+        font-size: 11px;
+        text-align: center;
+    }
+
+    .tbl-challan {
+        width: 100%;
+        height: 290px;
+    }
+
+    .tbl-challan_one {
+        width: 100%;
+        /*height: 290px;*/
+    }
+
+    .tbl-challan tr td {
+        /*height:20px;*/
+        font-size: 12px;
+        font-family: Arial;
+    }
+
+    .challan-table {
+        height: 100px;
+        width: 100%;
+        /*border:1px;*/
+        border-left: 1px solid black;
+        border-right: 1px solid black;
+        border-bottom: 1px solid black;
+        border-top: 1px solid black;
+    }
+
+    .challan-table-rt {
+        height: 100px;
+        width: 100%;
+        border-left: 0px solid black;
+        border-right: 1px solid black;
+        border-bottom: 1px solid black;
+        border-top: 1px solid black;
+    }
+
+    .challan-table tr {
+        border-bottom: 0px solid black;
+    }
+
+    .challan-table-rt tr {
+        border-bottom: 0px solid black;
+    }
+
+    .digit-right {
+        text-align: right;
+        padding: 2px;
+    }
+
+    .digit-float-right {
+        float: right;
+        padding: 2px;
+    }
+
+    .digit-left {
+        text-align: left;
+    }
+
+    .padd-left {
+        padding-left: 2px;
+    }
+
+    .img-logo {
+        width: 25%;
+    }
+
+    .note {
+        font-size: 12px;
+        font-family: Arial;
+    }
+</style>
+
+
+<div class="container-fluid">
+
+    <div class="panel-body challan-body">
+        <table class="tbl-challan">
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="4">
+                                <center><h5><b>NEW OKHLA INDUSTRIAL DEVELOPMENT AUTHORITY</b></h5>Main Administrative Building,Sector-VI <br />Noida - 201301</center>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="4">
+                                <center><h5><b>GST No. 09AAALN0120A1ZV</b></h5></center>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="2">
+                                <b>Transaction Id: </b>@Model.TransactionId
+                            </td>
+                            <td colspan="2" class="digit-float-right">
+                                <b class="digit-left">Date: </b>@DateTime.Now.Date.ToString("dd-MMM-yyyy")
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="8" class="">
+                                <b class="">Application No.: </b>@Model.ApplicationFormId
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="8" class="">
+                                <b class="digit-left">Applicant: </b>@Model.Applicant
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" class="">
+                                <b class="">Address: </b>@Model.CorrespondAddress
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="8" class="">
+                                <b class="">Applicant GST No: </b>@Model.GSTNO
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="4"><center><h5><b>Application For RTGS/NEFT Remittances</b></h5></center></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td>To <br />Branch Manager <br /> ____________ Branch</td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="2">@*Date: <b>@DateTime.Now.Date.ToString("dd-MMM-yyyy")*@</b></td>
+                            @*<td colspan="2" class="digit-float-right">Valid Till Date: <b>@Model.FormModel.ValidTillDate.Value.Date.ToString("dd-MMM-yyyy")</b></td>*@
+                            <td colspan="2" class="digit-float-right">Valid Till Date: <b>28-Feb-2021</b></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="4">
+                                Please remit a sum of <span class="fa fa-rupee"></span> <b>@Model.TextTotalAmountGST</b> ,Through RTGS/NEFT as per Benificiary Details mentioned below by debiting my /No.
+                                ________________________________________________________ with your branch.
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="4" style="height: 15px;"></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td>
+                                <table class="challan-table" border="1" style="border-collapse: collapse;">
+                                    <tr>
+                                        <th>Sno.</th>
+                                        <th>Description</th>
+                                        <th>Amount (<span class="fa fa-rupee"></span>)</th>
+                                        <th>SGST (9%)</th>
+                                        <th>CGST (9%)</th>
+                                        <th>Total Amount (<span class="fa fa-rupee"></span>)</th>
+
+                                    </tr>
+                                    <tr>
+                                        <td class="padd-left">1</td>
+                                        <td class="padd-left">Application Fee</td>
+                                        <td class="digit-right">@Model.TextApplicationFee</td>
+                                        <td class="digit-right">@Model.TextFormFeeSGST</td>
+                                        <td class="digit-right">@Model.TextFormFeeCGST</td>
+                                        <td class="digit-right">@Model.TextFormFeeGST</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="padd-left">2</td>
+                                        <td class="padd-left">Processing Fee</td>
+                                        <td class="digit-right">@Model.TextProcessingCharge</td>
+                                        <td class="digit-right">@Model.TextProcessingSGST</td>
+                                        <td class="digit-right">@Model.TextProcessingCGST</td>
+                                        <td class="digit-right">@Model.TextProcessingGST</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="padd-left">3</td>
+                                        <td class="padd-left">Earnest Money</td>
+                                        <td class="digit-right">@Model.TextEarnestMoney</td>
+                                        <td class="digit-right"></td>
+                                        <td class="digit-right"></td>
+                                        <td class="digit-right">@Model.TextEarnestMoney</td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td class="padd-left"><b>Total</b></td>
+                                        <td class="digit-right"></td>
+                                        <td class="digit-right"></td>
+                                        <td class="digit-right"></td>
+                                        <td class="digit-right">@Model.TextTotalAmountGST</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="4" style="height: 15px;"></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td>
+                                <table class="challan-table" border="1" style="border-collapse: collapse;">
+
+                                    <tr>
+                                        <td class="padd-left" colspan="2"><b>Benificiary Details</b></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="padd-left"><b>Amount to be Credited (<span class="fa fa-rupee"></span>)</b></td>
+                                        <td class="padd-left">@Model.TextTotalAmountGST</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="padd-left"><b>Amount in words (<span class="fa fa-rupee"></span>)</b></td>
+                                        <td class="padd-left">@Model.TotalAmountGSTInWords</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="padd-left"><b>Benificiary Name</b></td>
+                                        <td class="padd-left">NOIDA(New Okhla Industrial Development Authority)</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Benificary Account No.</b></td>
+                                        <td class="padd-left">@Model.FormModel.VirtualAccPrefix</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>IFSC Code.</b></td>
+                                        <td class="padd-left">@Model.FormModel.BankIFSCCode</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Benificary Bank & Branch Name</b></td>
+                                        <td class="padd-left">@Model.FormModel.ChallanBank</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="4" style="height: 15px;"></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="2"></td>
+                            <td colspan="2" style="text-align:right">
+                                ________________________________<br />
+                                <b>Signature</b>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+        <br />
+        <hr class="challan-line" />
+        <br />
+        <table class="tbl-challan_one">
+            <tr>
+                <td>
+                    <table class="tbl-challan_one" style="font-size: 12px;font-family:Arial;">
+                        <tr>
+                            <td colspan="4">
+                                <b>Acknowledgement</b><br />
+                                We Recieved RTGS/NEFT of amount <b><span class="fa fa-rupee"></span> @Model.TextTotalAmountGST</b> From <b>@Model.Applicant</b> for Scheme Form No : <b>@Model.ApplicationFormId</b>
+                                 via Cheque/DD No ______________ to credit A/c <b>@Model.FormModel.VirtualAccPrefix</b> of NOIDA(New Okhla Industrial Development Authority) and IFSC Code <b>@Model.FormModel.BankIFSCCode</b>
+                                <br /><br />
+                                Date:...../...../......
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <span class="note">
+        <b>Note:</b>
+        (i). The applicant is requested to update the payment details on the website www.noidaauthorityonline.com.
+        The payment will be verified with bank and the details updated on the website after 24 hours of transaction.
+        Please note the payment details need to be updated before 5pm on scheme closing date.<br />
+        (ii). The RTGS/NEFT facility for payment of application form fee and registration money will be liable for valid date.
+    </span>
+</div>

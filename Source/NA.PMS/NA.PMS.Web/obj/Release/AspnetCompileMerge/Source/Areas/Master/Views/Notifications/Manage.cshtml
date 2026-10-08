@@ -1,0 +1,127 @@
+﻿@using Kendo.Mvc.UI
+@{
+    ViewBag.Title = "Notifications";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/Scripts/kendo.aspnetmvc.min.js"></script>
+<style>
+    .k-grid-content{
+        overflow-y:hidden;
+        overflow-x:hidden;
+    }
+</style>
+
+<div id="ManageNotification">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Notifications</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                <a href="#" id="AddNotification" class="" onclick="javascript: AddNotification(event);">Add Notification</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12  k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.NotificationsModel>()
+                .Name("grdNotifications")
+                .Columns(columns =>
+                {
+                    if (@ViewBag.ReadOnlyMenu != null && @ViewBag.ReadOnlyMenu == true)
+                    {
+                        //columns.Bound(c => c.notificationName).Title("Notification Name").ClientTemplate("<a href='/Master/Notifications/ViewNotification/#=id#'>#=notificationName#</a>");
+                        columns.Bound(c => c.notificationName).Title("Notification Name").ClientTemplate("<a href='/Master/Notifications/ViewNotification/#=EncryptedNotificationId#'>#=notificationName#</a>");
+                    }
+                    else
+                    {
+                        columns.Bound(c => c.notificationName).Title("Notification Name");
+                    }
+                    columns.Bound(c => c.schemeName).Title("Scheme Name");
+                    columns.Bound(c => c.oldNotificationName).Title("Old Notification");
+
+                    if (@ViewBag.EditMenuVal != null && @ViewBag.EditMenuVal == true)
+                    {
+                        //columns.Bound(c => c.notificationID).HeaderHtmlAttributes(new { style = "text-align:center;" }).HtmlAttributes(new { style = "text-align:center;" }).Title("Edit").ClientTemplate("<a class='gridEdit' href='/Master/Notifications/Edit/#=notificationID#'> Edit</a>");
+                        columns.Bound(c => c.notificationID).HeaderHtmlAttributes(new { style = "text-align:center;" }).HtmlAttributes(new { style = "text-align:center;" }).Title("Edit").ClientTemplate("<a class='gridEdit' href='/Master/Notifications/Edit/#=EncryptedNotificationId#'> Edit</a>");
+                    }
+                    else
+                    {
+                        columns.Bound(c => c.notificationID).ClientTemplate("Edit").Title("Edit").Filterable(false);
+                    }
+                    if (@ViewBag.DeleteMenuVal != null && @ViewBag.DeleteMenuVal == true)
+                    {
+                        columns.Bound(c => c.notificationID).HeaderHtmlAttributes(new { style = "text-align:center;" }).HtmlAttributes(new { style = "text-align:center;" }).Title("Remove").ClientTemplate("<a onclick='javascript:return RemoveNotification(#=notificationID#)' class='hyperlinkcss'>Remove</a>");
+                        //columns.Bound(c => c.notificationID).HeaderHtmlAttributes(new { style = "text-align:center;" }).HtmlAttributes(new { style = "text-align:center;" }).Title("Remove").ClientTemplate("<a onclick='javascript:return RemoveNotification(#=EncryptedNotificationId#)' class='hyperlinkcss'>Remove</a>");
+                    }
+                    else
+                    {
+                        columns.Bound(c => c.notificationID).ClientTemplate("Remove").Title("Remove").Filterable(false);
+                    }
+                })
+                .Sortable()
+                 .Filterable()
+                 .Groupable()
+                //.ToolBar(toolBar =>
+                //{
+                //    toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Add Notification").HtmlAttributes(new { onclick = "javascript:AddNotification(event);", @class = "k-button", id = "AddNotification" });
+                //})
+                        .Events(e => e.DataBound("onDataBound"))
+                .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .DataSource(dataSource => dataSource
+                    .Ajax().Model(model => model.Id(p => p.notificationID))
+                     .ServerOperation(true)
+                     .Read(read => read.Action("GetAllNotifications", "Notifications")).PageSize(20)
+                )
+        )
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+
+    debugger;
+    $(document).ready(function () {
+        @{
+            if (TempData["MesgAdd"] != null || TempData["MesgAdd"] != "" )
+            {
+                @*@:alertify.success("Notification added successfully");*@
+            }
+        }
+    });
+
+    function AddNotification(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("Add", "Notifications")';
+    }
+
+    function RemoveNotification(notificationID) {
+        var removeNotification = confirm('Are you sure you want to remove Notification?');
+        if (removeNotification) {
+            $.ajax({
+                url: '@(Url.Action("RemoveNotification", "Notifications"))',
+                type: 'POST',
+                data: { notificationID: notificationID },
+                success: function (result) {
+                    if (result == true) {
+                        $('#grdNotifications').data('kendoGrid').dataSource.read();
+                        $('#grdNotifications').data('kendoGrid').refresh();
+                    }
+                    else {
+                        alert("Notification not removed");
+                        return false;
+                    }
+                }
+            });
+        }
+        else {
+            return false;
+        }
+    }
+    function onDataBound(e) {
+        var AddMenuVal = '@ViewBag.AddMenuVal'
+        if (AddMenuVal == "False") {
+            $("#AddNotification").addClass("disable_a_href");
+        }
+    }
+</script>
+

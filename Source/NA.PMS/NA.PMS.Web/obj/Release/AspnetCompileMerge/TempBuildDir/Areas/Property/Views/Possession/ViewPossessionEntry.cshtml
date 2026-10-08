@@ -1,0 +1,320 @@
+﻿@using Kendo.Mvc.UI
+@using NA.PMS.Common
+
+@model NA.PMS.Model.Property.PropertyPossessionModel
+@{
+    ViewBag.Title = "View Possession Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script type="text/javascript">
+    function PrintDiv() {
+        var contents = document.getElementById("divPossessionOrderBody").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+</script>
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">View Possession Entry</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory"></div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+
+                <h2 class="blck-heading"></h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Registration Id")</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.Rid)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Property Number")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.PropertyNumber)
+                        </div>
+                    </div>
+
+                </div>
+
+                <h2 class="blck-heading">Applicant Details</h2>
+                @Html.HiddenFor(m => m.DepartmentId)
+                @Html.HiddenFor(m => m.PropertyId)
+                @Html.HiddenFor(m => m.Rid)
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Scheme Name") </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.SchemeName)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Department")</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.DepartmentName)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Applicant's Name") </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.ApplicantName)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Gender")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.Gender)
+                            @Html.HiddenFor(m => m.Gender)
+                        </div>
+                    </div>
+                    <div class="row" id="divSigningAuthority">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Authorized Signatory")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.SigningAuthority)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Registered Office")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.RegisteredOffice)
+                        </div>
+                    </div>
+                    <div class="row" id="divParentsName">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Father's/Husband's Name")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.FatherName)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Mother's Name")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.MotherName)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Property Type")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.PropertyType)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Area")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.Area)
+                        </div>
+                    </div>
+                    <div class="row">
+
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("AreaRange/Floor")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.FloorAreaRange)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Lease Deed Due Date")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <div id="lblLeaseDueDt">
+                                @Html.DisplayFor(m => m.LeaseDeedDueDate)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Lease Deed Execution Date")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <div id="lblLeaseExecDt">
+                                @Html.DisplayFor(m => m.LeaseDeedExecutionDate)
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Possession Due Date")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.PossessionDueDate)
+                        </div>
+                    </div>
+                    @Html.HiddenFor(m => m.PropertyId)
+                </div>
+
+                <h2 class="blck-heading">Possession Details</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Possession Date") </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.PossessionDate)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Possession By", new { @class = "k-label" })  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.PossessionBy)
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("North")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.North)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("South")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.South)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("East")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.East)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("West")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.West)
+                        </div>
+                    </div>
+                   
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Area Change")
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.DisplayFor(m => m.AreaChange)
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group  divAreaChange">
+                                @Html.Label("Change Type")
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group  divAreaChange">
+                                @Html.DisplayFor(m => m.AreaChangeType)
+                            </div>
+                        </div>
+                        <div class="row  divAreaChange">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Changed Area(Sqmt)")
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.DisplayFor(m => m.ChnagedArea)
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("One Time Excess Charge(INR)")
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.DisplayFor(m => m.OneTimeExcessCharge)
+                            </div>
+                        </div>
+                    
+                </div>
+                @Html.HiddenFor(m => m.AreaChange)
+            </div>
+            <div class="box-button text-center">
+                <input type="button" class="btn btn-default" value="Back" id="btnBack" onclick="window.history.back();" />
+                <input type="button" class="btn btn-default" value="Generate Possession Certificate" id="btnPrint" />
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@*PopUp to print*@
+<div id="divPrintPossession" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="padding-top:20px;">
+    <div class="modal-dialog" style="width: 65%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">  <b>Possession Certificate</b></h4>
+            </div>
+            <div class="modal-body" style="overflow:auto; height:480px;">
+                <div id="divPossessionEntryBody"></div>
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="submit" id="btnPrintDiv" class="k-button" data-dismiss="modal" onclick="PrintDiv();">Print</button>
+                <button type="button" id="downloadLetter" class="k-button">Download</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function () {
+        $("#divSigningAuthority").css("display", "none");
+        //alert($("#Gender").val().toLowerCase());
+        if ($("#Gender").val().toLowerCase() == "company") {
+            $("#divSigningAuthority").show();
+            $('#divParentsName').hide();
+        }
+        else {
+            $("#divSigningAuthority").hide();
+            $('#divParentsName').show();
+        }
+
+        if ($("#AreaChange").val() === "Yes") {
+            $(".divAreaChange").show();
+        } else {
+            $(".divAreaChange").hide();
+        }
+
+    });
+
+    $("#btnPrint").click(function () {
+        var rid = $("#Rid").val();
+        var departmentId = $("#DepartmentId").val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rid: rid, departmentId: departmentId }),
+            url: '/Possession/PrintPossessionLetter',
+            success: function (result) {
+                $("#divPossessionEntryBody").html(result);
+                $("#divPrintPossession").modal('show');
+                //alertify.success("Records added successfully.");
+            },
+            error: function (obj) {
+                alertify.error("Some error occured. Please try again later.");
+            }
+        });
+
+    });
+
+    $('#downloadLetter').click(function () {
+        var rid = $("#Rid").val();
+        var departmentId = $("#DepartmentId").val();
+        var possession = '@NA.PMS.Common.PossessionType.Entry.ToString()';
+        window.location = "/Possession/DownloadPossessionLetter?rid=" + rid + "&departmentId=" + departmentId+ "&possession="+possession;
+    })
+
+</script>

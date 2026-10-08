@@ -1,0 +1,692 @@
+﻿@model NA.PMS.Model.BankAccountManagementModel
+
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@{
+    ViewBag.Title = "Create Challan";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    #divChallanGrid{
+        display:none;
+    }
+    .lbl-form-control{
+        /*background:#ececec;*/
+        background:url(/Content/Images/boxed-bg.jpg) repeat;
+    }
+</style>
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Create Challan</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+
+
+                <h2 class="blck-heading">Applicant Details</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Registration Id", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(m => m.RId)
+                            .Filter("contains")
+                            .DataTextField("text")
+                            .DataValueField("id")
+                            .OptionLabel("Select")
+                            //.DataSource(source =>
+                            //{
+                            //source.Read(read =>
+                            //{
+                            //    read.Action("GetRIDsForManageAccountDetails", "PropertyRegistration");
+                            //});
+                            //})
+                            .DataSource(source =>
+                            {
+                                source.Custom()
+                                .ServerFiltering(true)
+                                .ServerPaging(true)
+                                .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                .Transport(transport => { transport.Read("GetRIDsForManageAccountDetailsByDataSource", "PropertyRegistration"); })
+                                .Schema(schema => { schema.Data("Data").Total("Total"); })
+                                .PageSize(100);
+                            })
+                            .Events(events => { events.Change("RIdChange"); })
+                            .HtmlAttributes(new { @class = "schemeForms", style = "width:100%" })
+                            )
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Property No")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label id="lblPropNo" class="lbl-form-control">@Html.DisplayFor(m => m.PropertyNumber)</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Allottee Name")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label id="lblApNa" class="lbl-form-control">@Html.DisplayFor(m => m.ApplicationName)</label>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Department")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label id="lblDepttName" class="lbl-form-control">@Html.DisplayFor(m => m.DepttName)</label>
+                            
+                            @Html.HiddenFor(m => m.DepttId)
+                        </div>
+                    </div>
+
+                    <div class="row">
+
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Gender")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label id="lblGender" class="lbl-form-control">@Html.DisplayFor(m => m.Gender)</label>
+                        </div>
+
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Father's/Husband's Name")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group" >
+                            <label id="lblReNa" class="lbl-form-control">@Html.DisplayFor(m => m.RelationName)</label>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Property Type")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                           <label id="lblPropTy" class="lbl-form-control">@Html.DisplayFor(m => m.PropertyType)</label>
+                        </div>
+
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Area(sqmt)")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                           <label id="lblArea" class="lbl-form-control">@Html.DisplayFor(m => m.Area)</label>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Floor/Area Range")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                           <label id="lblFloor" class="lbl-form-control">@Html.DisplayFor(m => m.Floor)</label>
+                        </div>
+                    </div>
+                </div>
+                <h2 class="blck-heading">Bank Information</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Bank Name", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(model => model.bankId)
+                            .Name("bankId")
+                            .DataTextField("text")
+                            .DataValueField("id")
+                            .OptionLabel("Select")
+                            .Filter("contains")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetAllBanks", "PropertyRegistration");
+                                });
+                            })
+                            //.Events(model => model.Change("CleanAccountNumber"))
+                            .HtmlAttributes(new { style = "width: 100%", @class = "schemeForms" })
+                            )
+                            @Html.ValidationMessageFor(model => model.bankId, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Branch Address", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(model => model.branchId)
+                            .Name("branchId")
+                            .DataTextField("text")
+                            .DataValueField("id")
+                            .OptionLabel("Select")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetAllBranchs", "PropertyRegistration")
+                                        .Data("filterBranches");
+                                }).ServerFiltering(true);
+                            })
+                            .CascadeFrom("bankId")
+                            .Events(model => model.Change("HideShowBranch"))
+                            .HtmlAttributes(new { style = "width: 100%", @class = "schemeForms" })
+                            )
+                            @Html.ValidationMessageFor(model => model.branchId, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Account Number", htmlAttributes: new { @id = "lblAccountddl", @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group" id="lblDdlAccountNumber">
+                            @Html.TextBoxFor(m => m.DdlAccountNumber, new { @readonly = "readonly", @class="form-control" })
+                           
+                        </div>
+
+                    </div>
+                </div>
+
+                <h2 class="blck-heading"> Add Charges</h2>
+                <div class="form-bx">
+                    @*<div class="row">
+                        @Html.HiddenFor(m => m.Amount)
+                    </div>*@
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Account Head", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(model => model.AccountHeadId)
+                                    //.Name("AccountHeadId")
+                            .DataTextField("text")
+                            .DataValueField("id")
+                            .OptionLabel("Select")
+                            .Filter("contains")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetAllAccountHead", "PropertyRegistration");
+                                });
+                            })
+
+                            .HtmlAttributes(new { style = "width: 100%", @class = "schemeForms" })
+                            )
+                            @Html.ValidationMessageFor(model => model.AccountHeadId, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Account Subhead", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(model => model.AccountSubHeadId)
+                                    //.Name("AccountSubHeadId")
+                            .DataTextField("text")
+                            .DataValueField("id")
+                            .OptionLabel("Select")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetAccountSubHead", "PropertyRegistration")
+                                        .Data("filterAccountSubHead");
+                                }).ServerFiltering(true);
+                            })
+                                            .CascadeFrom("AccountHeadId")
+                            //.Events(model => model.Change("HideShowBranch").DataBound("onDataBound"))
+                            .HtmlAttributes(new { style = "width: 100%", @class = "schemeForms" })
+                            )
+                            @Html.ValidationMessageFor(model => model.AccountSubHeadId, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Amount", htmlAttributes: new { @id = "lblAccountddl", @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().NumericTextBoxFor(m => m.Amount)
+                                   .Name("Amount")
+                                  .Min(0)
+                                    .Max(999999999999999999)
+                                            .Spinners(false).Step(0)
+                                    .Enable(true)
+                                 .HtmlAttributes(new { style = "width: 100%", @maxlength = "18", @class = "k-label  textBoxValueRightAlign" })
+                            )
+                            @Html.ValidationMessageFor(model => model.Amount, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <input type="button" id="btnAdd" value="Add" class="btn btn-add" />
+                        </div>
+                    </div>                   
+                </div>
+
+                <div class="k-grid-content" id="divChallanGrid">
+                    @*@Html.HiddenFor(c => c.RId)*@
+                    @(Html.Kendo().Grid<NA.PMS.Model.BankAccountManagementModel>()
+                        .Name("gridChargeDetails")
+                            .Columns(columns =>
+                            {
+                                columns.Bound(c => c.ChallanId).Hidden(true);
+                                columns.Bound(c => c.RId).Hidden(true);
+                                columns.Bound(c => c.AccountHeadName).Title("Account Head");
+                                columns.Bound(c => c.AccountSubHeadName).Title("Account Sub Head");
+                                columns.Bound(c => c.Amount).Title("Amount");
+                                //columns.Bound(c => c.BankName).Title("Bank");
+                                //columns.Bound(c => c.CreatedDate).Title("Date").Format("{0:dd-MMM-yyyy}");
+                                columns.Bound(c => c.ChallanTransID).Title("Action").ClientTemplate("<a onclick='javascript:RemoveChallanDetails(this);'class='hyperlinkcss'>Remove</a>").Filterable(false).Sortable(false);
+                                //columns.Bound(c => c.ChallanTransID).Title("Action").ClientTemplate("<a onclick='javascript:RemoveDetails(\"#=ChallanTransID#\");'class='hyperlinkcss'>Remove</a>").Filterable(false).Sortable(false);
+                            })
+                            .Sortable()
+                            .Filterable()
+                            .Resizable(resize => resize.Columns(true))
+
+                            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                            //.DataSource(dataSource => dataSource
+                            //                .Ajax().Model(model => model.Id(c => c.ChallanTransID))
+                            //.ServerOperation(true)
+                            //.Read(read => read.Action("GetAccountChargeDetails", "PropertyRegistration").Data("AdditionalInfo")).PageSize(20)
+                            //)
+                                    .DataSource(dataSource => dataSource
+                                                    .Ajax().Model(model => model.Id(c => c.ChallanTransID))
+                                    .ServerOperation(true)
+                                            .Read(read => read.Action("GetGeneratedChallanDetails", "PropertyRegistration").Data("AdditionalInfo")).PageSize(5)
+                                    //.Read(read => read.Action("GetGeneratedChallanDetails", "PropertyRegistration").Data("AdditionalInfo")).PageSize(5)
+                                    )
+                    )
+                </div>
+                <div>
+                    <div class="row">
+                      @Html.HiddenFor(model=>model.Amount,htmlAttributes: new{@id="hdnAmmount"})
+                        @Html.HiddenFor(model => model.AccountHeadId, htmlAttributes: new { @id = "hdnAccountHeadId" })
+                        @Html.HiddenFor(model => model.AccountSubHeadId, htmlAttributes: new { @id = "hdnAccountSubHeadId" })
+                    </div>
+                </div>
+            </div>
+
+            <div class="box-button text-center">
+                <input type="button" id="btnBack" value="Back" class="btn  btn-default" />
+                <input type="button" value="Generate Challan" id="btnGenerateChallan" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <div id="divPrintChallan" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="padding-top:40px;">
+        <div class="modal-dialog" style="width: 60%;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">  <b>Challan</b></h4>
+                </div>
+                <div class="modal-body" style="overflow:auto; height:400px;">
+                    <div id="divChallanBody"></div>
+                </div>
+                <div class="modal-footer" style="text-align: center;">
+                    <button type="submit" id="btnPrintDiv" class="k-button" data-dismiss="modal" onclick="PrintDiv();">Print</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+    $("#btnBack").click(function () {
+        window.location.href = '@Url.Action("ManageBankAccount", "PropertyRegistration")';
+    });
+    function HideShowBranch() {
+        var bankId = $('#bankId').val();
+        var branchId = $('#branchId').val();
+        if (bankId == '') {
+            $("#DdlAccountNumber").val('');
+            //alertify.error("Please select Bank Name");
+            return false;
+        }
+        if (branchId == '') {
+            $("#DdlAccountNumber").val('');
+            //alertify.error("Please select Branch name");
+            return false;
+        }
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ bankId: bankId, branchId: branchId }),
+            url: '/PropertyRegistration/GetAccountNumber',
+            success: function (result) {
+                $("#DdlAccountNumber").val(result)
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                alertify.error("Some Error in saved database.");
+            }
+
+        });
+    }
+
+    function AdditionalInfo() {
+        return {
+            rid: $('#RId').val()
+        }
+    }
+
+    $("#btnAdd").click(function () {
+
+        var rId = $("#RId").val();
+
+        var AccountHeadId = $("#AccountHeadId").val();
+        var AccountSubHeadId = $("#AccountSubHeadId").val();
+        var Amount = $("#Amount").val();
+
+        $('#hdnAmmount').val(Amount);
+        $('#hdnAccountHeadId').val(AccountHeadId);
+        $('#hdnAccountSubHeadId').val(AccountSubHeadId);
+
+        if (rId == "") {
+            alertify.error("Please select RId.");
+            return false;
+        }
+        if (AccountHeadId == "") {
+            alertify.error("Please select Account Head.");
+            return false;
+        }
+        if (AccountSubHeadId == "") {
+            alertify.error("Please select Sub Account Head.");
+            return false;
+        }
+        if (Amount == "") {
+            alertify.error("Please enter  Amount.");
+            return false;
+        }
+
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rId: rId, AccountHeadId: AccountHeadId, AccountSubHeadId: AccountSubHeadId, Amount: Amount }),
+            url: '/PropertyRegistration/SaveCreateChallan',
+            success: function (result) {
+                if (result == 0) {
+                    $("#AccountHeadId").data("kendoDropDownList").value("");
+                    $("#AccountSubHeadId").data("kendoDropDownList").value("");
+                    $("#Amount").data("kendoNumericTextBox").value("");
+                    $("#gridChargeDetails").data("kendoGrid").dataSource.read();
+                    //alertify.success("Data saved successfully.");
+                    return false;
+                }
+                if (result == 2) {
+                    $("#AccountHeadId").data("kendoDropDownList").value("");
+                    $("#AccountSubHeadId").data("kendoDropDownList").value("");
+                    $("#Amount").data("kendoNumericTextBox").value("");
+                    $("#gridChargeDetails").data("kendoGrid").dataSource.read();
+                    alertify.success("Registration id is changed");
+                }
+                //if (result == 3) {
+                //    alertify.error("Maximum 3 charges are allowed.");
+                //    return false;
+                //}
+                else {
+                    return true;
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                alertify.error("Some Error in adding data.");
+            }
+
+        });
+
+    });
+
+    @*function RemoveDetails(ChallanTransID) {
+            var removeNotification = confirm('Are you sure to remove this details?');
+            var rId = $("#RId").val();
+            if (removeNotification) {
+                $.ajax({
+                    url: '@(Url.Action("RemoveChallanChargeDetail", "PropertyRegistration"))',
+                    type: 'POST',
+                    data: { ChallanTransID: ChallanTransID, rId: rId },
+                    success: function (result) {
+                        if (result == true) {
+                            $('#gridChargeDetails').data('kendoGrid').dataSource.read();
+                            $('#gridChargeDetails').data('kendoGrid').refresh();
+                            alertify.success("Record deleted successfully.");
+                        }
+                        else {
+                            alert("Charge Details not removed");
+                            return false;
+                        }
+                    }
+                });
+            }
+            else {
+                return false;
+            }
+        }*@
+
+    function RemoveChallanDetails(row) {
+        var tr = $(row).parent().parent();
+        var challanid = $(tr).children("td:eq(0)").text();
+        var rid = $(tr).children("td:eq(1)").text();
+        var headname = $(tr).children("td:eq(2)").text();
+        var subheadname = $(tr).children("td:eq(3)").text();
+        var amount = $(tr).children("td:eq(4)").text();
+        var removeNotification = confirm('Are you sure to remove this details?');
+        if (removeNotification) {
+            $.ajax({
+                type: 'POST',
+                data: { rid: rid, headName: headname, subHeadName: subheadname, amount: amount },
+                url: '@(Url.Action("RemoveChallanChargeDetail", "PropertyRegistration"))',
+                success: function (result) {
+                    if (result == true) {
+                        $('#gridChargeDetails').data('kendoGrid').dataSource.read();
+                        $('#gridChargeDetails').data('kendoGrid').refresh();
+                        alertify.success("Charges removed successfully.");
+                    }
+                    else {
+                        alert("Charge Details not removed");
+                        return false;
+                    }
+                }
+            });
+        }
+        else {
+            return false;
+        }
+    }
+
+        $("#btnGenerateChallan").click(function () {           
+        DepttId = $("#DepttId").val();
+
+        var rId = $("#RId").val();
+        var bankId = $("#bankId").val();
+        var branchId = $("#branchId").val();
+        var DdlAccountNumber = $("#DdlAccountNumber").val();
+
+        if (rId == "") {
+            alertify.error("Please select RId.");
+            return false;
+        }
+        if (bankId == "") {
+            alertify.error("Please select Bank.");
+            return false;
+        }
+        if (branchId == "") {
+            alertify.error("Please select branch.");
+            return false;
+        }
+        if (DdlAccountNumber == "") {
+            alertify.error("Please select Account Number.");
+            return false;
+        }
+        var grid = $("#gridChargeDetails").data("kendoGrid");
+        var totalRecords = grid.dataSource.total();
+        if (totalRecords == 0) {
+            alertify.error("Please enter atleast one record in Charge Details section.");
+            return false;
+        }
+        else {
+            var rid1 = $("tbody").children("tr:eq(0)").children("td:eq(1)").text();
+            //var rid2 = $("tbody").children("tr:eq(1)").children("td:eq(1)").text();
+            //var rid3 = $("tbody").children("tr:eq(2)").children("td:eq(1)").text();
+            //alert(rid1+" "+rid2+" "+rid3);
+            //if (rid1 != "") {
+            //    if (rid1 != rId) {
+            //        alertify.error("Registration id should be same.");
+            //        return false;
+            //    }
+            //}
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ rId: rId, bankId: bankId, branchId: branchId, ddlAccountNumber: DdlAccountNumber, deptId: DepttId }),
+                //url: '/DocParser/GenerateChallan',
+                url: '/DocParser/GeneratePaymentChallan',
+                success: function (result) {
+                    //alertify.success("Data saved successfully.");
+                    $('#gridChargeDetails').data('kendoGrid').dataSource.read();
+                    $('#gridChargeDetails').data('kendoGrid').refresh();
+                    $("#divChallanBody").html(result);
+                    $("#divPrintChallan").modal('show');
+
+                    //window.location.href = '@Url.Action("ManageBankAccount", "PropertyRegistration")';
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    alertify.error("Some Error in save database.");
+                }
+            });
+        }
+
+    });
+
+        $('#divPrintChallan').on('hidden.bs.modal', function () {
+            ClearFieldValue();
+            $("#AccountHeadId").data("kendoDropDownList").value("");
+            $("#AccountSubHeadId").data("kendoDropDownList").value("");
+            $("#Amount").data("kendoNumericTextBox").value("");
+            $("#bankId").data("kendoDropDownList").value("");
+        $("#gridChargeDetails").data('kendoGrid').dataSource.data([]);
+    });
+
+    function filterBranches() {
+        return {
+            bankId: $("#bankId").val()
+        };
+    }
+    function filterAccountSubHead() {
+        return {
+            AccountHeadId: $("#AccountHeadId").val()
+        };
+    }
+    function filterBankAccounts() {
+        return {
+            bankId: $("#bankId").val(),
+            branchId: $("#branchId").val()
+        };
+    }
+
+    function RIdChange() {
+        var rId = $("#RId").val();
+        if (rId == '') {
+            //alertify.error("Please select an Registration Id");
+            ClearFieldValue();
+            $('#divChallanGrid').hide();
+            return false;
+        }
+        else {
+            //var kid = $("tbody").children("tr:eq(0)").children("td:eq(1)").text();
+            //alert(kid);
+            //if (kid != "") {
+            //    if (kid != rId) {
+            //        alertify.error("Registration id should be same.");
+            //        return false;
+            //    }
+            //}
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ rId: rId }),
+                url: '/PropertyRegistration/GetFunctionalTransferDetailsByRID',
+                success: function (result) {
+                    if (result != null) {
+                        $("#lblPropNo").html(result.PropertyNumber);
+                        //$("#lblScNa").html(result.SchemeName);
+                        $("#lblDepttName").html(result.DepttName);
+                        $("#lblApNa").html(result.ApplicationName);
+                        $("#lblGender").html(result.Gender);
+                        $("#lblReNa").html(result.RelationName);
+                        $("#lblPropTy").html(result.PropertyType);
+                        $("#lblArea").html(result.Area);
+                        $("#lblFloor").html(result.Floor);
+
+                        $("#DepttId").val(result.DepttId);
+
+                        $("#gridChargeDetails").data("kendoGrid").dataSource.read();
+                        $('#divChallanGrid').show();
+                    }
+                    else {
+
+                        alertify.error("Some error occured. Please try again later.");
+                    }
+                },
+                error: function (obj) {
+
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            });
+        }
+
+    }
+    function ToJavaScriptDate(value) {
+        var pattern = /Date\(([^)]+)\)/;
+        var results = pattern.exec(value);
+        if (results != null) {
+            var dt = new Date(parseFloat(results[1]));
+            return (dt.getMonth() + 1) + "/" + dt.getDate() + "/" + dt.getFullYear();
+        }
+    }
+    function PrintDiv() {
+        var contents = document.getElementById("divChallanBody").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+    function ClearFieldValue() {
+        $("#lblPropNo").html('');
+        $("#lblDepttName").html('');
+        $("#lblApNa").html('');
+        $("#lblGender").html('');
+        $("#lblReNa").html('');
+        $("#lblPropTy").html('');
+        $("#lblArea").html('');
+        $("#lblFloor").html('');
+    }
+    </script>

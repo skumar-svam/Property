@@ -1,0 +1,409 @@
+﻿@using Kendo.Mvc.UI
+@using NA.PMS.Common
+@using System.Linq
+
+<style>
+    .grid-header {
+  text-align: center;
+}
+    .hyperlink {
+        color: darkblue;
+        font: bold;
+    }
+    .HeadBackClr{
+        background-color:aliceblue;
+    }
+    .TotalBackClr{
+        background-color:#00bfff;
+    }
+    .compBackClr{
+        background-color:lawngreen;
+        
+    }
+    .compBeyondBackClr{
+        background-color:#ffa500;
+    }
+    .withdrawnBackClr{
+        background-color:#9acb32;
+    }
+    .RejectBackClr{
+        background-color:#679b67;
+    }
+    .objectionBackClr{
+        background-color:#add8e6;
+    }
+    .pendingwithinBackClr{
+        background-color:yellow ;
+    }
+    .MoreThanMonthBackClr{
+        background-color:#e14e16;
+    }
+    .MoreThanWeekBackClr{
+        background-color:#fa8072;
+    }
+    .MoreThanFortnightBackClr{
+        background-color:#ff0000;
+    }
+    .k-grid tr td {
+    border-bottom: 1px solid black;
+    border-right:1px solid black;
+    text-align:center;
+         /*border:.25pt solid black;*/
+}
+     .k-grid tr th {
+    /*border-bottom: 1px solid black;
+    border-right:1px solid black;*/
+     border:1px solid black;
+}
+     .k-grid .k-grid-header .k-header .k-link {
+      overflow: visible !important; white-space: normal !important; 
+      text-align:center;
+   }
+     /*.k-footer-template td{
+         color:white;
+         background-color:saddlebrown;
+     }*/
+</style>
+
+<div id="div-graph-services">
+    <div class="row" style="padding:8px;">
+        <div class="col-md-3">
+            <label>Start Date</label>
+            @(Html.Kendo().DatePicker().Name("TimelineServiceStartDate")
+                    .Events(e => e.Change("TimelineServiceChangeEvent"))
+                    .HtmlAttributes(new { style = "width:90%;" })
+            )
+        </div>
+        <div class="col-md-3">
+            <label>End Date</label>
+            @(Html.Kendo().DatePicker().Name("TimelineServiceEndDate")
+                    .Events(e => e.Change("TimelineServiceChangeEvent"))
+                    .HtmlAttributes(new { style = "width:90%;" })
+            )
+        </div>
+        <div class="col-md-3">
+            <label>Request Type</label>
+            @(Html.Kendo().DropDownList()
+                  .Name("DDLRequestType")
+                  .DataTextField("Text")
+                  .DataValueField("Value")
+                  .OptionLabel(" --- Select ---")
+                  .BindTo(new List<SelectListItem>() {
+                      new SelectListItem() { Text = "Online", Value = "Online" },
+                      new SelectListItem() { Text = "JSK", Value = "JSK" },
+                      new SelectListItem() { Text = "NIC Nivesh Mitra", Value = "NIC Nivesh Mitra" }
+                  })
+                  .Value("Online")
+                  .HtmlAttributes(new { style = "width: 90%;" })
+                  .Events(e => e.Change("TimelineRequestTypeChangeEvent"))
+            )
+        </div>
+        <div class="col-md-3 form-group" style="padding-top:20px;">
+            <input type="button" id="btnTimeline" value="Citizen Charter Timeline" class="btn btn-default btnclass" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12" style="margin-top:20px;">
+            <div class="row rw-spce">
+                <div class="col-md-12">
+                    <input type="hidden" id="DeptId" />
+                    <h2 class=" blck-heading" style="border-left:1px solid green;border-right:1px solid green;margin-bottom:0;" id="ServiceHead">Timeline Of Services ( Online and JSK )</h2>
+                    <div class="col-md-12 k-grid-content" style="border: .25pt solid black;">
+                        @(Html.Kendo().Grid<NA.PMS.Model.ServiceViewModel>()
+                    .Name("GridSeviceTimeline")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(c => c.DepartmentId).Hidden(true);
+                        columns.Bound(c => c.Department).Title("Department").Width(110).ClientTemplate("<label class='hyperlink' onclick='javascript:ServiceByDepartment(#= DepartmentId #,\"#= Department #\")'>#= Department #</label>").ClientFooterTemplate("Total Count:");//.HeaderHtmlAttributes(new { style = "background-color:aliceblue;" });
+                        columns.Bound(c => c.Total).Title("Total Request").Width(110).ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "TotalBackClr" });//.HeaderHtmlAttributes(new { style = "background-color:#00bfff;" })
+                        columns.Group(g =>
+                            g.Title("Completed").HeaderHtmlAttributes(new { style = "text-align: center;background-color:#63d827;" })
+                            .Columns(info =>
+                            {
+                                info.Bound(x => x.CompletedWithinTime).Title("Within Time").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "compBackClr" });//.HeaderHtmlAttributes(new { style = "background-color:lawngreen;" });
+                                info.Bound(x => x.CompletedBeyondTime).Title("Beyond Time").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "compBeyondBackClr" });//.HeaderHtmlAttributes(new { style = "background-color:#ffa500;" })
+                                info.Bound(x => x.TotalReject).Title("Rejected").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "RejectBackClr" });//.HeaderHtmlAttributes(new { style = "background-color:#679b67;"})
+                                info.Bound(x => x.WithDrawn).Title("Withdrawn").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "withdrawnBackClr" });//.HeaderHtmlAttributes(new { style = "background-color:#9acb32;" })
+                            })
+                        );
+                        columns.Group(g =>
+                            g.Title("Pending").HeaderHtmlAttributes(new { style = "text-align: center;background-color:orange;" })
+                            .Columns(info =>
+                            {
+                                info.Bound(x => x.PendingWithTime).Title("Within Time").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "pendingwithinBackClr" });//.HeaderHtmlAttributes(new { style = "background-color:yellow" })
+                                info.Bound(c => c.PendingMoreThanWeek).Title("More Than a Week").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "MoreThanWeekBackClr" });//.HeaderHtmlAttributes(new { style = "background-color:#fa8072;" })
+                                info.Bound(c => c.PendingMoreThanFortNight).Title("More Than Fortnight").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "MoreThanFortnightBackClr" });//.HeaderHtmlAttributes(new { style = "background-color:#ff0000;" })
+                                info.Bound(c => c.PendingMoreThanOneMonth).Title("More Than a Month").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "MoreThanMonthBackClr" });//.HeaderHtmlAttributes(new { style = "background-color:#8b0000;" })
+                                info.Bound(c => c.TotalObjection).Title("Objection").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "objectionBackClr" });//.HeaderHtmlAttributes(new { style = "background-color:#add8e6;" })
+                                //info.Group(i => i.Title("Defaulter")//.HeaderHtmlAttributes(new { style = "text-align: center;background-color:red;" })
+                                //    .Columns(location =>
+                                //    {
+                                //        location.Bound(c => c.PendingMoreThanWeek).Title("More Than a Week").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "MoreThanWeekBackClr" });//.HeaderHtmlAttributes(new { style = "background-color:#fa8072;" })
+                                //        location.Bound(c => c.PendingMoreThanFortNight).Title("More Than Fortnight").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "MoreThanFortnightBackClr" });//.HeaderHtmlAttributes(new { style = "background-color:#ff0000;" })
+                                //        location.Bound(c => c.PendingMoreThanOneMonth).Title("More Than a Month").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "MoreThanMonthBackClr" });//.HeaderHtmlAttributes(new { style = "background-color:#8b0000;" })
+                                //        location.Bound(c => c.TotalObjection).Title("Objection").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "objectionBackClr" });//.HeaderHtmlAttributes(new { style = "background-color:#add8e6;" })
+                                //    })
+                                //);
+                            })
+                        );
+                    })
+                    .Resizable(resize => resize.Columns(true))
+                                //.Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                    .AutoBind(true)
+                    .DataSource
+                    (
+                        dataSource => dataSource
+                        .Ajax().ServerOperation(true)
+                        .Read(read => read.Action("GetServiceTimelineReportsAsDataSource", "Report", new { area = "Reports" }).Data("FilterParameterTimeline"))
+                        .Aggregates(aggregates =>
+                        {
+                            aggregates.Add(p => p.Total).Sum();
+                            aggregates.Add(p => p.CompletedWithinTime).Sum();
+                            aggregates.Add(p => p.CompletedBeyondTime).Sum();
+                            aggregates.Add(p => p.PendingWithTime).Sum();
+                            aggregates.Add(p => p.PendingMoreThanWeek).Sum();
+                            aggregates.Add(p => p.PendingMoreThanFortNight).Sum();
+                            aggregates.Add(p => p.PendingMoreThanOneMonth).Sum();
+                            aggregates.Add(p => p.TotalReject).Sum();
+                            aggregates.Add(p => p.TotalObjection).Sum();
+                            aggregates.Add(p => p.WithDrawn).Sum();
+                        })
+                    )
+                    //.HtmlAttributes(new {  })
+                    )
+                    </div>
+                </div>
+            </div>
+
+            <div class="row rw-spce" id="ServiceDepartmentWise">
+                <div class="col-md-12">
+                    <input type="hidden" id="hdSubType" />
+                    <input type="hidden" id="hdServiceId" />
+                    <h2 class=" blck-heading" style="border-left:1px solid green;border-right:1px solid green;margin-bottom:0;" id="depthead">Timeline Of Services Department Wise</h2>
+                    <div class="col-md-12 k-grid-content">
+                        @(Html.Kendo().Grid<NA.PMS.Model.ServiceViewModel>()
+                    .Name("GridServiceDetailsDeptWise")
+                            .Columns(columns =>
+                    {
+                        columns.Bound(c => c.ServiceId).Hidden(true);
+                        columns.Bound(c => c.ServiceName).Title("Service Name").ClientFooterTemplate("Total Count:").Width(200);
+                        columns.Bound(c => c.Total).Title("Total Request").ClientTemplate("<label class='hyperlink' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,1)'>#= TotalReceived #</label>").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "TotalBackClr" });
+                        columns.Group(g =>
+                            g.Title("Completed").HeaderHtmlAttributes(new { style = "text-align: center;background-color:#63d827;" })
+                            .Columns(info =>
+                            {
+                                info.Bound(x => x.CompletedWithinTime).Title("Within Time").ClientTemplate("<label class='hyperlink' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,2)'>#= CompletedWithinTime #</label>").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "compBackClr" });
+                                info.Bound(x => x.CompletedBeyondTime).Title("Beyond Time").ClientTemplate("<label class='hyperlink' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,3)'>#= CompletedBeyondTime #</label>").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "compBeyondBackClr" });
+                                info.Bound(x => x.TotalReject).Title("Rejected").ClientTemplate("<label class='hyperlink' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,8)'>#= TotalReject #</label>").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "RejectBackClr" });
+                                info.Bound(x => x.WithDrawn).Title("Withdrawn").ClientTemplate("<label class='hyperlink' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,10)'>#= WithDrawn #</label>").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "withdrawnBackClr" });
+                            })
+                        );
+                        columns.Group(g =>
+                            g.Title("Pending").HeaderHtmlAttributes(new { style = "text-align: center;background-color:orange;" })
+                            .Columns(info =>
+                            {
+                                info.Bound(x => x.PendingWithTime).Title("Within Time").ClientTemplate("<label class='hyperlink' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,4)'>#= PendingWithTime #</label>").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "pendingwithinBackClr" });
+                                info.Bound(c => c.PendingMoreThanWeek).Title("More Than a Week").ClientTemplate("<label class='hyperlink' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,5)'>#= PendingMoreThanWeek #</label>").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "MoreThanWeekBackClr" });
+                                info.Bound(c => c.PendingMoreThanFortNight).Title("More Than Fortnight").ClientTemplate("<label class='hyperlink' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,6)'>#= PendingMoreThanFortNight #</label>").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "MoreThanFortnightBackClr" });
+                                info.Bound(c => c.PendingMoreThanOneMonth).Title("More Than a Month").ClientTemplate("<label class='hyperlink' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,7)'>#= PendingMoreThanOneMonth #</label>").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "MoreThanMonthBackClr" });
+                                info.Bound(c => c.TotalObjection).Title("Objection").ClientTemplate("<label class='hyperlink' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,9)'>#= TotalObjection #</label>").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "objectionBackClr" });
+                                //info.Group(i => i.Title("Defaulter").HeaderHtmlAttributes(new { style = "text-align: center;" })
+                                //    .Columns(location =>
+                                //    {
+                                //        location.Bound(c => c.PendingMoreThanWeek).Title("More Than a Week").ClientTemplate("<label class='hyperlink' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,5)'>#= PendingMoreThanWeek #</label>").ClientFooterTemplate("#=sum#");
+                                //        location.Bound(c => c.PendingMoreThanFortNight).Title("More Than Fortnight").ClientTemplate("<label class='hyperlink' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,6)'>#= PendingMoreThanFortNight #</label>").ClientFooterTemplate("#=sum#");
+                                //        location.Bound(c => c.PendingMoreThanOneMonth).Title("More Than a Month").ClientTemplate("<label class='hyperlink' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,7)'>#= PendingMoreThanOneMonth #</label>").ClientFooterTemplate("#=sum#");
+                                //        location.Bound(c => c.TotalObjection).Title("Objection").ClientTemplate("<label class='hyperlink' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,9)'>#= TotalObjection #</label>").ClientFooterTemplate("#=sum#");
+                                //    })
+                                //);
+                            })
+                        );
+                    })
+                    .Resizable(resize => resize.Columns(true))
+                                //.Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                    .AutoBind(true)
+                    .DataSource
+                    (
+                        dataSource => dataSource
+                        .Ajax().ServerOperation(true)
+                        .Read(read => read.Action("GetServiceTimelineReportsAsDataSource", "Report", new { area = "Reports" }).Data("FilterData"))
+                        .Aggregates(aggregates =>
+                        {
+                            aggregates.Add(p => p.Total).Sum();
+                            aggregates.Add(p => p.CompletedWithinTime).Sum();
+                            aggregates.Add(p => p.CompletedBeyondTime).Sum();
+                            aggregates.Add(p => p.PendingWithTime).Sum();
+                            aggregates.Add(p => p.PendingMoreThanWeek).Sum();
+                            aggregates.Add(p => p.PendingMoreThanFortNight).Sum();
+                            aggregates.Add(p => p.PendingMoreThanOneMonth).Sum();
+                            aggregates.Add(p => p.TotalObjection).Sum();
+                            aggregates.Add(p => p.TotalReject).Sum();
+                            aggregates.Add(p => p.WithDrawn).Sum();
+                        })
+                    ))
+                    </div>
+                </div>
+            </div>
+
+            <div class="row rw-spce" id="ServiceDetailsDeptWise">
+                <div class="col-md-12">
+                    <h2 class=" blck-heading" style="border-left:1px solid green;border-right:1px solid green;margin-bottom:0;" id="service">Service Details</h2>
+                    <div class="col-md-12 k-grid-content">
+                        @(Html.Kendo().Grid<NA.PMS.Model.ServiceViewModel>()
+                    .Name("GridSeviceDetails")
+                    .Columns(columns =>
+                    {
+                        //columns.Bound(c => c.ServiceId).Hidden(true);
+                        columns.Bound(c => c.RequestId).Title("Ref No").Width(110).ClientTemplate("<a href='" + "/Member/ServiceRequest/RequestDetail/#= RequestId #" + "' target='_blank'>#=RequestId#</a>");
+                        columns.Bound(c => c.RegistrationNo).Title("RegistrationId").Width(110);
+                        columns.Bound(c => c.PropertyNo).Title("Property No").Width(110);
+                        columns.Bound(c => c.Applicant).Title("Applicant Name").Width(160);
+                        columns.Bound(c => c.RequestDate).Title("Request Date").Width(110).Format("{0:dd-MMM-yyyy}");
+                        columns.Bound(c => c.Status).Title("Status").Width(110);
+                        columns.Bound(c => c.Approver).Title("Forwarded To").Width(110);
+                        columns.Bound(c => c.ValidationDate).Title("Forwarded Date").Width(110).Format("{0:dd-MMM-yyyy}");
+                        columns.Bound(c => c.ApprovalDate).Title("Approval Date").Width(110).Format("{0:dd-MMM-yyyy}");
+                        
+                    })
+                    .Resizable(resize => resize.Columns(true))
+                    .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                    .AutoBind(true)
+                    .DataSource
+                    (
+                        dataSource => dataSource
+                        .Ajax().ServerOperation(true)
+                        .Read(read => read.Action("GetServiceTimelineReportsAsDataSource", "Report", new { area = "Reports" }).Data("FilterDataByServiceId"))
+                    ))
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="PopupTimeline" class="container-fluid">
+    @*<h2 class=" blck-heading" style="border-left:1px solid green;border-right:1px solid green;margin-bottom:0;">Citizen Charter Timeline</h2>*@
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.ServiceViewModel>()
+                    .Name("GridCitizenCharterTimeline")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(c => c.DepartmentId).Hidden(true);
+                        columns.Bound(c => c.Department).Title("Department");
+                        columns.Bound(c => c.ServiceName).Title("Service Name");
+                        columns.Bound(c => c.Timeline).Title("Timeline (In Days)").Filterable(false);
+                    })
+                    .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                    .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                    .AutoBind(true)
+                    .Groupable()
+                    .DataSource
+                    (
+                        dataSource => dataSource
+                        .Ajax().ServerOperation(true)
+                        .Read(read => read.Action("GetCitizenCharterTimelineList", "Report", new { area = "Reports" }))
+                        .Group(group => group.Add(p => p.Department))   
+                    ))
+    </div>
+</div>
+
+
+
+<script>
+    $(document).ready(function () {
+        TimelineRequestTypeChangeEvent();
+        $('#ServiceDepartmentWise').hide();
+        $('#ServiceDetailsDeptWise').hide();
+        var startdate = '2018-01-01';
+        $('#TimelineServiceStartDate').data("kendoDatePicker").value(startdate);
+        var todayDate = kendo.toString(kendo.parseDate(new Date()), 'MM/dd/yyyy');
+        $("#TimelineServiceEndDate").data("kendoDatePicker").value(todayDate);
+        //$("#PopupTimeline").hide();
+        $('#btnTimeline').click(function () {
+            $('#GridCitizenCharterTimeline').data("kendoGrid").dataSource.read();
+            $("#PopupTimeline").data("kendoWindow").center();
+            $("#PopupTimeline").data("kendoWindow").open();
+            //var win = $("#PopupTimeline").data("kendoWindow");
+            //win.center();
+            //win.open();
+        });
+    });
+
+    $('#PopupTimeline').kendoWindow({
+        modal: true,
+        title: "Citizen Charter Timeline",
+        visible: false,
+        width: "70%"//, height: "30%"
+    });
+
+    function FilterParameterTimeline() {
+        var today = new Date().toDateString();
+        return {
+            ActionType: 'All',
+            StartDate: $('#TimelineServiceStartDate').val() == "" ? "2018-01-01" : $('#TimelineServiceStartDate').val(),
+            EndDate: $('#TimelineServiceEndDate').val() == "" ? today : $('#TimelineServiceEndDate').val(),
+            RequestThrough: $('#DDLRequestType').val()
+        }
+    }
+
+    function ServiceByDepartment(row,row1){
+        
+        $('#depthead').html("Timeline Of Services Department Wise: "+ row1);
+        $('#DeptId').val(row);
+        $('#GridSeviceTimeline').data("kendoGrid").dataSource.read();
+        $('#GridServiceDetailsDeptWise').data("kendoGrid").dataSource.read();
+        $('#ServiceDepartmentWise').show();
+    }
+
+    function FilterData(){
+        return {
+            ActionType: 'DepartmentWise',
+            DepartmentId: $('#DeptId').val(),
+            StartDate: $('#TimelineServiceStartDate').val(),
+            EndDate: $('#TimelineServiceEndDate').val(),
+            RequestThrough: $('#DDLRequestType').val()
+        }
+    }
+
+    function ServiceDetailsByServiceId(deptId,serviceId,type){
+        $('#DeptId').val(deptId);
+        $('#hdSubType').val(type);
+        $('#hdServiceId').val(serviceId);
+        $('#GridSeviceDetails').data("kendoGrid").dataSource.read();
+        $('#ServiceDetailsDeptWise').show();
+    }
+
+    function FilterDataByServiceId() {
+        return {
+            ActionType: 'ServiceDetails',
+            DepartmentId: $('#DeptId').val(),
+            StartDate: $('#TimelineServiceStartDate').val(),
+            EndDate: $('#TimelineServiceEndDate').val(),
+            ActionTypeId: $('#hdSubType').val(),
+            ServiceId: $('#hdServiceId').val(),
+            RequestThrough: $('#DDLRequestType').val()
+        }
+    }
+
+    function TimelineServiceChangeEvent() {
+        $('#GridSeviceTimeline').data("kendoGrid").dataSource.read();
+        $('#GridServiceDetailsDeptWise').data("kendoGrid").dataSource.read();
+        $('#GridSeviceDetails').data("kendoGrid").dataSource.read();
+    }
+
+    function TimelineRequestTypeChangeEvent() {
+        var reqTypeHead=$('#DDLRequestType').val();
+        if(reqTypeHead != ""){
+            $('#ServiceHead').html("Timeline Of Services ( "+ reqTypeHead +" )");
+        }
+        else {
+            $('#ServiceHead').html("Timeline Of Services ( Online and JSK )");
+        }
+        $('#GridSeviceTimeline').data("kendoGrid").dataSource.read();
+        $('#GridServiceDetailsDeptWise').data("kendoGrid").dataSource.read();
+        $('#GridSeviceDetails').data("kendoGrid").dataSource.read();
+        $('#ServiceDepartmentWise').hide();
+        $('#ServiceDetailsDeptWise').hide();
+    }
+
+</script>

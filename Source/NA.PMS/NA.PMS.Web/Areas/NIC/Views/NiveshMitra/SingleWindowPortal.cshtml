@@ -1,0 +1,232 @@
+﻿@model NA.PMS.NICServices.SWPPostViewModel
+@using Kendo.Mvc.UI
+@{
+    ViewBag.Title = "Single Window Portal";
+    //Layout = "~/Views/Shared/_LayoutNIC.cshtml";
+    Layout = "~/Areas/NIC/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .btn {
+        min-width : 110px;
+        border-radius: 0 !important;
+        box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    }
+    .form-group span.form-control {
+        min-height: 30px;
+        height: auto;
+        padding-left: 0px; 
+        /* background: #e1e1e1; */
+    }
+    .k-dropdown.form-control{
+        width:100%;
+    }
+    .col-md-4.col-sm-12.col-xs-12.form-group{
+        width:40%;
+    }
+    .col-md-8.col-sm-12.col-xs-12.form-group{
+        width:60%;
+    }
+    @@media (min-width : 320px) and (max-width : 540px){
+        .col-md-4.col-sm-12.col-xs-12.form-group{
+            width:100% !important;
+        }
+        .col-md-8.col-sm-12.col-xs-12.form-group{
+            width:100% !important;
+        }
+    }
+</style>
+
+@using (Html.BeginForm("ValidateProperty", "NiveshMitra", FormMethod.Post, new { enctype = "multipart/form-data", id = "SWPForm" }))
+{
+    <div class="single-window-portal nic-portal" data-nic="SWP">
+        <div class="col-md-12">
+            <div class="row" style="margin-top:6px">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Single Window Portal</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce" id="nic-form">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <h2 class="blck-heading">NIC Online Services/Scheme Form Detail</h2>
+                <div class="">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-20 form-group"></div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-30 form-group">
+                            <label class="radio-inline" style="padding-left:10px"><input type="radio" name="ServiceType" value="SchemeForm">Scheme Form</label>
+                            <label class="radio-inline" style=""><input type="radio" name="ServiceType" value="Services" checked>Services (Nivesh Mitra)</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 col-sm-12 col-xs-12 form-group form-bx">
+                            <div class="row">
+                                <div class="col-md-4 col-sm-12 col-xs-12 col-20 form-group">
+                                    <label>Department :</label>
+                                </div>
+                                <div class="col-md-8 col-sm-12 col-xs-12 col-30 form-group">
+                                    <input type="text" class="form-control" name="DepartmentId" id="DepartmentId" value="UPSWP190809926" />
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 col-sm-12 col-xs-12 col-20 form-group">
+                                    <label>Service Name :</label>
+                                </div>
+                                <div class="col-md-8 col-sm-12 col-xs-12 col-30 form-group">
+                                    <input type="text" class="form-control" name="TxtServiceName" id="TxtServiceName" />
+                                </div>
+                            </div>
+                            <div class="row  row-scheme">
+                                <div class="col-md-4 col-sm-12 col-xs-12 col-20 form-group">
+                                    <label>Select Scheme :</label>
+                                </div>
+                                <div class="col-md-8 col-sm-12 col-xs-12 col-30 form-group">
+                                    <label class="radio-inline" style="padding-left:20px"><input type="radio" name="SchemeType" value="Open End Scheme" checked>Open End Scheme</label><br />
+                                    <label class="radio-inline" style="padding-left:20px"><input type="radio" name="SchemeType" value="Industrial Scheme">Industrial Plot Scheme</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6 col-sm-12 col-xs-12 form-group form-bx">
+                            <div class="row">
+                                <div class="col-md-4 col-sm-12 col-xs-12 col-20 form-group">
+                                    <label>Control Id :</label>
+                                </div>
+                                <div class="col-md-8 col-sm-12 col-xs-12 col-30 form-group">
+                                    <input type="text" class="form-control" name="TxtControlID" id="TxtControlID" value="UPSWP190809926" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 col-sm-12 col-xs-12 col-20 form-group">
+                                    <label>Unit Id :</label>
+                                </div>
+                                <div class="col-md-8 col-sm-12 col-xs-12 col-30 form-group">
+                                    <input type="text" class="form-control" name="TxtUnitID" id="TxtUnitID" value="UPSWP19080992601" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 col-sm-12 col-xs-12 col-20 form-group">
+                                    <label>Service Id :</label>
+                                </div>
+                                <div class="col-md-8 col-sm-12 col-xs-12 col-30 form-group">
+                                    <input type="text" class="form-control input-disabled" name="TxtServiceID" id="TxtServiceID" style="background:#e1e1e1" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 col-sm-12 col-xs-12 col-20 form-group">
+                                    <label>Process Industry Id :</label>
+                                </div>
+                                <div class="col-md-8 col-sm-12 col-xs-12 col-30 form-group">
+                                    <input type="text" class="form-control" name="TxtProcessIndustryID" id="TxtProcessIndustryID" value="" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 col-sm-12 col-xs-12 col-20 form-group">
+                                    <label>Application Id :</label>
+                                </div>
+                                <div class="col-md-8 col-sm-12 col-xs-12 col-30 form-group">
+                                    <input type="text" class="form-control" name="TxtApplicationID" id="TxtApplicationID" value="" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 col-sm-12 col-xs-12 col-20 form-group">
+                                    <label>Request Id :</label>
+                                </div>
+                                <div class="col-md-8 col-sm-12 col-xs-12 col-30 form-group">
+                                    <input type="text" class="form-control" name="TxtRequestID" id="TxtRequestID" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="box-button text-center" id="div-box-button">
+                    <input type="button" value="Clear" id="btn-clear" class="btn btn-add" style="border-width:0;" />
+                    <input type="submit" value="Submit" id="btn-submit" class="btn btn-add" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+<script>
+    jQuery(function () { jQuery("#DepartmentId").kendoDropDownList({ "dataSource": { "type": "aspnetmvc-ajax", "transport": { "read": { "url": "/NIC/NoidaAuthority/GetDropDownListAsDataSource", "data": FilterDepartment } }, "pageSize": 100, "page": 0, "total": 0, "serverPaging": true, "serverFiltering": true, "filter": [], "schema": { "data": "Data", "total": "Total" } }, "dataTextField": "Text", "filter": "contains", "autoBind": true, "dataValueField": "Id", "optionLabel": " -- Select --", "htmlAttributes": '{"width": 100%}' }); });
+
+    jQuery(function () { jQuery("#TxtServiceName").kendoDropDownList({ "dataSource": { "type": "aspnetmvc-ajax", "transport": { "read": { "url": "/NIC/NoidaAuthority/GetDropDownListAsDataSource", "data": FilterServices } }, "pageSize": 100, "page": 0, "total": 0, "serverPaging": true, "serverFiltering": true, "filter": [], "schema": { "data": "Data", "total": "Total" } }, "dataTextField": "Text", "filter": "contains", "autoBind": true, "dataValueField": "Value", "optionLabel": " -- Select --", "cascadeFrom": "DepartmentId", "cascadeFromField": "DepartmentId", "change": ServiceNameChangeEvent }); });
+
+    $(document).ready(function () {
+        //var urlAction = "/NIC/OnlineProperty/SchemeInformation";
+        //urlAction = "/NIC/NiveshMitraServices/NMUnitCheck";
+        var urlAction = "/NIC/NoidaAuthority/OnlineScheme";
+        $('#SWPForm').attr('action', urlAction);
+
+        RadioButtonCheckedEvent();
+
+        $('input[type=radio][name=ServiceType]').change(function () {
+            RadioButtonCheckedEvent();
+        });
+
+        $('#btn-clear').click(function () {
+            $('#TxtControlID').val('');
+            $('#TxtUnitID').val('');
+            $('#TxtServiceID').val('');
+            $('#TxtProcessIndustryID').val('');
+            $('#TxtApplicationID').val('');
+            $('#TxtRequestID').val('');
+            jQuery("#DepartmentId").data("kendoDropDownList").value('');
+        });
+
+    });
+
+    function FilterDepartment() {
+        return { FilterType: "Department", ReturnType: "Property" };
+    }
+
+    function FilterServices() {
+        return { FilterType: "NICServiceCode", ReturnType: "Property" };
+    }
+
+    function RadioButtonCheckedEvent() {
+        var rbtnval = $('input[type=radio][name=ServiceType]:checked').val();
+        if (rbtnval == 'SchemeForm') {
+            jQuery("#DepartmentId").data("kendoDropDownList").value('');
+            urlAction = "/NIC/NoidaAuthority/OnlineScheme";
+            $('#SWPForm').attr('action', urlAction);
+            $('#TxtServiceID').val('SC22002');
+            var uid = $('#TxtUnitID').val();
+            var sid = jQuery("#TxtServiceID").val();
+            var rqid = uid.substring(5) + sid.substring(2) + '0001';
+            $('#TxtRequestID').val(rqid);
+            
+            $('.row-scheme').show();
+        }
+        else if (rbtnval == 'Services') {
+            urlAction = "/NIC/NiveshMitra/ValidateProperty";
+            $('#SWPForm').attr('action', urlAction);
+            $('#TxtServiceID').val('');
+            $('.row-scheme').css("display", "none");
+        }
+    }
+
+    function ServiceNameChangeEvent(e) {
+        var rbtnval = $('input[type=radio][name=ServiceType]:checked').val();
+        if (rbtnval == 'SchemeForm') {
+            $('#TxtServiceID').val('SC22002');
+            $('#TxtRequestID').val('');
+            $('.row-scheme').show();
+        }
+        else {
+            var cid = $('#TxtControlID').val();
+            var uid = $('#TxtUnitID').val();
+            var sid = jQuery("#TxtServiceName").val();
+            //var rqid = cid.substring(5) + sid.substring(2) + '0001';
+            var rqid = uid.substring(5) + sid.substring(2) + '0001';
+            $('#TxtServiceID').val($('#TxtServiceName').val() != "" ? $('#TxtServiceName').val() : "");
+            $('#TxtRequestID').val(rqid);
+        }
+        
+    }
+</script>

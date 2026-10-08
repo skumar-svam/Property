@@ -1,0 +1,340 @@
+﻿
+@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+
+<div class="panel-body">
+    
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Challan Id:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().ComboBox()
+                .Name("DDLPaidChallanId")
+                .DataTextField("Text")
+                //.DataValueField("Id")
+                .DataValueField("ChallanRefId")
+                .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => { transport.Read("GetOnlinePaidChallanIdListAsDataSource", "Payment", new { area="Online"}); })
+                        .Schema(schema => { schema.Data("Data").Total("Total"); })
+                        .PageSize(100);
+                    }
+                 )
+                //.Events(events => { events.Change("GetPaymentDetailsById"); })
+                .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label class="lbl-service-refno">Service Ref No:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="30" id="pay-service-refno" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Transaction Id:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @*<input type="text" maxlength="50" id="pay-transaction-id" class="k-textbox" />*@
+            @(Html.Kendo().ComboBox()
+                .Name("DDLTransactionId")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .CascadeFrom("DDLPaidChallanId")
+                .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        //.Transport(transport => { transport.Read("GetOnlineTransactionIdListAsDataSource", "Payment", new { area = "Online" }); })
+                        .Transport(transport=>transport.Read(read=>read.Action("GetOnlineTransactionIdListAsDataSource", "Payment", new { area = "Online" }).Data("FilterChallanId")))
+                        .Schema(schema => { schema.Data("Data").Total("Total"); })
+                        .PageSize(100);
+                    }
+                 )
+                .Events(events => { events.Change("GetPaymentDetailsById"); })
+                .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Amount:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="20" id="pay-amount" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label class="lbl-gateway">Gateway Name:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="30" id="pay-gateway" class="k-textbox" />
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Product Info:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="50" id="pay-product-info" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label class="lbl-mode">Mode:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="30" id="pay-mode" class="k-textbox" />
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Transaction Status:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DropDownList()
+                .Name("DDLTransactionStatus")
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .OptionLabel(" --- Select ---")
+                .BindTo(new List<SelectListItem>() {
+                    new SelectListItem() { Text = "Success", Value = "1" },
+                    new SelectListItem() { Text = "Failed", Value = "0" }
+                })
+                .HtmlAttributes(new { style = "width: 100%;" })
+            )
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Payment Status:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DropDownList()
+                .Name("DDLPayStatus")
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .OptionLabel(" --- Select ---")
+                .BindTo(new List<SelectListItem>() {
+                    new SelectListItem() { Text = "Verified", Value = "1" },
+                    new SelectListItem() { Text = "Not Verified", Value = "0" }
+                })
+                .HtmlAttributes(new { style = "width: 100%;" })
+            )
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>PG Type:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="50" id="pay-pgtype" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Bank Ref No:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" id="pay-bank-refno" maxlength="50" class="k-textbox" />
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Bank Code:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" id="pay-bank-code" maxlength="30" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Card No:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" id="pay-cardno" maxlength="16" class="k-textbox" />
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Name On Card:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" id="pay-name-oncard" maxlength="50" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Registration Id:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" id="pay-registration-id" maxlength="8" class="k-textbox" />
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Request Id:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" id="pay-request-id" maxlength="10" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 form-group" style="text-align:right;">
+            <input type="button" id="btn-update-payment" value="Update" class="k-button" />
+            <input type="button" id="btn-clear-pay-fields" value="Clear" class="k-button" onclick="javascript: ClearPaymentFields()" />
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('#btn-update-payment').click(function () {
+            if ($('#DDLPaidChallanId').val() == '' || $('#DDLPaidChallanId').val() == "undefined") {
+                alertify.error("Select challan No");
+                return false;
+            }
+            //if ($('#pay-service-refno').val() == '' || $('#pay-service-refno').val() == "undefined") {
+            //    alertify.error("Enter Service Reference no");
+            //    return false;
+            //}
+            if ($('#pay-registration-id').val().trim() == "" || $('#pay-registration-id').val().length != 8) {
+                alertify.error("Please enter Registration Id");
+                return false;
+            }
+            if ($('#pay-transaction-id').val().trim() == "") {
+                alertify.error("Please enter Transaction Id");
+                return false;
+            }
+            if ($('#pay-amount').val() == "") {
+                alertify.error("Please enter amount");
+                return false;
+            }
+            if ($('#pay-product-info').val().trim() == "") {
+                alertify.error("Please enter Product Info");
+                return false;
+            }
+            if ($('#pay-mode').val().trim() == "") {
+                alertify.error("Please enter Product Info");
+                return false;
+            }
+            if ($('#DDLTransactionStatus').val() == "" || $('#DDLTransactionStatus').val() == "undefined") {
+                alertify.error("Please select Transaction Status");
+                return false;
+            }
+            if ($('#DDLPayStatus').val() == "" || $('#DDLPayStatus').val() == "undefined") {
+                alertify.error("Please select Transaction Status");
+                return false;
+            }
+            else {
+                UpdatePaymentDetail();
+            }
+        });
+
+        //$('#btn-update-payment').click(function () {
+        //    UpdatePaymentDetail();
+        //});
+    });
+
+    function FilterChallanId() {
+        return { ChallanRefId: $('#DDLPaidChallanId').data("kendoComboBox").text() };
+    }
+
+    function GetPaymentDetailsById() {
+        var id = $('#DDLTransactionId').val();
+        if (id != "") {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ Id: id }),
+                url: '/Online/Payment/GetOnlinePaymentDetailById',
+                success: function (result) {
+                    if (result != null) {
+                        $('#pay-service-refno').val(result.ServiceRefId);
+                        //$('#pay-transaction-id').val(result.TransactionId);
+                        $('#pay-amount').val(result.Amount);
+                        $('#pay-gateway').val(result.GatewayName);
+                        $('#pay-product-info').val(result.ProductInfo);
+                        $('#pay-mode').val(result.Mode);
+                        $('#DDLTransactionStatus').data("kendoDropDownList").value(result.TransactionStatusId);
+                        $('#DDLPayStatus').data("kendoDropDownList").value(result.StatusId);
+                        $('#pay-pgtype').val(result.PG_Type);
+                        $('#pay-bank-refno').val(result.BankReferenceNo);
+                        $('#pay-bank-code').val(result.BankCode);
+                        $('#pay-cardno').val(result.CardNumber);
+                        $('#pay-name-oncard').val(result.NameOnCard);
+                        $('#pay-registration-id').val(result.RegistrationId);
+                        $('#pay-request-id').val(result.OnlineRequestId);
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Please try again.");
+                }
+            });
+        }
+        else {
+            ClearPaymentFields();
+        }
+    }
+
+
+    function UpdatePaymentDetail() {
+        var PayModel = {
+            Id: $('#DDLPaidChallanId').val(),
+            ServiceRefId: $('#pay-service-refno').val(),
+            //TransactionId: $('#pay-transaction-id').val(),
+            TransactionId: $('#DDLTransactionId').val(),
+            Amount: $('#pay-amount').val(),
+            PaymentGateway: $('#pay-gateway').val(),
+            ProductInfo: $('#pay-product-info').val(),
+            Mode: $('#pay-mode').val(),
+            TransactionStatusId: $('#DDLTransactionStatus').val(),
+            StatusId: $('#DDLPayStatus').val(),
+            PG_Type: $('#pay-pgtype').val(),
+            BankReferenceNo: $('#pay-bank-refno').val(),
+            BankCode: $('#pay-bank-code').val(),
+            CardNumber: $('#pay-cardno').val(),
+            NameOnCard: $('#pay-name-oncard').val(),
+            OnlineRequestId: $('#pay-request-id').val(),
+            RegistrationId: $('#pay-registration-id').val()
+        };
+        $.ajax({
+            type: "post",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ model: PayModel }),
+            url: "/Online/Payment/UpdateOnlinePaymentDetailById",
+            success: function (result) {
+                if (result == '@ReturnType.Updated') {
+                    alertify.success("Information updated successfully.");
+                    ClearPaymentFields();
+                }
+                else {
+                    alertify.error("Provider failed to updated.");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Please try again.");
+            }
+        });
+    }
+
+    function ClearPaymentFields() {
+        $('#pay-service-refno').val('');
+        //$('#pay-transaction-id').val('');
+        $('#DDLTransactionId').data("kendoComboBox").value('');
+        $('#pay-amount').val('');
+        $('#pay-gateway').val('');
+        $('#pay-product-info').val('');
+        $('#pay-mode').val('');
+        $('#DDLTransactionStatus').data("kendoDropDownList").value('');
+        $('#DDLPayStatus').data("kendoDropDownList").value('');
+        $('#pay-pgtype').val('');
+        $('#pay-bank-refno').val('');
+        $('#pay-bank-code').val('');
+        $('#pay-cardno').val('');
+        $('#pay-name-oncard').val('');
+        $('#pay-registration-id').val('');
+        $('#pay-request-id').val('');
+    }
+
+</script>

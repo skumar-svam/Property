@@ -1,0 +1,605 @@
+﻿@model NA.PMS.Model.SchemeViewModel
+@using Kendo.Mvc.UI;
+
+<div class="scheme-bank">
+    <div class="col-md-12" id="bankDetail">
+        <h2 class="blck-heading">Bank Information</h2>
+        <div class="form-bx col-md-12 col-sm-12 col-xs-12">
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label>Bank Name</label></div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @(Html.Kendo().DropDownListFor(model => model.BankId)
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel("Select")
+                    .Filter("contains")
+                    .DataSource(source =>source.Read(read => read.Action("GetAllBanks", "Scheme")))
+                    .Events(model => model.Change("FilterBankName"))
+                    .HtmlAttributes(new { style = "width: 100%", @class = "schemeForms" })
+                    )
+                    @Html.ValidationMessageFor(model => model.BankId, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label>Branch Address</label></div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @(Html.Kendo().DropDownListFor(model => model.BranchId)
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel("Select")
+                    .DataSource(source =>source.Read(read =>read.Action("GetAllBranchs", "Scheme").Data("filterBranches")).ServerFiltering(true))
+                    .CascadeFrom("bankId")
+                    .Events(model => model.Change("FilterBankBranch").DataBound("onDataBound"))
+                    .HtmlAttributes(new { style = "width: 100%", @class = "schemeForms" })
+                    )
+                    @Html.ValidationMessageFor(model => model.BranchId, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="row" id="divAccountNo">
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group" id="divAccountLabel"><label>Account No</label></div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group" id="divAccountDropDown">
+                    @(Html.Kendo().DropDownListFor(model => model.AccountNo)
+                    .Name("DDLAccountNo")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel("Select")
+                    .DataSource(source =>source.Read(read =>read.Action("GetAccountNumber", "Scheme").Data("filterBankAccounts")).ServerFiltering(true))
+                    .CascadeFrom("BranchId")
+                    .HtmlAttributes(new { style = "width: 100%", @class = "schemeForms" })
+                    )
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label>Bank Name</label></div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.BankName, htmlAttributes: new { @class = "form-control", @id = "bankName" })
+                    @Html.ValidationMessageFor(model => model.BankName, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="row" id="divBranchName">
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label>Branch Address</label></div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.BranchName, htmlAttributes: new { @class = "form-control", @maxlength = "30" })
+                    <span id="spanbranch" class="text-danger">This account number already Exists.</span>
+                    @Html.ValidationMessageFor(model => model.BranchName, "", new { @class = "text-danger" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label>Account No</label></div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.AccountNo, htmlAttributes: new { @class = "form-control", @maxlength = "16" })
+                    <span id="spanAccount" class="text-danger">This account number already Exists.</span>
+                    @Html.ValidationMessageFor(model => model.AccountNo, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 col-sm-12 col-xs-12 form-group" style="text-align:center;padding-top:10px">
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="row scheme-rw-btn">
+        <div class="col-md-4 col-sm-4 col-xs-4 text-left">
+            <button type="button" class="btn btn-add" value="Add" id="btnPre4">Previous <i class="glyphicon glyphicon-backward"></i></button>
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-4 text-center">
+            <button type="button" class="btn btn-add" value="Add" id="btnAddBank"> Add</button>
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+            <button type="button" class="btn btn-add" value="Add" id="btnNext4">Next <i class="glyphicon glyphicon-forward"></i></button>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 k-grid-content" style="margin-bottom:10px;">
+        @(Html.Kendo().Grid<NA.PMS.Model.Banks>()
+            .Name("gridBanks")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.bankName).Title("Bank Name").Width(100);
+                columns.Bound(c => c.bankId).Hidden(true);
+                columns.Bound(c => c.branchId).Hidden(true);
+                columns.Bound(c => c.branchName).Width(100).Title("Branch Name");
+                columns.Bound(c => c.accountNumber).Width(100).Title("Account Number");
+                if (ViewBag.view != "Yes")
+                {
+                    columns.Bound(c => c.refId).Title("Action").ClientTemplate("<a onclick='javascript:RemoveBankRecord(\"#=refId#\");' class='schemeMasterGrids'>Remove</a>").Width(50).Filterable(false).Sortable(false);
+                }
+            })
+            .Sortable().Filterable().Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+            .AutoBind(true)
+            .DataSource
+            (
+                    dataSource => dataSource
+                    .Ajax().ServerOperation(true).Model(model => model.Id(p => p.bankId))
+                    .Read(read => read.Action("GetBankData", "Scheme").Data("AdditionalData")).PageSize(20)
+            )
+        )
+    </div>
+    <div class="row scheme-rw-btn">
+        <div class="col-md-4 col-sm-4 col-xs-4 text-left">
+            <button type="button" class="btn btn-add" value="Add" id="btnPre41">Previous <i class="glyphicon glyphicon-backward"></i></button>
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-4 text-center">
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+            <button type="button" class="btn btn-add" value="Add" id="btnNext41">Next <i class="glyphicon glyphicon-forward"></i></button>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function filterBranches() {
+        return {
+            bankId: $("#BankId").val()
+        };
+    }
+
+    function filterBankAccounts() {
+        return {
+            bankId: $("#BankId").val(),
+            branchId: $("#BranchId").val()
+        };
+    }
+    function onDataBound(e) {
+        var ds = this.dataSource.data();
+        if (ds.length == 0) {
+            this.enable(false);
+        }
+    }
+    function HideShowBranch() {
+        var bankVal = $('#bankId').val();
+        var branchVal = $('#branchId').val();
+        if (bankVal != -1) {
+            if (branchVal == -1) {
+                $('#accountNumber').show();
+                $('#accountNumber').removeAttr('disabled');
+                $("#DdlAccountNumber").data("kendoDropDownList").wrapper.hide();
+                $('label[for="branchName"]').show();
+                $('#lblBranchAddress').show();
+                $('#branchName').show();
+                $('#branchName').val("");
+                $('#accountNumber').val("");
+                $('span[for="accountNumber"]').hide();
+                $('#lblAccountddl').hide();
+                $('#divAccountNo').hide();
+                $('#lblAccounttxt').show();
+            }
+            else {
+                $('#accountNumber').hide();
+                $("#DdlAccountNumber").data("kendoDropDownList").wrapper.show();
+                $('label[for="branchName"]').hide();
+                $('#lblBranchAddress').hide();
+                $('#branchName').hide();
+                $('#branchName').val("");
+                $('#accountNumber').val("");
+                $('span[for="accountNumber"]').hide();
+                $('#lblAccountddl').show();
+                $('#divAccountNo').show();
+            }
+        }
+    }
+
+    //function boundEvent()
+    //{
+    //    var bankVal = $('#bankId').val();
+    //    if(bankVal == -1)
+    //    {
+    //        var bankDDLst = $("#branchId").data("kendoDropDownList");
+    //        bankDDLst.attr("disabled","disabled");
+    //    }
+    //}
+
+    function RemoveBankRecord(refId) {
+        var schemeID = $("#scheId").val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ refId: refId, schemeID: schemeID }),
+            url: '/Scheme/RemoveBankRecord',
+            success: function (result) {
+                if (result == true) {
+                    $("#gridBanks").data("kendoGrid").dataSource.read();
+                    var gridBanks = $("#gridBanks").data("kendoGrid").dataSource.data();
+                    if (gridBanks.length == 1) {
+                        IsSchemeCompletedByRemove(false);
+                    }
+                    alertify.success("Record deleted successfully.");
+                }
+            },
+            error: function (obj) {
+                //alert('Error While Saving Record.');
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        $('#btnNext4').attr('disabled', 'disabled');
+        $('#btnPre4').attr('disabled', 'disabled');
+        $("#btnAddBank").click(function () {
+            var validatebank = ValidatebankScheme();
+            if (validatebank) {
+                var departmentID = $('#bankId').val();
+                var schemeID = $("#scheId").val();
+                var branchIds = $("#branchId").val();
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ departmentID: departmentID, schemeID: schemeID, branchIds: branchIds }),
+                    url: '/Scheme/IsBankNameUnique',
+                    success: function (result) {
+                        if (result == true) {
+                            alertify.error("This Bank already exists");
+                            return false;
+                        }
+                        else {
+                            $.ajax({
+                                dataType: 'json',
+                                type: 'Post',
+                                contentType: 'application/json; charset=utf-8',
+                                data: JSON.stringify({ bankName: $("#bankName").val(), bankID: $('#bankId').val() }),
+                                url: '/Scheme/IsBankNameDuplicate',
+                                success: function (result) {
+                                    if (result == true) {
+                                        alertify.error("This Bank already exists");
+                                        return false;
+                                    }
+                                    else {
+                                        var $form = $("form");
+                                        //debugger;
+                                        var checkbankname = CheckBankName();
+
+                                        //Check duplicacy of A/C No.
+                                        var bankID = $('#bankId').val();
+                                        //var accountNumber = $('#DdlAccountNumber').val();
+                                        var accountNumber = "";
+                                        if (bankID == -1) {
+                                            accountNumber = $('#accountNumber').val();
+                                        }
+                                        $.ajax({
+                                            dataType: 'json',
+                                            type: 'Post',
+                                            contentType: 'application/json; charset=utf-8',
+                                            data: JSON.stringify({ bankID: bankID, accountNumber: accountNumber }),
+                                            url: '/Scheme/IsAccountNumberDuplicate',
+                                            success: function (result) {
+                                                if (result == true) {
+                                                    //$('#spanAccount').show();
+                                                    alertify.error("Bank A/C No. already exists.")
+                                                    return false;
+                                                }
+                                                else {
+                                                    if ($form.valid()) {
+                                                        $.ajax({
+                                                            async: false,
+                                                            dataType: 'json',
+                                                            type: 'Post',
+                                                            contentType: 'application/json; charset=utf-8',
+                                                            data: JSON.stringify({ bankId: $("#bankId").val(), branchId: $("#branchId").val(), branchName: $("#branchName").val(), newaccountNumber: $("#accountNumber").val(), newBank: $("#bankName").val(), schemeId: $("#scheId").val(), DdlAccountNumber: $("#DdlAccountNumber").val() }),
+                                                            url: "/Scheme/AddBank",
+                                                            success: function (data) {
+                                                                if (data == true) {
+                                                                    $("#gridBanks").data("kendoGrid").dataSource.read();
+                                                                    $("#bankId").data("kendoDropDownList").value("");
+                                                                    $("#branchId").data("kendoDropDownList").value("");
+                                                                    $('#bankName').val('');
+                                                                    $("#branchName").val('');
+                                                                    $("#accountNumber").val('');
+                                                                    $("#DdlAccountNumber").data("kendoDropDownList").wrapper.show();
+                                                                    $('#branchName').hide();
+                                                                    $('#lblBranchAddress').hide();
+                                                                    $('label[for="branchName"]').hide();
+                                                                    $('label[for="bankName"]').hide();
+                                                                    $('span[for="accountNumber"]').hide();
+                                                                    $('#bankName').hide();
+                                                                    $('#branchName').val("");
+                                                                    $('#bankName').val("");
+                                                                    $('#accountNumber').hide();
+                                                                    $('#lblBankName').hide();
+                                                                    $('span[for="bankName"]').hide();
+                                                                    $('span[for="branchName"]').hide();
+                                                                    $("#bankId").data("kendoDropDownList").dataSource.read();
+                                                                    $("#branchId").data("kendoDropDownList").dataSource.read();
+                                                                    $('#lblAccounttxt').hide();
+                                                                    $('#lblAccountddl').show();
+                                                                    $('#btnNext4').removeAttr('disabled');
+                                                                    $('#btnPre4').removeAttr('disabled');
+                                                                    $(".fifth .fke-link").hide();
+                                                                    $(".fifth .accordion-section-title").show();
+                                                                    //$('#divBranchName').css("display",false);
+                                                                    setTimeout(function () { ActivateScheme(); }, 2000);
+                                                                    //$('#spanBankId').hide();
+                                                                }
+                                                            },
+                                                            error: function (objAjaxRequest, strError) {
+                                                                var respText = objAjaxRequest.responseText;
+                                                                //alert(respText);
+                                                            }
+                                                        });
+
+                                                    }
+                                                }
+                                            },
+                                            error: function (objAjaxRequest, strError) {
+                                                var respText = objAjaxRequest.responseText;
+                                                //alert(respText);
+                                            }
+                                        });
+                                        //alert(accnumber);
+                                        //alert(checkbankname);
+
+                                    }
+                                },
+                                error: function (objAjaxRequest, strError) {
+                                    var respText = objAjaxRequest.responseText;
+                                    //alert(respText);
+                                }
+                            });
+
+                        }
+                    },
+                    error: function (objAjaxRequest, strError) {
+                        var respText = objAjaxRequest.responseText;
+                        //alert(respText);
+                    }
+                });
+            }
+        });
+        $('#accountNumber').attr('disabled', 'disabled');
+        $('label[for="branchName"]').hide();
+        $('#lblBranchAddress').hide();
+        $('#branchName').hide();
+        $('label[for="bankName"]').hide();
+        $('#lblBankName').hide();
+        $('#bankName').hide();
+        $('#spanAccount').hide();
+        $('#spanbranch').hide();
+        $('#lblAccounttxt').hide();
+        $('#bankName').blur(function () {
+            CheckBankName();
+        });
+        $('#accountNumber').blur(function () {
+            CheckAccountNumber();
+        });
+        $('#spanBankId').hide();
+        $('#btnNext4').click(function () {
+            $("#acc5").click();
+        });
+        $('#btnPre4').click(function () {
+            $("#acc3").click();
+        });
+        $('#btnNext41').click(function () {
+            $("#acc5").click();
+        });
+        $('#btnPre41').click(function () {
+            $("#acc3").click();
+        });
+    });
+
+    function ValidatebankScheme() {
+        var selectebankValue = $('#bankId');
+        var selectedbranchValue = $('#branchId');
+        var accountId = $('#accountNumber');
+        var ddlAccountNumber = $("#DdlAccountNumber").val();
+        if (selectebankValue.val() == "") { //Case when no Bank is seleceted.
+            alertify.error('Please select a Bank');
+            return false;
+        }
+        if (selectebankValue.val() != -1) { //Case when Bank selected is not "Other".
+            //alert();
+            if (selectedbranchValue.val() == "") {
+                alertify.error('Please select an branch.');
+                return false;
+            }
+            else if (selectedbranchValue.val() != -1) {
+                if (ddlAccountNumber == "") {
+                    alertify.error('Please select an account number.');
+                    return false;
+                }
+            }
+            else {
+                if ($("#branchName").val().trim() == "") {
+                    alertify.error("Please enter Branch Address.");
+                    return false;
+                }
+                if (accountId.val().trim() == "") {
+                    alertify.error('Please enter an account number.');
+                    return false;
+                }
+            }
+        }
+        else //When "Other" is selected as Bank. No need to check for Branch selection in this case.
+        {
+            if ($("#bankName").val().trim() == "") {
+                alertify.error("Please enter Bank Name");
+                return false;
+            }
+            else if(!(isNaN($("#bankName").val().trim())))
+            {
+                alertify.error("Please enter valid Bank Name");
+                return false;
+            }
+            else if ($("#branchName").val().trim() == "") {
+                alertify.error("Please enter Branch Name");
+                return false;
+            }
+            else if (accountId.val().trim() == "") {
+                alertify.error('Please enter an account number.');
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function CleanAccountNumber() {
+        $('#accountNumber').val("");
+        var bankID = $('#bankId').val();
+        if (bankID == -1) {
+            $('#accountNumber').show();
+            $('#accountNumber').removeAttr('disabled');
+            $('#lblAccountddl').hide();
+            $('#lblAccounttxt').show();
+            $("#DdlAccountNumber").data("kendoDropDownList").wrapper.hide();
+            $('#branchName').show();
+            $('label[for="branchName"]').show();
+            $('label[for="bankName"]').show();
+            $('#lblBankName').show();
+            $('#lblBranchAddress').show();
+            $('#bankName').show();
+            $('#branchName').val("");
+            $('#bankName').val("");
+            $('span[for="accountNumber"]').hide();
+            $('span[for="bankName"]').hide();
+            $('span[for="branchName"]').hide();
+            $('#lblAccountddl').hide();
+            $('#divAccountLabel').hide();
+            $('#divAccountDropDown').hide();
+        }
+        else {
+            //$("#DdlAccountNumber").data("kendoDropDownList").wrapper.show();
+            $('#branchName').hide();
+            $('#lblAccountddl').show();
+            $('#lblAccounttxt').hide();
+            $('label[for="branchName"]').hide();
+            $('label[for="bankName"]').hide();
+            $('span[for="accountNumber"]').hide();
+            $('#bankName').hide();
+            $('#lblBankName').hide();
+            $('#lblBranchAddress').hide();
+            $('#branchName').val("");
+            $('#bankName').val("");
+            $('#accountNumber').hide();
+            $('span[for="bankName"]').hide();
+            $('span[for="branchName"]').hide();
+            $('#lblAccountddl').show();
+            $('#divAccountLabel').show();
+            $('#divAccountDropDown').show();
+        }
+    }
+
+
+    function CheckBankName() {
+        var bankID = $('#bankId').val();
+        var bankName = $('#bankName').val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ bankID: bankID, bankName: bankName }),
+            url: '/Scheme/IsBankNameDuplicate',
+            success: function (result) {
+                if (result == true) {
+                    $('#spanBankId').show();
+                    return false;
+                }
+                else {
+                    $('#spanBankId').hide();
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+    function CheckAccountNumber() {
+        var bankID = $('#bankId').val();
+        var accountNumber = $('#DdlAccountNumber').val();
+        if (bankID == -1) {
+            accountNumber = $('#accountNumber').val();
+        }
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ bankID: bankID, accountNumber: accountNumber }),
+            url: '/Scheme/IsAccountNumberDuplicate',
+            success: function (result) {
+                if (result == true) {
+                    alertify.error("Bank A/C No. already exists.")
+                    return false;
+                }
+                else {
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+
+    function FilterBankName() {
+        $('#accountNumber').val("");
+        var bankID = $('#bankId').val();
+        if (bankID == -1) {
+            $('#divAccountNo').show();
+            $('#divAccountLabel').hide();
+            $('#lblAccountddl').hide();
+            $('#divAccountDropDown').hide();
+            $('#DdlAccountNumber').hide();
+            $('#divBranchName').show();
+            $('#lblBranchAddress').show();
+            $('#branchName').show();
+            $('#lblAccounttxt').show();
+            $('#accountNumber').show();
+            $('#accountNumber').removeAttr('disabled');
+            $('#lblBankName').show();
+            $('#bankName').show();
+            VacantInputField();
+        }
+        else {
+            $('#divAccountNo').show();
+            $('#divAccountLabel').show();
+            $('#lblAccountddl').show();
+            $('#divAccountDropDown').show();
+            $('#lblBankName').hide();
+            $('#bankName').hide();
+            $('#divBranchName').hide();
+            $('#lblBranchAddress').hide();
+            $('#branchName').hide();
+            $('#lblAccounttxt').hide();
+            $('#accountNumber').hide();
+            VacantInputField();
+        }
+    }
+
+    function FilterBankBranch() {
+        var bankVal = $('#bankId').val();
+        var branchVal = $('#branchId').val();
+        if (bankVal != -1) {
+            if (branchVal == -1) {
+                $('#divAccountNo').hide();
+                $('#divAccountLabel').hide();
+                $('#lblAccountddl').hide();
+                $('#divAccountDropDown').hide();
+                $('#lblBankName').hide();
+                $('#bankName').hide();
+                $('#divBranchName').show();
+                $('#lblBranchAddress').show();
+                $('#branchName').show();
+                $('#lblAccounttxt').show();
+                $('#accountNumber').show();
+                $('#accountNumber').removeAttr('disabled');
+                VacantInputField();
+            }
+            else {
+                $('#divAccountNo').show();
+                $('#divAccountLabel').show();
+                $('#lblAccountddl').show();
+                $('#divAccountDropDown').show();
+                $('#lblBankName').hide();
+                $('#bankName').hide();
+                $('#divBranchName').hide();
+                $('#lblBranchAddress').hide();
+                $('#branchName').hide();
+                $('#lblAccounttxt').hide();
+                $('#accountNumber').hide();
+                VacantInputField();
+            }
+        }
+    }
+
+    function VacantInputField(){
+        $('#accountNumber').val("");
+        $('#bankName').val("");
+        $('#branchName').val("");
+    }
+
+</script>

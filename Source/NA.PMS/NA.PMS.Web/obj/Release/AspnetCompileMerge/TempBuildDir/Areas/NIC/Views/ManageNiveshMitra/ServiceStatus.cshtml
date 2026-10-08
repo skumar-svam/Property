@@ -1,0 +1,47 @@
+﻿@model NA.PMS.Model.NIC.ServiceStatusVM
+@using Kendo.Mvc.UI;
+
+@{
+    ViewBag.Title = "Services Status";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="ManageRequestServices">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Manage Nivesh Mitra Service Status</h1></div>
+            <div class="col-md-6 col-sm-6 col-xs-12 mandatory">
+                <a target="_blank" class="btn btn-default" href="/NIC/ManageNiveshMitra/">Back</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.NIC.ServiceStatusVM>
+                    ()
+                    .Name("GridServiceStatus")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(c => c.Id).Title("ID").Width(50).Sortable(false);
+                        columns.Bound(c => c.StatusCode).Title("StatusCode").Width(50).Sortable(false);
+                        columns.Bound(c => c.StatusName).Title("StatusName").Width(110).Sortable(false);
+                        columns.Bound(c => c.CitizenStatusName).Title("CitizenStatusName").Width(100);
+                        columns.Bound(c => c.CitizenStatusID).Title("CitizenStatusID").Hidden(true);
+                        columns.Bound(c => c.Status).Title("Status").Width(50);
+                    })
+                    .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                    .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                    .AutoBind(true)
+                    .DataSource(dataSource => dataSource
+                    .Ajax()
+                    .Model(model => model.Id(c => c.Id))
+                    .ServerOperation(true)
+                    .Read(read => read.Action("GetNiveshMitraServiceStatus", "ManageNiveshMitra", new { area = "NIC" })).PageSize(10)
+                    )
+        )
+    </div>
+</div>
+<script type="text/javascript">
+
+</script>
+

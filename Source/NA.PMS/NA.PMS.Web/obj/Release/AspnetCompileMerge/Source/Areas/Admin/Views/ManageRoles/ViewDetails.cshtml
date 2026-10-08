@@ -1,0 +1,99 @@
+﻿@model NA.PMS.Model.RolesModel
+@using Kendo.Mvc.UI;
+
+@{
+    ViewBag.Title = "Admin";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">View User Role</h1></div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <h2 class="blck-heading">Role Information</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        @Html.HiddenFor(model => model.RoleId)
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.LabelFor(model => model.ApplicationName, htmlAttributes: new { @class = "k-label" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(model => model.ApplicationId)
+                                .Name("applications")
+                                .DataTextField("ApplicationName")
+                                .DataValueField("ApplicationId")
+                                .OptionLabel("Select")
+                                .DataSource(source =>source.Read(read =>read.Action("ReadApplicationDataType", "ManageRoles")))
+                                .HtmlAttributes(new { style = "width: 100%" })
+                            )
+                            @Html.ValidationMessageFor(model => model.ApplicationName, "", new { @class = "text-danger" })
+                        </div>
+
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.LabelFor(model => model.RoleName, htmlAttributes: new { @class = "k-label" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.RoleName, new { @class = "form-control", @disabled = "disabled" })
+                            @Html.ValidationMessageFor(model => model.RoleName, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            <label>Role In Department</label>
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(m => m.RoleInDepartment)
+                                  .DataTextField("Text")
+                                  .DataValueField("Value")
+                                  .OptionLabel("---select---")
+                                  .BindTo(new List<SelectListItem>() {
+                                      new SelectListItem() { Text = "Assistant", Value = "Assistant" },
+                                      new SelectListItem() { Text = "Accountant", Value = "Accountant" },
+                                      new SelectListItem() { Text = "Accounts Officer", Value = "AccountsOfficer" }
+                                  })
+                                  .HtmlAttributes(new { style = "width: 100%" })
+                            )
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.LabelFor(model => model.RoleDescription, htmlAttributes: new { @class = "k-label" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextAreaFor(model => model.RoleDescription, new { @class = "form-control", @disabled = "disabled" })
+                            @Html.ValidationMessageFor(model => model.RoleDescription, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box-button text-center">
+                <input type="button" id="btnBack" value="Back" class="btn btn-default" onclick="javascript: window.location = '@Url.Action("ManageRoles", "ManageRoles")';" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#RoleName').attr('disabled', 'disabled');
+        $('#RoleDescription').attr('disabled', 'disabled');
+        $('#applications').attr('disabled', 'disabled');
+        $("#applications").data("kendoDropDownList").enable(false);
+    });      
+</script>

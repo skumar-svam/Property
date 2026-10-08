@@ -1,0 +1,193 @@
+﻿@model NA.PMS.Model.FunctionalModel
+@using Kendo.Mvc.UI;
+@using NA.PMS.Model
+
+@{
+    ViewBag.Title = "ManageFunctional";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+
+<div class="ManageFunctional">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Functional Properties</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                <a href="#" id="btnPrintChallan" class="">Print Challan</a>
+                <a href="#" id="btnRequest" class="" onclick="javascript: AddFunctionalReq(event);">Add Functional Request</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+
+    <div class="k-grid-content">
+        @(Html.Kendo().Grid<FunctionalModel>()
+              .Name("gridFunctional")
+              .Columns(columns =>
+              {
+                  columns.Bound(c => c.IsSelected).Width(30).ClientTemplate("<input type='checkbox' #= IsSelected ? checked='checked':'' # class='inpchk' ></input>").HeaderTemplate(" <input type='checkbox' id='chkSelectAll' onchange='SelectAll(this)'/>").Filterable(false).Sortable(false).Title("");
+                  columns.Bound(c => c.RequestNo).Title("Request No").Width(130).ClientTemplate("<a href='" + "/Property/PropertyRegistration/ViewFunctionalDetails/#= RequestNo #'>#=RequestNo#</a>");
+                  columns.Bound(c => c.RId).Title("Registration Id").Width(150);
+                  columns.Bound(c => c.SectorName).Title("Sector").Width(100);
+                  columns.Bound(c => c.BlockName).Title("Block").Width(100);
+                  columns.Bound(c => c.PropertyNo).Title("Property No").Width(150);
+                  //columns.Bound(c => c.PropertyNumber).Title("Property No.");
+                  columns.Bound(c => c.CreatedDate).Title("Request Date").Format("{0:dd-MM-yyyy}");
+                  columns.Bound(c => c.ApproveDate).Title("Approved Date").Format("{0:dd-MM-yyyy}");
+                  columns.Bound(c => c.Status).Title("Status").Width(150);
+                  
+              })
+              .Sortable()
+              .Filterable()
+              .Resizable(resize => resize.Columns(true))
+                        //.ToolBar(toolBar =>
+                        //{
+
+                        //    toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Add Request Functional").HtmlAttributes(new { onclick = "javascript:AddFunctionalReq(event);", @class = "k-button", id = "btnRequest" });
+                        //})
+              .Pageable
+              (
+                      pageable => pageable
+                      .Enabled(true)
+                      .Refresh(true)
+                      .PageSizes(true)
+              )
+              .Groupable()
+              .DataSource
+              (
+                 dataSource => dataSource
+                .Ajax()
+                .Model(model => model.Id(p => p.RequestNo))
+                                .ServerOperation(true).Sort(sort => sort.Add("RequestNo").Descending())
+                .Read(read => read.Action("GetPropFunctional", "PropertyRegistration"))
+                .PageSize(10)
+              )
+        )
+    </div>
+
+</div>
+
+
+
+<div id="divRentPermissionModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="padding-top:40px;">
+    <div class="modal-dialog" style="width: 60%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">  <b>Functional Permission Letter/Challan</b></h4>
+            </div>
+            <div class="modal-body" id="divLetterChallanBody" style="overflow:auto;height:420px;">
+
+            </div>
+            <div style="page-break-after: always;"></div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="submit" id="btnPrintDiv" class="k-button" data-dismiss="modal" onclick="PrintDiv();">Print</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function AddFunctionalReq(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("AddFunctionalDetails", "PropertyRegistration")';
+    }
+    var checkedPropertyIds = [];
+    var checkedRIds = [];
+    //var checkedRNs = [];
+    var checkedRIDs = [];
+
+    function SelectAll(e) {
+        var state = $(e).is(':checked');
+        if (state == true) {
+            var grid = $('#gridFunctional').data("kendoGrid");
+            $.each(grid.dataSource.view(), function () {
+                $(".inpchk").prop('checked', 'checked');
+                if (this['IsSelected'] != state)
+                    this['IsSelected'] = state;
+                checkedRIds.push(this.Rid);
+                checkedPropertyIds.push(this.PropertyId);
+            });
+        } else {
+            $(".inpchk").removeAttr('checked');
+            var grid = $('#gridFunctional').data("kendoGrid");
+            $.each(grid.dataSource.view(), function () {
+                this['IsSelected'] = false;
+                checkedRIds.pop(this.Rid);
+                checkedPropertyIds.pop(this.PropertyId);
+            });
+        }
+    }
+    var currentDate = new Date().toJSON().slice(0, 10);
+    //select selected checkboxes
+    $(function () {
+        $('#gridFunctional').on('change', '.inpchk', function () {
+
+            var checked = $(this).is(':checked');
+            $("#chkSelectAll").removeAttr('checked');
+            if ($('.inpchk:checked').length == $('.inpchk').length) {
+                $("#chkSelectAll").prop('checked', 'checked');
+            }
+            var grid = $('#gridFunctional').data().kendoGrid;
+            var dataItem = grid.dataItem($(this).closest('tr'));
+            dataItem.set('IsSelected', checked);
+            checkedRIds.push(dataItem.RID);
+            checkedPropertyIds.push(this.PropertyId);
+        });
+
+    });
+    $("#btnPrintChallan").click(function () {
+         var items = $("#gridFunctional").data("kendoGrid").dataSource.data();
+        var rIds = [];
+        var checkedRNs = [];
+        var propertyIds = [];
+       
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+               if (item.IsSelected == true) {
+                rIds.push(item.RID);
+                checkedRNs.push(item.RequestNo);
+            }
+        }
+        if (rIds.length > 0) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ requestNoList: checkedRNs, ridList: rIds }),
+                url: '/DocParser/PrintBulkFunctionalChargeChallan',
+                success: function (result) {
+                    $("#divLetterChallanBody").html(result);
+                    $("#divRentPermissionModal").modal('show');
+                },
+                error: function (obj) {
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            });
+        } else {
+            alertify.error("Please select atleast one record to print Functional Challan.");
+        }
+    });
+    function PrintDiv() {
+        var contents = document.getElementById("divLetterChallanBody").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+</script>

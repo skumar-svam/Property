@@ -1,0 +1,45 @@
+﻿@model NA.PMS.Model.PaymentLedger
+@using Kendo.Mvc.UI;
+
+
+
+
+    <div class="col-md-12 k-grid-content">
+        <h2 class="blck-heading-grid">Ledger Details</h2>
+        @Html.HiddenFor(m => m.Rid)
+        @(Html.Kendo().Grid<NA.PMS.Model.PaymentLedger>()
+              .Name("gridPaymentLedger")
+              .Columns(columns =>
+              {
+                  columns.Bound(c => c.Entry_Date).Title("Transaction Date").Format("{0:dd-MM-yyyy}");
+                  columns.Bound(c => c.ReceiptSubheadName).Title("Account Name");
+                  columns.Bound(c => c.Debit_Amount).Title("Debit Amount");
+                  columns.Bound(c => c.Credit_Amount).Title("Credit Amount");
+                  columns.Bound(c => c.Balance_Amount).Title("Balance Amount");
+              })
+              .Sortable()
+              .Filterable()
+              .Resizable(resize => resize.Columns(true))
+              .Pageable
+              (
+                pageable => pageable
+                .Enabled(true)
+                .Refresh(true)
+                .PageSizes(true)
+              ).AutoBind(true)
+              .DataSource
+              (
+                 dataSource => dataSource
+                .Ajax().Model(model => model.Id(p => p.Rid))
+                .ServerOperation(true)
+                .Read(read => read.Action("GetPaymentLedger", "PropertyAllotment").Data("additionalInfo"))
+                .PageSize(10)
+              )
+        )
+    </div>
+
+<script type="text/javascript">
+    function additionalInfo() {
+        return { rid: $('#Rid').val() };
+    }
+</script>

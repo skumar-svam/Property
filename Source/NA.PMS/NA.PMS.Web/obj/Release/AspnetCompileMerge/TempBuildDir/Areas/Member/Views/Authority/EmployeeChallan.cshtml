@@ -1,0 +1,722 @@
+﻿@model NA.PMS.Model.ChallanViewModel
+@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+
+@{
+    ViewBag.Title = "Employee Challan";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    #divChallanGrid {
+        display: none;
+    }
+    #divPrintChallan {
+        display: none;
+    }
+</style>
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1" id="property-challan">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Employee Challan</h1></div>
+            <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 content-top-spce">
+        <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            <h2 class="blck-heading" style="margin-bottom:6px;">Property Details</h2>
+            <div class="form-bx">
+                <div>
+                    @Html.HiddenFor(m => m.IFSCCode)
+                    @Html.HiddenFor(model => model.Amount, htmlAttributes: new { @id = "hdnAmmount" })
+                    @Html.HiddenFor(model => model.AccountHeadId, htmlAttributes: new { @id = "hdnAccountHeadId" })
+                    @Html.HiddenFor(model => model.AccountSubHeadId, htmlAttributes: new { @id = "hdnAccountSubHeadId" })
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                        <label class="required">Department</label>
+                        @(Html.Kendo().DropDownListFor(m => m.DepartmentId)
+                        .Filter("contains")
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .OptionLabel(" -- Select --")
+                        .BindTo(new List<SelectListItem>() {
+                            new SelectListItem() { Text = "Salary and Bill", Value = "30" }
+                        })
+                        .HtmlAttributes(new { @class = "input-disabled", style = "width:90%; float:right;" })
+                        )
+                    </div>
+                    <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                        @Html.Label("Phone No", new { @class = "" })
+                        @Html.TextAreaFor(model => model.MobileNo, htmlAttributes: new { @class = "form-control", @maxlength = "30", style = "width:90%;float:right;height:32px;" })
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                        <label class="required">Received From(Bank)</label>
+                        @Html.TextBoxFor(model => model.ReceivedBank, htmlAttributes: new { @class = "form-control", style = "width:90%; float:right;" })
+                    </div>
+                    <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                        <label class="required">Received From(Org)</label>
+                        @Html.TextBoxFor(model => model.ReceivedOrg, htmlAttributes: new { @class = "form-control", style = "width:90%; float:right;" })
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                        <label class="required">Cheque Number</label>
+                        @Html.TextBoxFor(model => model.ChequeNumber, htmlAttributes: new { @class = "form-control", @maxlength = "50", style = "width:90%; float:right;" })
+                    </div>
+                    <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                        <label class="required">Cheque Date</label>
+                        @(Html.Kendo().DatePickerFor(model => model.ChequeDate).HtmlAttributes(new { style = "width:90%;float:right;", onkeydown="return false;"}))
+                    </div>
+                    <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                        @Html.Label("Received Amount", htmlAttributes: new { @id = "lblTotalAmount", @class = "required" })
+                        @(Html.Kendo().NumericTextBoxFor(m => m.DepositedAmount)
+                            .Min(0)
+                            .Max(999999999999999999)
+                            .Spinners(false).Step(0)
+                            .Enable(true)
+                            .HtmlAttributes(new { style = "width: 90%; float:right;", @maxlength = "18", @class = "k-textbox  text-right" })
+                        )
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                        @Html.Label("Bank Name", htmlAttributes: new { @claszs = "required" })
+                        @(Html.Kendo().DropDownListFor(model => model.BankId)
+                            .DataTextField("Text")
+                            .DataValueField("Id")
+                            .OptionLabel("---select---")
+                            .Filter("contains")
+                                //.DataSource(source =>source.Read(read =>read.Action("GetAllBanks", "PropertyRegistration")))
+                            .DataSource(source =>
+                            {
+                                source.Custom().ServerFiltering(true).ServerPaging(true).ServerPaging(true).Type("aspnetmvc-ajax")
+                                .Transport(transport => transport.Read("GetBankListAsDataSource", "Authority", new { area = "Member" }))
+                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                .PageSize(100);
+                            })
+                            .HtmlAttributes(new { style = "width: 90%; float:right;" })
+                        )
+                    </div>
+
+                    <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                        @Html.Label("Branch Address", htmlAttributes: new { @class = "required" })
+                        @(Html.Kendo().DropDownListFor(model => model.BranchId)
+                            .DataTextField("Text")
+                            .DataValueField("Id")
+                            .Filter("contains")
+                            .OptionLabel("---select---")
+                                //.DataSource(source =>source.Read(read =>read.Action("GetAllBranchs", "PropertyRegistration").Data("filterBranches")).ServerFiltering(true))
+                            .DataSource(source =>
+                            {
+                                source.Custom().ServerFiltering(true)//.ServerPaging(true).ServerPaging(true).Type("aspnetmvc-ajax")
+                                .Transport(transport => transport.Read(read => read.Action("GetBranchListOfBankAsDataSource", "Authority", new { area = "Member" }).Data("FilterBankId")))
+                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                .PageSize(100);
+                            })
+                            .CascadeFrom("BankId")
+                            .Events(model => model.Change("ChangeInBankBranchEvent"))
+                            .HtmlAttributes(new { style = "width: 90%; float:right;" })
+                        )
+                    </div>
+                    <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                        @Html.Label("Account No", htmlAttributes: new { @id = "lblAccountddl", @class = "required" })
+                        @Html.TextBoxFor(m => m.AccountNo, new { @class = "form-control", @maxlength = "20", style = "width:90%; float:right;" })
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                        @Html.Label("Employee Code", htmlAttributes: new { @class = "required" })
+                        @Html.TextBoxFor(m => m.EmployeeCode, new { @class = "form-control", @maxlength = "20", style = "width:90%; float:right;", onchange = "GetEmployeeDetails();" })
+                        @*@(Html.Kendo().DropDownListFor(model => model.EmployeeCode)
+                            .DataTextField("Text")
+                            .DataValueField("Text")
+                            .OptionLabel("---select---")
+                            .Filter("contains")
+                            .DataSource(source =>
+                            {
+                                source.Custom()
+                                    .ServerFiltering(true)
+                                    .ServerPaging(true)
+                                    .Type("aspnetmvc-ajax")
+                                .Transport(transport => transport.Read("GetEmployeeListAsdatasource", "Authority", new { area = "Member" }))
+                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                .PageSize(100);
+                            })
+                            .HtmlAttributes(new { style = "width: 90%; float:right;" })
+                            .Events(model => model.Change("GetEmployeeDetails"))
+                        )*@
+                    </div>
+                    <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                        @Html.Label("Employee Name", htmlAttributes: new { @class = "required" })
+                        @Html.TextBoxFor(m => m.EmployeeName, new { @class = "form-control", style = "width:90%; float:right;" })
+                    </div>
+                </div>
+
+
+                <div class="row">
+                    <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                        @Html.Label("Account Head", htmlAttributes: new { @class = "required" })
+                        @(Html.Kendo().DropDownListFor(model => model.AccountHeadId)
+                            .DataTextField("Text")
+                            .DataValueField("Id")
+                            .OptionLabel("---select---")
+                            .Filter("contains")
+                            .DataSource(source =>
+                            {
+                                source.Custom().ServerFiltering(true).ServerPaging(true).ServerPaging(true).Type("aspnetmvc-ajax")
+                                .Transport(transport => transport.Read("GetAccountHeadList", "Authority", new { area = "Member" }))
+                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                .PageSize(100);
+                            })
+                            .HtmlAttributes(new { style = "width: 90%; float:right;" })
+                        )
+                    </div>
+                    <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                        @Html.Label("Account Subhead", htmlAttributes: new { @class = "required" })
+                        @(Html.Kendo().DropDownListFor(model => model.AccountSubHeadId)
+                            .DataTextField("Text")
+                            .DataValueField("Id")
+                            .OptionLabel("---select---")
+                            .DataSource(source =>
+                            {
+                                source.Custom().ServerFiltering(true).ServerPaging(true)//.ServerPaging(true).Type("aspnetmvc-ajax")
+                                .Transport(transport => transport.Read(read => read.Action("GetAccountSubHeadList", "Authority", new { area = "Member" }).Data("FilterAccountHeadId")))
+                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                .PageSize(100);
+                            })
+                            .CascadeFrom("AccountHeadId")
+                            .HtmlAttributes(new { style = "width: 90%; float:right;" })
+                        )
+                    </div>
+                    <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                        @Html.Label("Amount", htmlAttributes: new { @id = "lblAccountddl", @class = "required" })
+                        @(Html.Kendo().NumericTextBoxFor(m => m.Amount)
+                            .Min(0)
+                            .Max(999999999999999999)
+                            .Spinners(false).Step(0)
+                            .Enable(true)
+                            .HtmlAttributes(new { style = "width: 90%; float:right;", @maxlength = "18", @class = "k-textbox  text-right" })
+                            .Events(model => model.Change("GetCorrectAmount"))
+                        )
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12 form-group" style="text-align:right">
+                        <input type="button" id="btnAdd" value="Add Amount" class="k-button" style="width:100px;" />
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-md-12 k-grid-content" id="divChallanGrid">
+                @(Html.Kendo().Grid<NA.PMS.Model.ChallanViewModel>()
+                    .Name("gridChargeDetails")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(c => c.Id).Title("Id").ClientFooterTemplate("Total:");
+                        columns.Bound(c => c.EmployeeCode).Title("Employee code");
+                        columns.Bound(c => c.EmployeeName).Title("Employee Name");
+                        columns.Bound(c => c.AccountHead).Title("Account Head");
+                        columns.Bound(c => c.AccountSubHead).Title("Account Sub Head");//.ClientFooterTemplate("Total:");
+                        columns.Bound(c => c.Amount).Title("Amount").ClientFooterTemplate("#=sum#");
+                        columns.Bound(c => c.Id).Title("Action").ClientTemplate("<a onclick='javascript:RemoveChallanDetails(this);'class='hyperlinkcss'>Remove</a>").Filterable(false).Sortable(false);
+                    })
+                        .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                        .Groupable()
+                        .DataSource(dataSource => dataSource
+                                .Ajax().Model(model => model.Id(c => c.Id))
+                                .ServerOperation(true)
+                                .Read(read => read.Action("GetTempChallanChargesForEmployee", "Authority")).PageSize(5) //.Data("AdditionalInfo")
+                                .Group(group => group.Add(p => p.EmployeeCode))
+                                .Aggregates(aggregates =>
+                                {
+                                    aggregates.Add(p => p.Amount).Sum();
+                                })
+                        )
+                        .Events(e => e.DataBinding("ChallanGridDataBoundEvent"))
+                )
+            </div>
+
+            <div class="col-md-12">
+                <div class="box-button text-center">
+                    @*<input type="button" id="btnBack" value="Back" class="btn  btn-default" />*@
+                    <input type="button" value="Generate Challan" id="btnGenerateChallan" class="btn btn-default" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="divPrintChallan" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="padding-top:40px;">
+    <div class="modal-dialog" style="width: 65%;">
+        <div class="modal-content" style="overflow:auto;">
+            <div class=" modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">  <b>Challan</b></h4>
+            </div>
+            <div class="modal-body" style="overflow:auto; height:450px;">
+                <style>
+                    .td-amount {
+                        padding-right: 30px;
+                    }
+
+                    #divChallanBody {
+                        padding: 5px;
+                    }
+
+                    #authorityChallan {
+                        border: 1px solid black;
+                        padding: 5px;
+                    }
+                </style>
+                <div id="divChallanBody"></div>
+            </div>
+
+            <div class="modal-footer" style="text-align: center;">
+                <button type="submit" id="btnPrintDiv" class="k-button" data-dismiss="modal" onclick="PrintDiv();" style="width:100px;">Print</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#btnAdd").prop("disabled", true);
+        $("#btnAdd").click(function () {
+            AddChallanDetail()
+        });
+        $("#btnGenerateChallan").click(function () {
+            //GenerateParsedChallan();
+            var flag = ValidateChallanDetails();
+            if (flag) {
+                var depoAmount = $("#DepositedAmount").val();
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ amount: '0' }),
+                    url: '/Member/Authority/GetTotalAmount',
+                    success: function (result) {
+                        if (result > depoAmount || result < depoAmount) {
+                            alertify.error("The sum of charges mismatch with Total Amount.");
+                            //$("#btnGenerateChallan").prop("disabled", true);
+                        }
+                        else {
+                            GenerateParsedChallan();
+                        }
+                    },
+                    error: function (ajaxRequest, strError) {
+                        var respText = ajaxRequest.responseText;
+                        alertify.error("Network error, Please try again later.");
+                    }
+                });
+            }
+        });
+
+        $('#divPrintChallan').on('hidden.bs.modal', function () {
+            ClearFieldValue();
+            $("#EmployeeCode").val("");
+            $("#EmployeeName").val("");
+            $("#AccountHeadId").data("kendoDropDownList").value("");
+            $("#AccountSubHeadId").data("kendoDropDownList").value("");
+            $("#Amount").data("kendoNumericTextBox").value("");
+            $("#BankId").data("kendoDropDownList").value("");
+            $("#gridChargeDetails").data('kendoGrid').dataSource.data([]);
+        });
+    });
+
+    function GetCorrectAmount() {
+        var currentAmount = $("#Amount").val();
+        var depoAmount = $("#DepositedAmount").val();
+        if (depoAmount == "") {
+            alertify.error("Please select Total Deposited Amount.");
+            return false;
+        }
+        if (depoAmount == 0) {
+            $("#DepositedAmount").data("kendoNumericTextBox").value("");
+            alertify.error("Enter a valid Deposited Amount.");
+            return false;
+        }
+        if (currentAmount == "") {
+            alertify.error("Please enter Amount.");
+            return false;
+        }
+        if (currentAmount == 0) {
+            $("#Amount").data("kendoNumericTextBox").value("");
+            alertify.error("Enter a valid amount.");
+            return false;
+        }
+        else {
+            GetTotalAmount(currentAmount, depoAmount);
+        }
+    }
+
+    function GetTotalAmount(currentAmount, depoAmount) {
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ amount: currentAmount }),
+            url: '/Member/Authority/GetTotalAmount',
+            success: function (result) {
+                if (result > depoAmount) {
+                    $("#Amount").data("kendoNumericTextBox").value("");
+                    alertify.error("The sum of charges exceeds the diposited amount.");
+                    $("#btnAdd").prop("disabled", true);
+                    //$("#btnGenerateChallan").prop("disabled", true);
+                }
+                else {
+                    $("#btnAdd").prop("disabled", false);
+                    //$("#btnGenerateChallan").prop("disabled", false);
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Network error, Please try again later.");
+            }
+        });
+    }
+
+    function ValidateChallanDetails() {
+        var flag = true;
+        if ($("#DepartmentId").val() == "") {
+            alertify.error("Please select Department.");
+            return flag = false;
+        }
+        if ($("#ReceivedBank").val().trim() == "") {
+            alertify.error("Please enter Received From.");
+            return flag = false;
+        }
+        if ($("#ReceivedOrg").val().trim() == "") {
+            alertify.error("Please enter Organization name.");
+            return flag = false;
+        }
+        if ($("#ChequeNumber").val().trim() == "") {
+            alertify.error("Please enter Cheque Number.");
+            return flag = false;
+        }
+        if ($("#ChequeDate").val() == "") {
+            alertify.error("Please enter Cheque Date");
+            return flag = false;
+        }
+        if ($("#BankId").val() == "") {
+            alertify.error("Please select Bank.");
+            return flag = false;
+        }
+        if ($("#BranchId").val() == "") {
+            alertify.error("Please select branch.");
+            return flag = false;
+        }
+        if ($("#AccountNo").val() != "") {
+            if ($("#AccountNo").val().length < 6) {
+                alertify.error("Please enter atleast 6 digits in Account No.");
+                return flag = false;
+            }
+        }
+
+        //CheckChallanSessionData();
+
+        var grid = $("#gridChargeDetails").data("kendoGrid");
+        var totalRecords = grid.dataSource.total();
+        if (totalRecords == 0) {
+            alertify.error("Please enter atleast one record in Charge Details.");
+            return flag = false;
+        }
+
+
+        return flag;
+    }
+
+    function AdditionalInfo() {
+        return {
+            //RegistrationId: $('#RegistrationId').val()
+        }
+    }
+
+    function ChangeInBankBranchEvent() {
+        if ($('#BranchId').val() != '') {
+            var bank = {
+                BankId: $('#BankId').val(),
+                BranchId: $('#BranchId').val(),
+                FilterType: "AccountNo"
+            };
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ model: bank }),
+                url: '/Member/Authority/GetBankAccountDetailById',
+                success: function (result) {
+                    if (result != null && result != '') {
+                        $("#AccountNo").val(result.AccountNo);
+                        $("#IFSCCode").val(result.IFSCCode);
+                        return false;
+                    }
+                    else {
+                        alertify.error("Account No is not available.");
+                        return true;
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    alertify.error("Network error, Please try again later.");
+                }
+            });
+        }
+    }
+
+    function GetEmployeeDetails() {
+        if ($('#EmployeeCode').val() != '') {
+            var emp = {
+                EmployeeCode: $('#EmployeeCode').val()
+            };
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ model: emp }),
+                url: '/Member/Authority/GetEmployeeDetailsById',
+                success: function (result)
+                {
+                    if (result.Id != null)
+                    {
+                        $("#EmployeeName").val(result.EmployeeName);
+                    }
+                    else
+                    {
+                        $("#EmployeeName").val('');
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    alertify.error("Network error, Please try again later.");
+                }
+            });
+        }
+    }
+
+    function FilterBankId() {
+        return {
+            bankId: $("#BankId").val()
+        };
+    }
+
+    function FilterAccountHeadId() {
+        return {
+            id: $("#AccountHeadId").val()
+        };
+    }
+
+    function AddChallanDetail() {
+        if ($("#DepositedAmount").val() == "") {
+            alertify.error("Please select Total Deposited Amount.");
+            return false;
+        }
+        if ($("#EmployeeCode").val() == "") {
+            alertify.error("Please select EmployeeCode.");
+            return false;
+        }
+        if ($("#EmployeeName").val() == "") {
+            alertify.error("Please Enter EmployeeName.");
+            return false;
+        }
+        if ($("#AccountHeadId").val() == "") {
+            alertify.error("Please select Account Head.");
+            return false;
+        }
+        if ($("#AccountSubHeadId").val() == "") {
+            alertify.error("Please select Sub Account Head.");
+            return false;
+        }
+        if ($("#Amount").val() == "") {
+            alertify.error("Please enter  Amount.");
+            return false;
+        }
+        var challan = {
+            EmployeeCode: $("#EmployeeCode").val(),
+            EmployeeName: $("#EmployeeName").val(),
+            AccountHeadId: $("#AccountHeadId").val(),
+            AccountSubHeadId: $("#AccountSubHeadId").val(),
+            AccountHead: $("#AccountHeadId").data("kendoDropDownList").text(),
+            AccountSubHead: $("#AccountSubHeadId").data("kendoDropDownList").text(),
+            Amount: $("#Amount").val()
+        };
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ model: challan }),
+            url: '/Member/Authority/SaveTempChallanChargeDetailForEmployee',       //SaveTempChallanChargeDetailForEmployee',
+            success: function (result) {
+                if (result == '@ReturnType.Saved') {
+                    $("#EmployeeCode").val(""),
+                    $("#EmployeeName").val(""),
+                    $("#AccountHeadId").data("kendoDropDownList").value("");
+                    $("#AccountSubHeadId").data("kendoDropDownList").value("");
+                    $("#Amount").data("kendoNumericTextBox").value("");
+                    $("#gridChargeDetails").data("kendoGrid").dataSource.read();
+                    alertify.success("Data saved successfully.");
+                    $("#gridChargeDetails").show();
+                    $("#btnAdd").prop("disabled", true);
+                    return false;
+                }
+                else {
+                    alertify.error("Data is not saved.");
+                    $("#btnAdd").prop("disabled", true);
+                    return true;
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Network error, Please try again later.");
+            }
+        });
+        }
+
+        function ChallanGridDataBoundEvent() {
+            var total = $('#gridChargeDetails').data("kendoGrid").dataSource.total();
+            if (total == 0) {
+                $('#divChallanGrid').css("display", "none");
+            }
+            else if (total > 0) {
+                $('#divChallanGrid').show();
+            }
+        }
+
+        function RemoveChallanDetails(row) {
+            var tr = $(row).parent().parent();
+            var id = $(tr).children("td:eq(1)").text();
+            var employeeCode = $(tr).children("td:eq(2)").text();
+            var employeeName = $(tr).children("td:eq(3)").text();
+            var headname = $(tr).children("td:eq(4)").text();
+            var subheadname = $(tr).children("td:eq(5)").text();
+            var amount = $(tr).children("td:eq(6)").text();
+            var removeNotification = confirm('Are you sure to remove this details?');
+            if (removeNotification) {
+                var challan = {
+                    Id: id,
+                    EmployeeCode: employeeCode,
+                    EmployeeName: employeeName,
+                    AccountHead: headname,
+                    AccountSubHead: subheadname,
+                    Amount: amount
+                };
+                $.ajax({
+                    type: 'POST',
+                    data: { model: challan },
+                    url: '@(Url.Action("RemoveTempChallanChargeDetailForEmployee", "Authority", new { area = "Member" }))',
+                    success: function (result) {
+                        if (result == '@ReturnType.Removed') {
+                            $('#gridChargeDetails').data('kendoGrid').dataSource.read();
+                            //$('#gridChargeDetails').data('kendoGrid').refresh();
+                            alertify.success("Charges removed successfully.");
+                        }
+                        else {
+                            alert("Charge Detail is not removed");
+                            return false;
+                        }
+                    }
+                });
+            }
+            else {
+                return false;
+            }
+        }
+
+        function GenerateParsedChallan() {
+            //var radiobtnRefNo = $('input[name=reference-type]:checked').val();
+            var challan = {
+                DepartmentId: $("#DepartmentId").val(),
+                Department: $("#DepartmentId").data("kendoDropDownList").text(),
+                BankId: $("#BankId").val(),
+                BankName: $("#BankId").data("kendoDropDownList").text(),
+                BranchId: $("#BranchId").val(),
+                BranchName: $("#BranchId").data("kendoDropDownList").text(),
+                AccountNo: $("#AccountNo").val(),
+                IFSCCode: $("#IFSCCode").val(),
+                MobileNo: $("#MobileNo").val(),
+                ReceivedBank: $("#ReceivedBank").val(),
+                ReceivedOrg: $("#ReceivedOrg").val(),
+                ChequeNumber: $("#ChequeNumber").val(),
+                ChequeDate: $("#ChequeDate").val()
+            };
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ model: challan }),
+                url: '/Member/Authority/GetGeneratedChallanForEmployee',
+                success: function (result) {
+                    if (result == '@Constants.Mismatch') {
+                        alertify.error("Challan data not available.");
+                    }
+                    else {
+                        $('#gridChargeDetails').data('kendoGrid').dataSource.read();
+                        $('#gridChargeDetails').data('kendoGrid').refresh();
+                        $("#divChallanBody").html(result);
+                        $("#divPrintChallan").modal('show');
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    alertify.error("Network Error, please try again later.");
+                }
+            });
+        }
+
+        function PrintDiv() {
+            var contents = document.getElementById("divChallanBody").innerHTML;
+            var frame1 = document.createElement('iframe');
+            frame1.name = "frame1";
+            frame1.style.position = "absolute";
+            frame1.style.top = "-1000000px";
+            document.body.appendChild(frame1);
+            var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+            frameDoc.document.open();
+            frameDoc.document.write('<html><head><title></title>');
+            frameDoc.document.write('<style>.td-amount {padding-right: 30px;}#divChallanBody {padding: 5px;font-size:10pt;}#authorityChallan {border: 1px solid black;padding: 5px;}</style>');
+            frameDoc.document.write('<style>tr.tr-notetype{border-bottom:1px solid black;}</style>');
+            frameDoc.document.write('</head><body style="font-size:10pt;">');
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                document.body.removeChild(frame1);
+            }, 500);
+            return false;
+        }
+
+        function ClearFieldValue() {
+            $("#Department").val('');
+            $("#MobileNo").val('');
+            $("#BankId").data("kendoDropDownList").value('');
+            $("#BranchId").data("kendoDropDownList").value('');
+            $('#AccountNo').val('');
+            $("#IFSCCode").val('');
+            $("#AccountHeadId").data("kendoDropDownList").value('');
+            $("#AccountSubHeadId").data("kendoDropDownList").value('');
+            $("#Amount").data("kendoNumericTextBox").value('');
+            $("#DepositedAmount").data("kendoNumericTextBox").value('');
+            $("#ReceivedBank").val('');
+            $("#ReceivedOrg").val('');
+            $("#ChequeNumber").val('');
+            $("#ChequeDate").data("kendoDatePicker").value('');
+            $("#EmployeeCode").val('');
+            $("#EmployeeName").val('');
+            $("#gridChargeDetails").css("display", "none");
+            //$('input[name=reference-type]').prop('checked', false);
+        }
+</script>
+

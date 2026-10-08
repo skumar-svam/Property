@@ -1,0 +1,250 @@
+﻿@*@model NA.PMS.Model.OnlineApplicationDetailsTrans*@
+@model NA.PMS.Model.OnlineFormViewModel
+@using Kendo.Mvc.UI
+@using NA.PMS.Common
+@using NA.PMS.Model
+@{
+    ViewBag.Title = "Form Detail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    //if (Session["CurrentUser"] != null)
+    //{      
+    //    Layout = "~/Views/Shared/_Layout.cshtml";
+    //}
+    //else
+    //{
+    //    Layout = "~/Views/Shared/_LayoutOnline.cshtml";
+    //}
+}
+
+@*@{Html.RenderPartial("_Reciept", Model);}*@
+
+<style>
+    .hyperlink {
+        cursor: pointer;
+    }
+
+    #divUserPhoto {
+        width: 100px;
+        height: 120px;
+        float: right;
+        margin: 0 0px 20px 0;
+    }
+
+    #divUserSign {
+        width: 100px;
+        height: 40px;
+        float: right;
+    }
+
+    #UserImage {
+        width: 100px;
+        height: 120px;
+    }
+
+    #UserSign {
+        width: 100px;
+        height: 40px;
+        margin-top: 80px;
+    }
+</style>
+
+<div class="row-prnt" id="divRegisteredForm">
+    <div class="col-md-12 row-prnt">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12 col-prnt-lt"><h1 class="gridTitle">Form Acknowledgement</h1></div>
+            <div class="col-md-6 col-sm-6 col-xs-12 mandatory col-prnt-rt"><h1 class="gridTitle">Form No: @Model.ApplicationFormId [@Model.ApplicantType]</h1></div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw hdr-ln"></div>
+    <div class="col-md-12 content-top-spce row-prnt" id="first-form">
+        <div class="inr-bx row-prnt" style="border:solid #e2e3e4; border-width:0 1px 1px">
+
+            @{Html.RenderPartial("_RegisteredForm", Model);}
+            @if (Model.IsApplicationFeePaid == true)
+            {
+                <h2 class="blck-heading" style="">Payment Receipt</h2>
+                <div class="form-bx row-prnt">
+                    <div class="row row-prnt">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                            @Html.Label("Form No: ")
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                            @Html.TextBoxFor(model => model.ApplicationFormId, new { @class = "form-control", @readonly = "readonly" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                            @Html.Label("Status: ")
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                            @Html.TextBoxFor(model => model.PaymentModel.Status, new { @class = "form-control", @readonly = "readonly" })
+                        </div>
+                    </div>
+                    <div class="row row-prnt">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                            @Html.Label("Consumer Name: ")
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                            @Html.TextBoxFor(model => model.Applicant, new { @class = "form-control", @readonly = "readonly" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                            @Html.Label("Amount: ")
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                            @Html.TextBoxFor(model => model.PaymentModel.Amount, new { @class = "form-control", @readonly = "readonly" })
+                        </div>
+                    </div>
+                    @if (Model.PaymentMode != "Online")
+                    {
+                        <div class="row row-prnt">
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                                @Html.Label("Transaction Id: ")
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                                @Html.TextBoxFor(model => model.PaymentModel.TransactionId, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                                @Html.Label("Method: ")
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                                @Html.TextBoxFor(model => model.PaymentModel.ProductInfo, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                        </div>
+                        <div class="row row-prnt">
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                                @Html.Label("UTR No: ")
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                                @Html.TextBoxFor(model => model.PaymentModel.TransactionKey, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                                @Html.Label("Bank Name: ")
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                                @Html.TextBoxFor(model => model.PaymentModel.BankName, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="row row-prnt">
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                                @Html.Label("Transaction Id: ")
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                                @Html.TextBoxFor(model => model.PaymentModel.TransactionId, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                                @Html.Label("Method: ")
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                                @Html.TextBoxFor(model => model.PaymentModel.ProductInfo, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                        </div>
+                        <div class="row row-prnt">
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                                @Html.Label("Bank Ref No: ")
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                                @Html.TextBoxFor(model => model.PaymentModel.BankReferenceNo, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                                @Html.Label("Name on Card: ")
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                                @Html.TextBoxFor(model => model.PaymentModel.NameOnCard, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                                @Html.Label("Card Type: ")
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.PaymentModel.CardType, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                                @Html.Label("Bank Transaction: ")
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                                @Html.TextBoxFor(model => model.PaymentModel.Mihpayid, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            <h2 class="blck-heading" style="margin-bottom:0px; margin-top:10px;">Documents</h2>
+            <div class="col-md-12 k-grid-content row-prnt DocumentGrid">
+                @(Html.Kendo().Grid<NA.PMS.Model.OnlineDocumentViewModel>()
+                    .Name("gridDocs")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(c => c.PathName).Hidden(true);
+                        columns.Bound(c => c.Id).Title("SI. No.").Width(70).ClientTemplate("# if (UploadedDocument != null) {#<a onclick='javascript:OpenDocument(this);' class='hyperlink'>#=Sno#</a>#}else {#<span>#=Sno#</span>#} #").Filterable(false);
+                        columns.Bound(c => c.Sno).Hidden(true);
+                        columns.Bound(c => c.DocumentName).Title("Description").Encoded(false);
+                        columns.Bound(c => c.ParentDocumentType).Title(" ").Hidden(true);
+                    })
+                    .Resizable(resize => resize.Columns(true))
+                    .AutoBind(true)
+                    .DataSource(dataSource => dataSource
+                        .Ajax()
+                                .Group(groups => groups.Add(p => p.ParentDocumentType))
+                        .Model(model => model.Id(c => c.Id))
+                        .ServerOperation(false)
+                        .Read(read => read.Action("GetUploadedDocumentsForReturnForm", "Application", new { Area = "Online" }).Data("FilterFormId"))
+                    )
+                )
+            </div>
+            @*Use in Application Form Print*@
+            <div id="documenttable">
+                @Html.Raw(Model.DocumentsTable)
+            </div>
+        </div>
+        <div class="box-button text-center">
+            <input type="button" class="btn btn-default" value="Print" id="btnPrintSchemeForm" />
+        </div>
+    </div>
+</div>
+
+@*For Print Application Form*@
+@{Html.RenderPartial("_PrintOnlineApplicationForm");}
+
+<div id="divDocumentView" style="overflow:hidden">
+    <div class="row">
+        <div class="col-md-12 no-margin no-padding" id="divPageView" style="overflow:hidden">
+            <iframe id="ifrmViewPdf" style="width:100%;"></iframe>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#documenttable").hide();
+        $('#divDocumentView').kendoWindow({
+            modal: true,
+            title: "Document",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "15%"
+            },
+            width: "70%", height: "80%"
+        });
+
+    });
+
+    function FilterFormId() {
+        return {
+            formId: $("#ApplicationFormId").val()
+        };
+    }
+
+    function OpenDocument(row) {
+        $("#divDocumentView").empty();
+        var tr = $(row).parent().parent();
+        var link = $(tr).children("td:eq(1)").text();
+        $("#divDocumentView").append($('<iframe src=' + link + ' style="width:100%;height:100%;overflow:hidden;"></iframe>'));
+        $("#divDocumentView").data("kendoWindow").center();
+        $("#divDocumentView").data("kendoWindow").open();
+        $("#divDocumentView").data("kendoWindow").pin();
+    }
+</script>

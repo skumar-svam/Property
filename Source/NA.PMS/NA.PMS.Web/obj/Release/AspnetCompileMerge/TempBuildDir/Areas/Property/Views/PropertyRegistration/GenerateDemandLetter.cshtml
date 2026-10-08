@@ -1,0 +1,282 @@
+﻿@model NA.PMS.Model.DemandLetterModel
+@using Kendo.Mvc.UI
+@{
+    ViewBag.Title = "Generate Demand Letter";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Generate Demand Letter</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <h2 class="blck-heading"></h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Demand Type", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(m => m.Type)
+                                .Filter("contains")
+                                .DataTextField("text")
+                                .DataValueField("id")
+                                .OptionLabel("---Select---")
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("GetDemandLetterTypes", "PropertyRegistration");
+                                    });
+                                })
+                         .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" })
+                            )
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Department")
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(m => m.DepttId)
+                    .Filter("contains")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel("---Select---")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetDepartmentsByUser", "PropertyRegistration");
+                        });
+                    })
+             .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" })
+                            )
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Sector")
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(m => m.Sector)
+                    .Filter("contains")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel("---Select---")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetSectorsByPropType", "PropertyRegistration");
+                        });
+                    })
+             .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" })
+                            )
+                            @*@(Html.Kendo().DropDownListFor(model => model.Sector)
+            .DataValueField("id")
+                     .Filter("contains")
+            .DataTextField("text").OptionLabel("Select")
+            .DataSource(source => source.Read(read => read.Action("GetSectorsByPropType", "Scheme")))
+                            .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" })
+                            )*@
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Block")
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(model => model.Block)
+            .DataValueField("id")
+            .DataTextField("text").OptionLabel("Select")
+                     .Filter("contains")
+                    .DataSource(source => source.Read(read => read.Action("GetBlocks", "PropertyRegistration")))
+                            .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" })
+                            )
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box-button text-center">
+                <input type="button" value="Search" id="btnSearch" class="btn btn-add" />
+            </div>
+            <br /><br />
+            <div class="k-grid-content">
+                @(Html.Kendo().Grid<NA.PMS.Model.DemandLetterModel>()
+        .Name("gridDmndLtr")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.RId).Title("RID").Width(40);
+            columns.Bound(c => c.ApplicantName).Width(100).Title("Applicant's Name");
+            columns.Bound(c => c.DepttName).Title("Department").Width(60);
+            columns.Bound(c => c.SectorName).Title("Sector").Width(40);
+            columns.Bound(c => c.Blockname).Title("Block").Width(40);
+            columns.Bound(c => c.PropNo).Title("Property Number").Width(60);
+            columns.Bound(c => c.IsSelected).Width(30).ClientTemplate("<input type='checkbox' #= IsSelected ? checked='checked':'' # class='inpchk' ></input>").HeaderTemplate(" <input type='checkbox' id='chkSelectAll' onchange='SelectAll(this)'/>").Filterable(false).Sortable(false).Title("");
+        })
+        .Sortable().AutoBind(false)
+        .Filterable()
+                .Resizable(resize => resize.Columns(true))
+        .Pageable(pageable => pageable
+                                               .Enabled(true)
+                                               .Refresh(true)
+                                               .PageSizes(true)
+                                            )
+        .DataSource(dataSource => dataSource
+        .Ajax().Model(model => model.Id(c => c.RId))
+        .ServerOperation(true)
+                .Read(read => read.Action("GetDemandLetterDataByFilter", "PropertyRegistration").Data("AdditionalData")).PageSize(20)
+        )
+                )
+            </div>
+            <br />
+            <br />
+            <input type="button" value="Generate Letter" class="btn btn-add" id="btnGenerateLetter" />
+        </div>
+    </div>
+</div>
+
+<div id="divPrintLetters" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="padding-top:40px;">
+    <div class="modal-dialog" style="width: 60%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">  <b>Demand Letter</b></h4>
+            </div>
+            <div class="modal-body" style="overflow:auto; height:400px;">
+                <div id="divLetterBody"></div>
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="submit" id="btnPrintDiv" class="k-button" data-dismiss="modal" onclick="PrintDiv();">Print</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function AdditionalData() {
+        var deptt = $("#DepttId").val();
+        var sector = $("#Sector").val();
+        var block = $("#Block").val();
+        var type = $("#Type").val();
+        return {
+            deptt: deptt, sector: sector, block: block, type: type
+        };
+    }
+
+    //var checkedPropertyIds = [];
+    var checkedRIds = [];
+    function SelectAll(e) {
+        var state = $(e).is(':checked');
+        if (state == true) {
+            var grid = $('#gridDmndLtr').data("kendoGrid");
+            $.each(grid.dataSource.view(), function () {
+                $(".inpchk").prop('checked', 'checked');
+                if (this['IsSelected'] != state)
+                    this['IsSelected'] = state;
+                checkedRIds.push(this.RId);
+                //checkedPropertyIds.push(this.PropertyId);
+            });
+        } else {
+            $(".inpchk").removeAttr('checked');
+            var grid = $('#gridDmndLtr').data("kendoGrid");
+            $.each(grid.dataSource.view(), function () {
+                this['IsSelected'] = false;
+            });
+        }
+    }
+
+    function PrintDiv() {
+        var contents = document.getElementById("divLetterBody").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+    //select selected checkboxes
+    $(function () {
+        $('#gridDmndLtr').on('change', '.inpchk', function () {
+
+            var checked = $(this).is(':checked');
+            $("#chkSelectAll").removeAttr('checked');
+            if ($('.inpchk:checked').length == $('.inpchk').length) {
+                $("#chkSelectAll").prop('checked', 'checked');
+            }
+            var grid = $('#gridDmndLtr').data().kendoGrid;
+            var dataItem = grid.dataItem($(this).closest('tr'));
+            dataItem.set('IsSelected', checked);
+            checkedRIds.push(dataItem.RId);
+            //checkedPropertyIds.push(this.PropertyId);
+        });
+    });
+
+    $(document).ready(function () {
+        $("#btnSearch").click(function () {
+            var type = $("#Type").val();
+            if (type == '') {
+                alertify.error("Please select Demand Type");
+                return false;
+            }
+            $("#gridDmndLtr").data("kendoGrid").dataSource.read();
+        });
+
+        $("#btnGenerateLetter").click(function () {
+            var items = $("#gridDmndLtr").data("kendoGrid").dataSource.data();
+            var rIds = [];
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                if (item.IsSelected == true) {
+                    rIds.push(item.RId);
+                }
+            }
+            if (rIds.length > 0) {
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ rIds: rIds }),
+                    url: '/PropertyRegistration/GenerateDemandLetters',
+                    success: function (result) {
+                        $("#divLetterBody").html(result);
+                        $("#divPrintLetters").modal('show');
+                    },
+                    error: function (objAjaxRequest, strError) {
+                        var respText = objAjaxRequest.responseText;
+                        //alert(respText);
+                    }
+                });
+            }
+            else {
+                alertify.error("Please select atleast one row to generate Demand Letter.");
+            }
+        });
+    });
+</script>

@@ -1,0 +1,72 @@
+﻿@model NA.PMS.Model.AllottedPropertyViewModel
+@using Kendo.Mvc.UI;
+
+<div class="col-md-12">
+    <ul class="nav nav-tabs content-tabs" id="ulProperty" role="tablist" style="float:right;">
+        <li class="active"><a href="#service-info" role="tab" data-toggle="tab">Service Request</a></li>
+    </ul>
+</div>
+<div class="col-md-12 tab-content" style="border:solid #e2e3e4; border-width:0 1px">
+    <div class="tab-pane fade in active" id="applicant-info">
+        <div class="col-md-12 k-grid-content">
+            <h2 class="blck-heading-grid">Service Request</h2>
+            @(Html.Kendo().Grid<NA.PMS.Model.ServiceViewModel>()
+            .Name("gridServiceRequested")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Hidden(true);
+                columns.Bound(c => c.Id).Title("Ref Id").Width(110).ClientTemplate("<a href='/Customer/Property/ServiceDetail?id= #=EncryptedId#'> #=Id#</a>");
+                columns.Bound(c => c.ServiceName).Title("Service Name");
+                //columns.Bound(c => c.Description).Title("Description");
+                columns.Bound(c => c.Requestor).Title("Requestor");
+                columns.Bound(c => c.CreatedDate).Format("{0:dd-MMM-yyyy}").Title("Request Date").Width(140);
+                columns.Bound(c => c.Status).Title("Status").Width(120);
+            })
+            .Sortable(sort => sort.Enabled(true)).Filterable().Resizable(resize => resize.Columns(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+            .ClientDetailTemplateId("template").AutoBind(true)
+            .DataSource
+            (
+                dataSource => dataSource
+                .Ajax().ServerOperation(true).Sort(x => x.Add(i => i.CreatedDate).Descending())
+                .Model(model => model.Id(p => p.Id))
+                .Read(read => read.Action("GetServiceRequestListByRegistrationId", "PropertyAllotment", new { area = "Property" }).Data("FilterRegistrationIdForService")).PageSize(10)
+            )
+            )
+        </div>
+    </div>
+</div>
+
+<script id="template" type="text/kendo-tmpl">
+    @(Html.Kendo().Grid<NA.PMS.Model.ServiceViewModel>()
+            .Name("grid_#=Id#") // template expression, to be evaluated in the master context
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Hidden(true);
+                //columns.Bound(o => o.Applicant).Width(300);//.ClientTemplate("<span>#= ServiceName #<br/><small ><b>Receiving Date:</b>&nbsp;#= CreatedDate#</small></span>");
+                columns.Bound(o => o.Description);
+                columns.Bound(o => o.Comment);//.ClientTemplate("<label>#=Comment#</label>");
+                //columns.Bound(o => o.Status).Width(120).Title("Update Status").ClientTemplate("<label class='lbl-status-action' onclick='javascript:OpenStatusWindow(this)'>#=Status#</label>");
+                //columns.Bound(o => o.RequestDate).Format("{0:dd/MM/yyyy}").Width(120);
+            })
+            .DataSource(dataSource => dataSource
+                .Ajax()
+                .PageSize(10)
+                .Read(read => read.Action("GetServiceRequestListByRegistrationId", "PropertyAllotment", new { RegistrationId = "#=RegistrationId#", Id = "#=Id#" }))
+            )
+            .ToClientTemplate()
+    )
+</script>
+<script>
+    function dataBound() {
+        this.expandRow(this.tbody.find("tr.k-master-row").first());
+    }
+</script>
+
+<script>
+    function FilterRegistrationIdForService() {
+        rid = $('#Property_RegistrationId').val();
+        var model = { RegistrationId: rid };
+        return model;
+    }
+</script>

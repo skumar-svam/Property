@@ -1,0 +1,40 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@using NA.PMS.Common
+@model NA.PMS.Model.PaymentViewModel
+
+<h2 class="blck-heading" style="margin-bottom:15px;">NDC Detail</h2>
+
+<div class="col-md-12 k-grid-content">
+    @(Html.Kendo().Grid<NA.PMS.Model.NDCVeiwModel>()
+        .Name("NDCGrid2")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.Id).Hidden();
+            columns.Bound(c => c.RegistrationId).Title("Registration Id").Width(100);
+            columns.Bound(c => c.Department).Title("Department").Width(100);
+            columns.Bound(c => c.Applicant).Title("Applicant");
+            //columns.Bound(c => c.Sector).Title("Sector").Width(100);
+            //columns.Bound(c => c.Block).Title("Block").Width(100);
+            //columns.Bound(c => c.PlotNo).Title("Plot No").Width(100);
+            //columns.Bound(c => c.CreatedDate).Title("Request Date").Format("{0:dd-MM-yyyy}");
+            columns.Bound(c => c.NDCDate).Title("Issue Date").Width(100).Format("{0:dd-MM-yyyy}");
+            columns.Bound(c => c.Status).Title("Status").Width(100);
+            columns.Bound(c => c.TemplateContent).Hidden();
+            //columns.Bound(c => c.Id).Title("NDC Letter").Width(100).ClientTemplate(" <center><a onclick='javascript:ViewNDCLetter(#=Id#);'><span class='fa fa-print'></span></a></center> ");
+            //columns.Bound(c => c.Id).Title("Edit").Width(100).ClientTemplate("#if(IsLetterIssued == null || IsLetterIssued == false){#<center><a href='" + "/Member/Authority/EditNDCLetter/#= Id #'><span class='fa fa-edit'></span></a></center>#}else{#<label>Issued</label>#}#  ");
+            //columns.Bound(c => c.IsLetterIssued).Title("Action").Width(100).ClientTemplate("#if(IsActive == true){ if(IsLetterIssued == true){#<label>Issued</label>#}else{#<label class='hyperlink verify' onclick='javascript:UpdateRemarks(#=RegistrationId#,#=Id#)'>Issue</label>#}}else{#<label>Cancelled</label>#}#");
+        })
+            .Filterable().Resizable(resize => resize.Columns(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+            .DataSource(dataSource => dataSource
+            .Ajax().Model(model => model.Id(p => p.Id))
+            .ServerOperation(true).Sort(sort => sort.Add("Id").Descending())
+            .Read(read => read.Action("GetNDCGeneratedLetterListAsDataSource", "Finance", new { area = "Revenue" }).Data("FilterRegistrationId"))
+        )
+    )
+</div>
+
+<script>
+
+</script>

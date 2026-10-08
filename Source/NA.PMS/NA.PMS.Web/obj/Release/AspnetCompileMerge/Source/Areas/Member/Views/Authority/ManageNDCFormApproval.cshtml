@@ -1,0 +1,59 @@
+﻿
+@using Kendo.Mvc.UI
+
+@{
+    ViewBag.Title = "ManageNDCFormApproval";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    #btnRequest {
+        float: right;
+    }
+
+    .k-grid-content {
+        overflow-y: hidden;
+        overflow-x: hidden;
+    }
+</style>
+
+<div class="NDCApprover">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage NDC</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.NDCVeiwModel>()
+                    .Name("NDCGrid")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(c => c.Id).ClientTemplate("<a href='" + "/Member/Authority/ViewNDCApproval/#= Id #'>#= Id #</a>");
+                        columns.Bound(c => c.RegistrationId).Title("Registration Id");
+                        columns.Bound(c => c.Department).Title("Department");
+                        //columns.Bound(c => c.Applicant).Title("Applicant");
+                        columns.Bound(c => c.PropertyNo).Title("Property No");
+                        columns.Bound(c => c.Requester).Title("Requested By");                       
+                        columns.Bound(c => c.RequestedDate).Title("Request Date").Format("{0:dd-MM-yyyy}");
+                        //columns.Bound(c => c.NDCDate).Title("Issue Date").Width(100).Format("{0:dd-MM-yyyy}");
+                        columns.Bound(c => c.Status).Title("Status");
+                        columns.Bound(c => c.Approver).Title("Forwared To");
+                        columns.Bound(c => c.ApprovalDate).Title("Approval Date").Format("{0:dd-MM-yyyy}");                       
+                    })
+                        .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                //.ClientDetailTemplateId("template")
+                //.AutoBind(true)
+                        .DataSource(dataSource => dataSource
+                        .Ajax().Model(model => model.Id(p => p.Id))
+                        .ServerOperation(true).Sort(sort => sort.Add("Id").Descending())
+                        .Read(read => read.Action("GetNDCListForApprovalAsDataSource", "Authority", new { area = "Member" })).PageSize(10)
+                    )
+        )
+    </div>
+</div>
+
+

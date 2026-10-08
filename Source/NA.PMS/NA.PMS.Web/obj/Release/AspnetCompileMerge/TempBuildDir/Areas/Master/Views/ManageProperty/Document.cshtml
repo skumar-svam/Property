@@ -1,0 +1,380 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@using NA.PMS.Common;
+@model NA.PMS.Model.DocumentViewModel
+@{
+    ViewBag.Title = "Document";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    #div-uploaded-documents{
+        display:none;
+    }
+</style>
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Document</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory"></div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <form action="SaveDocumentsInTempSessioin" id="form-upload-document" method="post" enctype="multipart/form-data">
+                    <h2 class="blck-heading">Property Info</h2>
+                    <div class="form-bx">
+                        <div>
+                            <input type="hidden" id="hdn-old-registration-id" />
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Registration Id", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(m => m.RegistrationId)
+                                .DataTextField("Text")
+                                .DataValueField("Id")
+                                .OptionLabel(" ---select---")
+                                .Filter("contains")
+                                .AutoBind(true)
+                                .Enable(true)
+                                .DataSource(source =>
+                                {
+                                    source.Custom()
+                                    .ServerPaging(true)
+                                    .ServerFiltering(true)
+                                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                    .Transport(transport => transport.Read(read => read.Action("GetRegistrationIdList", "Payment", new { Area = "Revenue" })))
+                                    .Schema(schema => schema.Data("Data").Total("Total"))
+                                    .PageSize(100);
+                                })
+                                .HtmlAttributes(new { style = "width:100%; float:right" })
+                                .Events(e => e.Change("RegistrationIdChangeEvent"))
+                                )
+                            </div>
+
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label>Department</label>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(model => model.DepartmentId)
+                            .DataTextField("Text")
+                            .DataValueField("Id")
+                            .OptionLabel(" --- select ---")
+                            .Filter("contains")
+                            .AutoBind(true)
+                            .Enable(true)
+                            .DataSource(source => source.Read(read => read.Action("GetDepartmentList", "Payment", new { area = "Revenue" })))
+                            .HtmlAttributes(new { style = "width:100%; float:right;" })
+                                )
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label>Applicant's Name</label>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextAreaFor(model => model.Applicant, htmlAttributes: new { @class = "form-control", @readonly = "readonly", style = "width:100%;float:right;height:30px;" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label>Property No</label>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.PropertyNo, htmlAttributes: new { @class = "form-control", style = "width:100%;" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label>Document Type</label>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(m => m.DocumentType)
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .OptionLabel(" ---select---")
+                                .Filter("contains")
+                                .AutoBind(true)
+                                .Enable(true)
+                                .DataSource(source =>
+                                {
+                                    source.Custom()
+                                    .ServerPaging(true)
+                                    .ServerFiltering(true)
+                                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                    .Transport(transport => transport.Read(read => read.Action("GetDocumentTypeListAsDataSource", "ManageProperty", new { Area = "Master" })))
+                                    .Schema(schema => schema.Data("Data").Total("Total"))
+                                    .PageSize(100);
+                                })
+                                .HtmlAttributes(new { style = "width:100%; float:right" })
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.HiddenFor(model=>model.DocumentName)
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <input type="file" name="tempFile" id="file-upload" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 col-sm-12 col-xs-12 form-group text-right">
+                                <input type="button" id="btn-add" value="Add Document" class="k-button" />
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div id="div-uploaded-documents" class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <div class="row">
+                    <h2 class="blck-heading" style="margin-bottom:0;">Uploaded Documents</h2>
+                    <div class="col-md-12 k-grid-content">
+                        @(Html.Kendo().Grid<NA.PMS.Model.DocumentViewModel>()
+                          .Name("gridTempDocument")
+                          .Columns(columns =>
+                          {
+                              columns.Bound(c => c.Id).Title("Serial No").Width(90);
+                              columns.Bound(c => c.DocumentPath).Hidden(true);
+                              columns.Bound(c => c.DocumentName).Title("Document");
+                              //columns.Bound(c => c.Id).Title("Action").Width(120).ClientTemplate("<a style = 'cursor:pointer;' onclick=javascript:RemoveFile(#=Id#);>Remove</a>");
+                              columns.Bound(c => c.DocumentPath).Title("Action").Width(120).ClientTemplate("<a style = 'cursor:pointer;' onclick=javascript:OpenFile(this);>Click Here</a>");
+                          })
+                          .Events(e=>e.DataBound("TempGridDataBoundEvent"))
+                          .DataSource
+                          (
+                              dataSource => dataSource
+                                  .Ajax().ServerOperation(true)
+                                  .Model(model => model.Id(p => p.Id))
+                                  .Read(read => read.Action("GetDocumentListFromTempSessionAsDataSource", "ManageProperty", new { area = "Master" }).Data("FilterRegistrationId"))
+                          )
+                        )
+                    </div>
+                </div>
+            </div>
+
+            @*<div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12 col-xs-12 form-group text-right" style="margin-top:15px;">
+                            <input type="button" id="btn-upload" value="Upload" class="btn btn-default" style="min-width:110px;border-radius:0;"/>
+                        </div>
+                    </div>
+                </div>                
+            </div>*@
+        </div>
+    </div>
+
+    <div class="row">
+        <h2 class="blck-heading" style="margin-bottom:0;">Existing Documents</h2>
+        <div class="col-md-12 k-grid-content">
+            @(Html.Kendo().Grid<NA.PMS.Model.DocumentViewModel>()
+              .Name("gridPropertyDocument")
+              .Columns(columns =>
+              {
+                  columns.Bound(c => c.Id).Title("Serial No").Width(90);
+                  columns.Bound(c => c.DocumentPath).Hidden(true);
+                  columns.Bound(c => c.DocumentName).Title("Document Name");
+                  columns.Bound(c => c.DocumentPath).Title("View").Width(120).ClientTemplate("<a style = 'cursor:pointer;' onclick=javascript:OpenFile(this);>Click Here</a>").Filterable(false);
+              })
+              .Resizable(resize => resize.Columns(true))
+              .DataSource
+              (
+                  dataSource => dataSource
+                      .Ajax().ServerOperation(true)
+                      .Model(model => model.Id(p => p.RegistrationId))
+                      //.Read(read => read.Action("GetDocumentDetails", "PropertyAllotment", new { area = "Property" }).Data("AdditionalInfoForDocument"))
+                      .Read(read => read.Action("GetExistingDocumentListAsDataSource", "ManageProperty", new { area = "Master" }).Data("FilterRegistrationId"))
+              )
+            )
+
+            @(Html.Kendo().Window()
+                .Visible(false)
+                .Name("IDWindow")
+                .Width(920)
+                .Title("Document")
+                .Modal(true)
+                .Content(
+                @<text>
+                    <div style="width:100%" id="windowDiv">
+                        <iframe id="ifrmViewPdf" style="width:900px; height:500px;"></iframe>
+                    </div>
+                </text>
+                )
+                .Actions(actions => actions.Close())
+            )
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+    function AdditionalInfoForDocument() {
+        return {
+            rid: 10000013,  // 10000997
+            oldRid: 10000013
+        }
+    }
+
+    function OpenFile(row) {
+        $("#windowDiv").empty();
+        var tr = $(row).parent().parent();
+        var link = $(tr).children("td:eq(1)").text();
+        $("#windowDiv").append($('<iframe src=' + link + ' style="width:900px; height:500px;"></iframe>'));
+        $("#IDWindow").data("kendoWindow").center();
+        $("#IDWindow").data("kendoWindow").open();
+    }
+</script>
+
+
+<script>
+    $(document).ready(function () {
+
+        $('#btn-add').click(function () {
+            if ($('#DocumentType').val() == "") {
+                alertify.error("Please select Document Type");
+                return false;
+            }
+            if ($('#file-upload').val() == "" || $('#file-upload').val() == undefined) {
+                alertify.error("Please select file to upload");
+                return false;
+            }
+            else {
+                SaveFileInSession();
+            }           
+        });
+
+        $('#btn-upload').click(function () {
+            if ($('#RegistrationId').val() != "") {
+                UploadDocumentByRegistrationId();
+            }
+            else {
+                alertify.error("Please select RegistrationId");
+            }
+        });
+    });
+
+    function FilterRegistrationId() {
+        return { RegistrationId: $('#RegistrationId').val() }
+    }
+
+    function TempGridDataBoundEvent() {
+        if ($('#gridTempDocument').data("kendoGrid").dataSource.total() > 0) {
+            $('#div-uploaded-documents').show();
+        }
+        else {
+            $('#div-uploaded-documents').css("display","none");
+        }
+    }
+
+    function SaveFileInSession() {
+        $('#DocumentName').val($('#DocumentType').data("kendoDropDownList").text());
+        var formData = new FormData($('#form-upload-document').get(0));
+
+        $.ajax({
+            url: '/Master/ManageProperty/SaveDocumentsInTempSession',
+            type: "POST",
+            contentType: false, // Not to set any content header  
+            processData: false, // Not to process data  
+            data: formData,
+            success: function (result) {
+                if (result == '@ReturnType.Saved') {
+                    $('#file-upload').val('');
+                    $('#DocumentType').data("kendoDropDownList").value('');
+                    $('#gridTempDocument').data("kendoGrid").dataSource.read();
+                }
+            },
+            error: function (err) {
+
+            }
+        });
+    }
+
+    function RegistrationIdChangeEvent() {
+        var rId = $('#RegistrationId').val();
+        if (rId != "" && rId.length == 8) {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ rid: rId }),
+                url: "/Revenue/Payment/GetAllottedPropertyDetailsById",
+                success: function (result) {
+                    if (result != null) {
+                        //ClearInputField();
+                        $('#Applicant').val(result.Applicant);
+                        $('#PropertyNo').val(result.PropertyNo);
+                        $('#DepartmentId').data("kendoDropDownList").value(result.DepartmentId);
+                        $('#gridTempDocument').data("kendoGrid").dataSource.read();
+                        $('#gridPropertyDocument').data("kendoGrid").dataSource.read();
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, Please try again.");
+                }
+            });
+        }
+        else {
+            ClearInputField();
+            //alertify.error("Please select Registration Id");
+        }
+    }
+
+    function UploadDocumentByRegistrationId() {
+        var rId = $('#RegistrationId').val();
+        if (rId != "" && rId.length == 8) {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ RegistrationId: rId }),
+                url: "/Master/ManageProperty/SavePropertyDocuments",
+                success: function (result) {
+                    if (result != null) {
+                        //ClearInputField();
+                        //$('#Applicant').val(result.Applicant);
+                        //$('#PropertyNo').val(result.PropertyNo);
+                        //$('#DepartmentId').data("kendoDropDownList").value(result.DepartmentId);;
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, Please try again.");
+                }
+            });
+        }
+        else {
+            ClearInputField();
+            //alertify.error("Please select Registration Id");
+        }
+    }
+
+    function RemoveFile(id) {
+        if (id != null && id != "") {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ Id: id }),
+                url: "/Master/ManageProperty/RemoveDocumentByIdFromTempSession",
+                success: function (result) {
+                    if (result == '@ReturnType.Removed') {
+                        alertify.success("File removed successfully.");
+                        $('#gridTempDocument').data("kendoGrid").dataSource.read();
+                    }
+                    else {
+                        alertify.error("Please try again later.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, Please try again.");
+                }
+            });
+        }
+    }
+</script>

@@ -1,0 +1,302 @@
+﻿@model NA.PMS.Model.SchemeViewModel
+@using Kendo.Mvc.UI
+
+<div class="SchemeLandDevelopment">
+    <div class="col-md-12" id="landDevelopmentDetail">
+        <h2 class="blck-heading">Define Land Development Schedule</h2>
+        <div class="col-md-12 col-sm-12 col-xs-12 scheme-form-bx schemeForms">
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+            <div class="row ">
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <label>Department</label>
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @(Html.Kendo().DropDownListFor(model => model.DepartmentId)
+                        .Name("ScheduleDepartmentId")
+                        .DataTextField("text")
+                        .DataValueField("id")
+                        .OptionLabel("Select")
+                        .DataSource(source =>source.Read(read =>read.Action("GetAllDepartmentsByScheme", "Scheme").Data("AdditionalData")))
+                        .HtmlAttributes(new { style = "width:100%;" })
+                    )
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <label>Process</label>
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @(Html.Kendo().DropDownListFor(model => model.ProcessId)
+                        .DataTextField("text")
+                        .DataValueField("id")
+                        .OptionLabel("Select")
+                        .DataSource(source =>source.Read(read =>read.Action("GetProcessData", "Scheme").Data("filterDepartment")).ServerFiltering(true))
+                        .CascadeFrom("ScheduleDepartmentId")
+                        .HtmlAttributes(new { style = "width:100%;" })
+                    )
+                </div>
+            </div>
+
+            <div class=" row">
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <label>Duration</label>
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <div class="col-md-12">
+                        <div class="col-md-4">
+                            @Html.TextBoxFor(model => model.Years, htmlAttributes: new { @class = "k-label textBoxValueRightAlign", @maxlength = "4", style = "width:100%", onkeypress = "return IsNumeric(event);" })
+
+                            @Html.LabelFor(model => model.Years, htmlAttributes: new { @class = "k-label" })
+                        </div>
+                        <div class="col-md-4">
+                            @Html.TextBoxFor(model => model.Months, htmlAttributes: new { @class = "k-label textBoxValueRightAlign", @maxlength = "4", style = "width:100%", onkeypress = "return IsNumeric(event);" })
+                            @Html.LabelFor(model => model.Months, htmlAttributes: new { @class = "k-label" })
+                        </div>
+                        <div class="col-md-4">
+                            @Html.TextBoxFor(model => model.Days, htmlAttributes: new { @class = "k-label textBoxValueRightAlign", @maxlength = "4", style = "width:100%", onkeypress = "return IsNumeric(event);" })
+                            @Html.LabelFor(model => model.Days, htmlAttributes: new { @class = "k-label" })
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.LabelFor(model => model.TriggerId, htmlAttributes: new { @class = "k-label required" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @(Html.Kendo().DropDownListFor(model => model.TriggerId)
+                        .DataTextField("text")
+                        .DataValueField("id")
+                        .OptionLabel("Select")
+                        .DataSource(source =>source.Read(read =>read.Action("GetTriggerProcessData", "Scheme").Data("filterDepartment")).ServerFiltering(true))
+                        .CascadeFrom("ScheduleDepartmentId")
+                        .HtmlAttributes(new { @class = "schemeForms", style = "width:100%" })
+                    )
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-10" style="text-align:center">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row scheme-rw-btn">
+        <div class="col-md-4 col-sm-4 col-xs-4 text-left">
+            <button type="button" class="btn btn-add" value="Add" id="btnPre5">Previous <i class="glyphicon glyphicon-backward"></i></button>
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-4 text-center">
+            <button type="button" class="btn btn-add" value="Add" id="btnLandDevelopmentAdd"> Add</button>
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+            <button type="button" class="btn btn-add" value="Add" id="btnNext5">Next <i class="glyphicon glyphicon-forward"></i></button>
+        </div>
+    </div>
+
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 k-grid-content" style="margin-bottom:10px;">
+        @(Html.Kendo().Grid<NA.PMS.Model.LandDevelopmentScheduleModel>()
+                .Name("grdLandDevelopment")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.SchemeName).Title("Scheme").Width(150);
+                    columns.Bound(c => c.LandDevelopmentDepartmentName).Title("Department").Width(150);
+                    columns.Bound(c => c.ProcessName).Title("Process Name").Width(150);
+                    columns.Bound(c => c.Duration).Width(90).Title("Duration (In Days)");
+                    columns.Bound(c => c.TriggerName).Title("Trigger Process").Width(100);
+                    if (ViewBag.view != "Yes")
+                    {
+                        columns.Bound(c => c.ScheduleId).Title("Action").ClientTemplate("<a onclick='javascript:RemoveLandDevelopment(\"#=ScheduleId#\");' class='schemeMasterGrids''>Remove</a>").Width(50).Filterable(false).Sortable(false);
+                    }
+                })
+                .Sortable().Filterable().Pageable( pageable => pageable.Enabled(true).PageSizes(true)).AutoBind(true)
+                .DataSource
+                (
+                     dataSource => dataSource
+                    .Ajax().Model(model => model.Id(p => p.ScheduleId))
+                    .ServerOperation(true)
+                    .Read(read => read.Action("GetLandDevelopmentScheduleData", "Scheme").Data("AdditionalData")).PageSize(20)
+                 )
+        )
+    </div>
+
+    <div class="row scheme-rw-btn">
+        <div class="col-md-4 col-sm-4 col-xs-4 text-left">
+            <button type="button" class="btn btn-add" value="Add" id="btnPre51">Previous <i class="glyphicon glyphicon-backward"></i></button>
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-4 text-center">
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+            <button type="button" class="btn btn-add" value="Add" id="btnNext51">Next <i class="glyphicon glyphicon-forward"></i></button>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+
+    function ValidateLandDevelopment() {
+        if ($('#LandDevelopmentDepartmentId').val() == "") {
+            alertify.error('Please Select Department');
+            return false;
+        }
+        else if ($('#ProcessId').val() == "") {
+            alertify.error('Please Select Process Name');
+            return false;
+        }
+        else if ($('#TriggerId').val() == "") {
+            alertify.error('Please Select Trigger Process');
+            return false;
+        }
+        else if ($("#Years").val() == "" && $("#Months").val() == "" && $("#Days").val() == "") {
+            alertify.error('Please enter Duration');
+            return false;
+        }
+        //else{
+        //    alertify.error('Invalid entry');
+        //    return false;
+        //}
+        return true;
+    }
+
+
+
+    $(document).ready(function () {
+        $('#btnNext5').attr('disabled', 'disabled');
+        $('#btnPre5').attr('disabled', 'disabled');
+        $("#btnLandDevelopmentAdd").click(function () {
+            //$("#btnLandDevelopmentAdd").attr('disabled', 'disabled');
+            var validateLandDevelopment = ValidateLandDevelopment();
+            if (validateLandDevelopment) {
+                var departmentID = $('#LandDevelopmentDepartmentId').val();
+                var schemeID = $("#scheId").val();
+                var rebateId = $("#rebateId").val();
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ departmentID: $("#LandDevelopmentDepartmentId").val(), processId: $("#ProcessId").val(), schemeID: $("#scheId").val(), triggerId: $("#TriggerId").val() }),
+                    url: '/Scheme/IsLandDevelopmentUnique',
+                    success: function (result) {
+                        if (result == true) {
+                            alertify.error("Duplicate Entry.");
+                            return false;
+                        }
+                        else {
+                            var days = 0
+                            var months = 0
+                            var years = 0
+                            if ($("#Years").val() != "")
+                                years = $("#Years").val();
+                            if ($("#Months").val() != "")
+                                months = $("#Months").val();
+                            if ($("#Days").val() != "")
+                                days = $("#Days").val();
+                            if ((days + months + years) == 0) {
+                                alertify.error("Duration should be of minimum 1 day.");
+                                return false;
+                            }
+                            $.ajax({
+                                dataType: 'json',
+                                type: 'Post',
+                                contentType: 'application/json; charset=utf-8',
+                                data: JSON.stringify({ departmentId: $("#LandDevelopmentDepartmentId").val(), processId: $("#ProcessId").val(), years: years, months: months, days: days, triggerId: $("#TriggerId").val(), schemeId: $("#scheId").val() }),
+                                url: "/Scheme/AddLandDevelopmentSchedule",
+                                success: function (data) {
+                                    if (data == 1) {
+                                        $("#LandDevelopmentDepartmentId").data("kendoDropDownList").value("");
+                                        $("#ProcessId").data("kendoDropDownList").value("");
+                                        $("#Years").val('');
+                                        $("#Months").val('');
+                                        $("#Days").val('');
+                                        $("#TriggerId").data("kendoDropDownList").value("");
+                                        $("#grdLandDevelopment").data("kendoGrid").dataSource.read();
+                                        $('#btnNext5').removeAttr('disabled');
+                                        $('#btnPre5').removeAttr('disabled');
+                                        $(".sixth .fke-link").hide();
+                                        $(".sixth .accordion-section-title").show();
+                                        $(".seventh .fke-link").hide();
+                                        $(".seventh .accordion-section-title").show();
+                                        alertify.success("Data added successfully");
+                                        setTimeout(function () { ActivateScheme(); }, 2000);
+                                        //$("#btnLandDevelopmentAdd").removeAttr('disabled');
+                                    }
+                                    else if (data == 2) {
+                                        alertify.error("Duplicate Entry.");
+                                    }
+                                    else {
+                                        alertify.success("Data Not added successfully");
+                                    }
+                                },
+                                error: function (objAjaxRequest, strError) {
+                                    var respText = objAjaxRequest.responseText;
+                                    //$("#btnLandDevelopmentAdd").removeAttr('disabled');
+                                    //alert(respText);
+                                }
+                            });
+                        }
+                    },
+                    error: function (objAjaxRequest, strError) {
+                        var respText = objAjaxRequest.responseText;
+                        //alert(respText);
+                    }
+                });
+                //}
+                // });
+                //}
+                //$("#btnLandDevelopmentAdd").removeAttr('disabled');
+            }
+        });
+        $('#btnNext5').click(function () {
+            $("#acc6").click();
+        });
+        $('#btnPre5').click(function () {
+            $("#acc4").click();
+        });
+        $('#btnNext51').click(function () {
+            $("#acc6").click();
+        });
+        $('#btnPre51').click(function () {
+            $("#acc4").click();
+        });
+    });
+    function RemoveLandDevelopment(ScheduleId) {
+        var schemeID = $("#scheId").val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ refId: ScheduleId, schemeID: schemeID }),
+            url: '/Scheme/RemoveLandDevelopment',
+            success: function (result) {
+                if (result == true) {
+                    $("#grdLandDevelopment").data("kendoGrid").dataSource.read();
+                    $('#grdLandDevelopment').data('kendoGrid').refresh();
+                    var grdLandDevelopment = $("#grdLandDevelopment").data("kendoGrid").dataSource.data();
+                    if (grdLandDevelopment.length == 1) {
+                        IsSchemeCompletedByRemove(false);
+                    }
+                    alertify.success("Record deleted successfully.");
+                }
+            },
+            error: function (obj) {
+                //alert('Error While Saving Record.');
+            }
+        });
+    }
+
+    function filterDepartment() {
+        return {
+            departmentId: $("#ScheduleDepartmentId").val()
+        };
+    }
+</script>
+

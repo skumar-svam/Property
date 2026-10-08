@@ -1,0 +1,337 @@
+﻿@model NA.PMS.Model.NotingDetailsModel 
+@using Kendo.Mvc.UI;
+@using NA.PMS.Model
+
+@{
+    ViewBag.Title = "Manage Noting";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .form-group{
+        padding-left: 10px !important;
+    }
+</style>
+
+
+<div class="col-md-12 col-sm-12">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Noting Files</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                <a href='javascript:void(0);' alt="click to open Check List popup" class="" id="frcontractreviewchklstlink">Create File</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 content-top-spce">
+        <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            <h2 class="blck-heading">Search</h2>
+            <div class="form-bx" style="padding-left:30px; text-align:center">
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.Label("Registration Id")
+                        @(Html.Kendo().DropDownListFor(m => m.Rid)
+                            .Filter("contains")
+                            .DataTextField("text")
+                            .DataValueField("id")
+                            .OptionLabel("Select")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetRidToSearchNoting", "PropertyRegistration");
+                                });
+                            })
+                            .HtmlAttributes(new { @class = "schemeForms", style = "width:100%" })
+                        )
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.Label("Department")
+                        @(Html.Kendo().DropDownListFor(m => m.DepartmentId)
+                            .Filter("contains")
+                            .DataTextField("text")
+                            .DataValueField("id")
+                            .OptionLabel("Select")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetDeptmentForNoting", "PropertyRegistration");
+                                });
+                            })
+                            .HtmlAttributes(new { @class = "schemeForms", style = "width:100%" })
+                        )
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.Label("File Number")
+                        @Html.TextBoxFor(m => m.FileName, htmlAttributes: new { @class = "form-control" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <br />
+                        <button type='button' id="btnSearchFilter" class='btn btn-default' value='Save'>Search Filter</button>
+                        <button type='button' id="btnClearSearch" class='btn btn-default' value='Save'>Clear</button>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="k-grid-content">
+                @(Html.Kendo().Grid<NotingDetailsModel>()
+                      .Name("gridNotingDetails")
+                      .Columns(columns =>
+                      {
+                          //columns.Bound(c => c.Rid).Title("Registration Id").ClientTemplate("<a href='" + "/Property/PropertyRegistration/ViewNotingDetails/#= Rid #'>#=Rid#</a>");
+                          columns.Bound(c => c.Rid).Title("Registration Id").ClientTemplate("<a href='" + "/Property/PropertyRegistration/ViewNotingDetails/#= EncodedRid #'>#=Rid#</a>");
+                          columns.Bound(c => c.DepartmentName).Title("Department");
+                          columns.Bound(c => c.FileName).Title("File Number");
+                          columns.Bound(c => c.CreatedDate).Title("Created Date").Format("{0:dd-MM-yyyy}");
+                          columns.Bound(c => c.CreatedBy).Title("Created By");
+                          columns.Bound(c => c.ReceiveBy).Title("Received By");
+                          columns.Bound(c => c.Receive_Date).Title("Received Date").Format("{0:dd-MM-yyyy}");
+                      })
+                      .Sortable()
+                      .Filterable()
+                      .Resizable(resize => resize.Columns(true))
+
+                      .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                      .DataSource
+                      (
+                         dataSource => dataSource
+                        .Ajax()
+                        .Model(model => model.Id(p => p.Id))
+                        .ServerOperation(true)
+                        .Read(read => read.Action("GetNotingDetails", "PropertyRegistration").Data("FilterEmpID"))
+                        .PageSize(10)
+                        .Group(g => g.Add(r => r.DepartmentName))
+                      )
+                )
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<div id='DivCommentView'>
+    <div class="col-md-12" style="padding-top:12px;padding-bottom:10px;">
+        <div class="row">
+            <div class="col-md-4 col-sm-4 col-xs-12 col-for-label form-group">
+                @Html.Label("Registration Id")
+            </div>
+            <div class="col-md-6 col-sm-8 col-xs-12 form-group">
+                @(Html.Kendo().DropDownListFor(m => m.RidNotingCreate)
+                    .Filter("contains")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel("Select")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetRIDsForNoting", "PropertyRegistration");
+                        });
+                    })
+                    .Events(events => { events.Change("RIdChange"); })
+                    .HtmlAttributes(new { style="width:100%"})
+                )
+            </div>
+        </div>
+      
+        <div class="row">
+            <div class="col-md-4 col-sm-4 col-xs-12 col-for-label form-group">
+                @Html.Label("Department")
+            </div>
+            <div class="col-md-6 col-sm-8 col-xs-12 form-group">
+                <div id="lblDepartmentName">
+                    @Html.DisplayFor(m => m.DepartmentName)
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-4 col-sm-4 col-xs-12 col-for-label form-group">
+                @Html.Label("File Number")
+            </div>
+            <div class="col-md-6 col-sm-8 col-xs-12 form-group">
+                @Html.TextBoxFor(m => m.FileNameNotingCreate, new { @class = "k-textbox", style = "width:100%", @maxlength = "50" })@*Resolved Bug#282*@
+            </div>
+        </div>        
+        <div class="row">
+            <div class="col-md-12" style="text-align:center">
+                <input type='button' class='btn btn-default' style="align-items :center; " value='Cancel' onclick="CloseCommnetPopUp();" />
+                <input type='button' class='btn btn-add' style="align-items :center; " value='Submit' id="btnSubmit" />
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    function FilterEmpID() {
+
+        var Rid = $("#Rid").val();
+        var DepartmentId = $("#DepartmentId").val();
+        var FileName = $("#FileName").val();
+        return {
+            Rid: Rid,
+            DepartmentId: DepartmentId,
+            FileName: FileName
+        };
+
+        //return { Rid: $("#Rid").val() }
+    }
+    $(document).ready(function () {
+        $("div[id='DivCommentView']").kendoWindow({
+            title: "Create New File",
+            modal: true,
+            visible: false,
+            width: "40%"
+        });
+        $("a#frcontractreviewchklstlink").click(function () {
+            OpenFRContractReviewChkLstPopUp()
+        });
+    });
+    @*function AddFunctionalReq(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("AddInterviewdetails", "PropertyRegistration")';
+    }*@
+
+   
+    function OpenFRContractReviewChkLstPopUp() {
+        var win = $("#DivCommentView").data("kendoWindow");
+        win.center();
+        win.open();
+    }
+    function CloseCommnetPopUp() {
+        var win = $("#DivCommentView").data("kendoWindow");
+        win.close();
+    }
+    $("#btnSubmit").click(function () {
+        var Rid = $("#RidNotingCreate").val();
+        var FileName = $("#FileNameNotingCreate").val();
+               var DepartmentName = $("#lblDepartmentName").html();
+              var deptId = $("#DepartmentId").val();
+      
+              if (Rid == "") {
+                  alertify.error("Please select RId.");
+                  return false;
+              }
+              if (FileName == "") {
+                  alertify.error("Please enter File Name");
+                  return false;
+              }
+              if (/^[a-zA-Z0-9- ]*$/.test(FileName) == false) {
+                  alertify.error('File No should be alphanumeric');
+                  return false;
+              }
+   
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ Rid: Rid, FileName: FileName, DepartmentName: DepartmentName, deptId: deptId }),
+                url: '/PropertyRegistration/AddNotingFile',
+                success: function (result) {
+                    if (result == 1) {
+                        alertify.success("Data saved successfully.");
+                        window.location.href = '@Url.Action("ManageNotings", "PropertyRegistration")';
+                        return false;
+                    }
+                    if (result == 2) {
+                        alertify.error("Noting Data already saved .");
+                       return false;
+                    }
+                    else {
+                        alertify.error("Some error occured. Please try again later.");
+                        return true;
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    alertify.error("Some error occured. Please try again later.");
+                }
+
+            });
+    
+       
+    });
+
+    function RIdChange() {    
+        var rId = $("#RidNotingCreate").val();
+        if (rId == '') {
+            //ClearValues();
+            alertify.error("Please select an RID");
+            return false;
+        }
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rId: rId }),
+            url: '/PropertyRegistration/GetNotingDeptmentByRId',
+            success: function (result) {
+                if (result != null) {
+                    $("#lblDepartmentName").html(result.DepartmentName);
+                    $("#DepartmentId").val(result.DepartmentId);
+                  
+                }
+                else {
+                    //ClearValues();
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            },
+            error: function (obj) {
+                //ClearValues();
+                alertify.error("Some error occured. Please try again later.");
+            }
+        });
+    }
+    $("#btnSearchFilter").click(function () {     
+        //$("#divSearchUsers").show();
+        var Rid = $("#Rid").val();
+        var FileName = $("#FileName").val();
+        var deptId = $("#DepartmentId").val();
+
+        if (Rid == "" && FileName == "" && deptId=="") {
+            alertify.error("Please select either RId or Department ,File Name .");
+            return false;
+        }
+       
+        $("#gridNotingDetails").data("kendoGrid").dataSource.read();
+
+        @*$.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ Rid: Rid, FileName: FileName, deptId: deptId }),
+            url: '/PropertyRegistration/SearchNotingFile',
+            success: function (result) {
+                if (result == 1) {
+                    alertify.success("Data saved successfully.")
+                    window.location.href = '@Url.Action("ManageNotings", "PropertyRegistration")';
+                    return false;
+                }
+                if (result == 2) {
+                    alertify.error("Noting Data already saved .");
+                    return false;
+                }
+                else {
+                    alertify.error("Some error occured. Please try again later.");
+                    return true;
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                alertify.error("Some error occured. Please try again later.");
+            }
+
+        });*@
+    });
+
+    $('#btnClearSearch').click(function () {
+        $('#Rid').data("kendoDropDownList").value('');
+        $('#DepartmentId').data("kendoDropDownList").value('');
+        $('#FileName').val('');
+        $("#gridNotingDetails").data("kendoGrid").dataSource.read();
+    })
+</script>

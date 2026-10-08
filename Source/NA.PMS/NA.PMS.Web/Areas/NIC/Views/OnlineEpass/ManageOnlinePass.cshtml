@@ -1,0 +1,60 @@
+﻿@model NA.PMS.Model.NIC.EpassViewModel
+@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@using NA.PMS.Common
+@{
+    ViewBag.Title = "Manage Covid-19 Pass";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div id="OnlinePass">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Covid-19 Pass</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                @*@Html.ActionLink("KYA Reports", "KYAReports", new { controller = "Authority", area = "Member" }, htmlAttributes: new { target = "_blank" })*@
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 alot-prop-grid k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.NIC.EpassViewModel>()
+            .Name("GridKYASubmittedForm")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Hidden(true);
+                columns.Bound(c => c.EpassNo).Title("Pass No").ClientTemplate("#if(IsActive==true){#<a target='_blank' href='/NIC/OnlineEpass/EpassDetails/#=Id#'>#=EpassNo#</a>#}else{#<label>#=EpassNo#</label>#}#").Sortable(true);
+                columns.Bound(c => c.Applicant).Title("Applicant Name");
+                columns.Bound(c => c.MobileNo).Title("Mobile No").Sortable(false).Filterable(false);
+                columns.Bound(c => c.FromAddress).Title("Source");
+                columns.Bound(c => c.ToAddress).Title("Destination");
+                columns.Bound(c => c.Purpose).Title("Purpose");
+                columns.Bound(c => c.StartDate).Title("Start Date").Format("{0:dd-MMM-yyyy}").Sortable(false);
+                columns.Bound(c => c.EndDate).Title("End Date").Format("{0:dd-MMM-yyyy}").Sortable(false);
+                columns.Bound(c => c.Approver).Title("Approved By");
+                columns.Bound(c => c.ApprovalDate).Title("Approval Date").Format("{0:dd-MMM-yyyy}").Sortable(false);
+                //columns.Bound(c => c.IsDocumentAvailable).Title(" ").Width(80).ClientTemplate("<label class='hyperlink' onclick='javascript:UpdateDocument(this)'>#=IsDocumentAvailable#</label>");
+                //columns.Bound(c => c.IsActive).Title(" ").Width(50).ClientTemplate("#if(IsDocumentAvailable){#<center><span class='glyphicon glyphicon-download'></span></center> #}else{#<center><span class='glyphicon glyphicon-refresh' onclick='javascript:UpdateDocument(this)'></span></center>#}#").Sortable(false);
+            })
+            .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+            .ClientDetailTemplateId("template")
+            .AutoBind(true)
+            .DataSource
+            (
+                dataSource => dataSource
+                .Ajax()
+                .Model(model => model.Id(p => p.Id))
+                .ServerOperation(true)
+                .Read(read => read.Action("GetAllEpassList", "OnlineEpass", new { area = "NIC" }))
+                .Sort(s => s.Add(x => x.Id).Descending())
+                .PageSize(10)
+            )
+            .Excel(excel => excel
+                .AllPages(true).Filterable(true)
+                .FileName("Covid-19 Pass.xlsx"))
+            .ToolBar(toolsExcel => toolsExcel.Excel())
+        )
+    </div>
+</div>
+

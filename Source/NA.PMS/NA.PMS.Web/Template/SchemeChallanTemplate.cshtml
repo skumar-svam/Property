@@ -1,0 +1,641 @@
+﻿@using System.Web.Mvc.Html
+@model NA.PMS.Model.OnlineChallanViewModel
+
+<style>
+    .panel-body.challan-body {
+        font-size: 11px;
+        font-family: Arial;
+        border: 1px solid black;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+
+    h4 {
+        margin: 0;
+        padding: 0;
+    }
+
+    br {
+        height: 2px;
+    }
+
+    th {
+        text-align: center;
+        font-size: 12px;
+        font-family: Arial;
+    }
+
+    td {
+        margin: 0px;
+    }
+
+    hr.challan-line {
+        display: block;
+        margin-top: 0;
+        margin-bottom: 0;
+        margin-left: auto;
+        margin-right: auto;
+        border-style: inset;
+        border-width: 1px;
+    }
+
+    .lbl-seperator {
+        width: 100%;
+        font-family: Arial;
+        font-size: 11px;
+        text-align: center;
+    }
+
+    .tbl-challan {
+        width: 100%;
+        height: 290px;
+    }
+
+    .tbl-challan_one {
+        width: 100%;
+        /*height: 290px;*/
+    }
+
+    .tbl-challan tr td {
+        /*height:20px;*/
+        font-size: 12px;
+        font-family: Arial;
+    }
+
+    .challan-table {
+        height: 100px;
+        width: 100%;
+        /*border:1px;*/
+        border-left: 1px solid black;
+        border-right: 1px solid black;
+        border-bottom: 1px solid black;
+        border-top: 1px solid black;
+    }
+
+    .challan-table-rt {
+        height: 100px;
+        width: 100%;
+        border-left: 0px solid black;
+        border-right: 1px solid black;
+        border-bottom: 1px solid black;
+        border-top: 1px solid black;
+    }
+
+    .challan-table tr {
+        border-bottom: 0px solid black;
+    }
+
+    .challan-table-rt tr {
+        border-bottom: 0px solid black;
+    }
+
+    .digit-right {
+        text-align: right;
+        padding: 2px;
+    }
+
+    .padd-left {
+        padding-left: 2px;
+    }
+</style>
+
+<div class="container-fluid">
+
+    <div class="panel-body challan-body">
+        <table class="tbl-challan">
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="2">@Model.FormModel.Department A/C No.:&nbsp;<b>@Model.FormModel.ChallanAccountNo</b></td>
+                            <td>Date:<b> @DateTime.Now.ToString("dd/MM/yyyy")</b></td>
+                            <td><b>Bank Copy</b></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="4">
+                                <center><h5><b>NEW OKHLA INDUSTRIAL DEVELOPMENT AUTHORITY</b></h5></center>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="4">Bank Name:&nbsp;<b>@Model.FormModel.ChallanBranchName</b></td>                           
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td>Application No:<b>@Model.FormModel.ApplicationFormId</b></td>
+                            <td colspan="2"><center>Pan No(In Case of Cash Deposit):___________</center></td>
+                            <td>Challan No.:&nbsp; <b>@Model.PaymentModel.TransactionId</b></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="2">Scheme Name:<b>@Model.FormModel.SchemeName</b></td>
+                            <td colspan="2">Area:<b>@Model.FormModel.AreaRange</b> </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td>
+                                <table class="challan-table"  border="1" style="border-collapse: collapse;">
+                                    <tr>
+                                        <th>Sno.</th>
+                                        <th>Description</th>
+                                        <th>Amount (Rs.)</th>
+                                        <th>SGST (9%)</th>
+                                        <th>CGST (9%)</th>
+                                        <th>Total Amount (Rs.)</th>
+                                    </tr>
+                                    <tr>
+                                        <td class="padd-left">1</td>
+                                        <td class="padd-left">@NA.PMS.Common.OnlineSchemeChallan.ApplicationFee</td>
+                                        <td class="digit-right">@Model.FormModel.ApplicationFee</td>
+                                        <td class="digit-right">@Model.FormModel.FormFeeSGST</td>
+                                        <td class="digit-right">@Model.FormModel.FormFeeCGST</td>
+                                        <td class="digit-right">@Model.FormModel.FormFeeGST</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="padd-left">2</td>
+                                        <td class="padd-left">@NA.PMS.Common.OnlineSchemeChallan.ProcessingCharge</td>
+                                        <td class="digit-right">@Model.FormModel.ProcessingCharge</td>
+                                        <td class="digit-right">@Model.FormModel.ProcessingSGST</td>
+                                        <td class="digit-right">@Model.FormModel.ProcessingCGST</td>
+                                        <td class="digit-right">@Model.FormModel.ProcessingChargeGST</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="padd-left">3</td>
+                                        <td class="padd-left">@NA.PMS.Common.OnlineSchemeChallan.EarnestMoney</td>
+                                        <td class="digit-right">@Model.FormModel.EarnestMoney</td>
+                                        <td class="digit-right"></td>
+                                        <td class="digit-right"></td>
+                                        <td class="digit-right">@Model.FormModel.EarnestMoney</td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td class="padd-left"><b>Total</b></td>
+                                        <td class="digit-right">@*@Model.FormModel.TotalAmount*@</td>
+                                        <td class="digit-right"></td>
+                                        <td class="digit-right"></td>
+                                        <td class="digit-right">@Model.FormModel.TotalAmountGST</td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td>&nbsp;</td>
+                            <td>
+                                <table class="challan-table-rt">
+                                    <tr>
+                                        <td colspan="2" class="">Applicant Name: <b>@Model.FormModel.Applicant</b></td>
+                                    </tr>
+
+                                    <tr>
+                                        <td colspan="2" class="">E-mail: <b>@Model.FormModel.Email</b></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Mobile No.: <b>@Model.FormModel.MobileNumber</b></td>
+                                        <td>Date of Deposit:___________</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" class="">Address: <b>@Model.FormModel.CorrespondingAddress</b></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" class="">Amount in words: <b>_________________</b></td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="4">
+                                <p>
+                                    Please find enclosed here with Draft/Pay Order No./Cash
+                                    &nbsp;
+                                    Dated &nbsp;
+                                    ____________
+                                    for Rs.
+                                    ____________
+                                    Drawn On &nbsp;
+                                    ____________ &nbsp; against <b>@*@Model.AccountHeadName</b> as <b> @Model.AccountSubHeadName*@</b>
+                                    the payment of property Allotted / Leased / Subleased to me by Noida Authority.
+                                </p>
+                            </td>
+                        </tr>
+
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="4" style="height: 5px;"></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="2">
+                                <b>Bank Authorised Signatory</b>
+                            </td>
+                            <td colspan="2" style="text-align:right">
+                                <b>Depositors Signature</b>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <span style="font-size:11px;">Note:Payment alone will not secure any right to allottee.</span>
+    <hr class="challan-line" />
+    <br />
+    <div class="panel-body challan-body">
+        <table class="tbl-challan">
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="2">@Model.FormModel.Department A/C No.:&nbsp;<b>@Model.FormModel.ChallanAccountNo</b></td>
+                            <td>Date:<b> @DateTime.Now.ToString("dd/MM/yyyy")</b></td>
+                            <td><b>Noida Copy</b></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="4">
+                                <center><h5><b>NEW OKHLA INDUSTRIAL DEVELOPMENT AUTHORITY</b></h5></center>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="4">Bank Name:&nbsp;<b>@Model.FormModel.ChallanBranchName</b></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td>Application No:<b>@Model.FormModel.ApplicationFormId</b></td>
+                            <td colspan="2"><center>Pan No(In Case of Cash Deposit):___________</center></td>
+                            <td>Challan No.:&nbsp; <b>@Model.PaymentModel.TransactionId</b></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="2">Scheme Name:<b>@Model.FormModel.SchemeName</b></td>
+                            <td colspan="2">Area:<b>@Model.FormModel.AreaRange</b> </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td>
+                                <table class="challan-table" border="1" style="border-collapse: collapse;">
+                                    <tr>
+                                        <th>Sno.</th>
+                                        <th>Description</th>
+                                        <th>Amount (Rs.)</th>
+                                        <th>SGST (9%)</th>
+                                        <th>CGST (9%)</th>
+                                        <th>Total Amount (Rs.)</th>
+                                    </tr>
+                                    <tr>
+                                        <td class="padd-left">1</td>
+                                        <td class="padd-left">@NA.PMS.Common.OnlineSchemeChallan.ApplicationFee</td>
+                                        <td class="digit-right">@Model.FormModel.ApplicationFee</td>
+                                        <td class="digit-right">@Model.FormModel.FormFeeSGST</td>
+                                        <td class="digit-right">@Model.FormModel.FormFeeCGST</td>
+                                        <td class="digit-right">@Model.FormModel.FormFeeGST</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="padd-left">2</td>
+                                        <td class="padd-left">@NA.PMS.Common.OnlineSchemeChallan.ProcessingCharge</td>
+                                        <td class="digit-right">@Model.FormModel.ProcessingCharge</td>
+                                        <td class="digit-right">@Model.FormModel.ProcessingSGST</td>
+                                        <td class="digit-right">@Model.FormModel.ProcessingCGST</td>
+                                        <td class="digit-right">@Model.FormModel.ProcessingChargeGST</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="padd-left">3</td>
+                                        <td class="padd-left">@NA.PMS.Common.OnlineSchemeChallan.EarnestMoney</td>
+                                        <td class="digit-right">@Model.FormModel.EarnestMoney</td>
+                                        <td class="digit-right"></td>
+                                        <td class="digit-right"></td>
+                                        <td class="digit-right">@Model.FormModel.EarnestMoney</td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td class="padd-left"><b>Total</b></td>
+                                        <td class="digit-right">@*@Model.FormModel.TotalAmount*@</td>
+                                        <td class="digit-right"></td>
+                                        <td class="digit-right"></td>
+                                        <td class="digit-right">@Model.FormModel.TotalAmountGST</td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td>&nbsp;</td>
+                            <td>
+                                <table class="challan-table-rt">
+                                    <tr>
+                                        <td colspan="2" class="">Applicant Name: <b>@Model.FormModel.Applicant</b></td>
+                                    </tr>
+
+                                    <tr>
+                                        <td colspan="2" class="">E-mail: <b>@Model.FormModel.Email</b></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Mobile No.: <b>@Model.FormModel.MobileNumber</b></td>
+                                        <td>Date of Deposit:___________</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" class="">Address: <b>@Model.FormModel.CorrespondingAddress</b></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" class="">Amount in words: <b>_________________</b></td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="4">
+                                <p>
+                                    Please find enclosed here with Draft/Pay Order No./Cash
+                                    &nbsp;
+                                    Dated &nbsp;
+                                    ____________
+                                    for Rs.
+                                    ____________
+                                    Drawn On &nbsp;
+                                    ____________ &nbsp; against <b>@*@Model.AccountHeadName</b> as <b> @Model.AccountSubHeadName*@</b>
+                                    the payment of property Allotted / Leased / Subleased to me by Noida Authority.
+                                </p>
+                            </td>
+                        </tr>
+
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="4" style="height: 5px;"></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="2">
+                                <b>Bank Authorised Signatory</b>
+                            </td>
+                            <td colspan="2" style="text-align:right">
+                                <b>Depositors Signature</b>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <span style="font-size:11px;">Note:Payment alone will not secure any right to allottee.</span>
+    <hr class="challan-line" />
+    <br />
+    <div class="panel-body challan-body">
+        <table class="tbl-challan">
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="2">@Model.FormModel.Department A/C No.:&nbsp;<b>@Model.FormModel.ChallanAccountNo</b></td>
+                            <td>Date:<b> @DateTime.Now.ToString("dd/MM/yyyy")</b></td>
+                            <td><b>Applicant's Copy</b></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="4">
+                                <center><h5><b>NEW OKHLA INDUSTRIAL DEVELOPMENT AUTHORITY</b></h5></center>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="4">Bank Name:&nbsp;<b>@Model.FormModel.ChallanBranchName</b></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td>Application No:<b>@Model.FormModel.ApplicationFormId</b></td>
+                            <td colspan="2"><center>Pan No(In Case of Cash Deposit):___________</center></td>
+                            <td>Challan No.:&nbsp; <b>@Model.PaymentModel.TransactionId</b></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="2">Scheme Name:<b>@Model.FormModel.SchemeName</b></td>
+                            <td colspan="2">Area:<b>@Model.FormModel.AreaRange</b> </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td>
+                                <table class="challan-table" border="1" style="border-collapse: collapse;">
+                                    <tr>
+                                        <th>Sno.</th>
+                                        <th>Description</th>
+                                        <th>Amount (Rs.)</th>
+                                        <th>SGST (9%)</th>
+                                        <th>CGST (9%)</th>
+                                        <th>Total Amount (Rs.)</th>
+                                    </tr>
+                                    <tr>
+                                        <td class="padd-left">1</td>
+                                        <td class="padd-left">@NA.PMS.Common.OnlineSchemeChallan.ApplicationFee</td>
+                                        <td class="digit-right">@Model.FormModel.ApplicationFee</td>
+                                        <td class="digit-right">@Model.FormModel.FormFeeSGST</td>
+                                        <td class="digit-right">@Model.FormModel.FormFeeCGST</td>
+                                        <td class="digit-right">@Model.FormModel.FormFeeGST</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="padd-left">2</td>
+                                        <td class="padd-left">@NA.PMS.Common.OnlineSchemeChallan.ProcessingCharge</td>
+                                        <td class="digit-right">@Model.FormModel.ProcessingCharge</td>
+                                        <td class="digit-right">@Model.FormModel.ProcessingSGST</td>
+                                        <td class="digit-right">@Model.FormModel.ProcessingCGST</td>
+                                        <td class="digit-right">@Model.FormModel.ProcessingChargeGST</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="padd-left">3</td>
+                                        <td class="padd-left">@NA.PMS.Common.OnlineSchemeChallan.EarnestMoney</td>
+                                        <td class="digit-right">@Model.FormModel.EarnestMoney</td>
+                                        <td class="digit-right"></td>
+                                        <td class="digit-right"></td>
+                                        <td class="digit-right">@Model.FormModel.EarnestMoney</td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td class="padd-left"><b>Total</b></td>
+                                        <td class="digit-right">@*@Model.FormModel.TotalAmount*@</td>
+                                        <td class="digit-right"></td>
+                                        <td class="digit-right"></td>
+                                        <td class="digit-right">@Model.FormModel.TotalAmountGST</td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td>&nbsp;</td>
+                            <td>
+                                <table class="challan-table-rt">
+                                    <tr>
+                                        <td colspan="2" class="">Applicant Name: <b>@Model.FormModel.Applicant</b></td>
+                                    </tr>
+
+                                    <tr>
+                                        <td colspan="2" class="">E-mail: <b>@Model.FormModel.Email</b></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Mobile No.: <b>@Model.FormModel.MobileNumber</b></td>
+                                        <td>Date of Deposit:___________</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" class="">Address: <b>@Model.FormModel.CorrespondingAddress</b></td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2" class="">Amount in words: <b>_________________</b></td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="4">
+                                <p>
+                                    Please find enclosed here with Draft/Pay Order No./Cash
+                                    &nbsp;
+                                    Dated &nbsp;
+                                    ____________
+                                    for Rs.
+                                    ____________
+                                    Drawn On &nbsp;
+                                    ____________ &nbsp; against <b>@*@Model.AccountHeadName</b> as <b> @Model.AccountSubHeadName*@</b>
+                                    the payment of property Allotted / Leased / Subleased to me by Noida Authority.
+                                </p>
+                            </td>
+                        </tr>
+
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="4" style="height: 5px;"></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="2">
+                                <b>Bank Authorised Signatory</b>
+                            </td>
+                            <td colspan="2" style="text-align:right">
+                                <b>Depositors Signature</b>
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <span style="font-size:11px;">Note:Payment alone will not secure any right to allottee.</span>
+
+</div>
+
+
+
+

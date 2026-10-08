@@ -1,0 +1,73 @@
+﻿@model NA.PMS.Model.AllotteeListModel
+@using Kendo.Mvc.UI;
+@using NA.PMS.Model
+
+@{
+    ViewBag.Title = "Manage";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .k-grid-content {
+        overflow-y: hidden;
+        overflow-x: hidden;
+    }
+</style>
+
+
+<div class="ManageAllottee">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Draft Allottee list</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<AllotteeListModel>()
+            .Name("gvAllottee")
+            .Columns(columns =>
+            {
+                if (@ViewBag.ReadOnlyMenu != null && @ViewBag.ReadOnlyMenu == true)
+                {
+                    columns.Bound(c => c.SchemeName).Title("Scheme Name").ClientTemplate("<a href='" + "/Property/Allotment/AllotteeListView/" + "?SchemeId=#= EncryptedSchemeId #&DepartmentId=#=EncryptedDeptId#&AllotmentDate=#=EncryptedAllotmentDate#'" + ">#=SchemeName#</a>");
+                    // columns.Bound(c => c.SchemeName).Title("Scheme Name").ClientTemplate("<a href='" + "/Property/Allotment/AllotteeListView/#=GetSchemeIdAndDept(SchemeId, DepartmentId)#'>#=SchemeName#</a>").Filterable(false);
+                }
+                else
+                {
+                    columns.Bound(c => c.SchemeName).Title("Scheme Name");
+                }
+
+                columns.Bound(c => c.Status).Title("Status");
+                columns.Bound(c => c.DepartmentName).Title("Department");
+                columns.Bound(c => c.SubmittedDate).Title("Submission Date").Format("{0:dd/MM/yyyy}");
+                columns.Bound(c => c.AllotmentDate).Title("Allotment Date").Format("{0:dd/MM/yyyy}");
+                columns.Bound(c => c.ApproverByName).Title("Approver Name");
+                //columns.Bound(c => c.SchemeId).Title("Actions").ClientTemplate("<a href='" + "/Property/Allotment/AllotteeListView/#=GetSchemeIdAndDept(SchemeId, DepartmentId,ApplicationId)#'>View List</a>").Filterable(false);
+            })
+            .Sortable()
+            .Filterable()
+            .Pageable( pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+            .Groupable()
+            .DataSource
+            (
+                dataSource => dataSource
+                .Ajax()
+                .Model(model => model.Id(p => p.SchemeId))
+                        .ServerOperation(true).Sort(sort => sort.Add("SubmittedDate").Descending())
+                .Read(read => read.Action("GetAllotteeLists", "Allotment")).PageSize(12)
+            )
+        )
+    </div>
+</div>
+
+<script type="text/javascript">
+    function GetSchemeIdAndDept(SchemeId, DepartmentId) {
+
+        return SchemeId + "," + DepartmentId
+    }
+</script>
+
+

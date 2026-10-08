@@ -1,0 +1,296 @@
+﻿@model NA.PMS.Model.CircleRateModel
+@using Kendo.Mvc.UI;
+@{
+    ViewBag.Title = "Circle Rate";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/Scripts/kendo.aspnetmvc.min.js"></script>
+
+<style>
+    .k-grid-content {
+        overflow-y: hidden;
+        overflow-x: hidden;
+    }
+</style>
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Add Sector Rate</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <h2 class="blck-heading">Sector Rate Detail</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.LabelFor(model => model.departmentId, htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(m => m.departmentId)
+                                    //.Name("departmentId")
+                                    .DataTextField("text")
+                                    .DataValueField("id")
+                                    .OptionLabel("Select")
+                                      .Filter("contains")
+                                    .DataSource(source =>
+                                    {
+                                        source.Read(read =>
+                                        {
+                                            read.Action("GetAllDepartments", "CircleRate");
+                                        });
+                                    }
+                                            
+                            )
+                                    .HtmlAttributes(new { style = "width:100%" })
+                           )               
+                            @Html.ValidationMessageFor(model => model.departmentId, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.LabelFor(model => model.sector, htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(m => m.sector)
+                                 .DataTextField("text")
+                                .DataValueField("id")
+                                .OptionLabel("Select")
+                                  .Filter("contains")
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("GetPropTypes", "CircleRate");
+                                        //.Data("filterdeptt");
+                                    });
+                                })
+                                        .HtmlAttributes(new { style="width:100%"})
+                            )
+                            <br />
+                            @Html.ValidationMessageFor(model => model.sector, "", new { @class = "text-danger" })
+                        </div>
+
+
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Block", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(model => model.blockId)
+                                    .DataValueField("id")
+                                    .DataTextField("text").OptionLabel("Please Select")
+                                    .Filter("contains")
+                                    .DataSource(source => source.Read(read => read.Action("GetBlocks", "Scheme")))
+                                    .HtmlAttributes(new { style = "width:100%" })
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.LabelFor(model => model.rate, htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().NumericTextBoxFor(m => m.rate)
+                                .Name("rate")
+                                     .Min(1)
+                                    .Max(99999)
+                                            .Spinners(false).Step(0)
+                                    .Enable(true)
+                                    .HtmlAttributes(new { style = "width: 100%", @maxlength = "6", @class = "k-label schemeForms textBoxValueRightAlign" })
+                                )
+                                
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.LabelFor(model => model.StartDate, htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group strtdate">
+                                @(Html.Kendo().DatePickerFor(model => model.StartDate).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))<br />
+                                @Html.ValidationMessageFor(model => model.StartDate, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+
+            <div class="box-button text-center" style="padding-bottom:15px;">
+                <button type="button" class="btn btn-default " value="Clear" id="btnClear"> Clear</button>
+                <button type="button" class="btn btn-add" value="Add" id="btnAddCircleRate"> Add</button>
+            </div>
+
+            <br />
+        </div>
+        <div class="cls"></div>
+
+
+        <div class="col-md-12 blnk-rw"></div>
+
+        <div class="col-md-12 k-grid-content">
+            @(Html.Kendo().Grid<NA.PMS.Model.CircleRateModel>
+                ()
+                .Name("gridCheckList")
+                .Columns(columns =>
+                {
+                columns.Bound(c => c.departmentName).Title("Department");
+                columns.Bound(c => c.sectorName).Title("Sector");
+            columns.Bound(c => c.blockName).Title("Block");
+                columns.Bound(c => c.rate).Title("Rate (per sq.mtr)");
+                columns.Bound(c => c.StartDate).Title("Start Date").Format("{0:dd/MM/yyyy}");
+                columns.Bound(c => c.EndDate).Title("End Date").Format("{0:dd/MM/yyyy}");
+
+                if (@ViewBag.DeleteMenuVal != null && @ViewBag.DeleteMenuVal)
+                {
+                    columns.Bound(c => c.refid).Title("Action").HeaderHtmlAttributes(new { style = "text-align:center;" }).HtmlAttributes(new { style = "text-align:center;" }).ClientTemplate("# if (EndDate == null) {#<a onclick='javascript:return RemoveCircleRate(#=refid#)' class='gridRemove hyperlinkcss' id='RemoveNotificationTag'>Remove</a>#}  else {#<span class='gridNotRem'>Remove</span>#} #").Filterable(false);
+
+                //columns.Bound(c => c.refid).Title("Action").ClientTemplate("<a onclick='javascript:return RemoveCircleRate(#=refid#)' class='btn' id='RemoveNotificationTag'><i class='fa fa-trash-o'></i>Remove</a>");
+                }
+                else
+                {
+                columns.Bound(c => c.refid).ClientTemplate("Remove").Title("Action").Filterable(false);
+                }
+                // }
+
+
+                })
+                .Sortable()
+                .Filterable()
+                      .Groupable()
+                .Pageable
+                (
+                pageable => pageable
+                .Enabled(true)
+                //.Refresh(true)
+                .PageSizes(true)
+                )
+                .DataSource
+                (
+                dataSource => dataSource
+                .Ajax().Model(model => model.Id(p => p.refid))
+                .ServerOperation(true)
+                .Read(read => read.Action("GetCircleRate", "CircleRate")).PageSize(10)
+                )
+
+                )
+        </div>
+
+
+
+    </div>
+</div>
+<div class="row form-group">
+
+</div>
+
+@*</div>*@
+<script type="text/javascript">
+
+    //var temp = false;
+    $("#btnClear").click(function () {
+        $("#departmentId").data("kendoDropDownList").value("");
+        $("#sector").data("kendoDropDownList").value("");
+        $("#blockId").data("kendoDropDownList").value("");
+        $("#rate").data("kendoNumericTextBox").value("");
+        $("#StartDate").val("");
+
+    });
+
+    $("#btnAddCircleRate").click(function () {
+        var deptId = $("#departmentId").val();
+        var sector = $("#sector").val();
+        var rate = $("#rate").val();
+        var StartDate = $("#StartDate").val();
+        var blockId = $("#blockId").val();
+       
+        if (deptId == "") {
+            alertify.error('Please select Department');
+            return false;
+        }
+        else if (sector == "") {
+            alertify.error('Please select Sector.');
+            return false;
+        }
+        else if (blockId == "") {
+            alertify.error('Please select Block.');
+            return false;
+        }
+        else if (rate == "") {
+            alertify.error('Please enter Rate value.');
+            return false;
+        }
+        else if (StartDate == "") {
+            alertify.error('Please enter Start Date.');
+            return false;
+        }
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ departmentId: $("#departmentId").val(), sector: $("#sector").val(), rate: $("#rate").val(), StartDate: $("#StartDate").val(), blockId: $("#blockId").val() }),
+            url: "/CircleRate/btnAddCircleRate",
+            success: function (data) {
+                if (data == 1) {
+                    $("#departmentId").data("kendoDropDownList").value("");
+                    $("#sector").data("kendoDropDownList").value("");
+                    $("#rate").data("kendoNumericTextBox").value("");
+                    $("#blockId").data("kendoDropDownList").value("");
+                    $("#gridCheckList").data("kendoGrid").dataSource.read();
+                    $("#StartDate").val("");
+                    alertify.success("Data added successfully");
+                    $("#btnAddCircleRate").removeAttr('disabled');
+                }
+                else if (data == 2) {
+                    alertify.error("Duplicate entry cannot be made against Department and Sector on same day.");
+                }
+                else if (data == 3) {
+                    alertify.error("Circle Start Date cannot be earlier to previous Start Date.");
+                }
+                else if (data == 4) {
+                    alertify.error("Duplicate entry cannot be entered.");
+                }
+                else {
+                    alertify.error("Data not added successfully");
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                $("#btnQuotaAdd").removeAttr('disabled');
+                //alert(respText);
+            }
+        });
+    })
+
+
+    function RemoveCircleRate(refId) {
+        var removeNotification = confirm('Are you sure you want to remove ?');
+        if (removeNotification) {
+            $.ajax({
+                url: '@(Url.Action("RemoveCircleRate", "CircleRate"))',
+                type: 'POST',
+                data: { refId: refId },
+                success: function (result) {
+                    if (result == true) {
+                        $('#gridCheckList').data('kendoGrid').dataSource.read();
+                        $('#gridCheckList').data('kendoGrid').refresh();
+                        alertify.success("Record deleted successfully.");
+                    }
+                    else {
+                        alert("Notification not removed");
+                        return false;
+                    }
+                }
+            });
+        }
+        else {
+            return false;
+        }
+    }
+
+
+
+</script>
+

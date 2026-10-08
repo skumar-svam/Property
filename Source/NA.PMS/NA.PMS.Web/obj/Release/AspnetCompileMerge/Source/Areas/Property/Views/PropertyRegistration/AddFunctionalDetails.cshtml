@@ -1,0 +1,202 @@
+﻿@model NA.PMS.Model.FunctionalModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@using NA.PMS.Model;
+@{
+    ViewBag.Title = "Add Functional ";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Add Functional Request</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                @*@{FunctionalModel model = new FunctionalModel();}*@
+                @{Html.RenderPartial("_FunctionalDetails");}
+            </div>
+            <div class="box-button text-center">
+                <input type="button" id="btnBack" value="Back" class="btn btn-default" />
+                <input type="submit" id="btnSubmitForApprovallink" value="Submit for Approval" class="btn btn-add" />
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div id='divAssineRequetApproval' class='adminfeediv' style="min-height:180px;">
+    <div class="container-fluid">
+        <div class="row topSpace">
+            <div class="col-md-3 col-md-offset-1 form-group">
+                @Html.Label("Assign To")
+            </div>
+            <div class="col-md-6 form-group">
+                @(Html.Kendo().DropDownListFor(model => model.User)
+                    .Name("User")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .Filter("contains")
+                    .OptionLabel("Select")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetAssineTo", "Allotment");
+                        });
+                    })
+                )
+                @Html.ValidationMessageFor(model => model.User)
+            </div>
+        </div>
+        <div class="row topSpace bottomSpace">
+            <div class="col-md-12" style="text-align:center">
+                <input type='submit' id="btnRequetForApproval" class='btn btn-add' value='Submit' />
+                <input type='button' class='btn btn-default' value='Cancel' onclick="CloseCommnetPopUpForApproval();" />
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#dvMeterSealingLink").hide();
+        //$('#FunctionalDueDate').data('kendoDatePicker').enable(false);
+        $("div[id='divAssineRequetApproval']").kendoWindow({
+            modal: true,
+            title: "Assign Request to Approver",
+            visible: false,
+            width: "39%"
+        });
+        $("#btnSubmitForApprovallink").click(function () {
+            OpenAssineRequetApprovalPopUp()
+        });
+    });
+
+    function OpenAssineRequetApprovalPopUp() {
+        var win = $("#divAssineRequetApproval").data("kendoWindow");
+        win.center();
+        win.open();
+    }
+    function CloseCommnetPopUpForApproval() {
+        var win = $("#divAssineRequetApproval").data("kendoWindow");
+        win.close();
+    }
+    $("#btnRequetForApproval").click(function () {
+        var rId = $("#RId").val();
+        var FunctionalDate = $("#FunctionalDate").val();
+        var FunctionalDueDate = $("#FunctionalDueDate").val();
+        //var MeterSealing = $("#MeterSealing").val();
+        //var Affidavit = $("#Affidavit").val();
+        //var RegistrationCertificate = $("#RegistrationCertificate").val();
+        //var NDCAccount = $("#NDCAccount").val();
+        var MeterSealing = $('#MeterSealing').is(':checked');//$("#MeterSealing").val();
+        var Affidavit = $('#Affidavit').is(':checked');
+        var RegistrationCertificate = $('#RegistrationCertificate').is(':checked');
+        var NDCAccount = $('#NDCAccount').is(':checked');
+        var user = $("#User").val();
+        //var lblPropNo = $("#lblPropNo").html();
+        var lblPropNo = $("#PropertyNumber").val();
+        var FunctionalCharge = $("#FunctionalCharge").val();
+        var ReqRefNo = $("#ReqRefNo").val();
+        var cmplsnDate = $('#CompletionDate').val();
+        var afdvtDate = $('#AffidavitDate').val();
+
+        if (rId == "") {
+            alertify.error("Please select RId.");
+            return false;
+        }
+
+        if (FunctionalDueDate == '') {
+            alertify.error("Please select Functional Due Date");
+            return false;
+        }
+
+        if (ReqRefNo == "") {
+            alertify.error("Please select Request Ref. No.");
+            return false;
+        }
+
+        if (ReqRefNo.length < 3) {
+            alertify.error("Request Ref. No. length must be 3 characters")
+            return false;
+        }
+
+        if (user != "") {
+            //var uploadSign = $("#fileMeterSealing").get(0).files[0].name;
+            var formData = new FormData();
+            var file = $('#fileMeterSealing')[0];
+            formData.append("fileMeterSealing", file.files[0]);
+            var fileAffidavit = $('#fileAffidavit')[0];
+            formData.append("fileAffidavit", fileAffidavit.files[0]);
+            var fileRegistrationCertificate = $('#fileRegistrationCertificate')[0];
+            formData.append("fileRegistrationCertificate", fileRegistrationCertificate.files[0]);
+            var fileNDCAccount = $('#fileNDCAccount')[0];
+            formData.append("fileNDCAccount", fileNDCAccount.files[0]);
+            //formData.append("FileName", uploadSign);
+            formData.append("rId", rId);
+            formData.append("FunctionalDate", FunctionalDate);
+            formData.append("FunctionalDueDate", FunctionalDueDate);
+            formData.append("MeterSealing", MeterSealing);
+            formData.append("Affidavit", Affidavit);
+            formData.append("RegistrationCertificate", RegistrationCertificate);
+            formData.append("NDCAccount", NDCAccount);
+            formData.append("user", user);
+            formData.append("PropertyNumber", lblPropNo);
+            formData.append("FunctionalCharge", FunctionalCharge);
+            formData.append("ReqRefNo", ReqRefNo);
+            formData.append("CompletionDate", cmplsnDate);
+            formData.append("AffidavitDate",afdvtDate);
+            //var data = new FormData($('#fileMeterSealing')[0].files[0]);
+            //alert(data);
+
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                data: formData,
+                url: '/PropertyRegistration/SaveFunctionalDetails',
+                cache: false,
+                contentType: false,
+                processData: false,
+
+
+
+                //data: JSON.stringify({ rId: rId, FunctionalDate: FunctionalDate,FunctionalDueDate:FunctionalDueDate, MeterSealing: MeterSealing, Affidavit: Affidavit, RegistrationCertificate: RegistrationCertificate, NDCAccount: NDCAccount, user: user, PropertyNumber: lblPropNo, FunctionalCharge: FunctionalCharge }),
+                //url: '/PropertyRegistration/SaveFunctionalDetails',
+                success: function (result) {
+                    if (result == 1) {
+                        alertify.success("Data saved successfully.");
+                        window.location.href = '@Url.Action("ManageFunctional", "PropertyRegistration")';
+                        return false;
+                    }
+                    if (result == 2) {
+                        alertify.error("Functional Data already saved .");
+                        return false;
+                    }
+                    else {
+                        return true;
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    alertify.error("Some error occured. Please try again later.");
+                }
+
+            });
+        }
+        else {
+            alert("Please select a User");
+        }
+    });
+    $("#btnBack").click(function () {
+        window.location.href = '@Url.Action("ManageFunctional", "PropertyRegistration")';
+    });
+</script>

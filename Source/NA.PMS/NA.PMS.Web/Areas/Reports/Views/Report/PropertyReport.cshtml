@@ -1,0 +1,162 @@
+﻿@model NA.PMS.Model.ReportModel
+@using Kendo.Mvc.UI
+@{
+    ViewBag.Title = "Property Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div id="PropertyReport">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Vacant Properties</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 row blnk-rw"></div>
+
+    <div class="col-md-12" style="border-left:1px solid #c5c5c5;border-right:1px solid #c5c5c5;">       
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Property Bank")
+                @(Html.Kendo().DropDownListFor(m => m.PropertyBank)
+                    .Filter("contains")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel(" -- Please Select --")
+                    .DataSource(source => source.Read(read => read.Action("GetPropertyBank", "Report")))
+                    .Events(e => e.Change("ChangePropBank"))
+                    .HtmlAttributes(new { style = "width:90%; float:right;", @class = "DisableKeyboardInput" })
+                )
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Scheme")
+                @(Html.Kendo().DropDownListFor(model => model.schemeId)
+                    .Name("SchemeId")
+                    .DataTextField("schemeName")
+                    .DataValueField("schemeId")
+                    .OptionLabel(" -- Please Select --")
+                    .DataSource(source => source.Read(read => read.Action("GetSchemeListForAllotment", "Report")))
+                    .Enable(true)
+                    .AutoBind(true)
+                    .Filter("contains")
+                    .HtmlAttributes(new { style = "width:90%; float:right;", @class = "DisableKeyboardInput" })
+                )
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Department")
+                @(Html.Kendo().DropDownListFor(m => m.departmentId)
+                    .Filter("contains")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel(" -- Please Select --")
+                    .DataSource(source => source.Read(read => read.Action("GetDepartmentsByUser", "Report")))
+                    .HtmlAttributes(new { style = "width:90%; float:right;", @class = "DisableKeyboardInput" })
+                )
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label(" ")
+                <input type="button" id="btnSearch" class="btn btn-add" value="Search" style="margin-top:20px;"/>
+                <input type="button" id="btnClear" class="btn btn-default" value="Clear" style="margin-top:20px;" />
+            </div>
+        </div>
+        
+    </div>
+
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.PropertyModel>()
+                .Name("gridPropertyReport")
+                .Excel(excel => excel
+                .AllPages(true).Filterable(true)
+                .FileName("PropertyReport.xlsx"))
+                .ToolBar(toolsExcel => toolsExcel.Excel())
+                    .ToolBar(tools => tools.Pdf())
+                    .Pdf(pdf => pdf
+                    .AllPages()
+                    .AvoidLinks()
+                    .PaperSize("A4")
+                    .Scale(0.8)
+                    .Margin("2cm", "1cm", "1cm", "1cm")
+                    .Landscape()
+                    .RepeatHeaders()
+                    .TemplateId("page-template")
+                    .FileName("PropertyReport.pdf")
+                //.ProxyURL(Url.Action("Pdf_Export_Save", "Report"))
+                )
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.schemeName).Title("Scheme Name");
+                    columns.Bound(c => c.departmentName).Title("Department");
+                    columns.Bound(c => c.propertyType).Title("Property Type");
+                    columns.Bound(c => c.sectorName).Title("Sector");
+                    columns.Bound(c => c.blockName).Title("Block");
+                    columns.Bound(c => c.PropertyNo).Title("Property No");
+                    columns.Bound(c => c.totalArea).Title("Total Area");
+                    columns.Bound(c => c.RegistryName).Title("Registry");
+                    columns.Bound(c => c.refId).Hidden(true);
+                })
+                .HtmlAttributes(new { style = "height:1000px" })
+                .Scrollable()
+                .Sortable()
+                .Filterable()
+                .Resizable(resize => resize.Columns(true))
+                .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))                                                   
+                 .Groupable()
+                .DataSource(dataSource => dataSource
+                .Ajax().Model(model => model.Id(c => c.refId))
+                .ServerOperation(true)
+                .Read(read => read.Action("PropertyReport", "Report").Data("PropertySearch")).PageSize(20)
+            )
+        )
+    </div>
+
+</div>
+<script>
+    function ChangePropBank() {
+        var propBankValue = $('#PropertyBank').val();
+        //var deptDDL = $("#departmentId").data("kendoDropDownList");
+        var schemeDDL = $("#SchemeId").data("kendoDropDownList");
+        if (propBankValue == 1)
+        {
+            //$('#departmentId').data('kendoDropDownList').value('');
+            $('#SchemeId').data('kendoDropDownList').value('');
+            schemeDDL.enable(false);
+            //deptDDL.enable(false);
+        }
+        else {
+            schemeDDL.enable(true);
+            //deptDDL.enable(true);
+        }
+    }
+    function PropertySearch() {
+        return {
+            schemeId: $('#SchemeId').val(),
+            deptId: $('#departmentId').val(),
+            propBank: $('#PropertyBank').val()
+        };
+    }
+    $('#btnSearch').click(function () {
+        var deptId = $('#departmentId').val();
+        var propBank = $('#PropertyBank').val();
+        var schemeId = $('#SchemeId').val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ deptId: deptId, propBank: propBank, schemeId: schemeId }),
+            url: '/Report/PropertyReport',
+            success: function (result) {
+                $("#gridPropertyReport").data("kendoGrid").dataSource.read();
+            },
+            error: function (ajaxRequest, strError) {
+                alertify.error("Something is wrong, try again later");
+            }
+        });
+    });
+    $('#btnClear').click(function () {
+        $('#departmentId').data('kendoDropDownList').value('');
+        $('#SchemeId').data('kendoDropDownList').value('');
+        $('#PropertyBank').data('kendoDropDownList').value('');
+        $("#gridPropertyReport").data("kendoGrid").dataSource.read();
+    });
+</script>

@@ -1,0 +1,225 @@
+﻿@model NA.PMS.Model.RolesModel
+@using Kendo.Mvc.UI;
+
+@{
+    ViewBag.Title = "Add";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (Html.BeginForm())
+{
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Add Admin Role</h1></div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+                </div>
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="col-md-12 content-top-spce">
+                <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    @Html.HiddenFor(model => model.ViewName)
+                    <h2 class="blck-heading">Role Information</h2>
+                    <div class="form-bx">
+                        <div class="row">
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("ApplicationName", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(model => model.ApplicationId)
+                                    .Name("applications")
+                                    .DataTextField("ApplicationName")
+                                    .DataValueField("ApplicationId")
+                                    .OptionLabel("Select")
+                                    .DataSource(source =>
+                                    {
+                                        source.Read(read =>
+                                        {
+                                            read.Action("GetApplications", "ManageAdminRoles");
+                                        });
+                                    })
+                                    .Events(e => e.Select("getSelectedValue"))
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                )
+                            </div>
+                            <div class="col-md-4 col-sm-6 col-xs-12 form-group">
+                                @Html.HiddenFor(model => model.RoleId, new { @id = "hdnRoleId", @name = "hdnRoleId" })
+                                @Html.HiddenFor(model => model.ApplicationId, new { @id = "hdnApplicationId", @name = "hdnApplicationId" })
+                                @Html.HiddenFor(model => model.ApplicationName, new { @id = "hdnApplicationName", @name = "hdnApplicationName" })
+
+                                <span id="appID" class="text-danger">Please select an application. </span>
+                                <span id="adminroles" class="text-danger">Admin Role already exists for this Application.</span>
+                            </div>                           
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Role Name", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.RoleName, new { @maxlength = "20", @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.RoleName, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                                <span id="rolename" class="text-danger">Please enter role name. </span>
+                                <span id="duplicateroles" class="text-danger">Role Name already exists.</span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Role Description", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                @Html.TextAreaFor(model => model.RoleDescription, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.RoleDescription, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                                <span id="reledescription" class="text-danger">Please enter role description. </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="box-button text-center">
+                    <input type="button" id="btnCancel" value="Cancel" class="btn btn-default" onclick="javascript: window.location = '@Url.Action("ManageAdminRoles", "ManageAdminRoles")';" />
+                    <input type="submit" value="Add" id="btnSave" class="btn btn-add" onclick="return ValidateAppliction();" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#appID").hide();
+        $("#adminroles").hide();
+        $("#rolename").hide();
+        $("#reledescription").hide();
+        $("#duplicateroles").hide();
+        $("#RoleName").blur(function () {
+            if ($("#RoleName").val().trim() != "") {
+                $("#rolename").hide();
+            }
+            GetApplicantDetails();
+        });
+        $("#RoleDescription").blur(function () {
+            if ($("#RoleDescription").val() != "") {
+                $("#reledescription").hide();
+            }
+        });
+        $("#ViewName").val("AddAdminRole");
+    });
+
+    function getSelectedValue(e) {
+        var dataItem = this.dataItem(e.item.index() + 1);
+        var applicationId = dataItem.ApplicationId;
+        $("#hdnApplicationId").val(dataItem.ApplicationId);
+        $("#hdnApplicationName").val(dataItem.ApplicationName);
+        $.ajax({
+            type: "Get",
+            url: '@Url.Action("GetRecordByApplicationId", "ManageAdminRoles")',
+            data: { "id": applicationId },
+            traditional: true,
+            dataType: "json",
+            success: function (data) {
+                if (data != null) {
+                    if (data.RoleName != "" && data.RoleName != null) {
+                        $("#RoleName").attr("disabled", "true");
+                        $("#RoleDescription").attr("disabled", "true");
+                        $("#btnSave").attr("disabled", "true");
+                        $("#adminroles").show();
+                    }
+                    else {
+                        $("#RoleName").removeAttr("disabled");
+                        $("#RoleDescription").removeAttr("disabled");
+                        $("#btnSave").removeAttr("disabled");
+                        $("#adminroles").hide();
+                    }
+                    $("#RoleName").val(data.RoleName);
+                    $("#RoleDescription").val(data.RoleDescription);
+                    $("#hdnRoleId").val(data.RoleId);
+                    $("#appID").hide();
+                    $("#rolename").hide();
+                    $("#reledescription").hide();
+                    //$("#hdnRoleName").val(data.RoleName);
+                    //$("#hdnRoleDescription").val(data.RoleDescription);
+                    //$("#hdnApplicationId").val(data.ApplicationId);
+                    //$("#hdnApplicationName").val(data.ApplicationName);
+                }
+            },
+            error: function () {
+                //alert("There is an error while fetching the records.");
+            }
+        });
+    }
+
+    function ValidateAppliction() {
+
+        var flag = false;
+        var flag1 = false;
+        var flag2 = false;
+
+        var rolename = $("#RoleName").val().trim();
+        var roledesc = $("#RoleDescription").val().trim();
+        var apps = $("#applications").val().trim();
+
+        if (apps == "") {
+            $("#appID").show();
+            flag2 = false;
+        }
+        else {
+            $("#appID").hide();
+            flag2 = true;
+        }
+
+        if (rolename == "") {
+            $("#rolename").show();
+            flag = false;
+        }
+        else {
+            $("#rolename").hide();
+            flag = GetApplicantDetails();
+        }
+        if (roledesc == "") {
+            $("#reledescription").show();
+            flag1 = false;
+        }
+        else {
+            $("#reledescription").hide();
+            flag1 = true;
+        }
+        if (flag && flag1 && flag2) {
+            return true;
+        }
+        else { return false; }
+
+    }
+    var appflag = true;
+    function GetApplicantDetails() {
+        //debugger;
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ roleName: $("#RoleName").val().trim(), roleId: $("#hdnRoleId").val().trim(), applicationId: $("#hdnApplicationId").val().trim() }),
+            url: "/ManageAdminRoles/IsRoleNameUnique",
+            success: function (data) {
+                if (data == true) {
+                    appflag = false;
+                    $("#duplicateroles").show();
+                }
+                else {
+                    appflag = true;
+                    $("#duplicateroles").hide();
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                appflag = false;
+                //alert(respText);
+            }
+        });
+        return appflag;
+    }
+</script>

@@ -1,0 +1,144 @@
+﻿@model  NA.PMS.NICServices.SWPServicesViewModel
+@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions;
+@using NA.PMS.Common;
+
+<style>
+    .row-pad{ padding:0 30px; }
+    .k-window-title{ font-weight:700; }
+</style>
+
+<div class="col-md-12 popup-window" id="AcknowledgementContent" style="min-height:300px;background:url(/Content/Images/boxed-bg.jpg) repeat;">
+    <div class="" id="divAcknowledgementReceiptBody">
+        <div class="row">
+            <div class="col-md-12">
+                <h2 style="text-align:center;padding:0;margin-bottom:4px;">NEW OKHLA INDUSTRIAL DEVELOPMENT AUTHORITY</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <h4 style="text-align:center;padding:0;margin-bottom:4px;">Sector-6 Administrator Office, NOIDA</h4>
+            </div>
+        </div>
+        <div class="row ">
+            <div class="col-md-12">
+                <h5 style="text-align:center;padding:0;margin-top:4px;">Acknowledgement Receipt </h5>
+            </div>
+        </div>
+        <div class="row row-pad">
+            <div class="col-md-12">
+                <span style="width:50%;text-align:right;float:right"> <b>Date: <span id="CreatedDate">["CreatedDate"]</span></b></span>
+            </div>
+        </div>
+        <div class="row row-pad">
+            <div class="col-md-12">
+                <span style="width:50%;float:left"><b> Acknowledgement No: &nbsp;<span id="ServiceRequestId">["ServiceRequestId"]</span></b></span>
+                <span style="width:50%;text-align:right;float:right"><b><span id="RegistrationNo">["RegistrationNo"]</span></b></span>
+            </div>
+        </div>
+        <div class="row row-pad">
+            <div class="col-md-12">
+                <span style="width:70%;float:left"><b> Applicant Name: &nbsp;<span id="Name">["Name"]</span></b></span>
+                <span style="width:30%;text-align:right;float:right"><b>Property No: &nbsp;<span id="PropertyNo">["Property_No"]</span></b></span>
+            </div>
+        </div>
+        <div class="row row-pad">
+            <div class="col-md-12">
+                <span style="width:50%;float:left"><b> Department: &nbsp;<span id="DepartmentName">["DepartmentName"]</span></b> &nbsp;&nbsp;( <span id="SubDepartment">["SubDepartment"]</span> )</span>
+                <span style="width:50%;text-align:right;float:right"><b>Mobile No.: &nbsp;<span id="Mobile">["Mobile"]</span></b></span>
+            </div>
+        </div>
+        <div class="row row-pad">
+            <div class="col-md-12">
+                <b> Request Type: &nbsp;<span id="ServiceName">["ServiceName"]</span></b>
+            </div>
+        </div>
+        <div class="row row-pad">
+            <div class="col-md-12">
+                <b> Subject: &nbsp; <label id="lblDescription">["Description"]</label></b>
+            </div>
+        </div>
+        <div class="row row-pad">
+            <div class="col-md-12" style="text-align:justify;text-justify:inter-word">
+                <p>
+                    <b> Note:</b> The information provided in application shall be validated against the available information with the department.
+                    In case where addition information like payment info addition supporting document etc.is required, the same shall be communicated on registered
+                    mobile number and mail You can also track the status of service request on <b> http://www.mynoida.in </b>,Please quote this service request number for any
+                    communication regarding the application.
+                </p>
+            </div>
+            <div class="col-md-12" style="text-align:justify;text-justify:inter-word">
+                <p>
+                    <b> Application will be processed only after completing KYA</b>
+                </p>
+            </div>
+        </div>
+        <div class="row row-pad">
+            <div class="col-md-12">
+                <b>
+                    Thanks for using services online.<br />
+                    Your Thankfully<br />
+                    NOIDA
+                </b>
+            </div>
+        </div>
+        <div class="row row-pad row-btn">
+            <div class="col-md-12" style="text-align: center; padding:15px 0 15px 0;">
+                <button type="button" id="btnPrintDiv" class="btn btn-success" onclick=" PrintAcknowledgementReciept();">Print</button>
+                <button type="submit" id="btnClose" class="btn btn-danger">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        $('.popup-window').kendoWindow({
+            modal: true,
+            title: "Service Acknowledgement",
+            actions: false, // [ "Minimize", "Maximize"],
+            visible: false,
+            width: "70%",
+            //height: "60%",
+        });
+
+        $('#btnClose').click(function () {
+            $(".popup-window").data("kendoWindow").close();
+            ClearFields();
+        });
+    });
+
+    function ToJavaScriptDate(value) {
+        var pattern = /Date\(([^)]+)\)/;
+        var results = pattern.exec(value);
+        //return value;
+        if (results != null) {
+            var dt = new Date(parseFloat(results[1]));
+            return (dt.getMonth() + 1) + "/" + dt.getDate() + "/" + dt.getFullYear();
+        }
+    }
+
+    function PrintAcknowledgementReciept() {
+        var contents = document.getElementById("AcknowledgementContent").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('<style>.row-btn{display:none;}</style>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+</script>

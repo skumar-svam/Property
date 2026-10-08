@@ -1,0 +1,157 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@model NA.PMS.Model.AdvanceSearchModel
+
+@{
+    ViewBag.Title = "Manage Payment";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="ManagePayment" style="margin-top: -30px;">
+   
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-6 col-sm-12 col-xs-12 dsh-btn" style="padding-right:5px;padding-top:0;">
+                <div class="row dsh-btn-rw" style="margin-top:-2%;">
+                    <div class="col-md-3 col-sm-4 col-xs-12 home-btns-spce">
+                        <a class="dashbrd-btn icn-application" href="/Property/ManagePayment/PaymentList">
+                            Payment List
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-sm-4 col-xs-12 home-btns-spce">
+                        <a class="dashbrd-btn icn-allotment" href="#">
+                            Payment Dues
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-sm-4 col-xs-12  home-btns-spce">
+                        <a class=" dashbrd-btn icn-noting" href="/Property/ManagePayment/Payment">
+                            Payment
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-sm-4 col-xs-12 home-btns-spce">
+                        <a class="dashbrd-btn icn-possession" href="#">
+                            Installment
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-sm-4 col-xs-12 home-btns-spce">
+                        <a class="dashbrd-btn icn-lease" href="#">
+                            Registry
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-sm-4 col-xs-12 home-btns-spce">
+                        <a class="dashbrd-btn icn-checklist" href="#">
+                            Advance Payment
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-sm-4 col-xs-12 home-btns-spce">
+                        <a class="dashbrd-btn icn-mortgage" href="#">
+                            Refund
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-sm-4 col-xs-12 home-btns-spce">
+                        <a class="dashbrd-btn icn-transfer" href="#">
+                            Transfer
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-sm-4 col-xs-12 home-btns-spce">
+                        <a class="dashbrd-btn icn-gpa" href="#">
+                            GPA
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-sm-4 col-xs-12 home-btns-spce">
+                        <a class="dashbrd-btn icn-payment" href="#">
+                            Payment Challan
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-sm-4 col-xs-12 home-btns-spce">
+                        <a class="dashbrd-btn icn-online-applications" href="#">
+                            Online Application
+                        </a>
+                    </div>
+                    <div class="col-md-3 col-sm-4 col-xs-12 home-btns-spce">
+                        <a class="dashbrd-btn icn-online-services" href="#">
+                            Online Services
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-1 col-sm-12 col-xs-12 dsh-btn" style="padding-left:5px;"></div>
+            <div class="col-md-5 col-sm-12 col-xs-12 dsh-btn" style="padding-left:5px;">
+                <h1>Payment Interface</h1>
+                @*@using (Html.BeginForm("SearchForPayment", "ManagePayment", FormMethod.Post, new { enctype = "multipart/form-data", id = "searchform" }))
+                {
+                    <div class="row adv-srch-bx">
+                        <h1 class="gridTitle adv-srch-title">Advance Search For Payment</h1>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="row search-bx-home adv-srch-frm-bg">
+                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                        <span class="advnce-srch-lbl">Department</span>
+                                        @(Html.Kendo().DropDownListFor(m => m.DepartmentId)
+                                            //.Name("txtDepartment")
+                                            .DataTextField("Name")
+                                            .DataValueField("Value")
+                                            .OptionLabel("--Select--")
+                                            .Filter("contains")
+                                            .Enable(true)
+                                            .DataSource(source =>
+                                            {
+                                                source.Read(read =>
+                                                {
+                                                    read.Action("GetDepartmentForAdvanceSearch", "PropertyAllotment");
+                                                });
+                                            })
+                                            .HtmlAttributes(new { style = "width:100%;" })
+                                        )
+                                    </div>
+                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                        <span class="advnce-srch-lbl">Registration ID</span>
+                                        @Html.TextBoxFor(m => m.Rid, htmlAttributes: new { @maxlength = "10" })
+                                    </div>
+                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                        <span class="advnce-srch-lbl">Sector</span>
+                                        @Html.TextBoxFor(m => m.SectorName, htmlAttributes: new { @maxlength = "10" })
+                                    </div>
+                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                        <span class="advnce-srch-lbl">Block</span>
+                                        @Html.TextBoxFor(m => m.BlockName, htmlAttributes: new { @maxlength = "10" })
+                                    </div>
+                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                        <span class="advnce-srch-lbl">Plot No</span>
+                                        @Html.TextBoxFor(m => m.PlotNumber, htmlAttributes: new { @maxlength = "10" })
+                                    </div>
+                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                        <span class="advnce-srch-lbl">Name</span>
+                                        @Html.TextBoxFor(m => m.ApplicantName, htmlAttributes: new { @maxlength = "30" })
+                                    </div>
+                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                        <span class="advnce-srch-lbl">Father Name</span>
+                                        @Html.TextBoxFor(m => m.FatherOrHusbandName, htmlAttributes: new { @maxlength = "30" })
+                                    </div>
+                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                        <span class="advnce-srch-lbl">Address</span>
+                                        @Html.TextBoxFor(m => m.Address, htmlAttributes: new { @maxlength = "100" })
+                                    </div>
+                                    <div class="col-md-6 col-sm-6 col-xs-12">
+                                        <span class="advnce-srch-lbl">Mobile No</span>
+                                        @Html.TextBoxFor(m => m.MobileNumber, htmlAttributes: new { @maxlength = "10" })
+                                    </div>
+
+                                    <div class="col-md-12 text-center">
+                                        <input type="button" id="btnAdvanceSearch" value="Search Property" class="adv-srch-bx-btn" />
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                }*@
+            </div>
+            <div class="col-md-12 col-sm-12 col-xs-12 dsh-btn dsh-btn-mrgin">
+
+            </div>
+        </div>
+
+    </div>
+</div>
+

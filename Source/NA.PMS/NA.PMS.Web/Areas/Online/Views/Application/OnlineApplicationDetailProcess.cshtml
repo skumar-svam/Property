@@ -1,0 +1,82 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@{
+    ViewBag.Title = "Manage Online Application Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="ManageOnlineApplicationDetails">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Online Application Details</h1></div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="k-grid-content">
+
+        @(Html.Kendo().Grid<NA.PMS.Model.OnlineApplicationDetailProcess>()
+                .Name("gridOnlineApplicationDetails")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.Comment).Hidden(true);
+            columns.Bound(c => c.OnlineApplicationDetailProcessId).Title("ID").Width(50);
+            columns.Bound(c => c.OnlineApplicationId).Title("OnlineApplicationId");
+            columns.Bound(c => c.CreatedDate).Title("Created Date").Format("{0:dd-MMM-yyyy}");
+            columns.Bound(c => c.UserCreatedBy).Title("Created By");
+            columns.Bound(c => c.AssignTo).Title("Approved By");
+            columns.Bound(c => c.ApprovalDate).Title("Approved Date").Format("{0:dd-MMM-yyyy}");
+            columns.Bound(c => c.strApplicationStatus).Title("Application Status");
+            columns.Bound(c => c.strProcessStatus).Title("Process Status");
+            columns.Bound(c => c.Comment).Title("Previous comment").ClientTemplate("<a onclick='javascript:ShowComments(this);'><span class='glyphicon glyphicon-eye-open'></span></a>");
+            //columns.Bound(c => c.IsActive).Title("Action").ClientTemplate("<a href=\"/Revenue/Finance/ViewLeaseDeedDetails/#= OnlineApplicationDetailProcessId#\" id='e_#=LeaseDeedId#'><span class='glyphicon glyphicon-eye-open'></span></a>").Filterable(false).Sortable(false).Width(100);
+        })
+        .Sortable()
+        .Filterable()
+        .Resizable(resize => resize.Columns(true))
+        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+        .DataSource(dataSource => dataSource
+            .Ajax()
+                    .Model(model => model.Id(p => p.OnlineApplicationDetailProcessId))
+            .ServerOperation(true)
+                            .Read(read => read.Action("GetOnlineApplicationProcess", "Application")).PageSize(20)
+            )
+        )
+    </div>
+</div>
+@(
+ Html.Kendo().Window().Name("ShowcommentsWindow").Title("Comment").Modal(true).Width(700).Visible(false).Content(
+@<text>
+    <div class="col-md-12">
+        <div class="row" style="margin-top:20px;">
+            <div class="col-md-2">
+                @Html.Label("Comment :")
+            </div>
+            <div class="col-md-10">
+                <label style="white-space:pre" id="showcomment"></label>
+            </div>
+        </div>
+        <div class="row topSpace">
+            <div class="col-md-9 col-sm-12 col-md-offset-3">
+                <input type="button" class="btn btn-default closePopup" value="Close" />
+            </div>
+        </div>
+    </div>
+</text>)
+                    .Draggable()
+                    .Resizable()
+                    .Actions(actions => actions.Close())
+)
+<script type="text/javascript">
+
+    function ShowComments(row) {
+        var tr = $(row).parent().parent();
+        var comments = $(tr).children("td:eq(0)").text();
+        $("#showcomment").html(comments);
+        $("#ShowcommentsWindow").data("kendoWindow").center();
+        $("#ShowcommentsWindow").data("kendoWindow").open();
+    }
+
+    $(".closePopup").click(function () {
+        $("#ShowcommentsWindow").data("kendoWindow").close();
+    });
+</script>

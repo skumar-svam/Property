@@ -1,0 +1,760 @@
+﻿@model NA.PMS.Model.AllotmentModel
+@using Kendo.Mvc.UI;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    #divGenderCompany {
+        display: none;
+    }
+</style>
+
+@using (Html.BeginForm("AddAllotment", "Allotment", FormMethod.Post, new { enctype = "multipart/form-data", id = "AllotmentForm" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Property Allocation</h1></div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+                </div>
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="col-md-12 content-top-spce">
+                <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                    <h2 class="blck-heading">Select Scheme</h2>
+
+                    @Html.HiddenFor(model => model.ApplicationId)
+                    <input type="hidden" id="frequencyValue" />
+                    <input type="hidden" id="duplicateformValue" />
+                    <input type="hidden" id="duplicatepropertyValue" />
+                    <input type="hidden" id="hdnEndDate" />
+                    <input type="hidden" id="hdnFormSubmissionDate" />
+                    <input type="hidden" id="hdnAreaRange" />
+                    <input type="hidden" id="hdnParentPropertyId" />
+                    <input type="hidden" id="hdnSchemeTypeId" />
+
+                    <div class="form-bx">
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Scheme", htmlAttributes: new { @class = "required" })  </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(model => model.SchemeId)
+                                  .Name("SchemeId")
+                                  .DataTextField("schemeName")
+                                  .DataValueField("schemeId")
+                                  .OptionLabel(" -- Please Select --")
+                                  .DataSource(source => source.Read(read => read.Action("SchemeListForAllotment", "Allotment")))
+                                  .Enable(true)
+                                  .AutoBind(true)
+                                  .Filter("contains")
+                                  .HtmlAttributes(new { style = "width:100%;" })
+                                )
+                                @Html.ValidationMessageFor(model => model.SchemeId, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Department", htmlAttributes: new { @class = "required" })  </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(model => model.DepartmentId)
+                      .Name("DepartmentId")
+                      .DataTextField("DepartmentName")
+                      .DataValueField("DepartmentId")
+                      .OptionLabel(" -- Please Select --")
+                      .DataSource(source => source.Read(read => read.Action("FilterDepartmentOnScheme", "PropertyAllotment").Data("FilterDepartment"))
+                                                          .ServerFiltering(true))
+                      .Enable(false)
+                      .AutoBind(false)
+                              .Filter("contains")
+                    .CascadeFrom("SchemeId")
+                    .HtmlAttributes(new { style = "width:100%;" })
+                                )
+
+                                @Html.ValidationMessageFor(model => model.DepartmentId, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                    </div>
+                    <h2 class="blck-heading">Applicant Details</h2>
+                    <div class="form-bx">
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Form Number", htmlAttributes: new { @class = "required", @id = "_FormID" })  </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @*@(Html.Kendo().DropDownListFor(m => m.FormNo)
+                                        .Name("formno")
+                                        .Filter("contains")
+                                        .DataTextField("id")
+                                        .DataValueField("text")
+                                        .OptionLabel("Select")
+
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("GetAllForms", "Allotment").Data("filterForms");
+                                            }).ServerFiltering(true);
+                                        }).CascadeFrom("DepartmentId,SchemeId")
+                                        .HtmlAttributes(new { style = "width:100%;" })
+                                        .Events(m => m.Change("GetApplicantDetails"))
+                                    )*@
+                                @(Html.Kendo().DropDownListFor(m => m.FormNo)
+                                .Name("formno")
+                                .Filter("contains")
+                                .DataTextField("text")
+                                .DataValueField("id")
+                                .OptionLabel("Select")
+                                .CascadeFromField("DepartmentId")
+                                .DataSource(source =>
+                                {
+                                    source.Custom()
+                                   .ServerFiltering(true)
+                                   .ServerPaging(true)
+                                   .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                   .Transport(transport =>
+                                   {
+                                       transport.Read(read => read.Action("GetAllFormsByDatasource", "Allotment").Data("filterForms"));
+                                   }).Schema(schema =>
+                                   {
+                                       schema.Data("Data")
+                                       .Total("Total");
+                                   }).PageSize(100);
+                                })
+                                .CascadeFrom("DepartmentId")
+        // .CascadeFrom("SchemeId")
+                                .Events(events => { events.Change("GetApplicantDetails"); })
+                                .HtmlAttributes(new { @class = "formNoForms", style = "width:100%" })
+                                )
+                                @Html.ValidationMessageFor(model => model.FormNo, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div id="divGenderPerson">
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Applicant's Name", htmlAttributes: new { @id = "_ApplicantName" })
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    <span id="ApplicantName" class="form-control"></span>
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Gender", htmlAttributes: new { @id = "_Gender" })
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    <span id="Gender" class="form-control"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Father's Name", htmlAttributes: new { @id = "_FatherName" })
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    <span id="FatherName" class="form-control"></span>
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Mother's Name", htmlAttributes: new { @id = "_MotherName" })
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    <span id="MotherName" class="form-control"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Mobile Number", htmlAttributes: new { @id = "_Mobile" })
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    <span id="Mobile" class="form-control"></span>
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Corresponding Address", htmlAttributes: new { @id = "_Address" })
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    <span id="Address" class="form-control"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Earnest Money", htmlAttributes: new { @id = "_Earnest" })<i class="glyphicon fa fa-inr"></i>
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    <span id="Earnest" class="form-control"></span>
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("PAN", htmlAttributes: new { @id = "_PANnumber" })
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    <span id="PANnumber" class="form-control"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Email", htmlAttributes: new { @id = "_Email" })
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    <span id="Email" class="form-control"></span>
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Category", htmlAttributes: new { @id = "_Category" })
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    <span id="Category" class="form-control"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="divGenderCompany">
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Company Name", htmlAttributes: new { @id = "_CompanyName" })
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    <span id="CompanyName" class="lbl-form-control"></span>
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Authorized Signatory", htmlAttributes: new { @id = "_SigningAuthority" })
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    <span id="SigningAuthority" class="form-control"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Registered Office", htmlAttributes: new { @id = "_RegisteredOffice" })
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    <span id="RegisteredOffice" class="form-control"></span>
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Corresponding Address", htmlAttributes: new { @id = "_CorrespondingAddress" })
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    <span id="CorrespondingAddress" class="lbl-form-control"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Permanent Address", htmlAttributes: new { @id = "_PermanentAddress" })
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    <span id="PermanentAddress" class="form-control"></span>
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Mobile Number", htmlAttributes: new { @id = "_MobileNumber" })
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    <span id="MobileNumber" class="form-control"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Phone Number", htmlAttributes: new { @id = "_PhoneNumber" })
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    <span id="PhoneNumber" class="form-control"></span>
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("PAN", htmlAttributes: new { @id = "_PanNumber" })
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    <span id="PanNumber" class="form-control"></span>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Earnest Money", htmlAttributes: new { @id = "_EarnestMoney" })
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    <span id="EarnestMoney" class="form-control"></span>
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Email", htmlAttributes: new { @id = "_CompanyEmail" })
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    <span id="CompanyEmail" class="form-control"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h2 class="blck-heading">Property Details</h2>
+                    <div class="form-bx">
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Property Number", htmlAttributes: new { @class = "required", @id = "_Property" })  </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <span id="PropertyID">
+                                    @*@(Html.Kendo().DropDownListFor(m => m.PropertyId)
+                                        .Name("PropertyId")
+                                        .Filter("contains")
+                                        .Template("<span #if (data.RecordExistsIn){#style='color:red'#}#> #:data.text #</span>")
+                                        .DataTextField("text")
+                                        .DataValueField("id")
+                                        .OptionLabel("Select")
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("GetAllProperty", "Allotment").Data("filterForms");
+                                            }).ServerFiltering(true);
+                                        })
+                                        .CascadeFrom("DepartmentId,SchemeId")
+                                        .HtmlAttributes(new { style = "width:100%;" })
+                                        .Events(m => m.Change("GetPropertyDetails"))
+                                        )*@
+                                    @(Html.Kendo().DropDownListFor(m => m.PropertyId)
+                                    .Name("PropertyId")
+                                    .Filter("contains")
+                                    .DataTextField("text")
+                                    .DataValueField("id")
+                                    .OptionLabel("Select")
+                                    .CascadeFromField("DepartmentId")
+                                    .DataSource(source =>
+                                    {
+                                        source.Custom()
+                                       .ServerFiltering(true)
+                                       .ServerPaging(true)
+                                       .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                       .Transport(transport =>
+                                       {
+                                           transport.Read(read => read.Action("GetAllPropertyByDataSource", "Allotment").Data("filterForms"));
+                                       }).Schema(schema =>
+                                       {
+                                           schema.Data("Data")
+                                           .Total("Total");
+                                       }).PageSize(100);
+                                    })
+                                    .CascadeFrom("DepartmentId")
+                                    .Events(events => { events.Change("GetPropertyDetails"); })
+                                    .HtmlAttributes(new { @class = "PropertyId", style = "width:100%" })
+                                    )
+                                    @Html.ValidationMessageFor(model => model.FormNo, "", new { @class = "text-danger" })
+                                </span>
+                            </div>
+                            
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Block", htmlAttributes: new { @id = "_Block" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <span id="Block" class="form-control"></span>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Sector", htmlAttributes: new { @id = "_Sector" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <span id="Sector" class="form-control"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Property Type", htmlAttributes: new { @id = "_Propertytype" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <span id="Propertytype" class="form-control"></span>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Area (Sq Mtr)", htmlAttributes: new { @id = "_Area", @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.TotalArea, new { @class = "form-control textBoxValueRightAlign", @maxlength = "16", onkeypress = "return IsNumeric(event);" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label>Property Rate</label>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <span id="property-rate" class="form-control"></span>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Total Property Cost", htmlAttributes: new { @id = "_totPropertycost" })<i class="glyphicon fa fa-inr"></i>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <span id="totPropertycost" class="form-control"></span>
+                            </div>
+                            
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Civil Cost", htmlAttributes: new { @id = "_civilcost" })<i class="glyphicon fa fa-inr"></i>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <span id="civil" class="form-control"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Total No of Installment", htmlAttributes: new { @id = "_totnoofinstallment" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <span id="totnoofinstallment" class="form-control"></span>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Allotment Money", htmlAttributes: new { @id = "_allotmentmoney" })<i class="glyphicon fa fa-inr"></i>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <span id="allotmentmoney" class="form-control"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Allotment Date", htmlAttributes: new { @id = "_allotmentDate", @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <span id="allotmentDate">@(Html.Kendo().DatePickerFor(model => model.AllotmentDate).Max(DateTime.Now).DisableDates(DayOfWeek.Sunday).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))</span>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Installment Start Date", htmlAttributes: new { @id = "_installmentStartDate" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <span id="installmentStartDate">@(Html.Kendo().DatePickerFor(model => model.InstalmentStartDate).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))</span>
+                            </div>
+                        </div>
+
+
+                    </div>
+                </div>
+
+                <div class="box-button text-center">
+                    <button type="button" value="Cancel" class="btn btn-default" onclick="javascript: window.location = '@Url.Action("ManageAllotment", "Allotment")';"> Back</button>
+                    <button type="button" class="btn btn-add" value="Submit" id="btnSubmitScheme">Add</button>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+}
+<style>
+    .textBoxValueRightAlign {
+        text-align: right;
+    }
+</style>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var datepicker = $("#InstalmentStartDate").data("kendoDatePicker");
+        datepicker.readonly();
+    });
+
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1 || keyCode == 46);
+        if (ret == false)
+            return false;
+    }
+    function filterForms() {
+        return {
+            SchemeId: $("#SchemeId").val() != null ? $("#SchemeId").val() : 0,
+            DepartmentId: $("#DepartmentId").val() != null ? $("#DepartmentId").val() : 0
+        };
+    }
+    function GetApplicantDetails() {
+        if ($('#formno').val() == "") {
+            RemoveApplicantDetails();
+        }
+        else {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ formno: $("#formno").val(), schemeID: $("#SchemeId").val(), departmentID: $("#DepartmentId").val() }),
+                url: '@Url.Action("GetApplicantDetailsForAllotment", "Allotment")',
+                success: function (data) {
+                    $('#ApplicationId').val(data.ApplicationId);
+                    if (data != null && (data.GenderName == "company" || data.GenderName == "Company")) {
+                        $('#divGenderPerson').hide();
+                        $('#CompanyName').html(data.ApplicantName);
+                        $('#SigningAuthority').html(data.SigningAuthority);
+                        $('#RegisteredOffice').html(data.RegisteredOffice);
+                        $('#CorrespondingAddress').html(data.CorrespondingAddress);
+                        $('#PermanentAddress').html(data.PermanentAddress);
+                        $('#MobileNumber').html(data.MobileNumber);
+                        $('#PhoneNumber').html(data.PhoneNumber);
+                        $('#PanNumber').html(data.PanNumber);
+                        $('#EarnestMoney').html(data.earnestMoney);
+                        $('#CompanyEmail').html(data.Email);
+                        $('#divGenderPerson').hide();
+                        $('#divGenderCompany').show();
+                        $('#duplicateformValue').val(data.RecordExistsIn);
+                    }
+                    else {
+                        $('#ApplicantName').html(data.ApplicantName);
+                        $('#Gender').html(data.GenderName);
+                        $('#FatherName').html(data.FatherName);
+                        $('#MotherName').html(data.MotherName);
+                        $('#Mobile').html(data.MobileNumber);
+                        $('#Address').html(data.CorrespondingAddress);
+                        $('#Earnest').html(data.earnestMoney);
+                        $('#Email').html(data.Email);
+                        $('#Category').html(data.CategoryName);
+                        $('#PANnumber').html(data.PanNumber);
+                        $('#ApplicationId').val(data.ApplicationId);
+                        $('#duplicateformValue').val(data.RecordExistsIn);
+                        $('#hdnFormSubmissionDate').val(data.FormSubmissionDate);
+                        $('#divGenderCompany').hide();
+                        $('#divGenderPerson').show();
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+    }
+
+
+    function GetPropertyDetails() {
+        $('#Block').empty();
+        $('#Sector').empty();
+        $('#Propertytype').empty();
+        $('#TotalArea').empty();
+        $('#allotmentmoney').empty();
+        $('#duplicatepropertyValue').val("");
+        $('#totPropertycost').empty();
+        $('#civil').empty();
+        $('#totnoofinstallment').empty();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ propertyId: $('#PropertyId').val(), schemeID: $("#SchemeId").val(), departmentID: $("#DepartmentId").val() }),
+            url: "/Allotment/GetPropertyDetailsForAllotment",
+            success: function (data) {
+                if (data != null) {
+                    $('#Block').html(data.BlockName);
+                    $('#Sector').html(data.SectorName);
+                    $('#Propertytype').html(data.PropertyTypeName);
+                    $('#TotalArea').val(data.TotalArea);
+                    $('#allotmentmoney').html(data.AllotmentMoney);
+                    $('#frequencyValue').val(data.Frequency);
+                    $('#duplicatepropertyValue').val(data.RecordExistsIn);
+                    $('#totPropertycost').html(data.TotalPropertyCost);
+                    $('#civil').html(data.CivilCost);
+                    $('#totnoofinstallment').html(data.TotalnoofInstallment);
+                    $('#hdnEndDate').val(data.EndDate);
+                    $('#hdnAreaRange').val(data.FloorName);
+                    $('#hdnParentPropertyId').val(data.ParentPropertyId);
+                    $('#hdnSchemeTypeId').val(data.SchemeTypeId);
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+
+
+    $('#btnSubmitScheme').click(function () {
+        if (ValidateForm()) {
+            var schemeId = $("#SchemeId").val();
+            var departmentId = $("#DepartmentId").val();
+            var allotmentDate = new Date($("#AllotmentDate").val());
+            var bflag = false;
+            //alert("check");
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ schemeId: schemeId, departmentId: departmentId, allotmentDate: allotmentDate }),
+                url: '/Allotment/CheckAllotmentCompletedForDay',
+                success: function (result) {
+                    if (result == true) {
+                        alertify.error("Allotment for day has been completed.");
+                        bflag = false;
+                    }
+                    else {
+                        bflag = true;
+                        var schemeTypeId = $('#hdnSchemeTypeId').val();
+                        if (schemeTypeId == 2) {
+                            if (ValidateAreaRange()) {
+                                $('form#AllotmentForm').submit();
+                            }
+                        }
+                        else {
+                            if (checkAllotmentDate() && ValidateAreaRange()) {
+                                $('form#AllotmentForm').submit();
+                            }
+                            else {
+                                alertify.error("Something  is wrong, try again later.");
+                            }
+                        }
+
+                        //if (checkAllotmentDate() && ValidateAreaRange()) {
+                        //    $('form#AllotmentForm').submit();
+                        //}
+                        //else {
+                        //    alertify.error("Something  is wrong, try again later.");
+                        //}
+                    }
+
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    //alert(respText);
+                    alertify.error("Something  is wrong, try again later.");
+                }
+            });
+        }
+    });
+
+    $('#AllotmentDate').blur(function () {
+        var department = $('#DepartmentId').val();
+        if (department != 4) {
+            var allotmentDate = new Date($("#AllotmentDate").val());
+            var datepicker = $("#InstalmentStartDate").data("kendoDatePicker");
+            var month1 = parseInt($("#frequencyValue").val());
+            var month = 12 / month1;
+            var end_date = new Date(allotmentDate);
+            end_date.setMonth(allotmentDate.getMonth() + month);
+            datepicker.value(end_date);
+            checkAllotmentDate();
+        }
+        else {
+            var allotmentDate = new Date($("#AllotmentDate").val());
+            var datepicker = $("#InstalmentStartDate").data("kendoDatePicker");
+            var month = 6;
+            var end_date = new Date(allotmentDate);
+            end_date.setMonth(allotmentDate.getMonth() + month);
+            var strdate;
+            if (end_date.getMonth() <= 6) {
+                strdate = '06' + '/30' + '/' + end_date.getFullYear();
+            }
+            else {
+                strdate = '12' + '/31' + '/' + end_date.getFullYear();
+            }
+            datepicker.value(strdate);
+            checkAllotmentDate();
+        }
+    });
+    function ValidateForm() {
+        var formno = $('#formno').val();
+        var property = $('#PropertyId').val();
+        var scheme = $('#SchemeId').val();
+        var department = $('#DepartmentId').val();
+        var totalArea = $('#TotalArea').val();
+        var allotmentDate = $("#AllotmentDate").val();
+        if (scheme == "") {
+            alertify.error('Please select a scheme.');
+            return false;
+        }
+        else if (department == "") {
+            alertify.error('Please select a department.');
+            return false;
+        }
+        else if (formno == "") {
+            alertify.error('Please select a Form.');
+            return false;
+        }
+        else if (property == "") {
+            alertify.error('Please select a Property Number.');
+            return false;
+        }
+        else if (totalArea == "") {
+            alertify.error('Please enter Area (Sq.Mtr).');
+            return false;
+        }
+        else if (totalArea == "") {
+            alertify.error('Please enter Area (Sq.Mtr).');
+            return false;
+        }
+        else if (allotmentDate == "") {
+            alertify.error('Please enter allotment date.');
+            return false;
+        }
+        else if ($('#duplicateformValue').val() == "true") {
+            alertify.error('This applicant has already assigned a property.');
+            return false;
+        }
+        else if ($('#duplicatepropertyValue').val() == "true") {
+            alertify.error('This property has already been alloted.');
+            return false;
+        }
+        else { return true; }
+    }
+
+    function checkAllotmentDate() {
+        var allotmentDate = new Date($("#AllotmentDate").val());
+        var schemeEndDate = $("#hdnEndDate").val();
+        var parentPropertyId = $("#hdnParentPropertyId").val();
+        //In case of sub lease -- added on 27 feb 2018
+        if (parentPropertyId == 0) {
+            var date = new Date(parseInt(schemeEndDate.substr(6)));
+            var strdate = (date.getMonth() + 1) + '/' + date.getDate() + '/' + date.getFullYear();
+            var flag = false;
+            if ((Date.parse(strdate) >= Date.parse(allotmentDate))) {
+                alertify.error("Allotment date should not be earlier than scheme end date.");
+                flag = false;
+                return flag;
+            }
+            else { flag = true; }
+        } else { flag = true; }
+        return flag;
+    }
+
+    function FilterDepartment() {
+        return { SchemeId: $("#SchemeId").val() };
+    }
+
+    function ValidateAreaRange() {
+        var totalArea = $('#TotalArea').val();
+        var department = $('#DepartmentId').val();
+        var areaRange = $('#hdnAreaRange').val();
+        var flag = false;
+        if (department != 5) {
+            if (areaRange.includes(">")) {
+                var areaRange1 = areaRange.split(">");
+                if (totalArea < parseInt(areaRange1[1].trim())) {
+                    alertify.error("Please enter Area within Area Range " + areaRange + ".");
+                    flag = false;
+                }
+                else { flag = true; }
+            }
+                //Added on 27th Feb. 2017 for the following missing validation:
+            else if (areaRange.includes("<")) {
+                var areaRange1 = areaRange.split("<");
+                if (totalArea > parseInt(areaRange1[1].trim())) {
+                    alertify.error("Please enter Area within Area Range " + areaRange + ".");
+                    flag = false;
+                }
+                else { flag = true; }
+            }
+                //New validatione ends here
+            else {
+                var areaRange2 = areaRange.split("-");
+                if (totalArea < parseFloat(areaRange2[0].trim()) || totalArea > parseFloat(areaRange2[1].trim())) {
+                    alertify.error("Please enter Area within Area Range " + areaRange + ".");
+                    flag = false;
+                }
+                else { flag = true; }
+            }
+        }
+        else {
+            flag = true;
+        }
+        return flag;
+    }
+
+    function RemoveApplicantDetails() {
+        $('#CompanyName').html("");
+        $('#SigningAuthority').html("");
+        $('#RegisteredOffice').html("");
+        $('#CorrespondingAddress').html("");
+        $('#PermanentAddress').html("");
+        $('#MobileNumber').html("");
+        $('#PhoneNumber').html("");
+        $('#PanNumber').html("");
+        $('#EarnestMoney').html("");
+        $('#CompanyEmail').html("");
+        $('#ApplicantName').html("");
+        $('#Gender').html("");
+        $('#FatherName').html("");
+        $('#MotherName').html("");
+        $('#Mobile').html("");
+        $('#Address').html("");
+        $('#Earnest').html("");
+        $('#Email').html("");
+        $('#Category').html("");
+        $('#PANnumber').html("");
+    }
+</script>

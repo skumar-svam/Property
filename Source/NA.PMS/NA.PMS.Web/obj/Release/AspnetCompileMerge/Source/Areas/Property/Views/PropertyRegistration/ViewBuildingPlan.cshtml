@@ -1,0 +1,121 @@
+﻿@model NA.PMS.Model.BuildingPlanModel
+@using Kendo.Mvc.UI
+@{
+    ViewBag.Title = "PropertyDetails";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="divViewBuildingPlan">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Building Plan Request</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 tabbable" id="dvBuildingPlan">
+        <ul class="nav nav-tabs content-tabs" id="ulBuildingPlan" role="tablist">
+            <li><a href="#one" role="tab" data-toggle="tab" class="active"><i class="glyphicon glyphicon-home" style="color:#00c097;"></i>&nbsp;&nbsp;Building Plan - I</a></li>
+            <li><a href="#two" role="tab" data-toggle="tab"><i class="glyphicon glyphicon-briefcase" style="color:#00c097;"></i>&nbsp;&nbsp;Building Plan - II</a></li>
+        </ul>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 content-top-spce">
+        <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            <h2 class="blck-heading">Building Plan</h2>
+            <div class="form-bx">
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.Label("Registration Id", htmlAttributes: new { @class = "required" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @(Html.Kendo().DropDownListFor(m => m.RId)
+                .Filter("contains")
+                .DataTextField("text")
+                .DataValueField("id")
+                .OptionLabel("Select")
+                .DataSource(source =>
+                {
+                    source.Read(read =>
+                    {
+                        read.Action("GetRIDs", "PropertyRegistration").Data("RIdChanges");
+                    });
+                })
+                                //.Events(events => { events.Change("RIdChange"); })
+                .HtmlAttributes(new { @class = "schemeForms", style = "width:100%" }).Enable(false)
+                        )
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.Label("Property No")
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <div id="lblPropNo">
+                            @Html.DisplayFor(m => m.PropNo)
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <div class="col-md-12 tab-content">
+        <div class="tab-pane fade in active" id="one">
+
+            @{
+                Html.RenderPartial("_BuildingPlan1", Model);
+            }
+        </div>
+        <div class="tab-pane fade" id="two">
+
+            @{
+                Html.RenderPartial("_BuildingPlanViewII", Model);
+            }
+        </div>
+        <div class="box-button text-center">
+            <input type="button" id="btnBack" value="Back" class="btn btn-default" />
+        </div>
+    </div>
+
+</div>
+
+
+
+@*<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-9"></div>
+        <div class="col-md-3">
+            <input type="button" value="Back" id="btnBack" />
+        </div>
+    </div>
+</div>*@
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#BuildingPlanFileNo').attr("disabled", true);
+        $('#DateOfSubmission').data('kendoDatePicker').enable(false);
+        $('#DateOfSanction').data('kendoDatePicker').enable(false);
+        $("#PropertyUse").data("kendoDropDownList").enable(false);
+        $("#PurchasableFar").data("kendoNumericTextBox").enable(false);
+        $('#PloatArea').attr("disabled", true);
+        $('#CoveredArea').attr("disabled", true);
+        $('#NumberOfStories').attr("disabled", true);
+        $('#ArchitectRegNo').attr("disabled", true);
+        $('#NameOfArchitect').attr("disabled", true);
+        $('#FloorAreasRation').attr("disabled", true);
+        $('#SanctionPlanValidity').data('kendoDatePicker').enable(false);
+        $("#MapReleased").data("kendoDropDownList").enable(false);
+        $("#MapRevised").data("kendoDropDownList").enable(false);
+        $(".view-btn-box").hide();
+        $('#btnSave').hide();
+
+    });
+    function RIdChanges() {
+        return {
+            type: "buildingPlan"
+        };
+    }
+    $("#btnBack").click(function () {
+        window.location.href = '@Url.Action("ManageBuildingPlan", "PropertyRegistration")';
+    });
+</script>

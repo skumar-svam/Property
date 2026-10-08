@@ -1,0 +1,284 @@
+﻿@model NA.PMS.Model.UserWiseRequest
+
+@using Kendo.Mvc.UI;
+@using NA.PMS.Model
+
+@{
+    ViewBag.Title = "Service Request Matrix";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@Html.HiddenFor(m => m.DepartmentId)
+@Html.HiddenFor(m => m.ServiceId)
+@Html.HiddenFor(m => m.RequestId)
+<style>
+    .legend {
+        width: 20px;
+        height: 20px;
+    }
+
+    .legend-head {
+        font-size: 12px;
+        font-weight: bolder;
+    }
+
+    .top-margin {
+        margin-top: 6px;
+    }
+
+    .col-md-2.pad-left {
+        margin-left: 12px;
+    }
+
+    .blnk-rw {
+        height: 1px;
+    }
+
+    .loadImg {
+        visibility: hidden;
+    }
+
+    .divOpacity {
+        opacity: 0.5;
+    }
+
+    td, th {
+        padding: 4px !important;
+    }
+</style>
+<div class="row" id="divServiceRequestMatrix">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Service Request Matrix</h1></div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12" style="border-left:1px solid #abc;border-right:1px solid #abc ;padding-bottom:15px;">
+        <div class="row">
+            @*<div class="col-md-2 pad-left">
+                    <b>@Html.Label("Department")</b>
+                    @(Html.Kendo().DropDownList()
+                        .Name("ddlDepartment")
+                        .Filter("contains")
+                        .DataTextField("text")
+                        .DataValueField("id")
+                        .OptionLabel(" -- Please Select --")
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetDepartmentList", "CustomerServiceRequest", new { Area = "Member" });
+                            });
+                        })
+                            //.Events(e => e.Change(""))
+                       .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" })
+                    )
+                </div>
+                <div class="col-md-2 pad-left">
+                    <b>@Html.Label("Service")</b>
+                    @(Html.Kendo().DropDownList()
+                        .Name("ddlService")
+                        .Filter("contains")
+                        .DataTextField("text")
+                        .DataValueField("id")
+                        .OptionLabel(" -- Please Select --")
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetAllServices", "CitizenRequests", new { Area = "Member" });
+                            });
+                        })
+                            //.Events(e => e.Change(""))
+                        .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" })
+                    )
+                </div>*@
+            <div class="col-md-2 pad-left">
+                <b>@Html.Label("Start Date")</b>
+                @(Html.Kendo().DatePicker().Name("kendoFromDate").HtmlAttributes(new { style = "width:100%;", @class = "DisableKeyboardInput" }))
+            </div>
+            <div class="col-md-2 pad-left">
+                <b>@Html.Label("End Date")</b>
+                @(Html.Kendo().DatePicker().Name("kendoToDate").HtmlAttributes(new { style = "width:100%;", @class = "DisableKeyboardInput" }))
+            </div>
+            <div class="col-md-2" style="text-align:right;">
+                <label style="width:100%;"> </label>
+                <button type="button" id="btnSearch" class="k-button top-margin" value="Search">Search</button>
+                <button type="button" id="btnClear" class="k-button top-margin" value="Clear">Clear</button>
+                <img id="loadingImg" src="~/Content/Images/ajax_loader_red.gif" class="loadImg" height="25" />
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+</div>
+<div class="row">
+    <div class="col-md-7" style="float:right;margin-right:-25px;">
+        <span class="legend brown">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="legend-head"> Objection  </span>
+        <span class="legend green">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="legend-head"> Completed  </span>
+        <span class="legend violet">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="legend-head"> Initiated  </span>
+        <span class="legend lightblue">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="legend-head"> InProgess  </span>
+        <span class="legend red">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="legend-head"> Rejected  </span>
+        <span class="legend yellow">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="legend-head"> Approved  </span>
+        <span class="legend blue">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="legend-head"> Pending  </span>
+        <span class="legend cream">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="legend-head"> Cancelled  </span>
+        <span class="legend silver">&nbsp;&nbsp;&nbsp;&nbsp;</span><span class="legend-head"> Accepted  </span>
+    </div>
+</div>
+<br />
+<div class="divMatrix">
+    @Html.Raw(Model.Matrix)
+</div>
+
+<div id='divUserRequestStatus' class='col-md-12 adminfeediv'>
+    <div class="row" style="margin-top:12px;">
+        <div class="col-md-12 k-grid-content">
+            @(Html.Kendo().Grid<UserWiseRequest>
+                ()
+                .Name("gvUserWiseRequest")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.UserName).Title("User Name");
+                    columns.Bound(c => c.Name).Title("Name");
+                    columns.Bound(c => c.TotalRequest).Title("Total Request");
+                })
+                .Sortable()
+                .Filterable()
+                .Pageable
+                (
+                pageable => pageable
+                .Enabled(true)
+                .Refresh(true)
+                .PageSizes(true)
+                )
+                    //.Groupable()
+                .DataSource
+                (
+                dataSource => dataSource
+                .Ajax()
+                    //.Sort(x => x.Add("RequestId").Descending())
+                .Model(model => model.Id(p => p.RequestId))
+
+                .ServerOperation(true)
+                .Read(read => read.Action("GetUserWiseRequest_Read", "Report").Data("GetPara")).PageSize(5)
+                ).AutoBind(false)
+            )
+        </div>
+    </div>
+    <div class="row" style="padding-top:30px;">
+        <div class="col-md-5 form-group"></div>
+        <div class="col-md-6 form-group">
+            <button type='button' class='btn btn-default' value='Cancel' onclick="CloseUserReq();">Close</button>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#loadingImg").addClass("loadImg");
+        $("#divUserRequestStatus").kendoWindow({
+            modal: true,
+            title: "User Wise Request",
+            visible: false,
+            width: "50%"
+        });
+        DefaultData();
+    });
+
+    function DefaultData() {
+        var todayDate = kendo.toString(kendo.parseDate(new Date()), 'MM/dd/yyyy');
+        var ToDate = $('#kendoToDate').val(todayDate);
+        var FromDate = $('#kendoFromDate').val(todayDate);
+        GetMatrix(null, null, FromDate, ToDate);
+    }
+
+    function OpenUserReqPopUp() {
+        $("#gvUserWiseRequest").data("kendoGrid").dataSource.read();
+        var win = $("#divUserRequestStatus").data("kendoWindow");
+        win.center();
+        win.open();
+    }
+
+    function CloseUserReq() {
+        var win = $("#divUserRequestStatus").data("kendoWindow");
+        win.close();
+    }
+
+    function ShowUserWiseRequest(strId) {
+        if (strId != null && strId.length > 1) {
+            var array = strId.split('#');
+            var Deptid = array[0];
+            var ServiceId = array[1];
+            var RequestStatus = array[2];
+
+            if (Deptid.length > 0 && ServiceId.length > 0 && RequestStatus.length > 0) {
+                $('#DepartmentId').val(parseInt(Deptid));
+                $('#ServiceId').val(parseInt(ServiceId));
+                $('#RequestId').val(parseInt(RequestStatus));
+                OpenUserReqPopUp();
+            }
+        }
+    }
+
+    function GetPara() {
+        var objUserWiseRequest = {
+            DepartmentId: parseInt($('#DepartmentId').val()),
+            ServiceId: parseInt($('#ServiceId').val()),
+            RequestId: parseInt($('#RequestId').val()),
+            FromDate: $('#kendoToDate').val(),
+            ToDate: $('#kendoFromDate').val()
+        };
+        return objUserWiseRequest;
+    }
+
+    $('#btnSearch').click(function () {
+        var ndeptId = $('#ddlDepartment').val();
+        var nservId = $('#ddlService').val();
+        var ToDate = $('#kendoToDate').val();
+        var FromDate = $('#kendoFromDate').val();
+
+        if (FromDate == null || FromDate == "") {
+            alertify.error("select start date.");
+            return false;
+        }
+        if (ToDate == null || ToDate == "") {
+            alertify.error("select end date.");
+            return false;
+        }
+        if (FromDate > ToDate) {
+            alertify.error("start date should not be greater than end date.");
+            return false;
+        }
+        $("#loadingImg").removeClass("loadImg");
+        $(".divMatrix").addClass("divOpacity");
+        GetMatrix(null, null, FromDate, ToDate);
+    });
+
+    $('#btnClear').click(function () {
+        //$('#ddlDepartment').data("kendoDropDownList").value("");
+        //$('#ddlService').data("kendoDropDownList").value("");
+        $('#kendoFromDate').data("kendoDatePicker").value("");
+        $('#kendoToDate').data("kendoDatePicker").value("");
+        $("#loadingImg").removeClass("loadImg");
+        $(".divMatrix").addClass("divOpacity");
+        DefaultData();
+    });
+    function GetMatrix(ndeptId, nservId, FromDate, ToDate) {
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ departmentid: ndeptId, serviceId: nservId, FromDate: FromDate, ToDate: ToDate }),
+            url: '/Report/GetServiceRequestMatrixBySearch',
+            success: function (result) {
+                $(".divtbl").remove();
+                $(".divMatrix").append(result);
+                $("#loadingImg").addClass("loadImg");
+                $(".divMatrix").removeClass("divOpacity");
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Something is wrong, try again later");
+            }
+        });
+    }
+</script>

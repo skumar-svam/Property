@@ -1,0 +1,50 @@
+﻿<br />
+<h3>NiveshMitra DashBoard</h3>
+<hr />
+@using (Ajax.BeginForm("GetDashboardReport", "Dashboard", null, new AjaxOptions { HttpMethod = "POST", OnSuccess = "OnSuccess", OnFailure = "OnFailure" }, null))
+{
+    <div class="row">
+            <form class="form-inline">
+                <div class="col-md-3">
+                    <label class="my-1 mr-2" for="DeptType">Start Date</label>
+                    @Html.TextBox("StartDate", null, "Select Date", new { @class = "custom-select my-1 mr-sm-2", @id = "StartDate" })
+                </div>
+                <div class="col-md-3">
+                    <label class="my-1 mr-2" for="DeptType">End Date</label>
+                    @Html.TextBox("EndDate", null, "Select Date", new { @class = "custom-select my-1 mr-sm-2", @id = "EndDate" })
+                </div>
+                <div class="col-md-3" style="display:none">
+                    <label class="my-1 mr-2" for="ReqThrough">Request Through</label>
+                    @Html.DropDownList("RequestThrough", new System.Web.Mvc.SelectList(ViewBag.RequestType, "Value", "Text"), new { @id = "DDLRequestType", @class = "custom-select my-1 mr-sm-2", required = "required" })
+                </div>
+                <div class="col-md-2">
+                    <input type="submit" style="margin-top:35px; width:100%" class="btn btn-primary pull-right" value="Submit" />
+                </div>
+            </form>
+    </div>
+}
+
+<script>
+    $(document).ready(function () {
+        $('input[id$=StartDate]').datepicker({
+            dateFormat: 'dd-MM-yy'
+        });
+
+        $('input[id$=EndDate]').datepicker({
+            dateFormat: 'dd-MM-yy'
+        });
+        $('#EndDate').datepicker().datepicker('setDate', new Date());
+
+        var firstDayOfMonth = function () {
+            return 1;
+        };
+
+        var d = new Date();
+        var currMonth = d.getMonth();
+        var currYear = d.getFullYear();
+        var startDate = new Date(currYear, currMonth, firstDayOfMonth());
+        $('#StartDate').datepicker().datepicker('setDate', startDate);
+    });
+</script>
+
+

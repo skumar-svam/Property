@@ -1,0 +1,358 @@
+﻿@model NA.PMS.Model.PaymentViewModel
+@using Kendo.Mvc.UI
+@using NA.PMS.Common
+@{
+    ViewBag.Title = "Compensation";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style type="text/css">
+    .col-cost .form-control {
+        width: 90%;
+        float: right;
+    }
+
+    .k-numerictextbox {
+        float: right;
+    }
+</style>
+
+@using (Html.BeginForm("SavePropertyDetail", "ManageProperty", FormMethod.Post, new { enctype = "multipart/form-data", id = "propertyform" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="col-lg-12 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-0">
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Compensation</h1></div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+                </div>
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="col-md-12 content-top-spce">
+                <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                    <h2 class="blck-heading">Property Detail</h2>
+                    <div class="form-bx">
+                        <div style="text-align:center">
+                            @Html.HiddenFor(model => model.Id)
+                            @Html.HiddenFor(model => model.PropertyId)
+                            @Html.HiddenFor(model => model.DepartmentId)
+                            @Html.HiddenFor(model => model.SectorId)
+                            @Html.HiddenFor(model => model.BlockId)
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                @Html.Label("Registration Id", htmlAttributes: new { @class = "required" })
+                                @(Html.Kendo().DropDownListFor(m => m.RegistrationId)
+                                    .Filter("contains")
+                                    .DataTextField("Text")
+                                    .DataValueField("Id")
+                                    .OptionLabel("---Select---")
+                                    .Enable(true)
+                                    .AutoBind(true)
+                                    .DataSource(source =>
+                                    {
+                                        source.Custom()
+                                        .ServerFiltering(true)
+                                        .ServerPaging(true)
+                                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                        .Transport(transport => { transport.Read("GetRegistrationIdListAsDataSource", "Authority", new { area = "Member" }); })
+                                        .Schema(schema => { schema.Data("Data").Total("Total"); })
+                                        .PageSize(100);
+                                    })
+                                    .Events(events => { events.Change("RegistrationIdChangeEvent"); })
+                                    .HtmlAttributes(new { @class = "col-custom", style = "width:90%; float:right;" })
+                                )
+                            </div>
+
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                @Html.Label("Department", htmlAttributes: new { @class = "required" })
+                                @Html.TextBoxFor(model => model.Department, htmlAttributes: new { @class = "form-control" })
+                            </div>
+                            <div class="col-md-6 col-sm-6 col-xs-12 col-cost form-group">
+                                @Html.Label("Allottee Name", htmlAttributes: new { @class = "required" })
+                                @Html.TextBoxFor(model => model.Applicant, htmlAttributes: new { @class = "form-control", style = "width:95%;float:right;" })
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                @Html.Label("Property No", htmlAttributes: new { @class = "required" })
+                                @Html.TextBoxFor(model => model.PropertyNo, htmlAttributes: new { @class = "form-control" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                @Html.Label("Total Area", htmlAttributes: new { @class = "required" })
+                                @(Html.Kendo().NumericTextBoxFor(m => m.TotalArea)
+                                    .Min(0).Max(99999999)
+                                    .Spinners(false).Step(0).Enable(true)
+                                    .HtmlAttributes(new { style = "width: 90%;", @maxlength = "14", @class = "text-right" })
+                                )
+                                @*@Html.TextBoxFor(model => model.TotalArea, htmlAttributes: new { @class = "form-control" })*@
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                @Html.Label("Allotment Rate", htmlAttributes: new { @class = "required" })
+                                @(Html.Kendo().NumericTextBoxFor(m => m.TotalAllotmentRate)
+                                    .Min(0).Max(99999999)
+                                    .Spinners(false).Step(0).Enable(true)
+                                    .HtmlAttributes(new { style = "width: 90%;", @maxlength = "14", @class = "text-right" })
+                                )
+                                @*@Html.TextBoxFor(m => m.TotalAllotmentRate, new { @class = "form-control text-right", @maxlength = "10", onkeypress = "return ValidateSpace(event);" })*@
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                <label>Total Property Cost (INR)</label>
+                                @(Html.Kendo().NumericTextBoxFor(m => m.TotalPropertyCost)
+                                    .Min(0).Max(99999999999999)
+                                    .Spinners(false).Step(0).Enable(true)
+                                    .HtmlAttributes(new { style = "width: 90%;", @maxlength = "14", @class = "text-right" })
+                                )
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                                <label>Date Of Compensation Letter</label>
+                                @(Html.Kendo().DatePickerFor(model => model.CompensationRequestDate).HtmlAttributes(new { style = "width:90%;float:right;" }))
+                            </div>
+                            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                                <label>Effected Area of Compensation</label>
+                                @(Html.Kendo().NumericTextBoxFor(m => m.AreaForCompensation)
+                                    .Min(0).Max(99999999)
+                                    .Spinners(false).Step(0).Enable(true)
+                                   .HtmlAttributes(new { style = "width: 90%;", @maxlength = "13", @class = "text-right", @placeholder = "Effected Area of Compensation" })
+                                    .Events(e => e.Change("AreaAndRateChangeEvent"))
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                                <label>Rate Of Compensation</label>
+                                @(Html.Kendo().NumericTextBoxFor(m => m.CompensationRate)
+                                    .Min(0).Max(99999999)
+                                    .Spinners(false).Step(0).Enable(true)
+                                   .HtmlAttributes(new { style = "width: 90%;", @maxlength = "13", @class = "text-right", @placeholder = "" })
+                                    .Events(e => e.Change("AreaAndRateChangeEvent"))
+                                )
+                               
+                            </div>
+                            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                                <label>Compensation In Percent(%)</label>
+                                @(Html.Kendo().NumericTextBoxFor(m => m.CompensationInPercent)
+                                    .Min(0).Max(99)
+                                    .Spinners(false).Step(0).Enable(true)
+                                   .HtmlAttributes(new { style = "width: 90%;", @maxlength = "13", @class = "text-right", @placeholder = "" })
+                                )
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                                <label>Compensation Amount</label>
+                                @(Html.Kendo().NumericTextBoxFor(m => m.CompensationAmount)
+                                    .Min(0).Max(9999999999)
+                                    .Spinners(false).Step(0).Enable(true)
+                                   .HtmlAttributes(new { style = "width: 90%;", @maxlength = "13", @class = "text-right", @placeholder = "" })
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                                <label>Penal Interest (%)</label>
+                                @(Html.Kendo().NumericTextBoxFor(m => m.PenalInterest)
+                                    .Min(0).Max(9999999999)
+                                    .Spinners(false).Step(0).Enable(true)
+                                   .HtmlAttributes(new { style = "width: 90%;", @maxlength = "13", @class = "text-right", @placeholder = "" })
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                                <label>Penal Amount</label>
+                                @(Html.Kendo().NumericTextBoxFor(m => m.InterestAmount)
+                                    .Min(0).Max(9999999999)
+                                    .Spinners(false).Step(0).Enable(true)
+                                   .HtmlAttributes(new { style = "width: 90%;", @maxlength = "13", @class = "text-right", @placeholder = "" })
+                                    .Events(e => e.Change("AreaAndRateChangeEvent"))
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                                <label>Total Compensation Payable Amount</label>
+                                @(Html.Kendo().NumericTextBoxFor(m => m.TotalCompensationAmount)
+                                    .Min(0).Max(999999999999)
+                                    .Spinners(false).Step(0).Enable(true)
+                                   .HtmlAttributes(new { style = "width: 90%;", @maxlength = "13", @class = "text-right", @placeholder = "" })
+                                )
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="box-button text-center">
+                    <input type="button" id="btnCancel" value="Cancel" class="btn btn-default" />
+                    <input value="Update" type="button" id="btnSubmit" class="btn btn-add" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#btnCancel").click(function () {
+            @*window.location.href = '@Url.Action("Manage", "ManageProperty")';*@
+        });
+
+        $('#btnSubmit').click(function () {
+            //SubmitPropertyForm();
+            SubmitCompensationDetail();
+        });
+    });
+
+    var spaceKeys = new Array();
+    spaceKeys.push(8); //Backspace
+    function ValidateSpace(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = (keyCode != 32);
+        if (ret == false)
+            return false;
+    }
+
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1 || keyCode == 46);
+        if (ret == false)
+            return false;
+    }
+
+    function RegistrationIdChangeEvent() {
+        if ($("#RegistrationId").val() != '') {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ RegistrationId: $("#RegistrationId").val() }),
+                url: '/Revenue/Finance/GetPropertyCostDetailAsPerScheme',
+                success: function (result) {
+                    if (result != null) {
+                        $("#PropertyId").val(result.PropertyId);
+                        $("#DepartmentId").val(result.DepartmentId);
+                        $("#SectorId").val(result.SectorId);
+                        $("#BlockId").val(result.BlockId);
+                        $("#Department").val(result.Department);
+                        $("#Applicant").val(result.Applicant);
+                        $("#PropertyNo").val(result.PropertyNo);
+                        $("#TotalArea").data("kendoNumericTextBox").value(result.TotalArea);
+                        $("#TotalAllotmentRate").data("kendoNumericTextBox").value(result.TotalAllotmentRate);
+                        if (result.IsCompensation == true) {
+                            $.ajax({
+                                dataType: 'json',
+                                type: 'Post',
+                                contentType: 'application/json; charset=utf-8',
+                                data: JSON.stringify({ RegistrationId: $("#RegistrationId").val(), PropertyId: $("#PropertyId").val() }),
+                                url: "/Revenue/Finance/GetPropertyCompensationCostDetailById",
+                                success: function (result) {
+                                    if (result != null) {
+                                        $("#Id").val(result.Id);
+                                        $("#CompensationRequestDate").data("kendoDatePicker").value(result.CompensationRequestDate);
+                                        $("#AreaForCompensation").data("kendoNumericTextBox").value(result.AreaForCompensation);
+                                        $("#CompensationRate").data("kendoNumericTextBox").value(result.CompensationRate);
+                                        $("#CompensationInPercent").data("kendoNumericTextBox").value(result.CompensationInPercent);
+                                        $("#CompensationAmount").data("kendoNumericTextBox").value(result.CompensationAmount);
+                                        $("#PenalInterest").data("kendoNumericTextBox").value(result.PenalInterest);
+                                        $("#InterestAmount").data("kendoNumericTextBox").value(result.InterestAmount);
+                                        $("#TotalCompensationAmount").data("kendoNumericTextBox").value(result.TotalCompensationAmount);
+                                    } else { alertify.error("no data found."); }
+
+                                },
+                                error: function (ajaxRequest, strError) {
+                                    var respText = ajaxRequest.responseText;
+                                }
+                            });
+                        }
+                        else {
+                            ClearCompensationFields();
+                        }
+                        
+                        $("#TotalPropertyCost").data("kendoNumericTextBox").value(result.TotalPropertyCost);                       
+                    }
+                    else {
+                        alertify.error("Network Error. Please try again later.");
+                    }
+                },
+                error: function (obj) {
+                    //ClearValues();
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            });
+        }
+        else {
+            ClearInputFields();
+        }
+    }
+
+    function SubmitCompensationDetail() {
+        if ($('#RegistrationId').val() != "") {
+            var formData = new FormData($('form').get(0));
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: false, // Not to set any content header
+                processData: false, // Not to process data
+                data: formData,
+                url: '/Revenue/Finance/SaveCompensationDetail',
+                success: function (result) {
+                    if (result == '@ReturnType.Saved') {
+                        alertify.success("Property compensation saved successfully.");
+                        ClearInputFields();
+                        ClearCompensationFields();
+                    }
+                    else {
+                        return false;
+                    }
+                    //ClearFields();
+                },
+                error: function (ajaxRequest, strError) {
+                    alertify.error("Network error, try again later");
+                }
+            });
+        }
+    }
+
+
+    function AreaAndRateChangeEvent() {
+        var rate = $("#CompensationRate").val().trim() == "" ? 0 : $("#CompensationRate").val();
+        var area = $("#AreaForCompensation").val().trim() == "" ? 0 : $("#AreaForCompensation").val();
+        var interest = $('#InterestAmount').val().trim() == "" ? 0 : $("#InterestAmount").val();
+        if (rate != 0 && area != 0) {
+            var compensation = parseFloat(parseFloat(area).toFixed(2) * parseFloat(rate).toFixed(2)).toFixed(2);
+            var totalpayable = Number(parseFloat(compensation).toFixed(2)) + Number(parseFloat(interest).toFixed(2));
+            $("#CompensationAmount").data("kendoNumericTextBox").value(compensation);           
+            $("#TotalCompensationAmount").data("kendoNumericTextBox").value(totalpayable);
+        }
+    }
+
+    function ClearInputFields() {
+        $("#RegistrationId").data("kendoDropDownList").value('');
+        $("#PropertyId").val('');
+        $("#DepartmentId").val('');
+        $("#Department").val('');
+        $("#Applicant").val('');
+        $("#PropertyNo").val('');
+        $("#TotalArea").data("kendoNumericTextBox").value('');
+        $("#TotalAllotmentRate").data("kendoNumericTextBox").value('');
+        $("#TotalPropertyCost").data("kendoNumericTextBox").value('');
+    }
+
+
+    function ClearCompensationFields() {
+        $("#CompensationRequestDate").data("kendoDatePicker").value('');
+        $("#CompensationInPercent").data("kendoNumericTextBox").value('');
+        $("#AreaForCompensation").data("kendoNumericTextBox").value('');
+        $("#CompensationRate").data("kendoNumericTextBox").value('');
+        $("#PenalInterest").data("kendoNumericTextBox").value('');
+        $("#CompensationAmount").data("kendoNumericTextBox").value('');
+        $("#TotalCompensationAmount").data("kendoNumericTextBox").value('');
+    }
+
+</script>
+
+
+
+

@@ -1,0 +1,148 @@
+﻿@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions
+
+
+<div class="panel-body">
+    <div class="row form-group">
+        <div class="col-md-12" id="Application" style="text-align:center">
+            <input type="radio" name="schemetype-action" value="AddSchemeType" />Add &nbsp;&nbsp;
+            <input type="radio" name="schemetype-action" value="UpdateSchemeType" />Update
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-3">
+            <label>Ex Scheme Type:</label>
+        </div>
+        <div class="col-md-3">
+            @(Html.Kendo().DropDownList()
+                  .Name("ddlSchemeType")
+                  .OptionLabel("---select---")
+                  .DataTextField("Text")
+                  .DataValueField("Id")
+                  .DataSource(source => source.Read(read => read.Action("GetSchemeTypeList", "Application", new { area = "Admin" })))
+                  .HtmlAttributes(new { style = "width:100%;" })
+            )
+        </div>
+        <div class="col-md-3"></div>
+        <div class="col-md-3"></div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-3">
+            <label>Scheme Description</label>
+        </div>
+        <div class="col-md-3">
+            <input type="text" maxlength="30" id="txtSchemeDescription" class="k-textbox" />
+        </div>
+        <div class="col-md-3">
+            <label>New Scheme Type:</label>
+        </div>
+        <div class="col-md-3">
+            <input type="text" maxlength="30" id="txtSchemeType" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-12" style="text-align:right">
+            <input type="button" id="btnSchemeTypeRequest" class="k-button" value="Update" style="min-width:80px;" />
+            <input type="button" id="btnSchemeTypeClear" class="k-button" value="Clear" />
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {      
+        $('input[type="radio"][name="schemetype-action"]').on("change", function () {
+            var action = $('input[type="radio"][name="schemetype-action"]:checked').val();
+            if (action == "AddSchemeType") {
+                $('#btnSchemeTypeRequest').val("Add");
+                $('#ddlSchemeType').data("kendoDropDownList").value('');
+                $('#ddlSchemeType').data("kendoDropDownList").enable(false);
+            }
+            else {
+                $('#btnSchemeTypeRequest').val("Update");
+                $('#ddlSchemeType').data("kendoDropDownList").enable(true);
+            }
+        });
+
+
+        $('#btnSchemeTypeRequest').click(function () {
+            SubmitSchemeTypeForm();
+        });
+
+        $('#btnSchemeTypeClear').click(function () {
+            ClearSchemeTypeFields();
+        });
+    });
+
+
+    function SubmitSchemeTypeForm() {
+        var flag = true;
+        var actiontype = $('input[type="radio"][name="schemetype-action"]:checked').val();
+        var schemeTypeId = $('#ddlSchemeType').data("kendoDropDownList").value();
+        var schemeType = $('#txtSchemeType').val();
+        var schemeDesc = $('#txtSchemeDescription').val();
+        if (actiontype == "" || actiontype == undefined) {
+            flag = false;
+            alertify.error("Select Action type.");
+            return false;
+        }
+        if (actiontype == "AddSchemeType") {
+            if (schemeType == "") {
+                alertify.error("Enter Scheme Type name");
+                flag = false;
+            }
+            if (schemeDesc == "") {
+                alertify.error("Enter Scheme Description");
+                flag = false;
+            }
+            actiontype = "Add";
+        }
+        if (actiontype == "UpdateSchemeType") {
+            if (schemeTypeId == "") {
+                alertify.error("Select Select Type");
+                flag = false;
+            }
+            else if (schemeType == "") {
+                alertify.error("Enter Select Type name");
+                flag = false;
+            }
+            actiontype = "Update";
+        }
+        if (flag) {
+            var SchemeTypeModel = {
+                ActionType: actiontype,
+                SchemeTypeId: $('#ddlSchemeType').data("kendoDropDownList").value(),
+                Name: $('#ddlSchemeType').data("kendoDropDownList").text(),
+                SchemeType: $('#txtSchemeType').val(),
+                SchemeTypeDescription: $('#txtSchemeDescription').val()
+            };
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ model: SchemeTypeModel }),
+                url: '@Url.Action("SaveSchemeType", "Application", new { area="Admin"})',
+                success: function (result) {
+                    if ((result == '@ReturnType.Saved') || (result == '@ReturnType.Updated')) {
+                        alertify.success("Scheme Type saved successfully.");
+                        ClearSchemeTypeFields();
+                        $('#ddlSchemeType').data("kendoDropDownList").dataSource.read();
+                    }
+                    else if (result == '@ReturnType.None') {
+                        alertify.error("Scheme Type doesn't exist.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again");
+                }
+            });
+        }
+    }
+
+    function ClearSchemeTypeFields() {
+        $('#ddlSchemeType').data("kendoDropDownList").value('');
+        $('#txtSchemeType').val('');
+        $('#txtSchemeDescription').val('');
+    }
+</script>

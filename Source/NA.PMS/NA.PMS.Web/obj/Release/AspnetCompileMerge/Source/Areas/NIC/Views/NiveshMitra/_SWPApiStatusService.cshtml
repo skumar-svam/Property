@@ -1,0 +1,285 @@
+﻿@using NA.PMS.NICServices;
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions
+
+
+<div class="panel-body">
+    <div class="row form-group">
+        <div class="col-md-12" id="ApplicationMenu" style="text-align:center">
+            <input type="radio" name="api-service-type" value="Services" />SWP Services &nbsp;&nbsp;
+            <input type="radio" name="api-service-type" value="Forms" />SWP Forms &nbsp;&nbsp;
+        </div>
+    </div>
+    <div class="row" style="display:none">
+        <input type="hidden" id="hdn-api-departmentid" />
+        <input type="hidden" id="hdn-api-serviceid" />
+        <input type="hidden" id="hdn-api-servicename" />
+    </div>
+    <div class="row form-group" style="padding-right:30px">
+        <div class="col-md-3 col-20">
+            <label>Request Id</label>
+        </div>
+        <div class="col-md-3 col-30">
+            @(Html.Kendo().DropDownList()
+                  .Name("DDLStatusRequestId")
+                  .OptionLabel("---select---")
+                  .DataTextField("Text")
+                  .DataValueField("Value")
+                  .Filter("contains")
+                  .DataSource(source =>
+                  {
+                      source.Custom().ServerFiltering(true).ServerPaging(true).Type("aspnetmvc-ajax")
+                      .Transport(transport => transport.Read(read => read.Action("GetSWPServiceRequestIdForDropDownAsDataSource", "NiveshMitra", new { area = "NIC" })))
+                      .Schema(schema => schema.Data("Data").Total("Total")).PageSize(100);
+                  })
+                  .HtmlAttributes(new { style = "width:100%;" })
+                  .Events(e=>e.Change("DropDownStatusRequestIdChangeEvent"))
+            )
+        </div>
+        <div class="col-md-3 col-20">
+            <label>Department</label>
+        </div>
+        <div class="col-md-3 col-30">
+            <input type="text" maxlength="10" id="txt-api-department" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row form-group" style="padding-right:30px;">
+        <div class="col-md-3 col-20">
+            <label>Control Id</label>
+        </div>
+        <div class="col-md-3 col-30">
+            <input type="text" maxlength="10" id="txt-api-controlid" class="k-textbox" />
+        </div>
+        <div class="col-md-3 col-20">
+            <label>Unit Id</label>
+        </div>
+        <div class="col-md-3 col-30">
+            <input type="text" maxlength="10" id="txt-api-unitid" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row form-group" style="padding-right:30px;">
+        <div class="col-md-3 col-20">
+            <label>Service Id:</label>
+        </div>
+        <div class="col-md-3 col-30">
+            <input type="text" maxlength="10" id="txt-api-serviceid" class="k-textbox" />
+        </div>
+        <div class="col-md-3 col-20">
+            <label>Process Industry Id:</label>
+        </div>
+        <div class="col-md-3 col-30">
+            <input type="text" maxlength="10" id="txt-api-industryid" class="k-textbox" />
+        </div>
+        
+    </div>
+    <div class="row form-group" style="padding-right:30px;">
+        <div class="col-md-3 col-20">
+            <label>NIC Request Id:</label>
+        </div>
+        <div class="col-md-3 col-30">
+            <input type="text" maxlength="10" id="txt-api-requestid" class="k-textbox" />
+        </div>
+        <div class="col-md-3 col-20">
+            <label id="lbl-status">Status Code:</label>
+        </div>
+        <div class="col-md-3 col-30">
+            @(Html.Kendo().DropDownList()
+                .Name("DDLApiStatusCode")
+                .OptionLabel("---select---")
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .BindTo(new List<NA.PMS.NICServices.SWPDropdownViewModel>() {
+                    new NA.PMS.NICServices.SWPDropdownViewModel(){ Text="INPROCESS", Value="01" },
+                    new NA.PMS.NICServices.SWPDropdownViewModel(){ Text="PENDING", Value="02" },
+                    new NA.PMS.NICServices.SWPDropdownViewModel(){ Text="VIEWED", Value="03" },
+                    new NA.PMS.NICServices.SWPDropdownViewModel(){ Text="VERIFIED", Value="04" },
+                    new NA.PMS.NICServices.SWPDropdownViewModel(){ Text="FORWARDED", Value="05" },
+                    new NA.PMS.NICServices.SWPDropdownViewModel(){ Text="APPROVED", Value="06" },
+                    new NA.PMS.NICServices.SWPDropdownViewModel(){ Text="REJECTED", Value="07" },
+                    new NA.PMS.NICServices.SWPDropdownViewModel(){ Text="QUERY_OBJECTION", Value="08" },
+                    new NA.PMS.NICServices.SWPDropdownViewModel(){ Text="PUT_FOR_FURTHER_REVIEW", Value="09" },
+                    new NA.PMS.NICServices.SWPDropdownViewModel(){ Text="SAVE_AS_DRAFT", Value="10" },
+                    new NA.PMS.NICServices.SWPDropdownViewModel(){ Text="FEE_PAID", Value="11" },
+                    new NA.PMS.NICServices.SWPDropdownViewModel(){ Text="FEE_PENDING", Value="12" },
+                    new NA.PMS.NICServices.SWPDropdownViewModel(){ Text="FORM_SUBMITTED", Value="13" },
+                    new NA.PMS.NICServices.SWPDropdownViewModel(){ Text="FORM_RE_SUBMITTED", Value="14" },
+                    new NA.PMS.NICServices.SWPDropdownViewModel(){ Text="CERTIFICATE_NO_ISSUED", Value="15" }
+                })
+                .HtmlAttributes(new { style = "width:100%;" })
+                .Events(e => e.Change("DDLApiStatusCodeChangeEvent"))
+            )
+        </div>
+    </div>
+    <div class="row form-group" style="padding-right:30px;">
+        <div class="col-md-3 col-20">
+            <label>Fee Amount:</label>
+        </div>
+        <div class="col-md-3 col-30">
+            <input type="text" maxlength="10" id="txt-api-feeamount" class="k-textbox" />
+        </div>
+        <div class="col-md-3 col-20">
+            <label>Fee Status:</label>
+        </div>
+        <div class="col-md-3 col-30">
+            <input type="text" maxlength="10" id="txt-api-feestatus" class="k-textbox" placeholder="UB"/>
+        </div>
+    </div>
+    <div class="row form-group" style="padding-right:30px;">
+        <div class="col-md-3 col-20">
+            <label>Pendency Level:</label>
+        </div>
+        <div class="col-md-3 col-30">
+            <input type="text" maxlength="100" id="txt-api-pendencylevel" class="k-textbox" />
+        </div>
+        <div class="col-md-3 col-20">
+            <label>Remarks:</label>
+        </div>
+        <div class="col-md-3 col-30">
+            <input type="text" maxlength="10" id="txt-api-remarks" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row form-group" style="text-align:right;padding-right:30px;">
+        <div class="col-md-12">
+            <input type="button" id="btn-update-apistatus" class="k-button" value="Update" style="min-width:100px;" />
+            <input type="button" id="btn-clear-apistatus" class="k-button" value="Clear" style="min-width:100px;" />
+        </div>
+    </div>
+</div>
+
+<script>
+    //jQuery(function () { jQuery("#txt-api-department").kendoDropDownList({ "dataSource": { "type": "aspnetmvc-ajax", "transport": { "read": { "url": "/NIC/NoidaAuthority/GetDropDownListAsDataSource", "data": FilterDepartment } }, "pageSize": 100, "page": 0, "total": 0, "serverPaging": true, "serverFiltering": true, "filter": [], "schema": { "data": "Data", "total": "Total" } }, "dataTextField": "Text", "filter": "contains", "autoBind": true, "dataValueField": "Value", "optionLabel": " -- Select --", "htmlAttributes": '{"width": 100%}' }); });
+
+    //jQuery(function () { jQuery("#txt-api-serviceid").kendoDropDownList({ "dataSource": { "type": "aspnetmvc-ajax", "transport": { "read": { "url": "/NIC/NoidaAuthority/GetDropDownListAsDataSource", "data": FilterServices } }, "pageSize": 100, "page": 0, "total": 0, "serverPaging": true, "serverFiltering": true, "filter": [], "schema": { "data": "Data", "total": "Total" } }, "dataTextField": "Text", "filter": "contains", "autoBind": true, "dataValueField": "Value", "optionLabel": " -- Select --", "cascadeFrom": "txt-api-department", "cascadeFromField": "DepartmentId", "change": ServiceNameChangeEvent }); });
+
+
+    $(document).ready(function () {
+        //$('#hdn-api-servicename').val("Issue No Dues Certificate");
+        //$('[data-toggle="tooltip"]').tooltip();
+
+        //$('#txt-api-serviceid').css("hover", "abc");
+        $('#txt-api-serviceid').hover(
+          function () {
+              $(this).css('cursor', 'pointer').attr('title', $('#hdn-api-servicename').val());
+          }, function () {
+              $(this).css('cursor', 'auto');
+          }
+        );
+
+        //$('input[type="radio"][name="api-service-type"]').on("change", function () {
+        //    var action = $('input[type="radio"][name="service-action"]:checked').val();
+        //    if (action == "AddSWPService") {
+        //        $('#ddlAuthorityServiceList').data("kendoDropDownList").value('');
+        //        $('#ddlNICServiceList').data("kendoDropDownList").value('');
+        //        $('#ddlNICServiceList').data("kendoDropDownList").enable(false);
+        //        $('#ddlAuthorityServiceList').data("kendoDropDownList").dataSource.read();
+        //    }
+        //    else if (action == "UpdateSWPService") {
+        //        $('#ddlAuthorityServiceList').data("kendoDropDownList").value('');
+        //        $('#ddlAuthorityServiceList').data("kendoDropDownList").enable(false);
+        //        $('#ddlNICServiceList').data("kendoDropDownList").value('');
+        //        $('#ddlNICServiceList').data("kendoDropDownList").enable(true);
+        //        $('#ddlNICServiceList').data("kendoDropDownList").dataSource.read();
+        //    }
+        //});
+
+        //$('#btn-update-service').click(function () {
+        //    SubmitSWPServiceDetail();
+        //});
+
+        $('#btn-update-apistatus').click(function () {
+            if ($('#DDLStatusRequestId').val() != "" && $('#DDLStatusRequestId').val() != undefined) {
+                SubmitApiStatusServiceDetail();
+            }
+            else {
+                alertify.error("Please select Request Id");
+            }
+        });
+    });
+
+    function SubmitApiStatusServiceDetail() {
+        var flag = true;
+        
+        if (flag) {
+            var statusModel = {
+                ActionType: "UpdateStatus",
+                ControlId: $('#txt-api-controlid').val(),
+                UnitId: $('#txt-api-unitid').val(),
+                ServiceId: $('#txt-api-servcieid').val(),
+                ApplicationId: $('#txt-api-applicationid').val(),
+                ProcessIndustryId: $('#txt-api-industryid').val(),
+                DepartmentId: $('#hdn-api-departmentid').val(),
+                RequestId: $('#DDLApiServiceCode').data("kendoDropDownList").value(),
+                ServiceCode: $('#DDLApiStatusCode').data("kendoDropDownList").value(),
+                PendencyLevel: $('#txt-api-pendencylevel').val(),
+                Remarks: $('#txt-api-remarks').val(),
+                FeeAmount: $('#txt-api-feeamount').val(),
+                FeeStatus: $('#txt-api-feestatus').val(),
+            };
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ model: statusModel }),
+                url: '/NIC/NiveshMitra/UpdateNiveshMitraApiStatusService',
+                success: function (result) {
+                    if (result.ReturnTypeId == '@SWPReturnTypeId.Updated') {
+                        alertify.success("Service updated successfully.");
+                    }
+                    else {
+                        alertify.error("Provider failed to update service.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again");
+                }
+            });
+        }
+    }
+
+
+    function DropDownStatusRequestIdChangeEvent() {
+        var requestId = $('#DDLStatusRequestId').val();
+        if (requestId != "" && requestId != undefined) {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ ApplicationId: $('#DDLStatusRequestId').val() }),
+                url: '/NIC/NiveshMitra/GetSWPServiceRequestDetailById',
+                success: function (result) {
+                    if ((result != null)) {
+                        $('#txt-api-department').val(result.Department);
+                        $('#txt-api-controlid').val(result.ControlId);
+                        $('#txt-api-unitid').val(result.UnitId);
+                        $('#txt-api-serviceid').val(result.ServiceId);
+                        $('#txt-api-industryid').val(result.ProcessIndustryId);
+                        $('#txt-api-requestid').val(result.RequestId);
+                        $('#hdn-api-servicename').val(result.ServiceName);
+                    }
+                    else {
+                        alertify.error("Service don't match.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again");
+                }
+            });
+        }
+        else {
+
+        }
+    }
+
+    function DDLApiStatusCodeChangeEvent() {
+        var statusCode = $('#DDLApiStatusCode').val();
+        if (statusCode == "12") {
+            $('#txt-api-feestatus').val("UB");
+        }
+        else {
+            $('#txt-api-feestatus').val($('#DDLApiStatusCode').data("kendoDropDownList").text());
+        }     
+    }
+
+</script>

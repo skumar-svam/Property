@@ -1,0 +1,181 @@
+﻿@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions
+
+
+<div class="panel-body">
+    <div class="row form-group">
+        <div class="col-md-12" id="AccountHead" style="text-align:center">
+            <input type="radio" name="accounthead-action" value="AddMenu" />Add &nbsp;&nbsp;
+            <input type="radio" name="accounthead-action" value="UpdateMenu" />Update
+        </div>
+    </div>
+    <div class="row form-group" style="padding-right:30px;">
+        <div class="col-md-3">
+            <label>Account Head</label>
+        </div>
+        <div class="col-md-3">
+            @(Html.Kendo().DropDownList()
+                .Name("DDLAccountHead")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .OptionLabel("---Select---")
+                .Filter("contains")
+                .DataSource(source =>
+                {
+                    source.Custom()
+                    .ServerPaging(true)
+                    .ServerFiltering(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    .Transport(transport => transport.Read(read => read.Action("GetAccountHeadList", "Payment", new { Area = "Revenue" })))
+                    .Schema(schema => schema.Data("Data").Total("Total"))
+                    .PageSize(100);
+
+                })
+                .HtmlAttributes(new { style = "width:100%;" })
+                //.Events(m => m.Change("GetPaymentDetails"))
+            )
+        </div>
+        <div class="col-md-3">
+            <label>New Account Head</label>
+        </div>
+        <div class="col-md-3">
+            <input type="text" class="k-textbox" id="txtAccountHead" maxlength="40" />
+        </div>
+    </div>
+    <div class="row form-group" style="padding-right:30px;">
+        <div class="col-md-3">
+            <label>Account Sub Head</label>
+        </div>
+        <div class="col-md-3">
+            @(Html.Kendo().DropDownList()
+                .Name("DDLAccountSubHead")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .OptionLabel("---Select---")
+                .Filter("contains")
+                .CascadeFrom("DDLAccountHead")
+                .DataSource(source =>
+                {
+                    source.Custom()
+                    .ServerPaging(true)
+                    .ServerFiltering(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    .Transport(transport => transport.Read(read => read.Action("GetAccountSubHeadList", "Payment", new { Area = "Revenue" }).Data("FilterAccountHead")))
+                    .Schema(schema => schema.Data("Data").Total("Total"))
+                    .PageSize(100);
+
+                })
+                .HtmlAttributes(new { style = "width:100%;" })
+                    //.Events(m => m.Change("GetPaymentDetails"))
+            )
+        </div>
+        <div class="col-md-3">
+            <label>New Account Sub Head:</label>
+        </div>
+        <div class="col-md-3">
+            <input type="text" class="k-textbox" id="txtAccountSubHead" maxlength="40" />
+        </div>
+    </div>
+    <div class="row form-group" style="text-align:right;padding-right:30px;">
+        <div class="col-md-12">
+            <input type="button" id="btnMenuRequest" class="k-button" value="Update" style="min-width:80px;" />
+            <input type="button" id="btnMenuClear" class="k-button" value="Clear" />
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+
+        $('input[type="radio"][name="menu-action"]').on("change", function () {
+            var action = $('input[type="radio"][name="menu-action"]:checked').val();
+            if (action == "AddMenu") {
+                $('#btnMenuRequest').val("Add");
+                $('#ddlMenu').data("kendoDropDownList").value('');
+                $('#ddlMenu').data("kendoDropDownList").enable(false);
+            }
+            else {
+                $('#btnMenuRequest').val("Update");
+                $('#ddlMenu').data("kendoDropDownList").enable(true);
+            }
+        });
+
+
+    });
+
+    function FilterAccountHead() {
+        return { id: $('#DDLAccountHead').val() };
+    }
+
+
+    function SubmitApplicationMenuForm() {
+        var flag = true;
+        var actiontype = $('input[type="radio"][name="menu-action"]:checked').val();
+        var applicationId = $('#ddlMenuApplication').data("kendoDropDownList").value();
+        var parentMenuId = $('#ddlParentMenu').data("kendoDropDownList").value();
+        var menuId = $('#ddlMenu').data("kendoDropDownList").value();
+        var menu = $('#txtMenu').val();
+        if (actiontype == "" || actiontype == undefined) {
+            flag = false;
+            alertify.error("Select Action type.");
+            return false;
+        }
+        if (applicationId == "") {
+            flag = false;
+            alertify.error("Select Application.");
+            return false;
+        }
+        if (actiontype == "AddMenu") {
+            if (menu == "") {
+                alertify.error("Enter Menu name");
+                flag = false;
+            }
+            actiontype = "Add";
+        }
+        if (actiontype == "UpdateMenu") {
+            if (menu == "") {
+                alertify.error("Enter Menu name");
+                flag = false;
+            }
+            actiontype = "Update";
+        }
+        if (flag) {
+            var MenuModel = {
+                ActionType: actiontype,
+                ApplicationId: $('#ddlMenuApplication').data("kendoDropDownList").value(),
+                ParentMenuId: $('#ddlParentMenu').data("kendoDropDownList").value(),
+                MenuId: $('#ddlMenu').data("kendoDropDownList").value(),
+                Menu: $('#txtMenu').val()
+            };
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ model: MenuModel }),
+                url: '@Url.Action("SaveApplicationMenu", "Application", new { area = "Admin" })',
+                success: function (result) {
+                    if ((result == '@ReturnType.Saved') || (result == '@ReturnType.Updated')) {
+                        alertify.success("Menu saved successfully.");
+                        ClearApplicationMenuFields();
+                        $('#ddlParentMenu').data("kendoDropDownList").dataSource.read();
+                        $('#ddlMenu').data("kendoDropDownList").dataSource.read();
+                    }
+                    else if (result == '@ReturnType.None') {
+                        alertify.error("Property Type doesn't exist.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again");
+                }
+            });
+        }
+    }
+
+    function ClearApplicationMenuFields() {
+        $('#ddlMenu').data("kendoDropDownList").value('');
+        $('#txtMenu').val('');
+    }
+
+</script>

@@ -1,0 +1,477 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@model NA.PMS.Model.RentPermissionModel
+@{
+    ViewBag.Title = "RentRequest";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script src="~/Scripts/_references.js"></script>
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="col-md-12">
+        <div class="row rw-spce" style="margin-bottom:10px;">
+            <div class="col-md-6 col-sm-12 col-xs-12">
+                <h1 class="gridTitle">Manage Rent Request</h1>
+            </div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                @*<label class="btn btn-default" id="lblRequestStatus" style="border-radius:0;"></label>*@
+                @if (Model.RequestStatus == "Approved")
+                {
+                    <i class=" glyphicon glyphicon-ok-sign" aria-hidden="true"></i>
+                    <strong style="color: lightgreen;"> Approved</strong>
+                }
+                else if (Model.RequestStatus == "InProgress")
+                {
+                    <i class=" glyphicon glyphicon-refresh" aria-hidden="true"></i>
+                    <strong style="color: green;"> InProgress</strong>
+                }
+                else if (Model.RequestStatus == "Rejected")
+                {
+                    <strong style="color: red;"><i class="glyphicon glyphicon-remove-sign" aria-hidden="true"></i>  Rejected</strong>
+                }
+                else if (Model.RequestStatus == "Cancelled")
+                {
+                    <strong style="color: red;"><i class="glyphicon glyphicon-remove-sign" aria-hidden="true"></i>  Canceled</strong>
+                }
+                <a href="#" id="btnViewCommentBox" class="" >View Comment</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 content-top-spce">
+        <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            <h2 class="blck-heading">Rent Request</h2>
+            <div class="form-bx">
+                <div class="row">
+                    @Html.HiddenFor(model => model.RequestNo)
+                    @Html.HiddenFor(model => model.StatusId)
+                    @*@Html.HiddenFor(model => model.Comment)*@
+                    @*@Html.HiddenFor(model => model.CommentDate)*@
+                    @Html.HiddenFor(model => model.Rid)
+                    @Html.HiddenFor(model => model.RequestStatus)
+                    @Html.HiddenFor(model => model.ViewName)
+                    @Html.HiddenFor(model => model.Functional)
+                    @Html.HiddenFor(model => model.GenderOrCompany)
+                    @Html.HiddenFor(model => model.IsRentingChargePaid)
+                    @*@Html.HiddenFor(model => model.AssignedUser)*@
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="font-bold">Registration Id</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @*<label class="form-control">@Html.DisplayFor(model => model.RequestNo)</label>*@
+                        @Html.TextBoxFor(model => model.Rid, new { @class = "form-control", @disabled = "disabled" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @*<label class="font-bold">Property No</label>*@
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @*<label class="form-control">@Html.DisplayFor(model => model.Sector)/@Html.DisplayFor(model => model.Block)/@Html.DisplayFor(model => model.PropertyNo)</label>*@
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.Label("Property No:", htmlAttributes: new { })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @*<label id="lblPropertyNo" class="font-bold form-control"></label>*@
+                        <label class="form-control">@Html.DisplayFor(model => model.Sector)/@Html.DisplayFor(model => model.Block)/@Html.DisplayFor(model => model.PropertyNo)</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.Label("Request Ref No:", htmlAttributes: new { @class = "" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.TextBoxFor(m => m.ServiceRequestRefNo, htmlAttributes: new { @class = "form-control", @readonly="readonly" })
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="font-bold">Scheme Name</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="form-control">@Html.DisplayFor(model => model.SchemeName)</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="font-bold">Department</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="form-control">@Html.DisplayFor(model => model.Department)</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label id="lblAllotteeName" class="font-bold">Allottee Name</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="lbl-form-control">@Html.DisplayFor(model => model.AllotteeName)</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="font-bold">Gender</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="form-control">@Html.DisplayFor(model => model.GenderOrCompany)</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label id="_lblParentsName" class="font-bold">Father's/Husband's Name</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label id="lblParentsName" class="form-control">@Html.DisplayFor(model => model.FatherOrHusbandName)</label>
+                        <label id="lblSigningAuthority" class="form-control">@Html.DisplayFor(model => model.SigningAuthority)</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="font-bold">Property Type</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="form-control">@Html.DisplayFor(model => model.PropertyType)</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="font-bold">Total Area(sqmt)</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="form-control">@Html.DisplayFor(model => model.TotalArea)</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="font-bold">Floor/Area Range</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="form-control">@Html.DisplayFor(model => model.FloorNo)</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="font-bold">Total Dues</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="form-control">@Html.DisplayFor(model => model.TotalDues)</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="font-bold">Functional</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="form-control">@Html.DisplayFor(model => model.YesOrNo)</label>
+                        @*<label id="lblFunctional" class="form-control"></label>*@
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="font-bold">Tenant Name</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="form-control">@Html.DisplayFor(model => model.TenantName)</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="font-bold">Tenant Project</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="form-control">@Html.DisplayFor(model => model.TenantProject)</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="font-bold">Rent Duration</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="form-control">@Html.DisplayFor(model => model.RentDuration)</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="font-bold">Renting Charge</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="form-control">@Html.DisplayFor(model => model.RentingCharge)</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="font-bold">Renting Date</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="form-control">@Html.DisplayFor(model => model.RentingDate)</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="font-bold">Renting End Date</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="form-control">@Html.DisplayFor(model => model.RentingEndDate)</label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="font-bold">Renting Area</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="form-control">@Html.DisplayFor(model => model.Area)</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="font-bold">Remarks</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="form-control">@Html.DisplayFor(model => model.Remarks)</label>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="box-button text-center">
+            @*@Html.ActionLink("Back", "ManageRentRequest", "PropertyRegistration", new { @class = "btn btn-default" })*@
+            <button type="button" value="Cancel" id="btnBack" class="btn btn-default" onclick="">Back</button>
+            <input type="button" id="btnReject" value="Reject" class="btn btn-default" />
+            <input type="button" id="btnApprove" value="Approve" class="btn btn-add" />
+        </div>
+    </div>
+</div>
+
+<div id="divPopupCommentBox">
+    <div class="container-fluid">
+        <div class="row form-group">
+            <div class="col-sm-11">
+                <label class="font-bold">Comments</label>
+                <textarea id="txtareaCommentBox" class="form-control" maxlength="500" style="min-height:80px;"></textarea>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-sm-6 col-sm-offset-3">
+                <button id="btnPopupSubmit" class="btn btn-default">Submit</button>
+                <button id="btnPopupCancel" class="btn btn-default">close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="divCommentBox">
+    <div class="container-fluid">
+        <div class="row form-group">
+            <div class="col-sm-10">
+                <div id="divCommentedArea" style="min-height:150px;">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="font-bold">Approver:</label>
+                        </div>
+                        <div class="col-md-9">
+                            <label>@Html.DisplayFor(model => model.AssignedUser)</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="font-bold">Date:</label>
+                        </div>
+                        <div class="col-md-9">
+                            <label>Date: @Html.DisplayFor(model => model.CommentDate)</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="font-bold">Comment: </label>
+                        </div>
+                        <div class="col-md-9">
+                            <label>@Html.DisplayFor(model => model.Comment)</label>
+                        </div>
+                    </div>                   
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        debugger;
+        $('#ViewName').val("RentRequest");
+        //if ($('#GenderOrCompany').val().ToLower() == "company") {
+        //    $('#lblAllotteeName').text("Company Name");
+        //    $('#lblParentsName').text("Authorized Signatory");
+        //    $('#FatherOrHusbandName').hide();
+        //} else {
+        //    $('#SigningAuthority').hide();
+        //}
+        //$('#lblRequestStatus').text("Status: " + $('#RequestStatus').val());
+        $('#lblFunctional').text($('#Functional').val())
+        if ($('#RequestStatus').val() == "Approved" || $('#RequestStatus').val() == "Rejected" || $('#RequestStatus').val() == "Cancelled") {
+            $('#btnApprove').css("display", "none");
+            $('#btnReject').css("display", "none");
+            $('#divPopupSubmit').css("display", "none");
+            //$('#btnViewCommentBox').css("display", "none");
+        }
+        //if ($('#Comment').val().trim() != "" || $('#Comment').val() != null) {
+        //    //$('#txtareaCommentBox').val($('#Comment').val());
+        //    //$('#divPopupSubmit').css("display", "none");
+        //    //$('#divCommentedArea').html($('#Comment').val());
+        //}
+        if ($('#RequestStatus').val() == "InProgress" || $('#RequestStatus').val() == "Pending") {
+            $('#btnViewCommentBox').css("display", "none");
+        } else {
+            $('#btnPopupSubmit').css("display", "none");
+        }
+        //debugger
+        if ($('#GenderOrCompany').val() == "Company") {
+            $('#lblAllotteeName').text("Company Name");
+            $('#_lblParentsName').text("Authorized Signatory");
+            $('#lblParentsName').hide();
+        } else {
+            $('#lblSigningAuthority').hide();
+        }
+
+        $("#btnBack").click(function () {
+            var PendencyReq = '@Request.QueryString["pr"]';
+            if (PendencyReq == 'true') {
+                window.location.href = '@Url.Action("PendencyReport", "Report", new { Area = "Reports" })';
+            }
+            else { window.location.href = '@Url.Action("ManageRentRequest", "PropertyRegistration")'; }
+        });
+    });
+    $('#divCommentBox').kendoWindow({
+        modal: true,
+        title: "Comments of Approver",
+        visible: false,
+        //width: "35%"
+    });
+
+    $('#divPopupCommentBox').kendoWindow({
+        modal: true,
+        title: "Approve/Reject Rent Request",
+        visible: false,
+        //width: "35%"
+    });
+
+    $('#btnViewCommentBox').click(function () {
+        var win = $("#divCommentBox").data("kendoWindow");
+        //$('#divPopupSubmit').css("display", "none");
+        win.center();
+        win.open();
+    });
+
+    $('#btnPopupCancel').click(function () {
+        $("#divPopupCommentBox").data("kendoWindow").close();
+        $('#divPopupSubmit').show();
+    });
+
+    $('#btnApprove').click(function () {
+        var rid = $('#Rid').val();
+        //var flag = IsPropertyRentingChargePaid(rid);
+        if (rid != "") {
+            $('#RequestStatus').val("Approved");
+            var win = $("#divPopupCommentBox").data("kendoWindow");
+            $('#divPopupSubmit').show();
+            win.center();
+            win.open();
+        }
+        else {
+            alertify.error("Slect Registration Id");
+            return false;
+        }
+    });
+
+    @*$('#btnApprove').click(function () {
+        var rid = $('#Rid').val();
+        //var flag = IsPropertyRentingChargePaid(rid);
+        if (rid != "") {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify({ rid: rid }),
+                url: '@Url.Action("IsRentingChargePaid","PropertyRegistration")',
+                success: function (result) {
+                    if (result == true) {
+                        $('#RequestStatus').val("Approved");
+                        var win = $("#divPopupCommentBox").data("kendoWindow");
+                        $('#divPopupSubmit').show();
+                        win.center();
+                        win.open();
+                        //return true;
+                    }
+                    else {
+                        alertify.error("Renting Charge is not paid");
+                        return false;
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Something is wrong, try again later");
+                    //return false;
+                }
+            });
+        }
+        else {
+            return false;
+        }
+    });*@
+
+    $('#btnReject').click(function () {
+        $('#RequestStatus').val("Rejected");
+        var win = $('#divPopupCommentBox').data('kendoWindow');
+        $('#divPopupSubmit').show();
+        win.center();
+        win.open();
+    });
+
+    $('#btnPopupSubmit').click(function () {
+        // alert("sh");
+        var comment = $('#txtareaCommentBox').val();
+        //alert($('#RequestStatus').val());
+        if (comment.trim() == "" || comment == null) {
+            alertify.error("Please write your comments");
+            return false;
+        }
+        else {
+            //alert(comment);
+            $('#Comment').val(comment);
+            var rid = $('#Rid').val();
+            var requestno = $('#RequestNo').val();
+            var reqstatus = $('#RequestStatus').val();
+            var viewname = $('#ViewName').val();
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify({ requestNo: requestno, rid: rid, comment: comment, requestStatus: reqstatus, viewName: viewname }),
+                url: '@Url.Action("UpdateStatusOfRentRequest","PropertyRegistration")',
+                success: function (result) {
+                    if (result == true) {
+                        $("#divPopupCommentBox").data("kendoWindow").close();
+                        alertify.success("Request updated successfully");
+                        window.location.href = '@Url.Action("ManageRentRequest", "PropertyRegistration")';
+                    }
+                    else {
+                        alertify.error("There is something error, try again");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Something is wrong, try again later.");
+                }
+            });
+        }
+    });
+
+    function IsPropertyRentingChargePaid(rid) {
+        $.ajax({
+            type: "post",
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            data: JSON.stringify({ rid: rid }),
+            url: '@Url.Action("IsRentingChargePaid","PropertyRegistration")',
+            success: function (result) {
+                if (result == true) {
+                    return true;
+                }
+                else {
+                    alertify.error("Renting Charge is not paid");
+                    return false;
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                alert(ajaxRequest.responseText);
+                //alertify.error("Something is going wrong");
+                return false;
+            }
+        });
+    }
+
+</script>

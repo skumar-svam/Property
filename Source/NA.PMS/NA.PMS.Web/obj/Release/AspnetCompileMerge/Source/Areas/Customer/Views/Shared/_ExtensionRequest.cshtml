@@ -1,0 +1,78 @@
+﻿@model NA.PMS.Model.ServiceRequestViewModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        <label class="required">Extension Due Date</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @(Html.Kendo().DatePickerFor(m => m.ExtensionModel.ExtensionDueDate).HtmlAttributes(new { @class = "input-disabled", style = "width:100%" }))
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        <label class="required">Extension Given Date</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @(Html.Kendo().DatePickerFor(m => m.ExtensionModel.ExtensionGivenDate).HtmlAttributes(new { @class = "input-disabled", style = "width:100%" }))
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+    function checkExtensionDate() {
+        var ExtensionDate = $("#ExtensionModel_ExtensionDueDate").val();
+        var possessionDate = $("#ExtensionModel_PossessionDate").val();
+        var flag = false;
+        if ((Date.parse(possessionDate) >= Date.parse(ExtensionDate))) {
+            alertify.error("Extension Date should not be earlier than Possession Date.");
+            flag = false;
+            return flag;
+        }
+        else { flag = true }
+        return flag;
+    }
+
+    function checkExtensionCompletionDate() {
+        var ExtensionDate = $("#ExtensionModel_ExtensionDueDate").val();
+        var completionDate = $("#ExtensionModel_CompletionDueDate").val();
+        var flag = false;
+        if ((Date.parse(completionDate) >= Date.parse(ExtensionDate))) {
+            alertify.error("Extension Date should not be earlier than Completion Date.");
+            flag = false;
+            return flag;
+        }
+        else { flag = true }
+        return flag;
+    }
+
+    function SaveExtensionRequest() {
+        var dueDate = $("input[name='ExtensionModel.ExtensionDueDate']").val();
+        var givenDate = $("input[name='ExtensionModel.ExtensionGivenDate']").val();
+        var description = $("#ServiceModel_Description").val();
+        if (dueDate == "") {
+            alertify.error("Please select extension due date");
+            return false;
+        }
+        if (givenDate == "") {
+            alertify.error("Please select extension given date");
+            return false;
+        }
+        if (description == "") {
+            alertify.error("Please write description");
+            return false;
+        }
+        else {
+            //$('#ServiceRequestForm').submit();
+            SubmitServiceRequestForm();
+        }
+    }
+
+    function ClearExtensionFields() {
+        $('#ExtensionModel_ExtensionDueDate').data("kendoDatePicker").value('');
+        $('#ExtensionModel_ExtensionGivenDate').data("kendoDatePicker").value('');
+    }
+</script>
+
+
+

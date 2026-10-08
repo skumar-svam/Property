@@ -1,0 +1,490 @@
+﻿@model  NA.PMS.Model.NIC.ServiceRequestVM
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@using NA.PMS.Common;
+
+<div id="PropertyDetailContainerDiv">
+    <div class="row form-group" style="padding-left:30px;">
+        <div class="col-md-6" style="background: #61c7d1;padding-left:10px;">
+            <h4 style="margin:6px 0;">Transferee Information</h4>
+            @Html.HiddenFor(model => model.TransferModel.ApplicantType)
+        </div>
+        <div class="col-md-6" style="background: #61c7d1;padding-bottom:8px">
+            <div style="margin-top:3px;">
+                @Html.RadioButtonFor(model => model.TransferModel.TypeOfTransferee, Constants.Individual, new { @checked = "checked", @class = "radio-inline" }) Individual
+                @Html.RadioButtonFor(model => model.TransferModel.TypeOfTransferee, Constants.Company, new { @class = "radio-inline" }) Company
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="required">Transfer Type</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DropDownListFor(m => m.TransferModel.TransferTypeId)
+                                                                                        .DataTextField("Text")
+                                                                                        .DataValueField("Id")
+                                                                                        .OptionLabel("---Select---")
+                                                                                        .DataSource(source => source.Read(read => read.Action("GetTransferTypeList", "NiveshMitraServices")))
+                                                                                        //.Events(events => { events.Change("TransChange"); })
+                                                                                        .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="required">Transfer Sub-type</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DropDownListFor(m => m.TransferModel.TransferSubTypeId)
+                                                                                        .DataTextField("Text")
+                                                                                        .DataValueField("Id")
+                                                                                        .OptionLabel("---Select---")
+                                                                                        .CascadeFrom("TransferModel_TransferTypeId")
+                                                                                        .DataSource(source => source.Read(read => read.Action("GetTransferSubTypeList", "NiveshMitraServices").Data("FilterTransferTypeId")).ServerFiltering(true))
+                                                                                        .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="genderClass required">Gender</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DropDownListFor(trans => trans.TransferModel.Gender)
+                                                                                        .DataTextField("Text")
+                                                                                        .DataValueField("Text")
+                                                                                        .OptionLabel("---Select---")
+                                                                                        .DataSource(source => source.Read(read => read.Action("GetGenderList", "NiveshMitraServices")))
+                                                                                        .HtmlAttributes(new { style = "width:100%" })
+            )
+            @Html.TextBoxFor(trans => trans.TransferModel.CompanyName, new { @class = "txtCompany k-textbox", @maxlength = "100" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="nw-lbl-lft">PAN</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(t => t.TransferModel.PAN, new { @class = "form-control", @maxlength = "10" })
+        </div>
+    </div>
+    <div class="row row-individual">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="required">First Name</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(t => t.TransferModel.FirstName, new { @class = "txtIndividual form-control", @maxlength = "100" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="">Middle Name</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(t => t.TransferModel.MiddleName, new { @class = "txtIndividual form-control", @maxlength = "100" })
+        </div>
+    </div>
+    <div class="row row-individual">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="required">Last Name</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(t => t.TransferModel.LastName, new { @class = "txtIndividual form-control", @maxlength = "100" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="required">Occupation</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DropDownListFor(trans => trans.TransferModel.OccupationId)
+                                                                                        .DataTextField("Text")
+                                                                                        .DataValueField("Id")
+                                                                                        .OptionLabel("---Select---")
+                                                                                        .DataSource(source => source.Read(read => read.Action("GetOccupationList", "NiveshMitraServices")))
+                                                                                        .HtmlAttributes(new { @class = "schemeForms", style = "width:100%" })
+            )
+
+        </div>
+    </div>
+
+    <div class="row row-company">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="required">Authorized Signatory</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(trans => trans.TransferModel.SigningAuthority, new { @class = "txtCompany form-control", @maxlength = "150" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="required">Registered Office</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(trans => trans.TransferModel.RegisteredOffice, new { @class = "txtCompany form-control", @maxlength = "500" })
+        </div>
+    </div>
+
+    <div class="row row-individual">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="required">Father's/Husband's Name</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(t => t.TransferModel.FatherOrHusbandName, new { @class = "txtIndividual form-control nw-lbl-rht nw-txt-bx", @maxlength = "150" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="">Mother's Name</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(t => t.TransferModel.MotherName, new { @class = "txtIndividual form-control nw-lbl-rht nw-txt-bx", @maxlength = "150" })
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="required">Mobile Number</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(t => t.TransferModel.Mobile, new { @class = "nw-lbl-rht form-control nw-txt-bx", @maxlength = "10", onkeypress = "return IsNumeric(event);" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="">Email</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(t => t.TransferModel.Email, new { @maxlength = "150", @class = "nw-lbl-rht form-control nw-txt-bx" })
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="required">Correspondence Address</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(t => t.TransferModel.CorrespondenceAdd, new { @class = "nw-lbl-rht form-control nw-txt-bx", @maxlength = "500" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="required">Permanent Address</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(t => t.TransferModel.PermanentAdd, new { @class = "nw-lbl-rht form-control nw-txt-bx", @maxlength = "500" })
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="">Fee Amount </label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="form-control">5900</label><small>(Fee (5000) + 18 % GST(900))</small>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="required">Payment Status</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="form-control" id="pay-status"></label>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+
+    $(document).ready(function () {
+        $(".row-company").css("display","none");
+        $('input[type=text][name="TransferModel.CompanyName"]').hide();
+
+        $('input[type=radio][name="TransferModel.TypeOfTransferee"]').change(function () {
+            TransfereeTypeChange();
+        });
+
+        var ttype = $("input[name='TransferModel.ApplicantType']").val();
+        if (ttype == "Company") {
+            $("input[name='TransferModel.TypeOfTransferee'][value='Company']").checked = true;
+            TransfereeTypeChange();
+        }
+
+        var _requestId = '@Model.ServiceModel.RequestId';
+        if (_requestId > 0) {
+            $("input[name='TransferModel.TypeOfTransferee']").attr("disabled", "disabled");
+            $("#TransferModel_TypeOfTransferee [value='Company']").attr("readonly", "readonly");
+            $("#TransferModel_TransferTypeId").data("kendoDropDownList").readonly();
+            $("#TransferModel_TransferSubTypeId").data("kendoDropDownList").readonly();
+            $("#TransferModel_Gender").data("kendoDropDownList").readonly();
+            $("#TransferModel_PAN").attr("readonly", "readonly");
+            $("#TransferModel_FirstName").attr("readonly", "readonly");
+            $("#TransferModel_MiddleName").attr("readonly", "readonly");
+            $("#TransferModel_LastName").attr("readonly", "readonly");
+            $("#TransferModel_OccupationId").data("kendoDropDownList").readonly();
+            $("#TransferModel_FatherOrHusbandName").attr("readonly", "readonly");
+            $("#TransferModel_MotherName").attr("readonly", "readonly");
+            $("#TransferModel_Mobile").attr("readonly", "readonly");
+            $("#TransferModel_Email").attr("readonly", "readonly");
+            $("#TransferModel_CorrespondenceAdd").attr("readonly", "readonly");
+            $("#TransferModel_PermanentAdd").attr("readonly", "readonly");
+
+            $("#TransferModel_CompanyName").attr("readonly", "readonly");
+            $("#TransferModel_RegisteredOffice").attr("readonly", "readonly");
+            $("#TransferModel_SigningAuthority").attr("readonly", "readonly");
+            var _payStatus = '@Model.ServiceModel.PaymentStatus';
+            if (_payStatus != null) {
+                if (_payStatus > 0) {
+                    $("#pay-status").html('Paid');
+                } else {
+                    $("#pay-status").html('Pending');
+                }
+            }
+        }
+    });
+
+    function TransfereeTypeChange() {
+        var transfereeType = $("input[name='TransferModel.TypeOfTransferee']:checked").val();
+        var ddlGender = $("#TransferModel_Gender").data("kendoDropDownList");
+        var ddlOccupation = $("#TransferModel_OccupationId").data("kendoDropDownList");
+        if (transfereeType == '@NA.PMS.Common.Constants.Company') {
+            $(".genderClass").html("Company Name:");
+            $('input[type=text][name="TransferModel.CompanyName"]').show();
+            ddlGender.wrapper.hide();
+            ddlOccupation.wrapper.hide();
+            $(".row-individual").css("display", "none");
+            $(".row-company").show();
+        }
+        else {
+            $(".genderClass").html("Gender:");
+            $('input[type=text][name="TransferModel.CompanyName"]').hide();
+            $(".row-company").css("display", "none");
+            $(".row-individual").show();
+            ddlGender.wrapper.show();
+            ddlOccupation.wrapper.show();
+        }
+    }
+
+    function SaveTransferRequest() {
+        $("#loader").show();
+        var transType = $("#TransferModel_TransferTypeId").val();
+        var transSubType = $("#TransferModel_TransferSubTypeId").val();
+        var desc = $("#ServiceModel_Description").val();
+
+        if (transType == '' || transType == "Select") {
+            $("#loader").hide();
+            alertify.error("Please select a Transfer Type");
+            return false;
+        }
+        if (transSubType == '' || transSubType == "---Select---") {
+            $("#loader").hide();
+            alertify.error("Please select a Transfer Sub-type");
+            return false;
+        }
+        var transfereeType = $("input[name='TransferModel.TypeOfTransferee']:checked").val();
+        if (transfereeType == '@NA.PMS.Common.Constants.Individual') {
+            if (ValidateIndividual()) {
+                ClearCompanyFields();
+                if (desc == "") {
+                    $("#loader").hide();
+                    alertify.error("Please enter description");
+                    return false;
+                }
+                else {
+                    $("#loader").hide();
+                    SubmitServiceRequestForm();
+                }
+            }
+        }
+
+        if (transfereeType == '@NA.PMS.Common.Constants.Company') {
+            if (ValidateCompany()) {
+                ClearIndividualFields();
+                if (desc == "") {
+                    $("#loader").hide();
+                    alertify.error("Please enter description");
+                    return false;
+                }
+                else {
+                    $("#loader").hide();
+                    SubmitServiceRequestForm();
+                }
+            } else {
+                $("#loader").hide();
+            }
+        }
+    }
+
+    function FilterTransferTypeId() {
+        return {
+            transferTypeId: $("#TransferModel_TransferTypeId").val()
+        };
+    }
+
+    function ValidateCompany() {
+        var cmpnyName = $("#TransferModel_CompanyName").val();
+        var signAuth = $("#TransferModel_SigningAuthority").val();
+        var RO = $("#TransferModel_RegisteredOffice").val();
+        var mobileNo = $("#TransferModel_Mobile").val();
+        var email = $("#TransferModel_Email").val();
+        var correspondenceAdd = $("#TransferModel_CorrespondenceAdd").val();
+        var permanentAdd = $("#TransferModel_PermanentAdd").val();
+        var PAN = $("#TransferModel_PAN").val();
+        if (cmpnyName == '') {
+            alertify.error("Please enter Company Name");
+            return false;
+        }
+        if (signAuth == '') {
+            alertify.error("Please enter Authorized Signatory");
+            return false;
+        }
+        if (RO == '') {
+            alertify.error("Please enter Registered Office");
+            return false;
+        }
+        if (mobileNo == '') {
+            alertify.error("Please enter Mobile Number");
+            return false;
+        }
+        if (correspondenceAdd == '') {
+            alertify.error("Please enter Correspondence Address");
+            return false;
+        }
+        if (!/^[a-zA-Z ]*$/g.test(signAuth)) {
+            alertify.error("Authorized Signatory should contain only alphabets and spaces");
+            return false;
+        }
+        if (mobileNo.length < 10) {
+            alertify.error("Please enter a valid Mobile Number");
+            return false;
+        }
+        if (email != '') {
+            if (/^([a-zA-Z0-9_.+-])+\@@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(email) == false) {
+                alertify.error("Please enter a valid Email");
+                return false;
+            }
+        }
+        if (/^[a-zA-Z0-9- ]*$/.test(PAN) == false) {
+            alertify.error("PAN should only be alphanumeric");
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+    function ValidateIndividual() {
+        var gender = $("#TransferModel_Gender").val();
+        var firstName = $("#TransferModel_FirstName").val();
+        var middleName = $("#TransferModel_MiddleName").val();
+        var lastName = $("#TransferModel_LastName").val();
+        var relativeName = $("#TransferModel_FatherOrHusbandName").val();
+        var motherName = $("#TransferModel_MotherName").val();
+        var mobileNo = $("#TransferModel_Mobile").val();
+        var email = $("#TransferModel_Email").val();
+        var correspondenceAdd = $("#TransferModel_CorrespondenceAdd").val();
+        var permanentAdd = $("#TransferModel_PermanentAdd").val();
+        var PAN = $("#TransferModel_PAN").val();
+        var occupation = $("#TransferModel_OccupationId").val();
+        if (gender == '' || gender == "Select") {
+            alertify.error("Please select a Gender");
+            return false;
+        }
+        if (firstName == '') {
+            alertify.error("Please enter First Name");
+            return false;
+        }
+        if (lastName == '') {
+            alertify.error("Please enter Last Name");
+            return false;
+        }
+        if (relativeName == '') {
+            alertify.error("Please enter Father's/Husband's Name");
+            return false;
+        }
+        if (mobileNo == '') {
+            alertify.error("Please enter Mobile Number");
+            return false;
+        }
+        if (correspondenceAdd == '') {
+            alertify.error("Please enter Correspondence Address");
+            return false;
+        }
+        if (permanentAdd == '') {
+            alertify.error("Please enter Permanent Address");
+            return false;
+        }
+        if (occupation == '') {
+            alertify.error("Please select Occupation");
+            return false;
+        }
+        if (!/^[a-zA-Z]*$/g.test(firstName)) {
+            alertify.error("First Name should contain only alphabets");
+            return false;
+        }
+        if (!/^[a-zA-Z]*$/g.test(middleName)) {
+            alertify.error("Middle Name should contain only alphabets");
+            return false;
+        }
+        if (!/^[a-zA-Z]*$/g.test(lastName)) {
+            alertify.error("Last Name should contain only alphabets");
+            return false;
+        }
+        if (!/^[a-zA-Z ]*$/g.test(relativeName)) {
+            alertify.error("Father's/Husband's Name should contain only alphabets and spaces");
+            return false;
+        }
+        if (!/^[a-zA-Z ]*$/g.test(motherName)) {
+            alertify.error("Mother's Name should contain only alphabets and spaces");
+            return false;
+        }
+        if (mobileNo.length < 10) {
+            alertify.error("Please enter a valid Mobile Number");
+            return false;
+        }
+        if (email != '') {
+            if (/^([a-zA-Z0-9_.+-])+\@@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(email) == false) {
+                alertify.error("Please enter a valid Email");
+                return false;
+            }
+        }
+        if (/^[a-zA-Z0-9- ]*$/.test(PAN) == false) {
+            alertify.error("PAN should only be alphanumeric");
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+    function ClearCompanyFields() {
+        $("#TransferModel_CompanyName").val('');
+        $("#TransferModel_SigningAuthority").val('');
+        $("#TransferModel_RegisteredOffice").val('');
+    }
+
+    function ClearIndividualFields() {
+        $("#TransferModel_Gender").val('');
+        $("#TransferModel_FirstName").val('');
+        $("#TransferModel_MiddleName").val('');
+        $("#TransferModel_LastName").val('');
+        $("#TransferModel_FatherOrHusbandName").val('');
+        $("#TransferModel_MotherName").val('');
+        $("#TransferModel_PermanentAddress").val('');
+        $("#TransferModel_OccupationId").val('');
+    }
+
+    function ClearTransferFields() {
+        $('input[type=text][name="TransferModel.FirstName"]').val('');
+        $('input[type=text][name="TransferModel.MiddleName"]').val('');
+        $('input[type=text][name="TransferModel.LastName"]').val('');
+        $('input[type=text][name="TransferModel.CompanyName"]').val('');
+        $('input[type=text][name="TransferModel.SigningAuthority"]').val('');
+        $('input[type=text][name="TransferModel.RegisteredOffice"]').val('');
+        $('input[type=text][name="TransferModel.FatherOrHusbandName"]').val('');
+        $('input[type=text][name="TransferModel.MotherName"]').val('');
+        $('input[type=text][name="TransferModel.CorrespondenceAdd"]').val('');
+        $('input[type=text][name="TransferModel.PermanentAddress"]').val('');
+        $('input[type=text][name="TransferModel.Mobile"]').val('');
+        $('input[type=text][name="TransferModel.Email"]').val('');
+        $('input[type=text][name="TransferModel.PAN"]').val('');
+        $('input[type=text][name="TransferModel.Gender"]').data("kendoDropDownList").value('');
+        $('input[type=text][name="TransferModel.OccupationId"]').data("kendoDropDownList").value('');
+        $('input[type=text][name="TransferModel.TransferTypeId"]').data("kendoDropDownList").value('');
+        $('input[type=text][name="TransferModel.TransferSubTypeId"]').data("kendoDropDownList").value('');
+    }
+</script>
+
+

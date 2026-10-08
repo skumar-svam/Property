@@ -1,0 +1,300 @@
+﻿@model NA.PMS.Model.OnlineFormViewModel
+@using Kendo.Mvc.UI
+@{
+    ViewBag.Title = "Update Offline Payment";
+    Layout = "~/Views/Shared/_LayoutOnline.cshtml";
+}
+
+@using (Html.BeginForm("SubmitOfflinePayment", "Payment", FormMethod.Post, new { enctype = "multipart/form-data", id = "UpdateOfflinePayment" }))
+{
+    @Html.HiddenFor(model => model.PaymentModel.ApplicationFormId, new { @id = "hdnAppId" })
+    @Html.HiddenFor(m => m.AppType)
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+        <div class="row">
+            <div class="col-md-12 rw-spce" style="margin-bottom:10px">
+                <div class="col-md-8 col-sm-12 col-xs-12">
+                    <h1 class="gridTitle">Online Applciation - Offline Payment (RTGS/NEFT)</h1>
+                    <small><b>Note</b>:Update RTGS/NEFT details as per your RTGS/NEFT challan</small>
+                </div>
+
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="col-md-12 content-top-spce">
+                <div id="DivRentRequestId" class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                    <h2 class="blck-heading">Update Challan Details</h2>
+                    <div class="form-bx">
+                        <div class="row">
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Application Form ID:", htmlAttributes: new { @class = "font-bold" })
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(model => model.PaymentModel.ApplicationFormId)
+                                      .Filter("contains")
+                                      .DataTextField("Text")
+                                      .DataValueField("Value")
+                                      .OptionLabel(" -- Please Select --")
+                                      .DataSource(source =>
+                                      {
+                                          source.Custom()
+                                          .ServerFiltering(true)
+                                          .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                          .Transport(transport =>
+                                          {
+                                              transport.Read(read => read.Action("GetApplicationFormIdForOfflinePayment", "Payment").Data("GetApplicationFormId"));
+                                          }).Schema(schema =>
+                                          {
+                                              schema.Data("Data")
+                                              .Total("Total");
+                                          }).PageSize(100);
+                                      })
+                                      .Enable(false)
+                                      .AutoBind(true)
+                                      .HtmlAttributes(new { style = "width: 100%" })
+                                )
+                                @(Html.ValidationMessageFor(m => m.ApplicationFormId))
+                            </div>
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Applicant Name:", htmlAttributes: new { @class = "" })
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.PaymentModel.Applicant, htmlAttributes: new { @class = "form-control" })
+                            </div>
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Amount:", htmlAttributes: new { @class = "" })
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.PaymentModel.Amount, htmlAttributes: new { @class = "form-control" })
+                            </div>
+                        </div>
+                    </div>
+                    <h2 class="blck-heading">Payment Information</h2>
+                    <div class="form-bx">
+                        <div class="row">
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Form Fee (INR)", htmlAttributes: new { @class = "" })
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.ApplicationFee, new { @readonly = "readonly", @class = "form-control textBoxValueRightAlign", @maxlength = "15", onkeypress = "return IsNumeric(event);" })
+                            </div>
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Processing Fee", htmlAttributes: new { @class = "" })
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.ProcessingCharge, new { @readonly = "readonly", @class = "form-control textBoxValueRightAlign", @maxlength = "15", onkeypress = "return IsNumeric(event);" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("GST(18%) on Form Fee ", htmlAttributes: new { @class = "" })
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.FormFeeGST, new { @readonly = "readonly", @class = "form-control textBoxValueRightAlign", @maxlength = "15", onkeypress = "return IsNumeric(event);" })
+                            </div>
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("GST(18%) on Processing Charge", htmlAttributes: new { @class = "" })
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.ProcessingChargeGST, new { @readonly = "readonly", @class = "form-control textBoxValueRightAlign", @maxlength = "15", onkeypress = "return IsNumeric(event);" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Earnest Money (INR)", htmlAttributes: new { @class = "" })
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.EarnestMoney, new { @readonly = "readonly", @class = "form-control textBoxValueRightAlign", @maxlength = "15", onkeypress = "return IsNumeric(event);" })
+                            </div>
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Amount Payable (INR)", htmlAttributes: new { @class = "" })
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.TotalAmount, new { @readonly = "readonly", @class = "form-control textBoxValueRightAlign", @maxlength = "15", onkeypress = "return IsNumeric(event);" })
+                            </div>
+                        </div>
+                    </div>
+                    <h2 class="blck-heading">Challan Details</h2>
+                    <div class="form-bx">
+                        <div class="row">
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Transaction ID:", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.PaymentModel.TransactionId, htmlAttributes: new { @class = "form-control" })
+                            </div>
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Submitted Date:", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DatePickerFor(m => m.PaymentModel.EntryDate)
+                                    .HtmlAttributes(new { style = "width: 100%; ", @class = "DisableKeyboardInput" }))
+                                @Html.ValidationMessageFor(m => m.PaymentModel.EntryDate)
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Select:", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                <label>@Html.RadioButtonFor(m => m.PayType, "RTGS", new { @class = "", @checked = true, @id = "Individual" }) RTGS</label>
+                                <label>@Html.RadioButtonFor(m => m.PayType, "Other", new { @class = "", @id = "" }) Other</label>
+                            </div>
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Upload Challan/Reciept:", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                <input type='file' id='chfiles' class='single' name='files' />
+                            </div>
+                        </div>
+                        <div class="row rtgsWindow">
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("UTR No:", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.PaymentModel.Udf1, htmlAttributes: new { @class = "form-control" })
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            </div>
+                        </div>
+                        <div class="row otherWindow">
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Bank Reference No:", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.PaymentModel.BankReferenceNo, htmlAttributes: new { @class = "form-control" })
+                            </div>
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="box-button text-center">
+                    @if (Model != null)
+                    { @Html.ActionLink("Back", "PreviewForm", "Application", new { id = Model.EncryptedFormId }, new { @class = "btn btn-default" })}
+                    <input type="button" id="btnCancel" value="Cancel" class="btn btn-default" />
+                    <input type="button" id="btnSubmitChallanDetails" value="Submit Challan Details" class="btn btn-add" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#PaymentModel_Applicant").attr("readonly", "readonly");
+        $("#PaymentModel_Amount").attr("readonly", "readonly");
+
+        // $(".rtgsWindow").hide();
+        $(".otherWindow").hide();
+
+        $('input:radio[name=PayType]').on('change', function () {
+            var formType = $('input[name=PayType]:checked').val();
+            if (formType.trim() == "RTGS") {
+                $(".rtgsWindow").show();
+                $(".otherWindow").hide();
+            }
+            else {
+                $(".rtgsWindow").hide();
+                $(".otherWindow").show();
+            }
+        });
+
+        @{
+            if (TempData["OfflinePayment_RTGS"] != null || TempData["OfflinePayment_RTGS"] == "")
+            {
+                @:alertify.error('@TempData["OfflinePayment_RTGS"]');
+                            }
+        }
+    });
+
+    $("#btnCancel").click(function () {
+        window.location.href = '@Url.Action("SchemeInformation","Application")';
+    });
+
+    $("#btnSubmitChallanDetails").click(function () {
+        var TransactionId = $("#PaymentModel_TransactionId").val();
+        var EntryDate = $("#PaymentModel_EntryDate").data("kendoDatePicker").value();
+        var BankReferenceNo = $("#PaymentModel_BankReferenceNo").val();
+        var ApplicationFormId = $("#PaymentModel_ApplicationFormId").val();
+        var formType = $('input[name=PayType]:checked').val();
+        var utrNo = $("#PaymentModel_Udf1").val();
+        var FileName = $("#chfiles").val();
+
+        if (TransactionId == "") {
+            alertify.error("Please enter Transaction ID.");
+            return false;
+        }
+
+        if (EntryDate == null) {
+            alertify.error("Please enter Submitted Date.");
+            return false;
+        }
+
+        if (FileName == "") {
+            alertify.error("Please upload atleast one file (jpg, jpeg, png & pdf).");
+            return false;
+        }
+
+        if (formType.trim() == "RTGS") {
+            if (utrNo == "") {
+                alertify.error("Please enter UTR No.");
+                return false;
+            }
+        }
+        else {
+            if (BankReferenceNo == "") {
+                alertify.error("Please enter Bank Reference No.");
+                return false;
+            }
+        }
+
+        $("#UpdateOfflinePayment").submit();
+
+    });
+
+    function GetApplicationFormId() {
+        var hdnAppFormId = $("#hdnAppId").val();
+        if (hdnAppFormId == "") { hdnAppFormId = 0; }
+        return {
+            ApplicationFormId: hdnAppFormId
+        };
+    }
+
+    $("#chfiles").change(function () {
+        CheckFileSizeExt(this);
+    });
+
+
+    function CheckFileSizeExt(input) {
+        var file = input.files[0].name;
+        var fileSize = input.files[0].size / 1024 //Size in KB
+        var count = file.lastIndexOf('.') + 1;
+        var ext = file.substr(count);
+        if (ext == "jpg" || ext == "png" || ext == "jpeg" || ext == "pdf") {
+            if (fileSize < 10) {
+                IsError = false;
+                alertify.error(file + " Min 10kb file size is allowed");
+                return false;
+            }
+            if (fileSize / 1024 > 5) {
+                IsError = false;
+                alertify.error(file + " Max 5Mb file size is allowed");
+                return false;
+            }
+        }
+        else {
+            alertify.error("Only jpg, png, jpeg & pdf file allowed.");
+            return false;
+        }
+    }
+</script>

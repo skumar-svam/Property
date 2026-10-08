@@ -1,0 +1,130 @@
+﻿<style>
+    .lbl-bld{
+        font-weight:700;
+    }
+</style>
+
+
+<div class="col-md-12" id="divProperty">
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Registration Id:")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="lbl-bld" id="lbl-RegistrationId"></label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Parent Property Id:")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="lbl-bld" id="lbl-ParentPropertyId"></label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Allottee Name:")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="lbl-bld" id="lbl-Applicant"></label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Property No:")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="lbl-bld" id="lbl-PropertyNo"></label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Mobile No:")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="lbl-bld" id="lbl-MobileNo"></label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Email:")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="lbl-bld" id="lbl-Email"></label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Correspond Address:")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="lbl-bld" id="lbl-CorrespondAdd"></label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Permanent Address:")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="lbl-bld" id="lbl-PermanentAdd"></label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Department:")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="lbl-bld" id="lbl-Department"></label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Property Area:")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+           <label class="lbl-bld" id="lbl-PropertyArea"></label>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Property Cost:")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="fa fa-inr lbl-bld" id="lbl-PropertyCost"></label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Property Rate:")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="fa fa-inr lbl-bld" id="lbl-PropertyRate"></label>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function GetSubleaseDetails(id) {
+        //alert(registrationId);
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ id: id }),
+            url: '/Master/ManageProperty/GetSubleasePropertyDetail',
+            success: function (result) {
+                if (result != null) {
+                    $('#lbl-RegistrationId').html(result.RegistrationId);
+                    $('#lbl-ParentPropertyId').html(result.ParentPropertyId);
+                    $('#lbl-Applicant').html(result.Applicant);
+                    $('#lbl-PropertyNo').html(result.Sector + "/" + result.Block + "-" + result.Plot);
+                    $('#lbl-MobileNo').html(result.Mobile);
+                    $('#lbl-Email').html(result.Email);
+                    $('#lbl-Department').html(result.Department);
+                    $('#lbl-CorrespondAdd').html(result.ApplicantAddress);
+                    $('#lbl-PermanentAdd').html(result.ApplicantAddress);
+                    $('#lbl-PropertyArea').html(result.PropertyArea);
+                    $('#lbl-PropertyCost').html(result.PropertyCost);
+                    $('#lbl-PropertyRate').html(result.PropertyRate);
+
+                    var win = $("#divSubleaseDetail").data("kendoWindow");
+                    win.center();
+                    win.open();
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Some error occured. Please try again later.");
+            }
+        });
+    }
+</script>

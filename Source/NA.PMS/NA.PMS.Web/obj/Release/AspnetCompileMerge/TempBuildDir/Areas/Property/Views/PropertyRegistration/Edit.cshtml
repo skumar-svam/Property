@@ -1,0 +1,222 @@
+﻿@model NA.PMS.Model.BuildingPlanModel
+@using Kendo.Mvc.UI
+@{
+    ViewBag.Title = "PropertyDetails";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="divEditBuildingPlan">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Edit Building Plan Request</h1></div>
+            <div class="col-md-6 col-sm-6 col-xs-12 mandatory"></div>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="col-md-6 col-sm-12 col-xs-12 tabbable" id="dvBuildingPlan">
+            <ul class="nav nav-tabs content-tabs" id="ulBuildingPlan" role="tablist">
+                <li><a href="#one" role="tab" data-toggle="tab" class="active"><i class="glyphicon glyphicon-home" style="color:#00c097;"></i>&nbsp;&nbsp;Building Plan - I</a></li>
+                <li><a href="#two" role="tab" data-toggle="tab"><i class="glyphicon glyphicon-briefcase" style="color:#00c097;"></i>&nbsp;&nbsp;Building Plan - II</a></li>
+            </ul>
+        </div>
+        <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+    </div>
+    
+    <div class="col-md-12 blnk-rw"></div>
+
+    <div class="col-md-12 inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+        <h2 class="blck-heading">Select Registration Id</h2>
+        <div class="form-bx">
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Registration Id", htmlAttributes: new { @class = "required" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @(Html.Kendo().DropDownListFor(m => m.RId)
+                .Filter("contains")
+                .DataTextField("text")
+                .DataValueField("id")
+                .OptionLabel("Select")
+                .DataSource(source =>
+                {
+                    source.Read(read =>
+                    {
+                        read.Action("GetRIDs", "PropertyRegistration").Data("RIdChanges");
+                    });
+                })
+                .HtmlAttributes(new { @class = "schemeForms", style = "width:100%" }).Enable(false)
+                    )
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Property No")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <div id="lblPropNo">
+                        @Html.DisplayFor(m => m.PropNo)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col-md-12 tab-content">
+        <div class="tab-pane fade in active" id="one">
+            @{
+                Html.RenderPartial("_BuildingPlan1", Model);
+            }
+            <div class="box-button text-center">
+                <input type="button" id="btnCancel" value="Back" class="btn btn-default" onclick="javascript: window.location = '@Url.Action("ManageBuildingPlan", "PropertyRegistration")'; " />
+                <input type="button" id="btnUpdate" value="Update" class="btn btn-add" />
+            </div>
+        </div>
+        <div class="tab-pane fade" id="two">         
+            @{
+                Html.RenderPartial("_BuildingPlanII", Model);
+            }
+        </div>
+    </div>
+</div>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.view-btn-box').hide();
+        $('#btnSave').hide();
+    });
+    function RIdChanges() {
+        return {
+            type: "buildingPlan"
+        };
+    }
+
+    $("#btnUpdate").click(function () {
+        var rId = $("#RId").val();
+        var BuildingPlanFileNo = $("#BuildingPlanFileNo").val();
+        var PropertyUse = $("#PropertyUse").val();
+        var DateOfSubmission = $("#DateOfSubmission").val();
+        var DateOfSanction = $("#DateOfSanction").val();
+        var PurchasableFar = $("#PurchasableFar").val();
+        var SanctionPlanValidity = $("#SanctionPlanValidity").val()
+        var MapReleased = $("#MapReleased").val();
+        var MapRevised = $("#MapRevised").val()
+        var PloatArea = $("#PloatArea").val()
+        //var PloatArea11 = $("#lblPloatArea").html()
+        var CoveredArea = $("#CoveredArea").val()
+        var FloorAreasRation = $("#FloorAreasRation").val()
+        var NumberOfStories = $("#NumberOfStories").val()
+        var ArchitectRegNo = $("#ArchitectRegNo").val();
+        var NameOfArchitect = $("#NameOfArchitect").val()
+
+        if (DateOfSanction != "") {
+            if (Date.parse(DateOfSubmission) >= Date.parse(DateOfSanction)) {
+                alertify.error("Sanction  date would be greater than submission date.");
+                return false;
+            }
+            if (SanctionPlanValidity != "") {
+
+                if (Date.parse(DateOfSanction) >= Date.parse(SanctionPlanValidity)) {
+                    alertify.error("Sanction Plan Validity date would be greater than submission date and sanction date .");
+                    return false;
+                }
+            }
+        }
+
+        if (ValidateBuildingPlan()) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ rId: rId, BuildingPlanFileNo: BuildingPlanFileNo, PropertyUse: PropertyUse, DateOfSubmission: DateOfSubmission, DateOfSanction: DateOfSanction, PurchasableFar: PurchasableFar, SanctionPlanValidity: SanctionPlanValidity, MapReleased: MapReleased, MapRevised: MapRevised, PloatArea: PloatArea, CoveredArea: CoveredArea, FloorAreasRation: FloorAreasRation, NumberOfStories: NumberOfStories, ArchitectRegNo: ArchitectRegNo, NameOfArchitect: NameOfArchitect }),
+                url: '/PropertyRegistration/UpdateBuildingPlan1',
+                success: function (result) {
+                    if (result == 1) {
+                        alertify.success("Data saved successfully.");
+                        window.location.href = '@Url.Action("ManageBuildingPlan", "PropertyRegistration")';
+                        return false;
+                    }
+                    if (result == 3) {
+                        alertify.error("Building Plan File No  already saved .");
+                        return false;
+                    }
+                    else {
+                        return true;
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    alert(respText);
+                }
+
+            });
+        }
+    });
+
+    function ValidateBuildingPlan() {
+        var rId = $("#RId").val();
+        var BuildingPlanFileNo = $("#BuildingPlanFileNo").val();
+        var PropertyUse = $("#PropertyUse").val();
+        var DateOfSubmission = $("#DateOfSubmission").val();
+        var DateOfSanction = $("#DateOfSanction").val();
+        var PurchasableFar = $("#PurchasableFar").val();
+        var SanctionPlanValidity = $("#SanctionPlanValidity").val()
+        var MapReleased = $("#MapReleased").val();
+        var MapRevised = $("#MapRevised").val()
+        var PloatArea = $("#PloatArea").val()
+        //var PloatArea11 = $("#lblPloatArea").html()
+        var CoveredArea = $("#CoveredArea").val()
+        var FloorAreasRation = $("#FloorAreasRation").val()
+        var NumberOfStories = $("#NumberOfStories").val()
+        var ArchitectRegNo = $("#ArchitectRegNo").val();
+        var NameOfArchitect = $("#NameOfArchitect").val()
+        var flag = false;
+        if (rId == "") {
+            alertify.error("Please select RId.");
+            flag = false;
+        }
+        else if (BuildingPlanFileNo == "") {
+            alertify.error("Please enter Building Plan File No.");
+            flag = false;
+        }
+        if (/^[a-zA-Z0-9- ]*$/.test(BuildingPlanFileNo) == false) {
+            alertify.error('Building Plan File No should be alphanumeric');
+            return false;
+        }
+        else if (DateOfSubmission == "") {
+            alertify.error("Please enter Date of Submission.");
+            flag = false;
+        }
+        //Resolved Bug#219 (Indirect Bug)
+        if (DateOfSanction == "") {
+            alertify.error("Please enter Date of Sanction.");
+            flag = false;
+        }
+        else if (MapReleased == "") {
+            alertify.error("Please select Map Released.");
+            return false;
+        }
+        else if (MapRevised == "") {
+            alertify.error("Please select Map Revised.");
+            flag = false;
+        }
+        else if (NumberOfStories == "") {
+            alertify.error("Please enter Number Of Stories.");
+            flag = false;
+        }
+        else if (ArchitectRegNo == "") {
+            alertify.error("Please enter Architect RegNo.");
+            flag = false;
+        }
+       
+        else if (NameOfArchitect == "") {
+            alertify.error("Please enter Name Of Architect.");
+            flag = false;
+        }
+        else {
+            flag = true;
+        }
+        return flag;
+    }
+</script>

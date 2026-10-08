@@ -1,0 +1,370 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@model NA.PMS.Model.PropertyCompletionModel
+
+    <h2 class="blck-heading">Add Completion Request</h2>
+    <div class="form-bx">
+        <div class="row">
+            @Html.HiddenFor(m => m.DepttId)
+            @Html.HiddenFor(m => m.ViewName)
+        </div>
+
+        <div class="row">
+           
+            @{Html.RenderPartial("_Rid");}
+          
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Property No")
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group" id="lblPropNo">
+                @Html.DisplayFor(m=> m.PropNo)
+                @Html.HiddenFor(m => m.PropNo)
+            </div>
+        </div>
+    </div>
+
+    <h2 class="blck-heading">Applicant Details</h2>
+    <div class="form-bx">
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Scheme Name")
+                @Html.HiddenFor(m => m.ReqNo)
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group" id="lblScNa">
+                @Html.DisplayFor(m => m.SchemeName)
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Department")
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group" id="lblDeNa">
+               @Html.DisplayFor(m => m.DepttName)
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Applicant/Company Name")
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group" id="lblApNa">
+                @Html.DisplayFor(m => m.ApplicantName)
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Gender")
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group" id="lblGender">
+                @Html.DisplayFor(m => m.Gender)
+            </div>
+        </div>
+     
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Father's/Husband's Name")
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group" id="lblReNa">
+                @Html.DisplayFor(m => m.FatherOrHusbandName)
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Property Type")
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group" id="lblPropTy">
+                @Html.DisplayFor(m => m.PropType)
+            </div>
+        </div>
+       
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Area")
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group" id="lblArea">
+                @Html.DisplayFor(m => m.Area)
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Floor")
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group" id="lblFloor">
+                @Html.DisplayFor(m => m.Floor)
+            </div>
+        </div>
+      
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Lease Deed Date")
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @(Html.Kendo().DatePickerFor(m => m.LeaseDeedDate)
+                    .HtmlAttributes(new { @class = "DisableKeyboardInput", style="width:100%;" }).Enable(false))            
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Possession Date")
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @(Html.Kendo().DatePickerFor(m => m.PossessionDate)
+                            .HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%;" }).Enable(false))
+            </div>
+        </div>
+     
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Building Plan Approved")
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group" id="lblBuildingPlanApproved">
+                @Html.DisplayFor(m => m.BuildingPlanApproved)
+            </div>
+        </div>
+    </div>
+   
+    <h2 class="blck-heading">Completion Details</h2>
+    <div class="form-bx">
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Completion Due Date")
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @(Html.Kendo().DatePickerFor(m => m.CompletionDueDate)
+                        .HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%;" }).Enable(false))
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Completion Execution Date", new { @class="required"})
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @(Html.Kendo().DatePickerFor(m => m.CompletionExecutionDate)
+                        .HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%;" }).Enable(false))
+            </div>
+        </div>
+       
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Completion Type", new { @class="required"})
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @(Html.Kendo().DropDownListFor(m => m.CompletionType)
+                .Filter("contains")
+                .DataTextField("text")
+                .DataValueField("text")
+                .OptionLabel("Select")
+                .DataSource(source =>
+                {
+                    source.Read(read =>
+                    {
+                        read.Action("GetCompletionType", "Completion");
+                    });
+                })
+                .Events(events => { events.Change("CompletionTypeChange"); })
+                .HtmlAttributes(new { @class = "schemeForms", style = "width:100%" })
+                )
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Completion Charges", htmlAttributes: new { @class="required"})
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @(Html.Kendo().NumericTextBoxFor(m => m.CompletionCharges)
+                .Min(0)
+                .Max(99999999999999)
+                        .Spinners(false).Step(0)
+                .Enable(true)
+                .HtmlAttributes(new { @maxlength = "12", @class = "k-label schemeForms textBoxValueRightAlign",style="width:100%" })
+                )
+            </div>
+        </div>
+        
+        <div class="row" id="dvPartCompletion">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Part Completion (%)", htmlAttributes: new { @class="required"})
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @(Html.Kendo().NumericTextBoxFor(m => m.PartCompletionPercentage)
+                .Min(1)
+                .Max(99999999999999)
+                        .Spinners(false).Step(0)
+                .Enable(true)
+                .HtmlAttributes(new { @maxlength = "5", onblur = "PartCompletionCal('PartCompletionPercentage');", @class = "k-label schemeForms textBoxValueRightAlign", style="width:100%" })
+                )
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Part Completion Area", htmlAttributes: new { @class="required"})
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @(Html.Kendo().NumericTextBoxFor(m => m.PartCompletionArea)
+                .Min(1)
+                .Max(99999999999999)
+                        .Spinners(false).Step(0)
+                .Enable(true)
+                .HtmlAttributes(new { @maxlength = "12", onblur = "PartCompletionCal('PartCompletionArea');", @class = "k-label schemeForms textBoxValueRightAlign", style="width:100%;" })
+                )
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Extension")
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group" id="lblExtension">
+                @Html.DisplayFor(m => m.Extension)
+            </div>
+        </div>
+    </div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#PartCompletionArea").data("kendoNumericTextBox").value("");
+        $("#PartCompletionPercentage").data("kendoNumericTextBox").value("");
+        $("#dvPartCompletion").hide();
+        $("#ViewName").val('AddCompletionRequest');
+    });
+
+    function PartCompletionCal(controlID) {
+        if (controlID == "PartCompletionPercentage") {
+            var partCompletionPercentage = (isNaN(parseFloat($('#PartCompletionPercentage').val()))) ? 0 : parseFloat($('#PartCompletionPercentage').val());
+            if (partCompletionPercentage != 0) {
+                if (partCompletionPercentage >= 100) {
+                    alertify.error("Part Completion value should be between 0 to 99");
+                    $("#PartCompletionPercentage").data("kendoNumericTextBox").value(99);
+                    var partCompletionPercentage1 = (isNaN(parseFloat($('#PartCompletionPercentage').val()))) ? 0 : parseFloat($('#PartCompletionPercentage').val());
+                    var area = $("#lblArea").html();
+                    var completionPercentage = parseFloat(((area * parseFloat(partCompletionPercentage1)) / 100).toFixed(2));
+                    $("#PartCompletionArea").data("kendoNumericTextBox").value(completionPercentage);
+                }
+                else {
+                    var area = $("#lblArea").html();
+                    var completionPercentage = parseFloat(((area * parseFloat(partCompletionPercentage)) / 100).toFixed(2));
+                    $("#PartCompletionArea").data("kendoNumericTextBox").value(completionPercentage);
+                }
+            }
+        }
+        else if (controlID == "PartCompletionArea") {
+            var partCompletionArea = (isNaN(parseFloat($('#PartCompletionArea').val()))) ? 0 : parseFloat($('#PartCompletionArea').val());
+            var area = $("#lblArea").html();
+            if (partCompletionArea != 0) {
+                if (partCompletionArea > area) {
+                    alertify.error("Part Completion Area should be less than Area");
+                    $("#PartCompletionArea").data("kendoNumericTextBox").value("");
+                    $("#PartCompletionPercentage").data("kendoNumericTextBox").value("");
+                }
+                else {
+                    var calculatedPartCompletionPercentage = parseFloat(((100.00 * parseFloat(partCompletionArea)) / area).toFixed(2));
+                    $("#PartCompletionPercentage").data("kendoNumericTextBox").value("");
+                    $("#PartCompletionPercentage").data("kendoNumericTextBox").value(calculatedPartCompletionPercentage);
+                }
+            }
+        }
+    }
+
+    function CompletionTypeChange() {
+        var completionType = $("#CompletionType").val();
+        var depttId = $("#DepttId").val();
+        if (depttId != 6 && completionType == "Partial") {
+            alertify.error("Completion type Partial allow only in case of Group Housing.");
+            $("#CompletionType").data("kendoDropDownList").value('0');
+            return false;
+        }
+        if (completionType == "Partial") {
+            $("#dvPartCompletion").show();
+        }
+        else {
+            $("#PartCompletionArea").data("kendoNumericTextBox").value("");
+            $("#PartCompletionPercentage").data("kendoNumericTextBox").value("");
+            $("#dvPartCompletion").hide();
+        }
+    }
+
+    function RIdChange() {
+        var rId = $("#RId").val();
+        if (rId == '') {
+            $('#CompletionExecutionDate').data('kendoDatePicker').enable(false);
+            ClearValues();
+            //alertify.error("Please select an RID");
+            return false;
+        }
+        //GetKYADetails(rId);
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rId: rId }),
+            url: '/Completion/GetApplicantDetailsByRId',
+            success: function (result) {
+                if (result != null) {
+                    $("#lblPropNo").html(result.PropNo);
+                    $("#lblScNa").html(result.SchemeName);
+                    $("#lblDeNa").html(result.DepttName);
+                    $("#lblApNa").html(result.ApplicantName);
+                    $("#lblGender").html(result.Gender);
+                    $("#lblReNa").html(result.FatherOrHusbandName);
+                    $("#lblPropTy").html(result.PropType);
+                    $("#lblArea").html(result.Area); 
+                    $("#lblFloor").html(result.Floor);
+                    $("#lblBuildingPlanApproved").html(result.BuildingPlanApproved);
+                    $("#CompletionDueDate").data("kendoDatePicker").value(result.CompletionDueDate);
+                    $("#LeaseDeedDate").data("kendoDatePicker").value(result.LeaseDeedDate);
+                    $("#PossessionDate").data("kendoDatePicker").value(result.PossessionDate);
+                    $("#ReqNo").val(result.ReqNo);
+                    $("#DepttId").val(result.DepttId);
+                    $("#lblExtension").html(result.Extension);
+                    $('#CompletionExecutionDate').data('kendoDatePicker').enable(true);
+                    $("#CompletionExecutionDate").kendoDatePicker({
+                        max: result.CurrentDateCompletion,
+                        min: result.CompletionExecutionMinDate
+                        //min: result.BuildingPlanSanctionDate
+                    });
+                }
+                else {
+                    ClearValues();
+                    $('#CompletionExecutionDate').data('kendoDatePicker').enable(false);
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            },
+            error: function (obj) {
+                ClearValues();
+                $('#CompletionExecutionDate').data('kendoDatePicker').enable(false);
+                alertify.error("Some error occured. Please try again later.");
+            }
+        });
+    }
+
+    function GetKYADetails(rId) {
+        //var rId = $("#RId").val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ RegistrationId: rId }),
+            url: '/Property/PropertyRegistration/GetKYADetailsForRid',
+            success: function (result) {
+                if (result != null) {
+                    if (result.StatusId == "2") {
+                        alertify.error("Your KYA has been Rejected. Please Complete your KYA again.");
+                        $('#btnAdd').attr('disabled', 'disabled');
+                        return false;
+                    }
+                    else if (result.StatusId == "" || result.StatusId == null) {
+                        alertify.error("Please Complete your KYA.");
+                        $('#btnAdd').prop('disabled', true);
+                        return false;
+                    }
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+
+    function ClearValues() {
+        $("#lblPropNo").html('');
+        $("#lblScNa").html('');
+        $("#lblDeNa").html('');
+        $("#lblApNa").html('');
+        $("#lblGender").html('');
+        $("#lblReNa").html('');
+        $("#lblPropTy").html('');
+        $("#lblArea").html('');
+        $("#lblFloor").html('');
+        $("#lblBuildingPlanApproved").html('');
+        $("#LeaseDeedDate").data("kendoDatePicker").value('');
+        $("#PossessionDate").data("kendoDatePicker").value('');
+        $("#CompletionDueDate").data("kendoDatePicker").value('');
+        $("#ReqNo").val('');
+        $("#lblExtension").html('');
+    }
+</script>

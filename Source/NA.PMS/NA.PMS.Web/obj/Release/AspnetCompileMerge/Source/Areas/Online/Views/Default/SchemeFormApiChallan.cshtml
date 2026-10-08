@@ -1,0 +1,550 @@
+﻿@model NA.PMS.OnlineScheme.SchemeFormViewModel
+@using NA.PMS.OnlineScheme
+@using Kendo.Mvc.UI
+@using NA.PMS.Common
+
+@{
+    ViewBag.Title = "Scheme Form Challan";
+    Layout = "~/Areas/Online/Views/Shared/_LayoutOnlineScheme.cshtml";
+}
+
+<style>
+    .text-red {
+        color: red;
+    }
+    .col-20 {
+        width: 20% !important;
+    }
+
+    .col-30 {
+        width: 30% !important;
+    }
+
+    .col-40 {
+        width: 40% !important;
+    }
+
+    .col-60 {
+        width: 60% !important;
+    }
+    .window-body{
+        overflow: auto;
+        height: calc(100% - 90px);
+        padding: 10px
+      }
+    .window-footer{
+        position: absolute;
+        bottom: 0;
+        display: block;
+        width: 100%;
+        margin-top: 20px;
+        padding: 19px 0 20px;
+        text-align: center;
+        border-top: 1px solid #e5e5e5;
+     }
+</style>
+
+<form id="challanapiform">
+    <div class="online-registration">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Scheme Form Api Challan </h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce" id="first-form">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px" id="divApplicantInformation">
+               
+                <h2 class="blck-heading" style="margin-bottom:6px;"></h2>
+                <div class="form-bx">
+                    <div>
+                        @Html.HiddenFor(m => m.Id)
+                        @Html.HiddenFor(m => m.EncryptedFormId)
+                       
+                        @Html.HiddenFor(m => m.DepartmentId)
+                        @Html.HiddenFor(m => m.BankId)
+                        @Html.HiddenFor(m => m.AreaRange)
+                        @Html.HiddenFor(m => m.SchemeType)
+                        @Html.HiddenFor(m => m.ApplicationFormType)
+                        @Html.HiddenFor(m => m.ApplicantType)
+                        @Html.HiddenFor(m => m.AppType)
+                        @Html.HiddenFor(m => m.FormType, htmlAttributes: new { @id = "hdnFormType" })
+
+                        @Html.HiddenFor(m => m.ApplicationFee)
+                        @Html.HiddenFor(m => m.EarnestMoney)
+                        @Html.HiddenFor(m => m.ProcessingCharge)
+                        @Html.HiddenFor(m => m.FormFeeGST)
+                        @Html.HiddenFor(m => m.FormFeeWithGST)
+                        @Html.HiddenFor(m => m.ProcessingChargeGST)
+                        @*@Html.HiddenFor(m => m.TotalAmount)*@
+
+                        @Html.HiddenFor(m => m.NICApplicationId)
+                        @Html.HiddenFor(m => m.NICControlId)
+                        @Html.HiddenFor(m => m.NICServiceId)
+                        @Html.HiddenFor(m => m.NICProcessIndustryId)
+                        @Html.HiddenFor(m => m.NICUnitId)
+                        @Html.HiddenFor(m => m.IsFromNIC)
+
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 col-20 form-group">
+                            @Html.Label("Scheme Name", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 col-30 form-group">
+                            @(Html.Kendo().DropDownListFor(model => model.SchemeId)
+                                    .DataValueField("Id")
+                                    .DataTextField("Text")
+                                    .OptionLabel("--Select--")
+                                    .AutoBind(true).Enable(true)
+                                    .Filter("contains")
+                                    .CascadeFrom("DepartmentId")
+                                    .DataSource(source =>
+                                    {
+                                        source.Custom()
+                                        .ServerFiltering(true)
+                                        .ServerPaging(true)
+                                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                        .Transport(transport => transport.Read(read => read.Action("GetSchemeListAsDataSource", "Default", new { area = "Online" }).Data("FilterSchemeType")))
+                                        .Schema(schema => schema.Data("Data").Total("Total"))
+                                        .PageSize(100);
+                                    })
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                            )
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 col-20 form-group">
+                            @Html.Label("Application Form No", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 col-30 form-group">
+                            @(Html.Kendo().DropDownListFor(model => model.ApplicationFormId)
+                                    .DataValueField("Id")
+                                    .DataTextField("Text")
+                                    .OptionLabel("--Select--")
+                                    .AutoBind(true).Enable(true)
+                                    .Events(events => { events.Change("GetSchemeFormDetail"); })
+                                    .Filter("contains")
+                                    .CascadeFrom("SchemeId")
+                                    .CascadeFromField("SchemeId")
+                                    .DataSource(source =>
+                                    {
+                                        source.Custom()
+                                        .ServerFiltering(true)
+                                        .ServerPaging(true)
+                                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                        .Transport(transport => transport.Read(read => read.Action("GetDropdownOnlineSchemeFormIdListAsDataSource", "Default", new { area = "Online" }).Data("FilterSchemeIdForApplicationForm")))
+                                        .Schema(schema => schema.Data("Data").Total("Total"))
+                                        .PageSize(100);
+                                    })
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                            )
+                        </div>
+                    </div>
+                    <div class="row" id="divCompanyInfo">
+                        <div class="col-md-2 col-sm-3 col-xs-12 col-20 form-group">
+                            @Html.LabelFor(m => m.Applicant, htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 col-30 form-group">
+                            @Html.TextBoxFor(model => model.Applicant, htmlAttributes: new { @class = "form-control", placeholder = "full name " })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 col-20 form-group col-company">
+                            @Html.Label("Authorized Signatory", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 col-30 form-group col-company">
+                            @Html.TextBoxFor(model => model.SigningAuthority, new { @class = "form-control", @maxlength = "150", placeholder = "signing authority" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 col-20 form-group">
+                            @Html.Label("Email", htmlAttributes: new { @class = "required lbl-Email" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 col-30 form-group">
+                            @(Html.EditorFor(model => model.Email, new { htmlAttributes = new { @editable = "true", @class = "form-control", @maxlength = "150", placeholder = "skumar@svam.com" } }))
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 col-20 form-group">
+                            @Html.Label("Mobile Number", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 col-30 form-group">
+                            @Html.TextBoxFor(model => model.MobileNumber, new { @class = "form-control", @minlength = "10", @maxlength = "10", onkeypress = "return IsNumeric(event);", placeholder = "1234567899" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 col-20 form-group">
+                            @Html.Label("GST Number", htmlAttributes: new { @class = "", @id = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 col-30 form-group">
+                            @Html.TextBoxFor(model => model.ApplicantGSTNumber, new { @class = "form-control", placeholder = "", @maxlength = "15" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 col-20 form-group">
+                            @Html.Label("PAN", htmlAttributes: new { @class = "required lbl-PAN" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 col-30 form-group">
+                            @Html.TextBoxFor(model => model.PanNumber, new { @class = "form-control", placeholder = "AAAAA1111A", @onchange = "PanNumberChange();", @maxlength = "10" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 col-20 form-group">
+                            @Html.Label("Sector Name", htmlAttributes: new { @class = "", @id = "lbl-epf" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 col-30 form-group">
+                            @Html.TextBoxFor(model => model.Sector, new { @class = "form-control", @maxlength = "30" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 col-20 form-group col-rent">
+                            @Html.Label("Block Name", htmlAttributes: new { @class = "", @id = "lbl-esi" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 col-30 form-group col-rent">
+                            @Html.TextBoxFor(model => model.Block, new { @class = "form-control", @maxlength = "10" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 col-20 form-group">
+                            @Html.Label("Address", htmlAttributes: new { @class = "required lbl-permanent-address" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 col-30 form-group">
+                            @Html.TextBoxFor(model => model.CorrespondingAddress, new { @class = "form-control", @maxlength = "500", placeholder = "address" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 col-20 form-group">
+                            @Html.Label("Total Amount", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 col-30 form-group">
+                            @Html.TextBoxFor(model => model.TotalAmount, new { @class = "form-control", @maxlength = "20" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 col-20  form-group">
+                            @Html.Label("Bank Name", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 col-30 form-group">
+                            @(Html.Kendo().DropDownListFor(m => m.RefundBankId).Filter("contains")
+                                .DataTextField("Text")
+                                .DataValueField("Id")
+                                .OptionLabel("---Select---")
+                                .DataSource(source => source.Read(read => read.Action("GetBankListforOnline", "Application")))
+                                .HtmlAttributes(new { @class = "schemeForms", style = "width: 100%" })
+                            )
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 col-20 form-group">
+                            @Html.Label("Department", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 col-30 form-group">
+                            @Html.TextBoxFor(model => model.Department, new { @class = "form-control", @maxlength = "150", placeholder = "" })
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 col-20  form-group">
+                            <label class="font-16-bold lbl-payment-mode">Challan Type :</label>
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 col-30 form-group">
+                            <label style="padding-left:0;">@Html.RadioButtonFor(m => m.PaymentTypeId, "1", new { @class = "", @checked = true, @id = "PaymentOffline" }) RTGS/NEFT Challan</label>
+                            <label style="padding-left:0;">@Html.RadioButtonFor(m => m.PaymentTypeId, "2", new { @class = "", @id = "PaymentOnline" }) DD/Cash/Cheque/FT Challan</label>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12 col-xs-12 form-group" style="padding-left:30px;">
+                            <input type="text" class="challan-no form-control" />
+                        </div>
+                        <div class="col-md-12 col-sm-12 col-xs-12 form-group" style="padding-left:30px;">
+                            <input type="text" class="txt-token form-control" readonly="readonly"/>
+                        </div>
+                    </div>
+
+                </div>
+                
+
+            </div>
+        </div>
+
+        <div class="box-button text-center" id="div-box-button">
+            <input type="button" class="btn btn-default" id="btn-cancel" value="Cancel" onclick="ClearInputFields()" />
+            <input type="button" value="Token" id="btn-token" class="btn btn-add" onclick="GenerateApiToken()"/>
+            <input type="button" value="Challan" id="btn-create-challan" class="btn btn-add" onclick="GenerateChallan()" />
+            <input type="button" value="Regenerate Challan" id="btn-recreate-challan" class="btn btn-add" onclick="ReGenerateChallan()" />
+        </div>
+    </div>
+</form>
+
+<div class="col-md-12" id="div-challan-window">
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12 form-group window-body">
+            <div id="div-challan-content"></div>
+        </div>
+        <div class="col-md-12 col-sm-12 col-xs-12 form-group text-center window-footer">
+            <input type="button" value="Print" id="btn-print-challan" onclick="PrintchallanDiv()"/>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script>
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+
+    $(document).ready(function () {
+
+        $('#div-challan-window').kendoWindow({
+            modal: true,
+            title: "Online Form validation",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "30%"
+            },
+            width: "70%", height: "60%" //"35%"
+        });
+
+    });
+
+    function FilterSchemeIdForApplicationForm() {
+        return {
+            SchemeId: $('#SchemeId').val()
+        }
+    }
+
+    function FilterSchemeType() {
+        return {
+            FilterType: "Online"
+        }
+    }
+
+
+    function GetSchemeFormDetail() {
+        var schemeId = $('#SchemeId').val();
+        var formId = $('#ApplicationFormId').val();
+        if (formId != "" && formId != undefined) {
+            $.ajax({
+                url: '/Online/Default/GetOnlineSchemeformDetailById',
+                type: 'POST',
+                dataType: 'json',
+                data: { ApplicationFormId: formId },
+                success: function (data) {
+                    if (data != null) {
+                        // alert(data.Applicant);
+                        $("#Applicant").val(data.Applicant);
+                        $("#SigningAuthority").val(data.SigningAuthority);
+                        $("#Email").val(data.Email);
+                        $("#MobileNumber").val(data.MobileNumber);
+                        $('#ApplicantGSTNumber').val(data.ApplicantGSTNumber);
+                        $("#PanNumber").val(data.PanNumber);
+                        $("#Sector").val(data.Sector);
+                        $("#Block").val(data.Block);
+                        //$("#PlotNo").val(result.PlotNo);
+                        $("#CorrespondingAddress").val(data.CorrespondingAddress);
+                        $('#TotalAmount').val(data.TotalAmount);
+                        $("#Department").val(data.Department);
+                        $("#DepartmentId").val(data.DepartmentId);
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+        else {
+            ClearPaymentFields();
+        }
+    }
+
+    function GenerateApiToken() {
+        $.ajax({
+            //url: "https://bankapi.mynoida.in/token",
+            url: "https://bankapiuat.mynoida.in/token",
+            //url: "http://localhost:59233/token",
+            data: {
+                username: "Admin",
+                password: "Admin",
+                grant_type: 'password',
+                //  scope:'openid offline_access',
+            },
+            method: 'POST',
+            success: function (tdata) {
+                $('.txt-token').val(tdata.access_token);
+                GetApiChallanData();
+            },
+            error: function (err) {
+                alert(err.responseText);
+            }
+        })
+    }
+
+    function GetApiChallanData() {
+        var paymentModeId = $('input[name=PaymentTypeId]:checked').val();
+        var formId = $('#ApplicationFormId').val();
+        $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            //contentType: "application/json; charset=utf-8",
+            //data: JSON.stringify({ ApplicationFormId: formId }),
+            data: { ApplicationFormId: formId, PaymentTypeId: paymentModeId },
+            url: "/Online/Default/SaveAndGetOnlineSchemeFormCallan",
+            success: function (fdata) {
+                if (fdata != null && fdata.FormApiChallan != null) {
+                    var accessToken = $('.txt-token').val();
+                    var dts = fdata.FormApiChallan;
+                    GenerateApiChallan(dts, accessToken);
+                }
+            },
+            error: function (err) {
+                alert(err.responseText);
+            }
+        });
+    }
+
+    function GenerateApiChallan(dts, accessToken) {
+        if (dts != undefined && accessToken != "" && accessToken != undefined) {
+            var accessToken = $('.txt-token').val();
+            var formId = $('#ApplicationFormId').val();
+            
+            var form = dts;
+            $.ajax({
+                //url: "https://bankapi.mynoida.in/Api/Receipt/CreateChallan",
+                url: "https://bankapiuat.mynoida.in/Api/Receipt/CreateChallan",
+                //url: "http://localhost:59233/Api/Receipt/CreateChallan",
+                data: JSON.stringify(form),
+                contentType: "application/json; charset=utf-8",
+                method: 'POST',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader("Authorization", "Bearer " + accessToken);
+                },
+                success: function (cdata) {
+                    if (cdata["StatusCode"] == 200) {
+                        $('#div-challan-content').html(cdata["ChallanContent"]);
+                        $("#div-challan-window").data("kendoWindow").center();
+                        $("#div-challan-window").data("kendoWindow").open();
+                        $("#div-challan-window").data("kendoWindow").pin();
+                    }
+                },
+                error: function (err) {
+                    alert(err.responseText);
+                }
+            });
+        }
+    }
+
+    function ReGenerateChallan() {
+        $.ajax({
+            //url: "https://bankapi.mynoida.in/token",
+            url: "https://bankapiuat.mynoida.in/token",
+            //url: "http://localhost:59233/token",
+            data: {
+                username: "Admin",
+                password: "Admin",
+                grant_type: 'password',
+                //  scope:'openid offline_access',
+            },
+            method: 'POST',
+            success: function (tdata) {
+                $('.txt-token').val(tdata.access_token);
+                var challanNo = $('.challan-no').val();
+                $.ajax({
+                    //url: "https://bankapi.mynoida.in/Api/Receipt/GetChallanTemplate?ChallanNo=" + challanNo + "&User=Admin",
+                    url: "https://bankapiuat.mynoida.in/Api/Receipt/GetChallanTemplate?ChallanNo=" + challanNo + "&User=Admin",
+                    //data: JSON.stringify(form),
+                    contentType: "application/json; charset=utf-8",
+                    method: 'GET',
+                    beforeSend: function (xhr) {
+                        xhr.setRequestHeader("Authorization", "Bearer " + accessToken);
+                    },
+                    success: function (cdata) {
+                        if (cdata["StatusCode"] == 200) {
+                            $('#div-challan-content').html(cdata["ChallanContent"]);
+                            $("#div-challan-window").data("kendoWindow").center();
+                            $("#div-challan-window").data("kendoWindow").open();
+                            $("#div-challan-window").data("kendoWindow").pin();
+                        }
+                    },
+                    error: function (err) {
+                        alert(err.responseText);
+                    }
+                })
+            },
+            error: function (err) {
+                alert(err.responseText);
+            }
+        })
+
+
+        //var accessToken = $('.txt-token').val();
+        //var formId = $('#ApplicationFormId').val();
+        //var form = {
+        //    ChallanNo: "800008160",
+        //    User: "Admin"
+        //};
+        //$.ajax({
+        //    //url: "https://bankapi.mynoida.in/Api/Receipt/GetChallanTemplate",
+        //    url: "https://bankapiuat.mynoida.in/Api/Receipt/GetChallanTemplate",
+        //    data: JSON.stringify(form),
+        //    contentType: "application/json; charset=utf-8",
+        //    method: 'GET',
+        //    beforeSend: function (xhr) {
+        //        xhr.setRequestHeader("Authorization", "Bearer " + accessToken);
+        //    },
+        //    success: function (cdata) {
+        //        if (cdata["StatusCode"] == 200) {
+        //            alert("new challan");
+        //            $('#div-challan-content').html(cdata["ChallanContent"]);
+        //        }
+        //    },
+        //    error: function (err) {
+        //        alert(err.responseText);
+        //    }
+        //})
+    }
+
+    function ClearInputFields() {
+        $('#SchemeId').data("kendoDropDownList").value('');
+        $('#CorrespondingAddress').val('');
+        $('#Email').val('');
+        $('#MobileNumber').val('');
+        $('#PanNumber').val('');
+        $('#ApplicantGSTNumber').val('');
+        $('#TotalAmount').val('');
+        $('#Sector').val('');
+        $('#Block').val('');
+        //$('#PlotNo').val('');
+        $('#RefundBankId').data("kendoDropDownList").value('');
+        //$('#AllottmentDate').data("kendoDatePicker").value('');
+       
+    }
+
+    function PrintchallanDiv() {
+        var contents = document.getElementById("div-challan-content").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('<link href="/Content/CSS/font-awesome.min.css" rel="stylesheet"/>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+</script>
+
+
+
+
+
+
+
+

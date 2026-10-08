@@ -1,0 +1,562 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@using NA.PMS.Common;
+@model NA.PMS.Model.PaymentViewModel
+
+@{
+    ViewBag.Title = "Paid Amount List";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /*.form-control{
+        height:70%;
+        width:90%;
+    }*/
+    .inputBox{
+        height:20px;
+        /*width:100%;*/
+    }
+    
+    .btnclass{
+        margin-top:20px;
+        margin-right:5px;
+        float:right;
+    }
+    #loader {
+        display: none;
+    }
+    
+</style>
+
+
+<div class="ManagePayment">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Paid Amount </h1></div>
+            @*<div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                <a href="#" onclick="javascript:DisplayWindow()"><i class="fa fa-plus"></i>Edit Payment</a>  
+            </div>*@
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="row">
+        <div class="col-md-12">
+            <ul class="nav nav-tabs content-tabs" id="ulProperty" role="tablist">
+                <li class="active"><a href="#one" role="tab" data-toggle="tab">2009 Onwards</a></li>
+                <li><a href="#two" role="tab" data-toggle="tab">Before 2009</a></li>                      
+            </ul>
+        </div>
+
+        <div class="col-md-12 tabbable ">
+            <div class="tab-content">
+                <div class="tab-pane fade in active" id="one">
+                    <div class="col-md-12" style="border-left:1px solid #e2e3e4; border-right:1px solid #e2e3e4; ">
+                        <div class="row" style="padding-right:30px;padding-top:5px;">
+                            <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                                <label>Sector</label>
+                                @Html.TextBoxFor(m => m.SectorName, new { @maxlength = "6", @class = "form-control", style = "width:90%;float:right;" })
+                            </div>
+                            <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                                @Html.Label("Block")
+                                @Html.TextBoxFor(m => m.BlockName, new { @maxlength = "6", @class = "form-control", style = "width:90%;float:right;" })
+                            </div>
+                            <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                                @Html.Label("Plot/Flat")
+                                @Html.TextBoxFor(m => m.PlotNo, new { @maxlength = "40", @class = "form-control", style = "width:90%;float:right;" })
+                            </div>
+                            <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                                @Html.Label("Registration Id")
+                                @Html.TextBoxFor(m => m.RegistrationNo, new { @minlength = "8", @maxlength = "8", @class = "form-control", style = "width:90%;float:right;" })
+                            </div>
+                            <div class="col-md-4 col-sm-12 col-xs-12 form-group">
+                                <input type="button" id="btnSearch" value="Search" class="btn btn-default btnclass" />
+                                <input type="button" id="btnClearSearchField" value="Clear" class="btn btn-default btnclass" />
+                                <input type="button" id="btnUpdateRid" value="Update" class="btn btn-default btnclass" />
+                                <input type="button" id="btnLedger" value="Print" class="btn btn-default btnclass" /> 
+                            </div>
+                        </div>
+                        
+                        @*<div class="row" style="padding-right:30px;padding-bottom:10px;">
+                            <div class="col-md-12" style="text-align:right;">
+                                <input type="button" id="btnSearch" value="Search" class="btn btn-default" />
+                                <input type="button" id="btnClearSearchField" value="Clear" class="btn btn-default" />
+                                <input type="button" id="btnUpdateRid" value="Update" class="btn btn-default" />
+                            </div>
+                        </div>*@
+                    </div>
+
+                    <div class="col-md-12 k-grid-content">
+                        @(Html.Kendo().Grid<NA.PMS.Model.PaymentViewModel>()
+                            .Name("gridManagePayment")
+                            .Columns(columns =>
+                            {
+                                //columns.Bound(c => c.EncodedRid).Hidden();
+                                columns.Bound(c => c.ReceiptId).Hidden(true);
+                                columns.Bound(c => c.RegistrationNo).Title("Registration Id");
+                                columns.Bound(c => c.SectorName).Title("Sector");
+                                columns.Bound(c => c.BlockName).Title("Block");
+                                columns.Bound(c => c.PlotNo).Title("Property No");
+                                columns.Bound(c => c.Amount).Title("Amount");
+                                columns.Bound(c => c.DepositDate).Title("Deposit Date").Format("{0:dd-MM-yyyy}");
+                            })
+                            .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                            .ClientDetailTemplateId("template")
+                            .AutoBind(true)
+                            .DataSource
+                            (
+                                dataSource => dataSource
+                                .Ajax().Model(model => model.Id(p => p.ReceiptId)).ServerOperation(true)
+                                .Read(read => read.Action("GetPropertyPaymentDetails", "Payment", new { area = "Revenue" }).Data("FilterParameter"))
+                                .Sort(m => m.Add(n => n.ReceiptId).Descending())
+                            )
+                                //.Events(events => events.DataBound("dataBound"))
+                        )
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="two">
+                    @{
+                        Html.RenderPartial("_UpdatePaidChallan");
+                    }
+                </div>
+            </div>
+        </div>
+        <div id="progressbar" style="width:100%; text-align:center;">
+            <div id="loader" style="position: fixed;top:210px; left:0;  width:100%; height: 100%;  ">
+                <img src="~/Content/Images/ajax_loader_red.gif" style="width:50px;height:50px;" />
+                @*<img src="~/Content/Images/Chimply_progress.gif" style="width:200px;height:200px;background:#e2e3e4;" />*@
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="divPropertyPayment" style="">
+    <div class="row" style="padding-top:30px;padding-right:30px;">
+        <div class="col-md-3 col-sm-3 col-xs-12   form-group">
+            <label class="required">Sector</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12   form-group">
+            @Html.TextBoxFor(m => m.SectorName, new { id = "sector", @maxlength = "6", @class = "inputBox" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12   form-group">
+            @Html.Label("Block", new { @class = "required" })
+        </div> 
+        <div class="col-md-3 col-sm-3 col-xs-12   form-group">
+            @Html.TextBoxFor(m => m.BlockName, new { id = "block", @maxlength = "6", @class = "inputBox" })
+        </div>       
+    </div>
+
+    <div class="row" style="padding-right: 30px;">
+        <div class="col-md-3 col-sm-3 col-xs-12   form-group">
+            @Html.Label("Plot/Flat", new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12   form-group">
+            @Html.TextBoxFor(m => m.PlotNo, new { id = "plot", @maxlength = "40", @class = "inputBox" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12   form-group">
+            @Html.Label("Registration Id", new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12   form-group">
+            @Html.TextBoxFor(m => m.RegistrationNo, new { id = "RegdId", @class = "inputBox"@*, @onchange = "IsRegistrationIdExist();"*@ })
+        </div>
+    </div>
+
+    <div class="row" style="padding-top:15px;padding-bottom:15px;text-align:center;">
+        <div class="col-sm-12">
+            <button id="btnUpdate" class="btn btn-add">Update</button>
+            <button id="btnPopupCancel" class="btn btn-add">close</button>
+        </div>
+    </div>
+</div>
+
+<div id="divPrintLedger" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="padding-top:40px;">
+    <div class="modal-dialog" style="width: 90%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" style="text-align:center;">  <b>Payment Ledger</b></h4>
+            </div>
+            <div class="modal-body" style="overflow:auto; height:400px;">                
+                <div class="col-md-12" id="divPaymentLedger" style="padding-left:30px;">
+
+                </div>
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <button id="btnPrint" class="btn btn-default" onclick="javascript:PrintChallan()">Print</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="template" type="text/kendo-tmpl">
+    @(Html.Kendo().Grid<NA.PMS.Model.PaymentViewModel>()
+            .Name("grid_#=ReceiptId#") // template expression, to be evaluated in the master context
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Hidden(true);
+                columns.Bound(c => c.ReceiptId).Hidden(true);
+                columns.Bound(o => o.ReceiptHeadName).Title("Receipt Head Name");
+                columns.Bound(o => o.ReceiptSubHeadName).Title("Receipt Sub Head Name");
+                columns.Bound(o => o.Amount).Title("Amount");
+            })
+            .DataSource(dataSource => dataSource
+                .Ajax()
+                //.PageSize(10)
+                .Read(read => read.Action("GetReceiptDetailsById", "Payment", new { receiptId = "#=ReceiptId#" }))
+            )
+            .ToClientTemplate()
+    )
+</script>
+<script>
+    function dataBound() {
+        this.expandRow(this.tbody.find("tr.k-master-row").first());
+    }
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('#btnUpdateRid').click(function () {
+            $("#sector").val($("#SectorName").val());
+            $("#block").val($("#BlockName").val());
+            $("#plot").val($("#PlotNo").val());
+            $("#RegdId").val($("#RegistrationNo").val());
+            var win = $("#divPropertyPayment").data("kendoWindow");
+            win.center();
+            win.open();
+        });
+
+        $('#btnClearSearchField').click(function () {
+            ClearSearchFields();
+            $('#gridManagePayment').data("kendoGrid").dataSource.read();
+        });
+
+        $('#btnSearch').click(function () {
+            SearchPaymentDetail();
+        });              
+    });
+    $('#divPropertyPayment').kendoWindow({
+        modal: true,
+        title: "Update RegistrationId",
+        visible: false,
+        width: "50%", height: "30%"
+    });
+    $('.k-window-action').click(function () {
+        ClearModalFields();
+    });
+    //$('.k-i-close').click(function () {
+    //    ClearModalFields();
+    //});
+    $('#btnUpdate').click(function () {
+        if ($("#sector").val() == "") {
+            alertify.error("Enter Sector");
+            return false;
+        }
+        if ($("#block").val() == "") {
+            alertify.error("Enter block");
+            return false;
+        }
+        if ($("#plot").val() == "") {
+            alertify.error("Enter plot");
+            return false;
+        }
+        if ($("#RegdId").val() == "") {
+            alertify.error("Enter RegistrationId");
+            return false;
+        }
+        if ($("#RegdId").val() != "" && $("#RegdId").val().length != 8) {
+            alertify.error("Registration Id should be of 8 digits.");
+            return false;
+        }
+        else {
+            IsRegistrationIdExist();
+        }
+    });
+
+    $('#btnLedger').click(function () {
+        var sector = $("#SectorName").val();
+        var block = $("#BlockName").val();
+        var plot = $("#PlotNo").val();
+        var rid = $("#RegistrationNo").val();
+
+        if (rid == "") {
+            if (sector == "") {
+                alertify.error("Enter PropertyNo/RegistrationId to print ledger.");
+                return false;
+            }
+            if (block == "") {
+                alertify.error("Enter Block to print ledger.");
+                return false;
+            }
+            if (plot == "") {
+                alertify.error("Enter Plot to print ledger.");
+                return false;
+            }
+            else {
+                CheckPropertyExistOrNot();
+            }
+        }
+        else {
+            if (rid.length != 8) {
+                alertify.error("Registration Id should be of 8 digits.");
+                return false;
+            }
+            else {
+                CheckRidExistOrNot();
+            }
+        }
+    });
+
+
+    $('#btnPopupCancel').click(function () {
+        $("#divPropertyPayment").data("kendoWindow").close();
+        ClearModalFields();
+    });
+    function FilterParameter() {
+        return {
+            SectorName: $('#SectorName').val().trim(),
+            BlockName: $('#BlockName').val().trim(),
+            PlotNo: $('#PlotNo').val().trim(),
+            RegistrationNo: $('#RegistrationNo').val().trim()
+        }
+    }
+    function SearchPaymentDetail() {
+        $('#gridManagePayment').data("kendoGrid").dataSource.read();
+    }
+    function Validate() {
+        var flag = true;
+        if ($("#sector") == "") {
+            alertify.error("Enter Sector");
+            flag = false;
+            return false;
+        }
+        if ($("#block") == "") {
+            alertify.error("Enter block");
+            flag = false;
+            return false;
+        }
+        if ($("#plot") == "") {
+            alertify.error("Enter plot");
+            flag = false;
+            return false;
+        }
+        if ($("#RegdId") == "") {
+            alertify.error("Enter RegistrationId");
+            flag = false;
+            return false;
+        }
+        if ($("#RegdId") != "" && $("#RegdId").length != 8) {
+            alertify.error("Registration Id should be of 8 digits.");
+            flag = false;
+            return false;
+        }
+    }
+    function UpdateRegistrationId() {
+        //var formData = new FormData($('form').get(0));
+        var rid = $("#RegdId").val();
+        var sector = $("#sector").val();
+        var block = $("#block").val();
+        var plot = $("#plot").val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ RegistrationNo: rid, SectorName: sector, BlockName: block, PlotNo: plot }),
+            //contentType: false, // Not to set any content header
+            //processData: false, // Not to process data
+            //data: formData,
+            url: '/Revenue/Payment/UpdateRegistrationIdByPropertyNo',
+            success: function (result) {
+                if (result == '@ReturnType.Updated') {
+                    ClearModalFields();
+                    $("#divPropertyPayment").data("kendoWindow").close();
+                    $('#gridManagePayment').data("kendoGrid").dataSource.read();
+                    alertify.success("Data updated successfully.");
+                }
+                else if (result == '@ReturnType.None') {
+                    alertify.error("Property Not Found.");
+                }
+                else if (result == '@ReturnType.Mismatch') {
+                    alertify.error("RegistrationId Mismatch.");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                alertify.error("Update Failed");
+            }
+        });
+    }
+
+    function GetRegistrationId() {
+        var pmodel = {
+            RegistrationId: $("#RegistrationId").val(),
+            SectorName: $("#sector").val(),
+            BlockName: $("#block").val(),
+            PlotNo: $("#plot").val(),
+            ActionType: "UnRegistered"
+        };
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ model: pmodel }),
+            url: '/Revenue/Payment/GetPropertyDetailById',
+            success: function (result) {
+                if (result != null) {
+                    $('#RegdId').val(result.RegistrationId);
+                }
+                else {
+                    alertify.error("provider failed, Please try again.");
+                }
+            },
+            error: function (obj) {
+                alertify.error("Property not found");
+            }
+        });
+    }
+
+    function IsRegistrationIdExist() {
+        var pmodel = {
+            RegistrationId: $("#RegdId").val()
+        };
+        var flag = false;
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ model: pmodel }),
+            url: '/Revenue/Payment/IsRegistrationIdExist',
+            success: function (result) {
+                if (result == '@ReturnType.NotExist') {
+                    alertify.error("RegistrationId not exist.");
+                }
+                else {
+                    UpdateRegistrationId();
+                }
+            },
+            error: function (obj) {
+                alertify.error("provider failed, Please try again.");
+            }
+        });
+    }
+
+    function ClearModalFields() {
+        $("#sector").val('');
+        $("#block").val('');
+        $("#plot").val('');
+        $("#RegdId").val('');
+    }
+
+    function ClearSearchFields() {
+        $("#SectorName").val('');
+        $("#BlockName").val('');
+        $("#PlotNo").val('');
+        $("#RegistrationNo").val('');
+    }
+
+    function CheckRidExistOrNot() {
+        var rid = $('#RegistrationNo').val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ RegistrationNo: rid }),
+            url: '/Revenue/Payment/IsPaymentExistForRid',
+            success: function (result) {
+                if (result == '@ReturnType.Exist') {
+                    ViewLedger();
+                }
+                else {
+                    alertify.error("Payment doesn't exist for this RID.");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Network Error, please try again later.");
+            }
+        });
+    }
+
+    function CheckPropertyExistOrNot() {
+        pmodel = {
+            SectorName: $('#SectorName').val(),
+            BlockName: $('#BlockName').val(),
+            PlotNo: $('#PlotNo').val()
+        }
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ model:pmodel }),
+            url: '/Revenue/Payment/IsPaymentExistForProperty',
+            success: function (result) {
+                if (result == '@ReturnType.Exist') {
+                    ViewLedger();
+                }
+                else {
+                    alertify.error("Payment doesn't exist for this property.");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Network Error, please try again later.");
+            }
+        });
+    }
+
+    function ViewLedger() {
+        $('#loader').show();
+        Gmodel = {
+            RegistrationNo: $('#RegistrationNo').val(),
+            SectorName: $('#SectorName').val(),
+            BlockName: $('#BlockName').val(),
+            PlotNo: $('#PlotNo').val(),
+            //PropertyNo: $('#PropertyNo').val()
+        }
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ model:Gmodel }),
+            url: '/Revenue/Payment/GetGeneratedLedgerByRId',
+            success: function (result) {
+                if (result != null && result != '') {
+                    //$('#Id').val(result.Id);
+                    //$("#LedgerHeader").show();
+                    $('#loader').hide();
+                    $("#divPaymentLedger").html(result);
+                    $("#divPrintLedger").modal('show');
+                }
+                else {
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Network Error, please try again later.");
+            }
+        });
+    }
+    function PrintChallan() {
+        var contents = document.getElementById("divPaymentLedger").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<style>.td-amount {padding-right: 30px;}#divPaymentLedger {padding: 5px;font-size:10pt;}#authorityChallan {border: 1px solid black;padding: 5px;} .h4-dept{margin-top:0px; margin-bottom:0px;}.h4-noida{margin-bottom:2px;}</style>');
+        frameDoc.document.write('</head><body style="font-size:10pt;">');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+</script>
+
+

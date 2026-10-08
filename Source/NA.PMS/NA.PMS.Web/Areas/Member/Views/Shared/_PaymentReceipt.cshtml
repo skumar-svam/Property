@@ -1,0 +1,252 @@
+﻿@model NA.PMS.Model.OnlinePaymentViewModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@using NoidaAuthority.PMS.Common;
+
+
+<style>
+    /*.noida-logo {
+        background: url(/Content/Images/noida-acknowledgement.png);
+        width: 550px;
+        height: 70px;
+        margin-left: 150px;
+    }*/
+
+    .row-pad {
+        padding-left: 30px;
+        padding-right: 30px;
+    }
+    
+</style>
+
+<div id="div-payment" class="col-md-12">
+    <div class="col-md-12 content-top-spce row-prnt" id="first-form">
+        <div class="inr-bx row-prnt" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            @*<h2 class="blck-heading">Payment Receipt</h2>*@
+            <div class="form-bx row-prnt" id="payment-receipt-body">
+                <div class="row row-pad">
+                    <div id="recpt-challan-content">[HtmlContent]</div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12" style="background:#00a182;display:none;">
+                        <div class="noida-logo"></div>
+                    </div>
+                    <div class="col-md-12">
+                        <h2 style="text-align:center;padding:0;margin-bottom:2px;">NEW OKHLA INDUSTRIAL DEVELOPMENT AUTHORITY</h2>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <h4 style="text-align:center;padding:0;margin-bottom:2px;">Sector-6 Administrator Office, NOIDA</h4>
+                    </div>
+                </div>
+                <div class="row ">
+                    <div class="col-md-12">
+                        <h5 style="text-align:center;padding:0;margin-top:3px;">Payment Receipt </h5>
+                    </div>
+                </div>
+                <div class="row row-pad">
+                    <div class="col-md-12">
+                        <span style="width:100%;float:left"><b> Challan Ref Id: &nbsp;<span id="recpt-challanref-id">[ChallanRefId]</span></b></span>
+                    </div>
+                </div>
+                <div class="row row-pad">
+                    <div class="col-md-12">
+                        <span style="width:100%;float:left"><b> Applicant Name: &nbsp;<span id="recpt-applicant">[Applicant]</span></b></span>
+                    </div>
+                </div>
+                <div class="row row-pad">
+                    <div class="col-md-12">
+                        <span style="width:50%;float:left"><b> Department: &nbsp;<span id="recpt-department">[Department]</span></b> </span>
+                        <span style="width:50%;text-align:right;float:right"><b>Online Request No.: &nbsp;<span id="recpt-request-id">[OnlineRequestId]</span></b></span>
+                    </div>
+                </div>
+                <div class="row row-pad">
+                    <div class="col-md-12">
+                        <span style="width:50%;float:left"><b> Sector: &nbsp;<span id="recpt-sector">[Sector]</span></b> </span>
+                        <span style="width:50%;text-align:right;float:right"><b>Block: &nbsp;<span id="recpt-block">[Block]</span></b></span>
+                    </div>
+                </div>
+                <div class="row row-pad">
+                    <div class="col-md-12">
+                        <span style="width:50%;float:left"><b> Plot No: &nbsp;<span id="recpt-plotno">[PlotNo]</span></b> </span>
+                        <span style="width:50%;text-align:right;float:right"><b>Challan Date: &nbsp;<span id="recpt-challan-date">[ChallanDate]</span></b></span>
+                    </div>
+                </div>
+                <div class="row row-pad">
+                    <div class="col-md-12">
+                        <span style="width:50%;float:left"><b> Mobile No: &nbsp;<span id="recpt-mobileno">[MobileNo]</span></b> </span>
+                        <span style="width:50%;text-align:right;float:right"><b>Email: &nbsp;<span id="recpt-email">[Email]</span></b></span>
+                    </div>
+                </div>
+                <div class="row row-pad">
+                    <div class="col-md-12">
+                        <span style="width:50%;float:left"><b> Bank Name: &nbsp;<span id="recpt-bankname">[BankName]</span></b> </span>
+                        <span style="width:50%;text-align:right;float:right"><b>Account No: &nbsp;<span id="recpt-accountno">[AccountNo]</span></b></span>
+                    </div>
+                </div>
+
+                <div class="row row-pad">
+                    <div class="col-md-12">
+                        <span style="width:50%;float:left"><b> Paid Amount: &nbsp;<span id="recpt-amount">[Amount]</span></b></span>
+                        <span style="width:50%;text-align:right;float:right"><b>Payment Status: &nbsp;<span id="recpt-transaction-status">[TransactionStatus]</span></b></span>
+                    </div>
+                </div>
+                <div class="row row-pad">
+                    <div class="col-md-12">
+                        <span style="width:50%;float:left"><b> Payment Mode: &nbsp;<span id="recpt-mode">[Mode]</span></b></span>
+                        <span style="width:50%;text-align:right;float:right"><b>Transaction Id: &nbsp;<span id="recpt-transactionid">[TransactionId]</span></b></span>
+                    </div>
+                </div>
+                <div class="row row-pad">
+                    <div class="col-md-12">
+                        <span style="width:50%;float:left"><b> Payment Date: &nbsp;<span id="recpt-entry-date">[EntryDate]</span></b></span>
+                        <span style="width:50%;text-align:right;float:right"><b>Bank Reference No: &nbsp;<span id="recpt-bankrefno">[BankReferenceNo]</span></b></span>
+                    </div>
+                </div>
+
+                <div class="row row-pad row-btn">
+                    <div class="col-md-12" style="text-align: center; padding:15px 0px;">
+                        <button type="button" id="btnPrintDiv" class="btn btn-success" onclick=" PrintAcknowledgementReciept();">Print</button>
+                        <button type="button" id="btn-close-popup" class="btn btn-danger" onclick="ClosePaymentReceipt();">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    @{
+        if (TempData["Success"] != null || TempData["Success"] == "")
+        {
+            @:alertify.success('Payment completed successfully');
+       }
+    }
+</script>
+
+<script>
+    $(document).ready(function () {
+        //$('.popup-window').kendoWindow({
+        //    modal: true,
+        //    title: "Service Request Acknowledgement",
+        //    visible: false,
+        //    width: "70%",
+        //    //height: "60%"
+        //});
+
+        //$('#btnClose').click(function () {
+        //    $(".popup-window").data("kendoWindow").close();
+        //    window.location.reload();
+        //    alertify.success("Request Submitted Successfully.");
+        //});
+    });
+
+    function ClosePaymentReceipt() {
+        $('#div-payment-receipt').data("kendoWindow").close();
+    }
+
+    function ToJavaScriptDate(value) {
+        var pattern = /Date\(([^)]+)\)/;
+        var results = pattern.exec(value);
+        //return value;
+        if (results != null) {
+            var dt = new Date(parseFloat(results[1]));
+            return dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
+        }
+    }
+
+    function DisplayPaymentReceipt(id) {
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ Id: id }),
+            url: '/Member/Authority/GetOnlinePaymentDetailById',
+            success: function (result) {
+                if (result != null) {
+                    $('#recpt-challan-content').html(result.HtmlContent);
+                    $('#recpt-challanref-id').html(result.ChallanRefId);
+                    $('#recpt-applicant').html(result.Applicant);
+                    $('#recpt-department').html(result.Department);
+                    $('#recpt-request-id').html(result.OnlineRequestId == null ? "---------------" : result.OnlineRequestId);
+                    $('#recpt-sector').html(result.Sector);
+                    $('#recpt-block').html(result.Block);
+                    $('#recpt-plotno').html(result.PlotNo);
+                    $('#recpt-challan-date').html(ToJavaScriptDate(result.ChallanDate));
+                    $('#recpt-mobileno').html(result.MobileNo);
+                    $('#recpt-email').html(result.Email);
+                    $('#recpt-bankname').html(result.BankName);
+                    $('#recpt-accountno').html(result.AccountNo);
+                    $('#recpt-amount').html(result.Amount);
+                    $('#recpt-transaction-status').html(result.TransactionStatus);
+                    $('#recpt-mode').html(result.Mode);
+                    $('#recpt-transactionid').html(result.TransactionId);
+                    $('#recpt-entry-date').html(ToJavaScriptDate(result.EntryDate));
+                    $('#recpt-bankrefno').html(result.BankReferenceNo == null ? "----------------" : result.BankReferenceNo);
+
+                    $('#div-payment-receipt').data("kendoWindow").open();
+                    $('#div-payment-receipt').data("kendoWindow").center();
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                //alertify.error("Network Error, please try again later.");
+            }
+        });
+    }
+
+    function PrintAcknowledgementReciept() {
+        var contents = document.getElementById("payment-receipt-body").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<style>.td-amount {padding-right: 30px;}#recpt-challan-content {padding: 5px;font-size:10pt;}#authorityChallan {border: 1px solid black;padding: 5px;} .h4-dept{margin-top:0px; margin-bottom:0px;}.h4-noida{margin-bottom:2px;}</style>');
+        frameDoc.document.write('<style>.row-btn{display:none;}</style>');
+        frameDoc.document.write('</head><body style="font-size:10pt;">');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+
+    //function PrintAcknowledgementReciept() {
+    //    var contents = document.getElementById("payment-receipt-body").innerHTML;
+    //    var frame1 = document.createElement('iframe');
+    //    frame1.name = "frame1";
+    //    frame1.style.position = "absolute";
+    //    frame1.style.top = "-1000000px";
+    //    document.body.appendChild(frame1);
+    //    var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+    //    frameDoc.document.open();
+    //    frameDoc.document.write('<html><head><title></title>');
+    //    frameDoc.document.write('<style>.row-btn{display:none;}</style>');
+    //    //frameDoc.document.write('<style>.noida-logo{background:url(/Content/Images/noida-acknowledgement.png);margin-left:150px;width:550px;height:70px;}</style>');
+    //    //frameDoc.document.write('<style>.popup-window{background:url(/Content/Images/logo-noida-small2.png) repeat;}</style>');
+    //    frameDoc.document.write('<style>.row-pad{padding: 0 30px;}</style>');
+    //    frameDoc.document.write('</head><body>');
+    //    frameDoc.document.write(contents);
+    //    frameDoc.document.write('</body></html>');
+    //    frameDoc.document.close();
+    //    setTimeout(function () {
+    //        window.frames["frame1"].focus();
+    //        window.frames["frame1"].print();
+    //        document.body.removeChild(frame1);
+    //    }, 500);
+    //    return false;
+    //}
+</script>
+
+

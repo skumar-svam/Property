@@ -1,0 +1,320 @@
+﻿@model NA.PMS.Model.WBasicDetailsModel_NMS
+@using Kendo.Mvc.UI
+@using NA.PMS.Common
+
+@{
+    ViewBag.Title = "Nivesh Mitra - NIC Unit Check";
+    Layout = "~/Areas/NIC/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    #nic_regid, #nic_regid_otp {
+        color: red;
+    }
+</style>
+
+@using (Html.BeginForm("SaveNiveshMitraServiceUnit", "NiveshMitraServices", FormMethod.Post, new { id = "unitform" }))
+{
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+        <div class="col-md-12" style="position:static">
+            <div class="row" style="padding-top:8px;">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Validate Unit </h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<label class="star">*</label>) are required.</div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>      
+        <div class="col-md-12 content-top-spce" id="divRid">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <h2 class="blck-heading" style="margin-bottom:5px;">Unit Information</h2>
+                <div class="form-bx" style="padding-top:12px;">
+                    <div class="hidden-field">
+                        @Html.HiddenFor(model => model.TxtControlID)
+                        @Html.HiddenFor(model => model.TxtUnitID)
+                        @Html.HiddenFor(model => model.TxtServiceID)
+                        @Html.HiddenFor(model => model.TxtProcessIndustryID)
+                        @Html.HiddenFor(model => model.TxtApplicationID)
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12 col-xs-12" style="text-align:center;">
+                            <label id="nic_regid" style=""></label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label class=""> Registration Id: </label>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <input type="text" id="registrationId" class="form-control" maxlength="8" min="8" onkeypress="return IsNumeric(event);" />
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group col-property" style="text-align:center;">
+                            <label>Property No:</label>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group col-property">
+                            <label class="lbl-property-no lbl-form-control"></label>
+                        </div>
+                    </div>
+                    <div class="row row-allottee-info">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label> Allottee Name: </label>
+                        </div>
+                        <div class="col-md-9 col-sm-9 col-xs-12 form-group">
+                            <label class="lbl-allottee lbl-form-control"></label>
+                        </div>
+                    </div>
+                    <div class="row row-allottee-info">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label> Address: </label>
+                        </div>
+                        <div class="col-md-9 col-sm-9 col-xs-12 form-group">
+                            <label class="lbl-address lbl-form-control"></label>
+                        </div>
+                    </div>
+                    <div class="row row-allottee-info">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label> Mobile No: </label>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label class="lbl-mobile-no lbl-form-control"></label>
+                        </div>
+                        <div class="col-md-6 col-sm-12 col-xs-12 form-group">
+                            <div class="col-md-3"><label> OTP: </label></div>
+                            <div class="col-md-5">
+                                <input type="text" class="k-textbox" id="txt-otp" maxlength="10" placeholder="Enter OTP" style="width:100%" />
+                                <label id="nic_regid_otp"></label>
+                            </div>
+                            <div class="col-md-4">
+                                <input class="k-button btn-default" type="button" value="Resend OTP" id="btn-resend-otp" style="min-width:120px;float:right;"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box-button text-center">
+                <input type="button" id="btn-back" value="Back" class="btn btn-add" />
+                <input type="button" id="btn-validate-otp" value="Validate OTP" class="btn btn-add" />
+                <input type="button" id="btn-rid-submit" value="Submit" class="btn btn-add" />
+            </div>
+        </div>
+
+        @*<div class="col-md-12 content-top-spce" id="divOTPwindow_NIC">
+            <h2 class="blck-heading" style="margin-bottom:5px;">Unit Information</h2>
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <div class="form-bx" style="padding:10px 0 10px 0px;">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label class=""> OTP: </label>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <input type="text" class="k-textbox" id="txtotp" maxlength="10" placeholder="Enter OTP" style="width:100%" />
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <input class="k-button btn-default" type="button" value="Resend" id="btnResend" />
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label id="nic_regid_otp"></label>
+                            <input type="hidden" id="sent-otp" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box-button text-center">
+                <input type="button" id="btnBack_otp" value="Back" class="btn btn-add" />
+                <input type="button" id="btnMobileOTP" value="Submit" class="btn btn-add" />
+            </div>
+        </div>*@
+    </div>
+}
+<script>
+
+    $(document).ready(function () {
+        @{
+            if (TempData["Save_ErrorMessage"] != null && TempData["Save_ErrorMessage"] != "")
+            {
+                //@:$("#error_text").html('@TempData["Save_ErrorMessage"]');
+                @:alert('@TempData["Save_ErrorMessage"]');
+            }
+        }
+
+        $("#divRid").show();
+        $("#divOTPwindow_NIC").hide();
+
+        if ($('#registrationId').val().trim() == "" && $('#registrationId').val().trim().length != 8) {
+            $('.row-allottee-info').css("display", "none");
+            $(".col-property").css("display", "none");
+            $(".lbl-property-no").css("display", "none");
+            $("#btn-validate-otp").css("display", "none");
+            $("#btn-back").css("display", "none");
+        }
+        
+
+        $("#btn-validate-otp").click(function () {
+            //alert("Validate otp button");
+            $("#loader").show();
+            var _otp = $("#txtotp").val();
+            var _rid = $("#registrationId").val();
+            if (_otp == $("#sent-otp").val()) {
+                $("#loader").hide();
+                $("#TxtProcessIndustryID").val(_rid);
+                $('#unitform').submit();
+            } else {
+                $("#loader").hide();
+                $("#nic_regid_otp").html('Incorrect OTP .');
+                alertify.error("OTP mismatch");
+            }
+        });
+
+        $('#btn-back').click(function () {
+            $('.row-allottee-info').css("display", "none");
+            $(".col-property").css("display", "none");
+            $(".lbl-property-no").css("display", "none");
+            $("#btn-validate-otp").css("display", "none");
+            $("#btn-rid-submit").show();
+            $(".lbl-property-no").html('');
+            $('.lbl-allottee').html('');
+            $('.lbl-address').html('');
+            $('.lbl-mobile-no').html('');
+            $("#nic_regid_otp").html('');
+            $("#nic_regid").html('');
+            $("#btn-back").css("display", "none");
+            $("#nic_regid_otp").css("display", "none");
+            $("#nic_regid").css("display", "none");
+        });
+
+        $("#btn-rid-submit").click(function () {
+            $("#loader").show();
+            var _rid = $("#registrationId").val();
+            if (_rid > 0) {
+                ValidateUnit(_rid);
+            } else {
+                $("#loader").hide();
+                alertify.error("Invalild registration Id");
+            }
+        });
+
+        $("#btn-resend-otp").click(function () {
+            var _rid = $("#registrationId").val();
+            ValidateUnit(_rid);
+        });
+
+    });
+
+   
+    function ValidateSentOTP() {
+        $("#loader").show();
+        var _otp = $("#txtotp").val();
+        var _rid = $("#registrationId").val();
+        if (_otp > 0 && _rid > 0) {
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                data: JSON.stringify({ otpMobile: _otp }),
+                url: '/NIC/NiveshMitraServices/ValidateOTP',
+                success: function (result) {
+                    if (result != null) {
+                        if (result == '@ReturnType.Success') {
+                            $("#loader").hide();
+                            $("#TxtProcessIndustryID").val(_rid);
+                            $('#unitform').submit();
+                        } else {
+                            $("#loader").hide();
+                            $("#nic_regid_otp").html('Incorrect OTP .');
+                            alertify.error("OTP mismatch");
+                        }
+                    }
+                    else {
+                        $("#loader").hide();
+                        $("#nic_regid_otp").html('Incorrect OTP .');
+                        alertify.error("OTP mismatch");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                }
+            });
+        } else {
+            $("#loader").hide();
+            alertify.error("Invalild OTP");
+        }
+    }
+
+    $("#btnMobileOTP2").click(function () {
+        $("#loader").show();
+        var _otp = $("#txtotp").val();
+        var _rid = $("#registrationId").val();
+        if (_otp > 0 && _rid > 0) {
+            if (_otp == $("#sent-otp").val()) {
+                $("#loader").hide();
+                $("#TxtProcessIndustryID").val(_rid);
+                $('#unitform').submit();
+            } else {
+                $("#loader").hide();
+                $("#nic_regid_otp").html('Incorrect OTP .');
+                alertify.error("OTP mismatch");
+            }
+        } else {
+            $("#loader").hide();
+            alertify.error("Invalild OTP");
+        }
+    });
+
+
+    $("#btnBack_otp").click(function () {
+        $("#divRid").show();
+        $("#divOTPwindow_NIC").hide();
+    });
+
+    $("#btnResend").click(function () {
+        var _rid = $("#registrationId").val();
+        ValidateUnit(_rid);
+    });
+
+    function ValidateUnit(_rid) {
+        $("#loader").show();
+        $("#nic_regid").html('');
+        var _reg = _rid;
+        $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            data: { registrationId: _reg },
+            url: '/NIC/NiveshMitraServices/ValidateUnit',
+            success: function (result) {
+                if (result != null) {
+                    if (result.RegistrationId > 0) {
+                        if (result.IsKYADone) {
+                            $("#loader").hide();
+                            $('#sent-otp').val(result.OTP);
+
+                            //$("#divOTPwindow_NIC").show();
+                            //$("#divRid").hide();
+                            $(".lbl-property-no").html(result.Sector + "/" + result.Block + "-" + result.PlotNo);
+                            $('.lbl-allottee').html(result.Applicant);
+                            $('.lbl-address').html(result.CorrespondAddress);
+                            $('.lbl-mobile-no').html(result.Mobile);
+                            $(".lbl-property-no").show();
+                            $(".col-property").show();
+                            $('.row-allottee-info').show();
+                            $("#btn-validate-otp").show();
+                            $("#btn-rid-submit").css("display", "none");
+                            $("#btn-back").show();
+                        } else {
+                            $("#loader").hide();
+                            $("#nic_regid").html('KYA is pending for this registration Id .Contact Noida Authority .');
+                            alertify.error("KYA is pending.")
+                        }
+                    } else {
+                        $("#loader").hide();
+                        $("#nic_regid").html('Invalid registration Id .Contact Noida Authority .');
+                        alertify.error("invalid registraion id.")
+                    }
+                }
+                else {
+                    $("#loader").hide();
+                    alertify.error("--");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+            }
+        });
+    }
+</script>

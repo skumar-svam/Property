@@ -1,0 +1,285 @@
+﻿@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions
+
+@{
+    ViewBag.Title = "Update Payment Info";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .left-pad-15 {
+        padding-left: 15px;
+    }
+
+    .panel-title a {
+        text-decoration: none;
+    }
+
+    .k-textbox {
+        width: 100%;
+    }
+
+    .form-control {
+        border-radius: 0;
+    }
+
+    .more-less {
+        float: right;
+        color: #212121;
+    }
+
+    .panel-body {
+        padding-bottom: 0;
+    }
+    .k-picker-wrap input.k-input[type="text"] {
+        padding: 6px 12px;
+        height: 30px;
+        box-sizing: border-box;
+        border-bottom: 1px solid #abc;
+    }
+</style>
+<script src="~/Scripts/common-validation.js"></script>
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Update Payment Info</h1></div>
+            <div class="col-md-6 col-sm-6 col-xs-12 col-btn"></div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 content-top-spce">
+        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="heading1">
+                    <h4 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse1" aria-expanded="true" aria-controls="collapse1">
+                            <i class="more-less glyphicon glyphicon-plus"></i>
+                            Account Head/Subhead
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapse1" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading1">
+                    @{Html.RenderPartial("_AccountHead");}
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="heading2">
+                    <h4 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse2" aria-expanded="true" aria-controls="collapse2">
+                            <i class="more-less glyphicon glyphicon-plus"></i>
+                            Payment Type/Subtype
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapse2" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading2">
+                    @{Html.RenderPartial("_PaymentType");}
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="heading3">
+                    <h4 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse3" aria-expanded="true" aria-controls="collapse3">
+                            <i class="more-less glyphicon glyphicon-plus"></i>
+                            Installment Schedule
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapse3" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading3">
+                    @{Html.RenderPartial("_InstallmentSchedule");}
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="heading4">
+                    <h4 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse4" aria-expanded="true" aria-controls="collapse4">
+                            <i class="more-less glyphicon glyphicon-plus"></i>
+                            Installment Payment
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapse4" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading4">
+                    @{Html.RenderPartial("_Installment");}
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="heading5">
+                    <h4 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse5" aria-expanded="true" aria-controls="collapse5">
+                            <i class="more-less glyphicon glyphicon-plus"></i>
+                            Lease Rent Payment
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapse5" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading4">
+                    @{Html.RenderPartial("_LeaseRent");}
+                </div>
+            </div>
+
+        </div>
+
+
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    function toggleIcon(e) {
+        $(e.target).prev('.panel-heading').find(".more-less").toggleClass('glyphicon-plus glyphicon-minus');
+    }
+
+    function DisplayWindow() {
+        $('#divSectorBlock').data("kendoWindow").open();
+        $('#divSectorBlock').data("kendoWindow").center();
+    }
+
+
+
+    $(document).ready(function () {
+        $('.kendo-popup-window').kendoWindow({
+            modal: true,
+            title: "Add Sector/Block",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "30%"
+            },
+            width: "40%", height: "35%"
+        });
+
+
+        $('.panel-group').on('hidden.bs.collapse', toggleIcon);
+        $('.panel-group').on('shown.bs.collapse', toggleIcon);
+
+        $(".numeric-box").keydown(function (e) {
+            // Allow: backspace, delete, tab, escape, enter and .
+            if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
+                // Allow: Ctrl+A, Command+A
+                (e.keyCode === 65 && (e.ctrlKey === true || e.metaKey === true)) ||
+                // Allow: home, end, left, right, down, up
+                (e.keyCode >= 35 && e.keyCode <= 40)) {
+                // let it happen, don't do anything
+                return;
+            }
+            // Ensure that it is a number and stop the keypress
+            if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                e.preventDefault();
+            }
+        });
+
+        $('#btnUpdateRequest').click(function () {
+            var id = $('#txtRequestNo').val();
+            var rid = $('#txtRegistrationId').val();
+            if (id == "") {
+                alertify.error("Please enter Request no.");
+                return false;
+            }
+            if (rid == "" || rid.length != 8) {
+                alertify.error("Please enter Registration Id.");
+                return false;
+            }
+            else {
+                $.ajax({
+                    type: "post",
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({ requestNo: id, registrationId: rid }),
+                    url: '@Url.Action("UpdateRegistrationIdByRequestNo", "Report")',
+                    success: function (result) {
+                        if (result == '@ReturnType.Success') {
+                            alertify.success("Registration Id updated successfully.");
+                        }
+                        if (result == '@ReturnType.Exist') {
+                            alertify.error("Request No already has Registration Id.");
+                        }
+                        if (result == '@ReturnType.NotExist') {
+                            alertify.error("Service Request doesn't exist");
+                        }
+                    },
+                    error: function (ajaxRequest, strError) {
+                        //alert(ajaxRequest.responseText);
+                        alertify.error("Please try again.");
+                    }
+                });
+            }
+        });
+
+        $('#txtRequestNo').blur(function () {
+            var id = $('#txtRequestNo').val();
+            //alert(id);
+            if (id != "") {
+                $.ajax({
+                    type: "post",
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({ requestNo: id }),
+                    url: '@Url.Action("GetRegistrationIdByRequestNo", "Report")',
+                    success: function (result) {
+                        if (result != null || result != 0) {
+                            $('#txtRegistrationId').val(result);
+                        }
+                    },
+                    error: function (ajaxRequest, strError) {
+                        //alert(ajaxRequest.responseText);
+                        alertify.error("Please try again.");
+                    }
+                });
+            }
+        });
+
+        $('#btnClearRequest').click(function () {
+            $('#txtRequestNo').val('');
+            $('#txtRegistrationId').val('');
+        });
+
+    });
+
+
+    $('#btnAddSectorBlock').click(function () {
+        var sb = $('#SectorBlock').val();
+        var txtname = $('#txtSectorBlock').val();
+        if (sb.trim() == "") {
+            alertify.error("Please select sector or block.");
+            return false;
+        }
+        if (txtname.trim() == "") {
+            alertify.error("Please enter sector or block name.");
+            return false;
+        }
+        else {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ type: sb, typeName: txtname }),
+                url: '@Url.Action("SaveSectorBlockName", "Report")',
+                success: function (result) {
+                    if (result == '@ReturnType.Saved') {
+                        $('#txtSectorBlock').val('');
+                        alertify.success("Data saved successfully.");
+                        return false;
+                    }
+                    else if (result == '@ReturnType.Exist') {
+                        $('#txtSectorBlock').val('');
+                        alertify.error("Sector/Block already exist.");
+                        return false;
+                    }
+                    else {
+                        alertify.error("Please try again.");
+                        return false;
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Please try again.");
+                }
+            });
+        }
+    });
+
+</script>

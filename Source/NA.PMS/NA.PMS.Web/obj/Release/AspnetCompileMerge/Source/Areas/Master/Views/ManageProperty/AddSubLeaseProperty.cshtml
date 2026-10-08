@@ -1,0 +1,686 @@
+﻿@model NA.PMS.Model.SubLeaseViewModel
+@using Kendo.Mvc.UI
+@using NA.PMS.Common;
+@{
+    ViewBag.Title = "Sub Lease Property";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .hyperlink:hover {
+        color: #fff;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    .k-grid-content .active > .rem {
+        color: #fff;
+    }
+
+    .k-grid-content .rem {
+        width: 100%;
+        height: 100%;
+        background: #4800ff;
+        color: #fff;
+    }
+
+    .k-grid-content .act {
+        width: 100%;
+        height: 100%;
+        background: red;
+        color: #fff;
+    }
+
+    .k-grid-content td.abc {
+        padding: 0;
+        margin: 0;
+    }
+
+    .k-grid-content tr {
+        padding: 0;
+        margin: 0;
+    }
+
+    .k-grid-content td {
+        padding: 3px 0 3px 8px;
+        margin: 0;
+    }
+
+        .k-grid-content td.active {
+            padding-left: 0;
+        }
+
+    .active label {
+        padding: 4px 0 4px 10px;
+        margin: 0;
+    }
+
+    .searchBox {
+        padding: 4px;
+        background-color: white;
+        border: 1px solid #ccc5c5;
+    }
+
+    .input-group {
+        display: flex;
+    }
+
+    .AdvanceSearchProperty .form-bx .form-group {
+        padding-left: 10px !important;
+    }
+</style>
+<form>
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Sub-Lease Property</h1></div>
+                </div>
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="col-md-12 content-top-spce">
+                <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                    <h2 class="blck-heading">Sub-Lease Property Detail</h2>
+                    <div class="form-bx">
+                        <div>
+                            @Html.HiddenFor(m => m.Id)
+                            @Html.HiddenFor(m => m.SchemeId)
+                            @Html.HiddenFor(m => m.PropertyType)
+                            @Html.HiddenFor(m => m.PropertyTypeId)
+                            @Html.HiddenFor(m => m.BlockId)
+                            @Html.HiddenFor(m => m.SectorId)
+                            @Html.HiddenFor(m => m.DepartmentId)
+                            @Html.HiddenFor(m => m.PropertyId)
+                            @Html.HiddenFor(m => m.ParentPropertyId)
+                        </div>
+                        <div class="row">
+
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Parent Registration Id", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 ">
+                                <div class="input-group">
+                                    @Html.TextBoxFor(m => m.RegistrationId, new { @class = "form-control", @maxlength = '8', @minlength = '8' })
+                                    <div class="input-group-append searchBox">
+                                        <span class="input-group-text"><i class="fa fa-search FindRid"></i></span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Department")
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.Department, new { @readonly = "readonly", @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Sector")</div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="lbl-form-control" id="lblSector"></label></div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Block")</div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="lbl-form-control" id="lblBlock"></label></div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Plot Number")</div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="lbl-form-control" id="lblPlotNo"></label></div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Sub-Lease Plot Number", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.SubLeasePlot, new { @class = "form-control", @maxlength = "25" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Area Range", new { @class = "required" })</div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(m => m.AreaRangeId)
+                                  .Filter("contains")
+                                  .DataTextField("Text")
+                                  .DataValueField("Id")
+                                  .OptionLabel("-Select-")
+                                        //.DataSource(source => source.Read(read => read.Action("GetFloors", "Scheme").Data("filterFloor")).ServerFiltering(true))
+                                  .DataSource(source => source.Read(read => read.Action("GetFloorAreaListByDepartment", "ManageProperty").Data("FilterDepartmentId")))
+                                  .HtmlAttributes(new { style = "width: 100%" })
+                                  .AutoBind(false)
+                                        //.CascadeFrom("DepartmentId")
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Total Property Area", new { @class = "required" })</div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().NumericTextBoxFor(m => m.PropertyArea)
+                                    .Min(0)
+                                    .Max(99999999999999)
+                                    .Spinners(false).Step(0)
+                                    .Enable(true)
+                                    .HtmlAttributes(new { style = "width: 100%", @maxlength = "14", @class = "textBoxValueRightAlign" })
+                                )
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Area Rate (Per sq Mtr)", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().NumericTextBoxFor(m => m.PropertyRate)
+                                    .Min(0)
+                                    .Max(99999999999999)
+                                    .Spinners(false).Step(0)
+                                    .Enable(true)
+                                    .HtmlAttributes(new { style = "width: 100%", @maxlength = "14", @class = "textBoxValueRightAlign" })
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Total Property Cost")</div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.PropertyCost, new { @class = "textBoxValueRightAlign form-control" })
+                            </div>
+                        </div>
+                        @*Added on 16Nov2017 for group housing*@
+                        <div class="row" id="GHProject">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Project", htmlAttributes: new { @class = "" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(m => m.ProjectId)
+                                  .Filter("contains")
+                                  .DataTextField("Text")
+                                  .DataValueField("Id")
+                                  .OptionLabel("-Select-")
+                                  .DataSource(source => source.Read(read => read.Action("GetProjectsByPRid", "ManageProperty").Data("FilterParentPropertyId")))
+                                  .HtmlAttributes(new { style = "width: 100%" })
+                                  .AutoBind(false)
+                                )
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-button text-center">
+                        <input type="button" id="btnCancel" value="Cancel" class="btn btn-default" />
+                        <input value="Add" type="button" id="btnSubmit" class="btn btn-add" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12 ApplicationForm" id="SLGrid">
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="k-grid-content">
+                @(Html.Kendo().Grid<NA.PMS.Model.SubLeaseViewModel>()
+                    .Name("gridSubLease")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(c => c.PropertyId).Title("Property Id");
+                        columns.Bound(c => c.Department).Title("Department");
+                        columns.Bound(c => c.Sector).Title("Sector").Width(100);
+                        columns.Bound(c => c.Block).Title("Block").Width(100);
+                        columns.Bound(c => c.SubLeasePlot).Title("Plot No").Width(100);
+                        columns.Bound(c => c.PropertyArea).Title("Area").Width(100);
+                        columns.Bound(c => c.Project).Title("Project");
+                        columns.Bound(c => c.SubLeaseStatus).Title("Status").Width(100);
+                        //columns.Bound(c => c.Id).Title("Action").HeaderHtmlAttributes(new { @class = "removeColumnHeader" }).ClientTemplate("<a onclick='javascript:RemoveSubLease(\"#=Id#\");' class='subLeaseAnchor'>Remove</a>").Filterable(false).Sortable(false);
+                        columns.Bound(c => c.Id).Title("Action").Width(100).ClientTemplate("#if(IsPropertyActive==true){#<label onclick='javascript:SubLeasePlotActivation(\"#=Id#\");' class='hyperlink rem'>Remove</label>#}else{#<label onclick='javascript:SubLeasePlotActivation(\"#=Id#\");' class='hyperlink act'>Activate</label>#}#").Filterable(false).HtmlAttributes(new { @class = "active" });
+                    })
+                    .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                    .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                    .DataSource(dataSource => dataSource
+                        .Ajax().Model(model => model.Id(c => c.Id))
+                        .ServerOperation(true)
+                        //.Read(read => read.Action("GetSubLeaseData", "ManageProperty").Data("AdditionalData")).PageSize(10)
+                        .Read(read => read.Action("GetSubLeasedProperty", "ManageProperty", new { area="Master"}).Data("FilterRegistrationId")).PageSize(10)
+                    )
+                )
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header row">
+                <h5 class="modal-title" id="exampleModalLabel" style="float:left;"><b>Search Parent Registration ID</b></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="float:right;">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="AdvanceSearchProperty">
+                        <div class="col-md-12 content-top-spce">
+                            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                                <h2 class="blck-heading">Search</h2>
+                                <div class="form-bx">
+                                    <div class="row">
+                                        <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                                            @Html.Label("Sector", htmlAttributes: new { @class = "required" })
+                                            @(Html.Kendo().DropDownListFor(model => model.SearchSectorId)
+                                            .OptionLabel("--Select--")
+                                            .DataTextField("text")
+                                            .DataValueField("id")
+                                            .DataSource(source =>
+                                            {
+                                                source.Read(read =>
+                                                {
+                                                    read.Action("GetAllSectors", "ManageProperty");
+                                                });
+                                            })
+                                            .HtmlAttributes(new { style = "width:100%;" })
+                                            )
+                                        </div>
+                                        <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                                            @Html.Label("Block", htmlAttributes: new { @class = "required" })
+                                            @(Html.Kendo().DropDownListFor(m => m.SearchBlockId)
+                                            .OptionLabel("--Select--")
+                                            .DataTextField("text")
+                                            .DataValueField("id")
+                                            .DataSource(source => source.Read(read => read.Action("GetAllBlocks", "ManageProperty")))
+                                            .HtmlAttributes(new { style = "width:100%" })
+                                            .AutoBind(false)
+                                            )
+                                        </div>
+                                        <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                                            @Html.Label("Property No", htmlAttributes: new { @class = "required" })
+                                            @Html.TextBoxFor(model => model.SearchPlotNo, htmlAttributes: new { @class = "form-control", @maxlength = "10" })
+                                        </div>
+                                        <div class="col-md-4 col-sm-3 col-xs-12 form-group" style="text-align:right">
+                                            @Html.Label("")<br />
+                                            <input type="button" id="btnParentRidSearch" class="btn btn-add" value="Search" />
+                                            <input type="button" id="btnClear" class="btn btn-default" value="Clear" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                        @Html.Label("Searched Parent Registration ID:", htmlAttributes: new { @class = "" })
+                    </div>
+                    <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                        <input class="form-control" id="SearchRid" name="SearchRid" readonly="readonly" type="text" value="" />
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-add" id="CopyRid">Copy & Paste Parent Registration ID</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(".FindRid").click(function () {
+        $("#SearchRid").val('');
+        $("#RegistrationId").val('');
+        $("#exampleModal").modal('toggle');
+        $('#exampleModal').modal('show');
+    });
+
+    $("#CopyRid").click(function () {
+        ClearAllSearchedValues();
+        var rid = $("#SearchRid").val();
+        $("#RegistrationId").val(rid);
+        $('#exampleModal').modal('hide');
+    });
+
+    $("#btnParentRidSearch").click(function () {
+
+        var searchSectorId = $("#SearchSectorId").data("kendoDropDownList").text();
+        var searchBlockId = $("#SearchBlockId").data("kendoDropDownList").text();
+        var searchPlotNo = $('#SearchPlotNo').val();
+
+        if (searchSectorId == "" || searchSectorId == null) {
+            alertify.error("Please select sector.");
+        }
+        else if (searchBlockId == "" || searchBlockId == null) {
+            alertify.error("Please select block.");
+        }
+        else if (searchPlotNo == "" || searchPlotNo == null) {
+            alertify.error("please enter plot no.");
+        }
+        else {
+            $.ajax({
+                url: '@(Url.Action("SearchParentRid", "PropertyAllotment", new { area="Property" }))',
+                type: 'Post',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ Sector: searchSectorId, Block: searchBlockId, PlotNo: searchPlotNo }),
+                success: function (result) {
+                    if (result != false) {
+                        if (result[0].RID > 0) {
+                            ClearAllSearchedValues();
+                            $("#SearchRid").val(result[0].RID);
+                        }
+                    }
+                    else {
+                        alertify.error("No data found.");
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            });
+        }
+    });
+
+    function ClearAllSearchedValues() {        
+        $("#SearchSectorId").data("kendoDropDownList").value('');
+        $("#SearchBlockId").data("kendoDropDownList").value('');
+        $('#SearchPlotNo').val('');
+    }
+
+    $('#btnClear').click(function () {
+        ClearAllSearchedValues();
+    });
+
+
+
+    function FilterRegistrationId() {
+        return { rid: $('#RegistrationId').val() };
+    }
+
+    function FilterDepartmentId() {
+        return { departmentId: $('#DepartmentId').val() };
+    }
+
+    function AdditionalData() {
+        return { rid: $("#RID").val() };
+    }
+
+    function filterFloor() {
+        return {
+            depttID: $("#DeptId").val()
+        };
+    }
+
+    function FilterParentPropertyId() {
+        return { ParentPropertyId: $("#ParentPropertyId").val() };
+    }
+
+    function RemoveSubLease(Id) {
+        var r = confirm("Are you sure?");
+        if (r == true) {
+            $.ajax({
+                url: '@(Url.Action("RemoveSubLease", "ManageProperty"))',
+                type: 'Post',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ Id: Id }),
+                success: function (result) {
+                    if (result == true) {
+                        $("#gridSubLease").data("kendoGrid").dataSource.read();
+                        ClearAllValues();
+                        alertify.success("Sub-Lease deleted successfully");
+                    }
+                    else {
+                        alertify.error("Some error occured. Please try again later.");
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    //alert(respText);
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            });
+        }
+    }
+
+    function SubLeasePlotActivation(Id) {
+        var r = confirm("Are you sure?");
+        if (r == true) {
+            $.ajax({
+                url: '@(Url.Action("SubLeasePlotActivation", "ManageProperty"))',
+                type: 'Post',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ Id: Id }),
+                success: function (result) {
+                    if (result == '@ReturnType.Updated') {
+                        $("#gridSubLease").data("kendoGrid").dataSource.read();
+                        ClearAllValues();
+                        alertify.success("Sub-Lease plot updated successfully");
+                    }
+                    else {
+                        alertify.error("Please try again later.");
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    //alert(respText);
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            });
+        }
+    }
+
+    function ClearValues() {
+        $("#lblSector").html('');
+        $("#lblBlock").html('');
+        $("#lblPlotNo").html('');
+        $("#SchemeId").val('');
+        $("#PropertyType").val('');
+        $("#PropertyTypeId").val('');
+        $("#BlockId").val('');
+        $("#SectorId").val('');
+        $("#Department").val('');
+        $("#DepartmentId").val('');
+        $("#AreaRangeId").data("kendoDropDownList").value('');
+    }
+
+    function ClearAllValues() {
+        $("#DepartmentId").val('');
+        //$("#RegistrationId").val('');
+        $("#lblSector").html('');
+        $("#lblBlock").html('');
+        $("#lblPlotNo").html('');
+        $("#SubLeasePlot").val('');
+        $("#SchemeId").val('');
+        $("#PropertyType").val('');
+        $("#BlockId").val('');
+        $("#SectorId").val('');
+        $("#Department").val('');
+        $("#AreaRangeId").data("kendoDropDownList").value('');
+        $('#PropertyRate').data("kendoNumericTextBox").value('');
+        $('#PropertyArea').data("kendoNumericTextBox").value('');
+        $("#PropertyCost").val('');
+    }
+
+    function CalculatePropertyCost() {
+        var PropArea = $("#PropertyArea").val();
+        var AreaRate = $("#PropertyRate").val();
+        if (PropArea != '' && AreaRate != '') {
+            $("#PropertyCost").val(PropArea * AreaRate);
+        }
+        else {
+            $("#PropertyCost").val('');
+        }
+    }
+
+    $(document).ready(function () {
+        $("#SLGrid").hide();
+        $("#GHProject").hide();
+        $("#btnCancel").click(function () {
+            window.location.href = '@Url.Action("Manage", "ManageProperty")';
+        });
+
+        $("#PropertyArea").blur(function () {
+            CalculatePropertyCost();
+        });
+
+        $("#PropertyRate").blur(function () {
+            CalculatePropertyCost();
+        });
+
+        $("#btnSubmit").click(function () {
+            var deptt = $("#DepartmentId").val();
+            var rid = $("#RegistrationId").val();
+            var subLeasePropNo = $("#lblPlotNo").html()+ "/" + $("#SubLeasePlot").val();
+            var areaRate = $("#PropertyRate").val();
+            var propArea = $("#PropertyArea").val();
+            var propCost = $("#PropertyCost").val();
+            var areaRangeId = $("#AreaRangeId").val();
+            var dropdownlist = $("#AreaRangeId").data("kendoDropDownList");
+            //if (deptt == '') {
+            //    alertify.error("Please select a Department");
+            //    return false;
+            //}
+            if (rid == '') {
+                alertify.error("Enter Registration Id");
+                return false;
+            }
+            if (subLeasePropNo == '') {
+                alertify.error("Please enter Sub-Lease Property Number");
+                return false;
+            }
+            if (areaRangeId == '') {
+                alertify.error("Please select Area Range");
+                return false;
+            }
+            if (propArea == '') {
+                alertify.error("Please enter Total Property Area");
+                return false;
+            }
+            if (areaRate == '') {
+                alertify.error("Please enter Area Rate (Per sq Mtr)");
+                return false;
+            }
+            if (dropdownlist.text().includes(">")) {
+                var areaRange = dropdownlist.text().split(">");
+                if (propArea <= parseInt(areaRange[1].trim())) {
+                    alertify.error("Please enter Total Area greater than Area Range.");
+                    return false;
+                }
+            }
+            else if (dropdownlist.text().includes("<")) {
+                var areaRange = dropdownlist.text().split("<");
+                if (propArea >= parseInt(areaRange[1].trim())) {
+                    alertify.error("Please enter Total Area less than Area Range.");
+                    return false;
+                }
+            }
+            else {
+                var areaRange = dropdownlist.text().split("-");
+                if (propArea < parseFloat(areaRange[0].trim()) || propArea > parseFloat(areaRange[1].trim())) {
+                    alertify.error("Please enter Total Area within Area Range.");
+                    return false;
+                }
+            }
+            $.ajax({
+                @*url: '@(Url.Action("CheckRIDValidity", "ManageProperty"))',*@
+                url: '@(Url.Action("GetParentPropertyDetailById", "ManageProperty"))',
+                type: 'Post',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ rid: rid }),
+                success: function (result) {
+                    if (result.IsRIDValid == false) {
+                        ClearValues();
+                        //$("#SLGrid").hide();
+                        alertify.error("Please enter a valid RID and respective Department");
+                        return false;
+                    }
+                    else {
+                        var formdata = new FormData($('form').get(0));
+                        $.ajax({
+                            @*url: '@(Url.Action("SaveSubLease", "ManageProperty"))',*@
+                            url: '/Master/ManageProperty/SaveSubLeaseProperty',
+                            type: 'Post',
+                            dataType: 'json',
+                            //contentType: 'application/json; charset=utf-8',
+                            //data: JSON.stringify({ parentPropRId: rid, dept: deptt, subLeasePropNo: subLeasePropNo, areaRate: areaRate, propArea: propArea, propCost: propCost, areaRangeId: areaRangeId }),
+                            contentType: false,
+                            processData: false,
+                            data: formdata,
+                            success: function (result) {
+                                if (result == '@ReturnType.Saved') {
+                                    $("#gridSubLease").data("kendoGrid").dataSource.read();
+                                    ClearAllValues();
+                                    alertify.success("Sub-Lease added successfully");
+                                }
+                                else if (result == '@ReturnType.Updated') {
+                                    $("#gridSubLease").data("kendoGrid").dataSource.read();
+                                    ClearAllValues();
+                                    alertify.success("Sub-Lease updated successfully");
+                                }
+                                else {
+                                    alertify.error("Please try again later.");
+                                }
+                            },
+                            error: function (ajaxRequest, strError) {
+                                //alert(ajaxRequest.responseText);
+                                alertify.error("Some error occured. Please try again later.");
+                            }
+                        });
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    //alert(respText);
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            });
+
+        });
+
+        $("#RegistrationId").blur(function () {
+            var rid = $("#RegistrationId").val();
+            if (rid == '') {
+                alertify.error("Enter Registration Id");
+                return false;
+            }
+            $.ajax({
+                @*url: '@(Url.Action("CheckRIDValidity", "ManageProperty"))',*@
+                url: '@(Url.Action("GetParentPropertyDetailById", "ManageProperty"))',
+                type: 'Post',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ rid: rid }),
+                success: function (result) {
+                    if (result.IsRIDValid == false) {
+                        ClearValues();
+                        $("#SLGrid").hide();
+                        alertify.error("Please enter a valid RID");
+                        return false;
+                    }
+                    else {
+                        @*//if (result.Department.toLowerCase() == '@NA.PMS.Common.Departmentenum.Institutional'.toLowerCase() || result.DepaertmentName.toLowerCase() == '@NA.PMS.Common.Departmentenum.Commercial'.toLowerCase() || result.DepaertmentName.toLowerCase() == '@NA.PMS.Common.Constants.strDeptGroupHousing'.toLowerCase()) {*@
+                        if (result.DepartmentId == '@NADepartment.Institutional' || result.DepartmentId == '@NADepartment.Commercial' || result.DepartmentId == '@NADepartment.GroupHousing') {
+                            $("#lblSector").html(result.Sector);
+                            $("#lblBlock").html(result.Block);
+                            $("#lblPlotNo").html(result.PlotNo);
+                            $("#SchemeId").val(result.SchemeId);
+                            $("#PropertyType").val(result.PropertyType);
+                            $("#PropertyTypeId").val(result.PropertyTypeId);
+                            $("#DepartmentId").val(result.DepartmentId);
+                            $("#PropertyId").val(result.PropertyId);
+                            $("#ParentPropertyId").val(result.PropertyId);
+                            $("#BlockId").val(result.BlockId);
+                            $("#SectorId").val(result.SectorId);
+                            $("#Department").val(result.Department);
+                            $("#AreaRangeId").data("kendoDropDownList").dataSource.read();
+                            $("#AreaRangeId").data("kendoDropDownList").value(result.AreaRangeId);
+                            $("#gridSubLease").data("kendoGrid").dataSource.read();
+                            $("#SLGrid").show();
+                            if (result.DepartmentId == '@NADepartment.GroupHousing') {
+                                $("#GHProject").show();
+                            } else { $("#GHProject").hide(); }
+                        }
+                        else {
+                            alertify.error("Sub-Lease is not allowed for the selected RID and Department");
+                            return false;
+                        }
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Some network error. Please try again later.");
+                }
+            });
+        });
+
+
+    });
+</script>

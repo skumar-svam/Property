@@ -1,0 +1,108 @@
+﻿
+@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div id="div-dashboard">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">REPORTS</h1></div>
+        </div>
+    </div>
+    <div class="col-md-12  blnk-rw"></div>
+    <div class="col-md-12">
+        <ul class="nav nav-tabs content-tabs" id="ulProperty" role="tablist">
+            <li class="active"><a href="#one" role="tab" data-toggle="tab">KYA</a></li>
+            <li><a href="#two" role="tab" data-toggle="tab">Challan</a></li>
+            <li><a href="#three" role="tab" data-toggle="tab">Services</a></li>
+            <li><a href="#four" role="tab" data-toggle="tab">Online Services</a></li>
+            <li><a href="#five" role="tab" data-toggle="tab">JSK Services</a></li>
+            <li><a href="#six" role="tab" data-toggle="tab">NDC and Demand</a></li>
+            <li><a href="#seven" role="tab" data-toggle="tab">TimeLine</a></li>
+            <li><a href="#eight" role="tab" data-toggle="tab">Service Timeline</a></li>
+            <li><a href="#nine" role="tab" data-toggle="tab">Monthly Dues</a></li>
+            <li><a href="#ten" role="tab" data-toggle="tab">Defaulter List</a></li>
+            <li><a href="#eleven" role="tab" data-toggle="tab">Timeline Letters</a></li>
+        </ul>
+    </div>
+    <div class="col-md-12 tab-content">
+        <div class="tab-pane fade in active" id="one" >
+            @{Html.RenderPartial("_GraphKYA");}
+        </div>
+        <div class="tab-pane fade" id="two" >
+            @{Html.RenderPartial("_GraphChallan");}
+        </div>
+        <div class="tab-pane fade" id="three" >
+            @{Html.RenderPartial("_GraphServices");}
+        </div>
+        <div class="tab-pane fade" id="four">
+            @{Html.RenderPartial("_GraphOnlineServices");}
+        </div>
+        <div class="tab-pane fade" id="five">
+            @{Html.RenderPartial("_GraphJSKServices");}
+        </div>
+        <div class="tab-pane fade" id="six">
+            @{Html.RenderPartial("_GraphNdcDemandLetters");}
+        </div>
+        <div class="tab-pane fade" id="seven">
+            @{Html.RenderPartial("_ServicesTimeline");}
+        </div>
+        <div class="tab-pane fade" id="eight">
+            @{Html.RenderPartial("_ServicesReportForAllDepartment");}
+        </div>
+        <div class="tab-pane fade" id="nine">
+            @{Html.RenderPartial("_MonthlyDuesReport");}
+        </div>
+        <div class="tab-pane fade" id="ten">
+            @{Html.RenderPartial("_DefaulterReport");}
+        </div>
+        <div class="tab-pane fade" id="eleven">
+            @{Html.RenderPartial("_ServicesReportLetterForDepartment");}
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        SubmittedKYAForms();
+        SubmittedKYAFormsII();
+        KYAParameterChangeEvent();
+
+        //GetChallanListForGraph();
+        GetChallanListForColumnGraph();
+        //GetNotVerifedChallanListForGraph();
+
+        //not uncomment
+        //GetServiceListForGraph();
+        //CreateBarGraphForServices();
+
+        TotalServiceListByDepartment();
+        TotalInProcessServiceListByDepartment();
+        TotalCompletedServicesByServiceName();
+        TotalInProcessServicesByServiceName();
+
+        GetTotalOnlineServiceListForGraph();
+        GetInProcessOnlineServiceListForGraph();
+
+        GetJSKServiceListForGraph();
+        GetJSKServicesOngoingForGraph();
+
+        GetDemandAndNDCListForGraph();
+
+        GetHTMLReportForService();
+        GetHTMLReportLetter();
+    });
+
+    //$(document).bind("kendo:skinChange", SubmittedKYAForms());
+    //$(document).bind("kendo:skinChange", SubmittedKYAFormsII());
+
+    //$(document).bind("kendo:skinChange", GetChallanListForGraph());
+
+    //$(document).bind("kendo:skinChange", GetOnlineServiceListForGraph());
+    //$(document).bind("kendo:skinChange", CreateBarGraphForOnlineServices());
+    //$(document).bind("kendo:skinChange", GetJSKServiceListForGraph());
+    //$(document).bind("kendo:skinChange", CreateBarGraphForJSKServices());
+
+    //$(document).bind("kendo:skinChange", GetDemandAndNDCListForGraph());
+</script>

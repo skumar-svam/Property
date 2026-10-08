@@ -1,0 +1,1099 @@
+﻿@model NA.PMS.Model.KYAViewModel
+@using Kendo.Mvc.UI
+@using NA.PMS.Common
+
+@{
+    ViewBag.Title = "KYA Form";
+    //Layout = "~/Views/Shared/_LayoutCustomer.cshtml";
+    Layout = "~/Views/Shared/_BlankCustomer.cshtml";
+}
+<script src="//code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+
+<style type="text/css">
+    .textBoxWidth {
+        width: 50px;
+    }
+    textarea.form-control{
+        /*height:34px;*/
+    }
+
+    .row-company{
+        display:none;
+    }
+    .col-company{
+        display:none;
+    }
+    .glyphicon.glyphicon-arrow-right{
+            color: #fff;
+            background-color: #204d74;
+            border-color: #122b40;
+            padding:11px 18px;
+    }
+    .col-md-3.col-sm-6.col-xs-12.form-group.col-file{
+        margin-top:6px;
+        margin-bottom:6px;
+    }
+
+    input[type=file] {
+        padding-top:4px;
+    }
+    #kya-form-content{
+        display:none;
+    }
+    .star{
+        color:red;
+    }
+    #loader {
+        display: none;
+    }
+</style>
+
+@using (Html.BeginForm("SaveKYAForm", "Property", new { area = "Customer" }, FormMethod.Post, new { enctype = "multipart/form-data", id = "userform" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="user-template" style="padding-top:30px;">
+        <div class="col-md-12">
+            <div class="row row-heading">
+                <div class="col-md-4 col-20 col-sm-6 col-xs-12"><h1 class="h1-title">KYA Form</h1></div>
+                <div class="col-md-8 col-80 col-sm-6 col-xs-12" style="text-align:right;">
+                    <b>[ Help line No. :- 0120-2425027, Email: helpdesk@noidaauthorityonline.com (Mon-Fir, 10:00AM - 5:00PM)] </b> <br />
+                    Fields marked with an asterisk (<span class="star">*</span>) are required.
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12  hr-div"></div>
+        <div class="col-md-12" id="kya-instruction">
+            @{
+                Html.RenderPartial("_KYAInstruction");
+             }
+        </div>
+
+        <div class="col-md-12 content-border" id="kya-form-content" style="border:solid #e2e3e4; border-width:0 1px 1px; margin-bottom:15px;">
+            <div class="row">
+                <input type="hidden" id="hdnOTP" />
+                @Html.HiddenFor(model=>model.DepartmentId)
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <h2 class="grid-title">Allottee Information</h2>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12" style="height:12px;">
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 col-20 col-sm-12 form-group">
+                    @Html.Label("Sector", new { @class="required"})
+                </div>
+                <div class="col-md-3 col-30 col-sm-6 col-xs-12 form-group">
+                    @(Html.Kendo().DropDownListFor(model => model.SectorId)
+                        .DataTextField("Text")
+                        .DataValueField("Id")
+                        .OptionLabel(" -- Select --")
+                        .Enable(true)
+                        .AutoBind(true)
+                        .Filter("contains")
+                        .DataSource(source =>
+                        {
+                            source.Custom()
+                            .ServerFiltering(true)
+                            .ServerPaging(true)
+                            .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                            .Transport(transport => transport.Read(read => read.Action("GetMasterSearchParameterAsDataSource", "Property", new { area = "Customer" }).Data("FilterSectorParameter")))
+                            .Schema(schema => schema.Data("Data").Total("Total"))
+                            .PageSize(100);
+                        })
+                        .HtmlAttributes(new { style = "width:100%; float:right;", @class = "input-disabled" })
+                        .Events(e => e.Change("ChangeInSector"))
+                    )
+                </div>
+                <div class="col-md-3 col-20 col-sm-12 form-group">
+                    @Html.Label("Block", new { @class = "required" })
+                </div>
+                <div class="col-md-3 col-30 col-sm-6 col-xs-12 form-group">
+                    @(Html.Kendo().DropDownListFor(m => m.BlockId)
+                        .Filter("contains")
+                        .DataTextField("Text")
+                        .DataValueField("Id")
+                        .OptionLabel(" -- Select --")
+                        .CascadeFrom("SectorId")
+                        .CascadeFromField("SectorId")
+                        .DataSource(source =>
+                        {
+                            source.Custom()
+                            .ServerFiltering(true)
+                            .ServerPaging(true)
+                            .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                //.Transport(transport => transport.Read(read => read.Action("GetMasterSearchParameterAsDataSource", "Property", new { area = "Customer" }).Data("FilterBlockParameter")))
+                            .Transport(transport => transport.Read(read => read.Action("GetMasterSearchParameterAsDataSource", "Property", new { area = "Customer" }).Data("FilterBlockParameter")))
+                            .Schema(schema => schema.Data("Data").Total("Total"))
+                            .PageSize(100);
+                        })
+                        .Events(events => { events.Change("ChangeInBlock"); })
+                        .HtmlAttributes(new { @class = "input-disabled", style = "width:100%; float:right;" })
+                    )
+                </div>
+
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 col-20 col-sm-12 form-group">
+                    @Html.Label("Plot/Flat", new { @class = "required" })
+                </div>
+                <div class="col-md-3 col-30 col-sm-6 col-xs-12 form-group">
+                    @(Html.Kendo().DropDownListFor(m => m.PlotNo)
+                        .Filter("contains")
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .OptionLabel(" -- Select --")
+                        .CascadeFrom("BlockId")
+                        .CascadeFromField("BlockId")
+                        .DataSource(source =>
+                        {
+                            source.Custom()
+                            .ServerFiltering(true)
+                            .ServerPaging(true)
+                            .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                            .Transport(transport => transport.Read(read => read.Action("GetMasterSearchParameterAsDataSource", "Property", new { area = "Customer" }).Data("FilterPlotParameter")))
+                            .Schema(schema => schema.Data("Data").Total("Total"))
+                            .PageSize(100);
+                        })
+                        .Events(events => { events.Change("GetAllotteeDetails"); })
+                        .HtmlAttributes(new { @class = "input-disabled", style = "width:100%; float:right;" })
+                    )
+                </div>
+                <div class="col-md-3 col-20 col-sm-12 form-group">
+                    <label>Registration Id</label>
+                </div>
+                <div class="col-md-3 col-30">
+                    @Html.TextBoxFor(model => model.RegistrationId, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 col-20 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Allottee Name", new {id = "lbl-allottee-name" })
+                </div>
+                <div class="col-md-3 col-30 col-sm-3 col-xs-12 form-group">
+                    @Html.TextAreaFor(model => model.AllotteeName, new { @class = "form-control", @maxlength = "450", @readonly = "readonly" })
+                </div>
+                <div class="col-md-3 col-20 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Allottee Address", htmlAttributes: new { @class = "" })
+                </div>
+                <div class="col-md-3 col-30 col-sm-3 col-xs-12 form-group">
+                    @Html.TextAreaFor(model => model.CorrespondAddress, new { @class = "form-control", @maxlength = "500", @readonly = "readonly" })
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 col-20 col-sm-6 col-xs-12 form-group">
+                    @Html.Label("Allottee Type")
+                </div>
+                <div class="col-md-3 col-30 col-sm-6 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.AllotteeType, htmlAttributes: new { @class = "form-control", @maxlength = "20", @onchange = "ChangeInAllotteeType()", @readonly = "readonly" })
+                </div>
+                <div class="col-md-3 col-20 col-sm-3 col-xs-12 form-group">
+                    <label class="required" id="lbl-department">Department</label>
+                </div>
+                <div class="col-md-3 col-30 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.Department, htmlAttributes: new { @class = "form-control", @maxlength = "45", @readonly = "readonly" })
+                </div>               
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 col-20 col-sm-3 col-xs-12 form-group">
+                    <label class="required" id="lbl-mobile-no">Mobile No</label>
+                </div>
+                <div class="col-md-3 col-30 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.MobileNo, new { @class = "form-control", @maxlength = "12" })
+                </div>
+                <div class="col-md-3 col-20 col-sm-3 col-xs-12 form-group">
+                    <label class="required" id="lbl-email">Email</label>
+                </div>
+                <div class="col-md-3 col-30 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.Email, htmlAttributes: new { @class = "form-control", @maxlength = "45" })
+                </div>
+            </div> 
+            
+            <div class="row" style="display:none">
+                <div class="col-md-3 col-20 col-sm-3 col-xs-12 form-group col-individual">
+                    <label class="" id="lbl-aadhar-no">Aadhar No</label>
+                </div>
+                <div class="col-md-3 col-30 col-sm-3 col-xs-12 form-group col-individual">
+                    @Html.TextBoxFor(model => model.AadharNo, new { @class = "form-control", @maxlength = "16" })
+                </div>
+                <div class="col-md-3 col-20 col-sm-3 col-xs-12 form-group col-company">
+                    <label class="" id="lbl-roc">ROC</label>
+                </div>
+                <div class="col-md-3 col-30 col-sm-3 col-xs-12 form-group col-company">
+                    @Html.TextBoxFor(model => model.ROC, new { @class = "form-control", @maxlength = "20" })
+                </div>               
+            </div>           
+
+            <div class="row row-company">
+                <div class="col-md-3 col-20 col-sm-6 col-xs-12 form-group">
+                    @Html.Label("Authorized Signatory Mobile No", new { @class = "required" })
+                </div>
+                <div class="col-md-3 col-30 col-sm-6 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.SignatoryMobileNo, htmlAttributes: new { @class = "form-control", @maxlength = "150" })
+                </div>
+                <div class="col-md-3 col-20 col-sm-6 col-xs-12 form-group">
+                    @Html.Label("Authorized Signatory Email Id", new { @class = "required" })
+                </div>
+                <div class="col-md-3 col-30 col-sm-6 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.SignatoryEmail, htmlAttributes: new { @class = "form-control", @maxlength = "150" })
+                </div>
+            </div>
+
+            <div class="row row-company">
+                <div class="col-md-3 col-20 col-sm-6 col-xs-12 form-group">
+                    @Html.Label("Authorized Signatory Name", new { @class = "required" })
+                </div>
+                <div class="col-md-3 col-30 col-sm-6 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.AuthorizedSignatory, htmlAttributes: new { @class = "form-control", @maxlength = "25" })
+                </div>
+                <div class="col-md-3 col-20 col-sm-6 col-xs-12 form-group">
+                    @Html.Label("GST No")
+                </div>
+                <div class="col-md-3 col-30 col-sm-6 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.GSTNo, htmlAttributes: new { @class = "form-control", @maxlength = "150" })
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 col-20 col-sm-6 col-xs-12 form-group">
+                    <label class="" id="lbl-pan">Allottee PAN</label>
+                </div>
+                <div class="col-md-3 col-30 col-sm-6 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.PAN, htmlAttributes: new { @class = "form-control", @onchange = "javascript:PanNumberChange()" })
+                </div>
+            </div>
+
+            <div class="row" style="margin-bottom:10px;">
+                <div class=" col-md-12">
+                <h2 class="grid-title">Communication Address</h2>
+            </div>
+            </div>
+
+            <div class="row row-address" >
+                <div class="col-md-3 col-20 col-sm-6 col-xs-12 form-group">
+                    @Html.Label("Address Line 1", new { @class = "required" })
+                </div>
+                <div class="col-md-3 col-30 col-sm-6 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.AddressLine1, htmlAttributes: new { @class = "form-control", @maxlength = "50" })
+                </div>
+                <div class="col-md-3 col-20 col-sm-6 col-xs-12 form-group">
+                    @Html.Label("Address Line 2")
+                </div>
+                <div class="col-md-3 col-30 col-sm-6 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.AddressLine2, htmlAttributes: new { @class = "form-control", @maxlength = "100" })
+                </div>
+            </div>
+
+            <div class="row row-address">
+                <div class="col-md-3 col-20 col-sm-6 col-xs-12 form-group">
+                    @Html.Label("Area Locality", new { @class = "required" })
+                </div>
+                <div class="col-md-3 col-30 col-sm-6 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.AreaLocality, htmlAttributes: new { @class = "form-control", @maxlength = "50" })
+                </div>
+                <div class="col-md-3 col-20 col-sm-6 col-xs-12 form-group">
+                    @Html.Label("State", new { @class = "required" })
+                </div>
+                <div class="col-md-3 col-30 col-sm-6 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.AddressLine2, htmlAttributes: new { @class = "form-control", @maxlength = "100" })
+                </div>
+            </div>
+
+            <div class="row row-address">
+                <div class="col-md-3 col-20 col-sm-6 col-xs-12 form-group">
+                    @Html.Label("PIN Code", new { @class = "required" })
+                </div>
+                <div class="col-md-3 col-30 col-sm-6 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.PinCode, htmlAttributes: new { @class = "form-control", @maxlength = "6" })
+                </div>
+                <div class="col-md-3 col-20 col-sm-6 col-xs-12 form-group">
+
+                </div>
+                <div class="col-md-3 col-30 col-sm-6 col-xs-12 form-group">
+
+                </div>
+            </div>
+
+            <div class="row row-file" style="background:#fff;">
+                <div class="col-md-3 col-20 col-sm-6 col-xs-12 form-group col-file">
+                    @Html.Label("Id Proof", htmlAttributes: new { @class = "required", @id = "lbl-idproof" })
+                </div>
+                <div class="col-md-3 col-30 col-sm-6 col-xs-12 form-group col-file">
+                    @(Html.Kendo().DropDownListFor(model => model.AllotteeIdFileType)
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .OptionLabel("--select--")
+                        .DataSource(source =>
+                        {
+                            source.Custom()
+                            .ServerFiltering(true)
+                            .ServerPaging(true)
+                            .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                            .Transport(transport => transport.Read(read => read.Action("GetAllotteeIdTypeList", "Property", new { area = "Customer" }).Data("FilterAllotteeType")))
+                            .Schema(schema => schema.Data("Data").Total("Total"))
+                            .PageSize(100);
+                        })
+                        .HtmlAttributes(new { style = "width:100%" })
+                    )
+                </div>   
+                <div class="col-md-3 col-20 col-sm-6 col-xs-12 form-group col-file">
+
+                </div>
+                <div class="col-md-3 col-30 col-sm-6 col-xs-12 form-group col-file">
+                    <input type="file" name="idfile" id="id-file" class="file-upload" />
+                </div>
+                
+                
+            </div>
+
+            <div class="row row-file" style="background:#f5f5f5;">
+                <div class="col-md-3 col-20 col-sm-6 col-xs-12 form-group col-file">
+                    @Html.Label("Plot Ownership Letter", new { @class = "required" })
+                </div>
+                <div class="col-md-3 col-30 col-sm-6 col-xs-12 form-group col-file">
+                    @(Html.Kendo().DropDownListFor(model => model.PlotOwnershipFileType)
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .OptionLabel("--select--")
+                        .DataSource(source =>
+                        {
+                            source.Custom()
+                            .ServerFiltering(true)
+                            .ServerPaging(true)
+                            .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                            .Transport(transport => transport.Read(read => read.Action("GetOwnershipFileTypeList", "Property", new { area = "Customer" }).Data("FilterAllotteeType")))
+                            .Schema(schema => schema.Data("Data").Total("Total"))
+                            .PageSize(100);
+                        })
+                        .HtmlAttributes(new { style = "width:100%" })
+                    )
+                </div>
+                <div class="col-md-3 col-20 col-sm-6 col-xs-12 form-group col-file">
+
+                </div>
+                <div class="col-md-3 col-30 col-sm-6 col-xs-12 form-group col-file">
+                    <input type="file" name="letterfile" id="ownership-file" class="file-upload" />
+                </div>
+            </div>
+
+            <div class="row row-file" style="background:#fff;">
+                <div class="col-md-3 col-20 col-sm-6 col-xs-12 form-group col-file">
+                    @Html.Label("Other Proof")
+                </div>
+                <div class="col-md-3 col-30 col-sm-6 col-xs-12 form-group col-file">
+                    @Html.TextBoxFor(model => model.OtherFileType, htmlAttributes: new { @class = "k-textbox", @maxlength = "20", style = "width:100%;" })
+                </div>
+                <div class="col-md-3 col-20 col-sm-6 col-xs-12 form-group col-file">
+
+                </div>
+                <div class="col-md-3 col-30 col-sm-6 col-xs-12 form-group col-file">
+                    <input type="file" name="otherfile" id="other-file" class="file-upload" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 col-sm-12 col-xs-12 form-group">
+                    <label style="padding-left:15px;">Declaration</label>
+                </div>
+                <div class="col-md-12 col-sm-12 col-xs-12 form-group">
+                    <p style="padding:0 15px;">
+                        @Html.HiddenFor(model => model.IsDeclarationChecked.Value)
+                        <input type="checkbox" id="checkbox-declaration" /> I/We hereby declare that all the information provided is true and correct to the best of my/our 
+                        knowledge and belief and is provided for the allottee and no other third party. I/We undertake to inform you of any changes therein, immediately. 
+                        In case any of the above information is found to be false or untrue or misleading or misrepresenting, I am/we are aware that I/we may be held liable 
+                        for it. I/We understand that the information provided will solely be used for communication purposes only and no other purpose. 
+                    </p>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12 form-group" style="text-align:right">
+                    <input type="button" id="btn-next" value="Submit" class="btn btn-primary" style="width:100px; margin-right:12px;border-radius:0;" />                  
+                </div>
+            </div>
+        </div>
+
+    </div>
+}
+
+
+<div class="col-md-12" id="divOTPwindow">
+    <div class="row form-group" style="margin-top:25px;">
+        <div class="col-md-3 col-sm-12 col-xs-12" style="text-align:center;padding:0;">
+            <label>OTP</label>
+        </div>
+        <div class="col-md-5 col-sm-12 col-xs-12" style="padding:0;">
+            <input type="text" class="k-textbox" id="txtotp" maxlength="10" placeholder="enter otp here" style="width:100%;" />
+        </div>
+        <div class="col-md-3 col-sm-12 col-xs-12" style="padding:0;">
+            <input class="k-button" type="button" value="Resend" id="btnResend" style="width:150px;"/>
+        </div>
+    </div>
+    <div class="row form-group" style="margin:15px 0 15px 0;">
+        <div class="col-md-4 col-sm-4 col-xs-12"></div>
+        <div class="col-md-4 col-sm-4 col-xs-12">
+            <input type="button" class="k-button btn btn-primary" id="btnMobileOTP" value="submit" style="width:100%" />
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-12"><input type="hidden" id="hdnOTP" /> </div>
+    </div>
+</div>
+
+<div id="progressbar" style="width:100%; text-align:center;">
+    <div id="loader" style="position: fixed;top:210px; left:0;  width:100%; height: 100%;  ">
+        <img src="~/Content/Images/ajax_loader_red.gif" style="width:200px;height:200px;" />
+        @*<img src="~/Content/Images/Chimply_progress.gif" style="width:200px;height:200px;background:#e2e3e4;" />*@
+    </div>
+</div>
+
+<script type="text/javascript">
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+
+    function ChangeInAllotteeType() {
+        //alert("change in allottee type");
+        if ($('#AllotteeType').val() == "Company") {
+            $('#lbl-allottee-name').text("Name Of Organisation");
+            $('#lbl-mobile-no').text("Organisation's Contact No");
+            $('#lbl-email').text("Organisation's Email Id");
+            $('#lbl-idproof').text("Organisation PAN/GST Reg.");
+            $('#lbl-pan').text("Organisation PAN")
+            $('.row-company').show();
+            $('.col-company').show();
+            $('.col-individual').css("display", "none");
+        }
+        else {
+            $('#lbl-allottee-name').text("Allottee Name");
+            $('#lbl-mobile-no').text("Allottee's Mobile No");
+            $('#lbl-email').text("Allottee's Email Id");
+            $('#lbl-idproof').text("Id Proof")
+            $('#lbl-pan').text("Allottee PAN")
+            $('.row-company').css("display", "none");
+            $('.col-company').css("display", "none");
+            $('.col-individual').show();
+        }
+
+        $('#AllotteeIdFileType').data('kendoDropDownList').dataSource.read();
+        $('#PlotOwnershipFileType').data('kendoDropDownList').dataSource.read();
+    }
+
+    function ReadDropdownParameter() {
+        $('#SectorId').data('kendoDropDownList').dataSource.read();
+        $('#BlockId').data('kendoDropDownList').dataSource.read();
+        $('#PlotNo').data('kendoDropDownList').dataSource.read();
+    }
+
+    function GetAllotteeDetails() {
+        var sectorId = $('#SectorId').val();
+        var blockId = $('#BlockId').val();
+        var plotNo = $('#PlotNo').val();
+        if (sectorId != "" && blockId != "" && plotNo != "") {
+            var kya = {
+                SectorId: sectorId,
+                BlockId: blockId,
+                PlotNo: plotNo
+            };
+            $.ajax({
+                url: '@(Url.Action("GetPropertyDetailForKYA", "Property", new { area="Customer"}))',
+                type: 'POST',
+                dataType: 'json',
+                data: { model: kya },
+                success: function (result) {
+                    if (result != null) {
+                        if (result.ActionId == '@ReturnType.NotExist') {
+                            alertify.error("Contact Authority for this property");
+                            return false;
+                        }
+                        if (result.ActionId == '@ReturnType.Exist') {
+                            alertify.error("KYA form has been submitted for this prorperty.");
+                            return false;
+                        }
+                        else {
+                            $('#RegistrationId').val(result.RegistrationId);
+                            $('#AllotteeType').val(result.AllotteeType);
+                            $('#AllotteeName').val(result.AllotteeName);
+                            $('#CorrespondAddress').val(result.CorrespondAddress);
+                            $('#MobileNo').val(result.MobileNo);
+                            $('#Email').val(result.Email);
+                            $('#AuthorizedSignatory').val(result.AuthorizedSignatory);
+                            $('#GSTNo').val(result.GSTNo);
+                            $('#DepartmentId').val(result.DepartmentId);
+                            $('#Department').val(result.Department);
+                            ChangeInAllotteeType();
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    function FilterAllotteeType() {
+        return {
+            ActionType: $('#AllotteeType').val()
+        };
+    }
+
+    function FilterSectorParameter() {
+        return {
+            ActionType: "Sector",
+            SchemeId: null,
+            DepartmentId: null,
+            SectorId: $('#SectorId').val(),
+            //BlockId: $('#BlockId').val()
+        };
+    }
+
+    function ChangeInSector() {
+        //ReadDropdownParameter();
+        $('#BlockId').data('kendoDropDownList').dataSource.read();
+        //$('#PlotNo').data('kendoDropDownList').dataSource.read();
+    }
+
+    function FilterBlockParameter() {
+        return {
+            ActionType: "Block",
+            SchemeId: null,
+            DepartmentId: null,
+            SectorId: $('#SectorId').val(),
+            //BlockId: $('#BlockId').val()
+        };
+    }
+
+    function ChangeInBlock() {
+        //ReadDropdownParameter();
+        $('#PlotNo').data('kendoDropDownList').dataSource.read();
+    }
+
+    function FilterPlotParameter() {
+        return {
+            ActionType: "Plot",
+            SchemeId: null,
+            DepartmentId: null,
+            SectorId: $('#SectorId').val(),
+            BlockId: $('#BlockId').val()
+        };
+    }
+
+    function ChangeInPlotNo() {
+        //ReadDropdownParameter();
+        GetAllotteeDetails();
+    }
+
+    function SubmitKYAform() {
+        $('#loader').show();
+        if ($('#RegistrationId').val() != "") {
+            var formData = new FormData($('form').get(0));
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: false, // Not to set any content header
+                processData: false, // Not to process data
+                data: formData,
+                url: '/Customer/Property/SavePropertyDetailForKYAII',
+                success: function (result) {
+                    if (result == '@ReturnType.Saved') {
+                        $('#loader').hide();
+                        alertify.success("Property detail updated successfully.");
+                        window.location.href = "/Customer/Property/KYAForm";
+                        ClearInputFields();
+                    }
+                    else if (result == '@ReturnType.Exist') {
+                        alertify.error("Property already updated");
+                    }
+                    else {
+                        return false;
+                    }
+                    //ClearFields();
+                },
+                error: function (ajaxRequest, strError) {
+                    alertify.error("Network error, try again later");
+                }
+            });
+        }
+    }
+
+    function SendOTPtoUser() {
+        var mobile = $('#MobileNo').val();
+        var mailId = $('#Email').val();
+        if ($('#AllotteeType').val() == '@Constants.Company') {
+            mobile = $('#SignatoryMobileNo').val();
+            mailId = $('#SignatoryEmail').val();
+        }
+
+        if (mobile != "") {
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                data: { mobileNo: mobile, email: mailId, ActionType: "KYA" },
+                url: '/Customer/Property/SendOTP',
+                success: function (result) {
+                    if (result != null) {
+                        $('#hdnOTP').val(result);
+                        alertify.success("OTP has been sent on your mobile and email id successfully.");
+                        return false;
+                    }
+                    else {
+
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+    }
+
+    function ValidateOTP() {
+        //var formId = $('#ApplicationFormId').val();
+        var otp_mobile = $('#txtotp').val();
+        if (otp_mobile != "") {
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                data: { OTP: otp_mobile },
+                url: '/Customer/Property/ValidateOTP',
+                success: function (result) {
+                    if (result == '@ReturnType.Success') {
+                        $('#divOTPwindow').data("kendoWindow").close();
+                        //$('#AreaRange').val($('#AreaRangeId').data("kendoDropDownList").text());
+                        SubmitKYAform();
+                        //$('#applicationform').submit(function(){});
+                    }
+                    else {
+                        alertify.error("OTP mismatch");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+    }
+
+    $(document).ready(function () {
+        $('#divOTPwindow').kendoWindow({
+            modal: true,
+            title: "KYA Approver Window",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "30%"
+            },
+            width: "40%", height: "35%"
+        });
+
+        $('#btn-next').click(function () {
+            if (ValidateInputFields()) {
+                SendOTPtoUser();
+                $("#divOTPwindow").data("kendoWindow").center();
+                $("#divOTPwindow").data("kendoWindow").open();
+                $("#divOTPwindow").data("kendoWindow").pin();
+            }
+        });
+
+        $('#btnResend').click(function () {
+            SendOTPtoUser();
+        });
+
+        $('#btnMobileOTP').click(function () {
+            //if (CheckFileToUpload()) {
+                //SubmitKYAform();
+            //}
+                ValidateOTP();
+        });
+
+
+        $("#id-file").change(function () {
+            readURL(this);
+        });
+        $("#ownership-file").change(function () {
+            readURL2(this);
+    });
+        $("#other-file").change(function () {
+            readURL3(this);
+        });
+    });
+
+    function readURL(input) {
+        if (CheckUserImage(input)) {
+            if (input.files && input.files[0]) {
+                var imgsize = input.files[0].size / 1024;
+                if (imgsize < 20) {
+                    alertify.error(" Min 100kb file size is allowed");
+                    $('#id-file').val('');
+                    return false;
+                }
+                else if (imgsize / 1024 > 5) {
+                    alertify.error(" Max 5Mb file size is allowed");
+                    $('#id-file').val('');
+                    return false;
+                }
+                //else {
+                //    alertify.error("file size min(10kb) and max(50mb)");
+                //    $('#imguser').val('');
+                //}
+                //if (imgsize > 11 && imgsize < 51) {
+                //    var reader = new FileReader();
+                //    $('#userid').css("display", "none");
+                //    reader.onload = function (e) {
+                //        $('#userphoto').attr('src', e.target.result);
+                //    }
+                //    $('#userphoto').show();
+                //    reader.readAsDataURL(input.files[0]);
+                //}
+
+            }
+        }
+        else {
+            $('#id-file').val('');
+        }
+    }
+    function readURL2(input) {
+        if (CheckUserImage(input)) {
+            if (input.files && input.files[0]) {
+                var imgsize = input.files[0].size / 1024;
+                if (imgsize < 100) {
+                    alertify.error(" Min 100kb file size is allowed");
+                    $("#ownership-file").val('');
+                    return false;
+                }
+                else if (imgsize / 1024 > 5) {
+                    alertify.error(" Max 5Mb file size is allowed");
+                    $("#ownership-file").val('');
+                    return false;
+                }
+                //else {
+                //    alertify.error("file size min(10kb) and max(50mb)");
+                //    $("#ownership-file").val('');
+                //}
+            }
+        }
+        else {
+            $("#ownership-file").val('');
+        }
+    }
+
+    function readURL3(input) {
+        if (CheckUserImage(input)) {
+            if (input.files && input.files[0]) {
+                var imgsize = input.files[0].size / 1024;
+                if (imgsize < 100) {
+                    alertify.error(" Min 100kb file size is allowed");
+                    $("#other-file").val('');
+                    return false;
+                }
+                else if (imgsize / 1024 > 5) {
+                    alertify.error(" Max 5Mb file size is allowed");
+                    $("#other-file").val('');
+                    return false;
+                }
+                //else {
+                //    alertify.error("file size min(10kb) and max(50mb)");
+                //    $("#ownership-file").val('');
+                //}
+            }
+        }
+        else {
+            $("#other-file").val('');
+        }
+    }
+
+    function CheckUserImage(input) {
+        var file = input.files[0].name;
+        var count = file.lastIndexOf('.') + 1;
+        var ext = file.substr(count);
+        if (ext.toLowerCase() == "jpg" || ext.toLowerCase() == "pdf") {
+            return true;
+        }
+        else {
+            alertify.error("Only jpg/pdf file allowed.");
+            return false;
+        }
+    }
+
+
+    function ValidateEmail(email) {
+        var expr = /^([\w-\.]+)@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
+        return expr.test(email);
+    };
+
+
+    function PanNumberChange() {
+        if ($("#PAN").val().trim() == '') {
+            $("#PAN").val('');
+        }
+        var bool = CheckPanNoFormat();
+        if (bool == false) {
+            alertify.error("Pan Number format is wrong.");
+            $("#PAN").val('');
+            return false;
+        }
+    }
+    function CheckPanNoFormat() {
+        var value = $("#PAN").val().trim();
+        var regex1 = /^[A-Z]{5}\d{4}[A-Z]{1}$/;
+        if (!regex1.test(value) || value.length != 10) {
+            return false;
+        }
+        return true;
+    }
+
+
+    function ValidateInputFields() {
+        var flag = true;
+        if ($('#SectorId').val() == "") {
+            alertify.error("Please select Sector");
+            flag = false;
+        }
+        if ($('#PlotNo').val() == "") {
+            alertify.error("Please enter PlotNo");
+            flag = false;
+        }
+        if ($('#RegistrationId').val() == "") {
+            alertify.error("Please enter Registration Id");
+            flag = false;
+        }
+        if ($('#AllotteeName').val() == "") {
+            alertify.error("Please enter Allottee Name");
+            flag = false;
+        }
+        if ($('#CorrespondAddress').val() == "") {
+            alertify.error("Please enter Communication address");
+            flag = false;
+        }
+        if ($('#AllotteeType').val() == "") {
+            alertify.error("Please enter Allottee Type");
+            flag = false;
+        }
+        if ($('#MobileNo').val() == "") {
+            alertify.error("Please enter Mobile No.");
+            flag = false;
+        }
+        if ($('#Email').val() == "") {
+            alertify.error("Please enter Email.");
+            //return false;
+            flag = false;
+        }
+        if ($("#Email").val() != "") {
+            if (!ValidateEmail($("#Email").val())) {
+                alertify.error("Please enter valid email address.");
+                //return false;
+                flag = false;
+            }
+        }
+        if ($('#AllotteeType').val() == '@Constants.Company') {
+            if ($('#SignatoryMobileNo').val() == "") {
+                alertify.error("Please enter Authorized Signatory Mobile No.");
+                flag = false;
+            }
+            if ($('#AuthorizedSignatory').val() == "") {
+                alertify.error("Please enter Authorized Signatory Name.");
+                flag = false;
+            }
+            if ($('#SignatoryEmail').val() == "") {
+                alertify.error("Please enter Authorized Signatory Email.");
+                //return false;
+                flag = false;
+            }
+            if ($("#SignatoryEmail").val() != "") {
+                if (!ValidateEmail($("#SignatoryEmail").val())) {
+                    alertify.error("Please enter valid Signatory Email address.");
+                    //return false;
+                    flag = false;
+                }
+            }
+        }
+
+        if ($("#PAN").val() != "") {
+            if (!CheckPanNoFormat()) {
+                alertify.error("Please enter valid PAN number.");
+                //return false;
+                flag = false;
+            }
+        }
+        if ($('#AddressLine1').val() == "") {
+            alertify.error("Please enter AddressLine1.");
+            //return false;
+            flag = false;
+        }
+        if ($('#AreaLocality').val() == "") {
+            alertify.error("Please enter Area Locality.");
+            //return false;
+            flag = false;
+        }
+
+        if ($('#State').val() == "") {
+            alertify.error("Please enter state.");
+            //return false;
+            flag = false;
+        }
+        if ($('#PinCode').val() == "") {
+            alertify.error("Please enter pincode.");
+            //return false;
+            flag = false;
+        }
+        if ($('#AllotteeIdFileType').val() == "") {
+            alertify.error("Please select Allottee File Type.");
+            flag = false;
+        }
+        if ($('#AllotteeIdFileType').val() != "") {
+            if ($('#id-file').val() == "") {
+                alertify.error("Please select id File.");
+                flag = false;
+            }
+        }
+        if ($('#PlotOwnershipFileType').val() == "") {
+            alertify.error("Please select Plot Ownership File Type.");
+            flag = false;
+        }
+        if ($('#PlotOwnershipFileType').val() != "") {
+            if ($('#ownership-file').val() == "") {
+                alertify.error("Please select ownership File.");
+                flag = false;
+            }
+        }
+        if ($('#OtherFileType').val() != "") {
+            if ($('#other-file').val() == "") {
+                alertify.error("Please select other File.");
+                flag = false;
+            }
+        }
+        if ($('#checkbox-declaration').prop("checked") == false || $('#checkbox-declaration').val() == undefined) {
+            alertify.error("Please check declaration.");
+            flag = false;
+        }
+        return flag;
+    }
+
+
+    function ClearInputFields() {
+        $('#SectorId').data("kendoDropDownList").value('');
+        $('#BlockId').data("kendoDropDownList").value('');
+        $('#PlotNo').val('');
+        $('#RegistrationId').val('');
+        $('#AllotteeName').val('');
+        $('#AllotteeType').val('');
+        $('#CorrespondAddress').val('');
+        $('#MobileNo').val('');
+        $('#Email').val('');
+        $('#PAN').val('');
+        $('#GSTNo').val('');
+        $('#SignatoryMobileNo').val('');
+        $('#SignatoryEmail').val('');
+        $('#AuthorizedSignatory').val('');
+        $('#AllotteeIdFileType').data("kendoDropDownList").value('');
+        $('#PlotOwnershipFileType').data("kendoDropDownList").value('');
+        $('#PlotOwnershipFileType').val('');
+        $('#IsDeclartationChecked').prop('checked', false);
+        $('#txtotp').val('');
+
+        $('#AddressLine1').val('');
+        $('#AddressLine2').val('');
+        $('#AreaLocality').val('');
+        $('#State').val('');
+        $('#PinCode').val('');
+
+        $('#id-file').val('');
+        $('#ownership-file').val('');
+        $('#other-file').val('');
+    }
+
+    function CheckAllotteeIdFileType() {
+        //alert("check id file");
+        var idfile = $('#id_file').val();
+        if ($('#id_file').val() != "") {
+            var fileSize = ($('#id_file').files[0].size / 1024);
+            var fileName = $('#id-file').files[0].name;
+            var extension = $('#id-file').value.substr(($('#id-file').value.lastIndexOf('.') + 1));
+            if (extension.toLowerCase() == "pdf" || extension.toLowerCase() == "jpg" || extension.toLowerCase() == "jpeg") {
+                return false;
+            }
+            else {
+                alertify.error(fileName + " is not allowed.");
+                $('#id-file').val('');
+                return false;
+            }
+
+            if (size < 10) {
+                alertify.error(fileName + " Min 10kb file size is allowed");
+                return false;
+            }
+            if (size / 1024 > 5) {
+                alertify.error(fileName + " Max 5Mb file size is allowed");
+                $('#id-file').val('');
+                return false;
+            }
+        }
+    }
+
+    function CheckOwnershipFileType() {
+        var idfile = $('#ownership-file').val();
+        if ($('#ownership-file').val() != "") {
+            var fileSize = ($('#ownership-file').file.size / 1024);
+            var fileName = $('#ownership-file').file.name;
+            var extension = $('#ownership-file').value.substr(($('#ownership-file').value.lastIndexOf('.') + 1));
+            if (extension.toLowerCase() == "pdf" || extension.toLowerCase() == "jpg" || extension.toLowerCase() == "jpeg") {
+                return false;
+            }
+            else {
+                alertify.error(fileName + " is not allowed.");
+                $('#ownership-file').val('');
+                return false;
+            }
+
+            if (size < 10) {
+                alertify.error(fileName + " Min 10kb file size is allowed");
+                return false;
+            }
+            if (size / 1024 > 5) {
+                alertify.error(fileName + " Max 5Mb file size is allowed");
+                $('#ownership-file').val('');
+                return false;
+            }
+        }
+    }
+
+    function CheckOtherFileType() {
+        var idfile = $('#other-file').val();
+        if ($('#other-file').val() != "") {
+            var fileSize = ($('#other-file').file.size / 1024);
+            var fileName = $('#other-file').file.name;
+            var extension = $('#other-file').value.substr(($('#other-file').value.lastIndexOf('.') + 1));
+            if (extension.toLowerCase() == "pdf" || extension.toLowerCase() == "jpg" || extension.toLowerCase() == "jpeg") {
+                return false;
+            }
+            else {
+                alertify.error(fileName + " is not allowed.");
+                $('#other-file').val('');
+                return false;
+            }
+
+            if (size < 10) {
+                alertify.error(fileName + " Min 10kb file size is allowed");
+                return false;
+            }
+            if (size / 1024 > 5) {
+                alertify.error(fileName + " Max 5Mb file size is allowed");
+                $('#other-file').val('');
+                return false;
+            }
+        }
+    }
+
+</script>
+
+

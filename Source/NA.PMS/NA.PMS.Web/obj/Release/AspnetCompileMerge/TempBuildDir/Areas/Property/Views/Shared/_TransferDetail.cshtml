@@ -1,0 +1,354 @@
+﻿@model NA.PMS.Model.TransferViewModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+
+<style>
+    /*#divGPArow1 {
+        display: none;
+    }
+
+    #divGPArow2 {
+        display: none;
+    }*/
+</style>
+
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.Label("Transfer Type", htmlAttributes: new { @class = "required" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @(Html.Kendo().DropDownListFor(m => m.TransferTypeId)
+            .Filter("contains")
+            .DataTextField("Text")
+            .DataValueField("Id")
+            .OptionLabel("---Select---")
+            .DataSource(source => source.Read(read => read.Action("GetTransferTypeList", "Allotment", new { area="Property"})))
+            .Events(events => { events.Change("TransferTypeIdChangeEvent"); })
+            .HtmlAttributes(new { style = "width:100%" })
+        )
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.Label("Transfer Sub-type", htmlAttributes: new { @class = "required" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @(Html.Kendo().DropDownListFor(m => m.TransferSubTypeId)
+                .Filter("contains")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .OptionLabel("---Select---").CascadeFrom("TransferTypeId")
+                .DataSource(source => source.Read(read => read.Action("GetTransferSubTypeList", "Allotment", new { area="Property"}).Data("FilterTransferTypeId")).ServerFiltering(true))
+                .HtmlAttributes(new { style = "width:100%" })
+        )
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.Label("Transfer Date", htmlAttributes: new { @class = "required" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @(Html.Kendo().DatePickerFor(trans => trans.TransferDate).Max(DateTime.Now)
+                                          .HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.Label("Transferee Type", htmlAttributes: new { @class = "required genderClass" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @(Html.Kendo().DropDownListFor(trans => trans.TransfereeType)
+            .Filter("contains")
+            .Events(events => { events.Change("TransfereeTypeChangeEvent"); })
+            .DataTextField("Text")
+            .DataValueField("Text")
+            .OptionLabel("---Select---")
+            .DataSource(source => source.Read(read => read.Action("GetAllotteeTypeList", "Allotment", new { area = "Property" })))
+            .HtmlAttributes(new { @class = "schemeForms", style = "width:100%" })
+        )
+    </div>
+    
+</div>
+
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        <label>Transferee Name</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.TextBoxFor(trans => trans.Transferee, new { @class = "txtIndividual form-control", @maxlength = "490" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        <label class="lbl-transferee-master">Father/Husband Name</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.TextBoxFor(trans => trans.TransfereeMaster, new { @class = "txtIndividual form-control", @maxlength = "150" })
+    </div>
+</div>
+
+<div class="row row-individual">   
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.Label("Mother's Name", new { @class = "lbl-mother-name" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.TextBoxFor(trans => trans.MotherName, new { @class = "txtIndividual form-control", @maxlength = "150" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.Label("Occupation", new { @class = "lbl-occupation required" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @(Html.Kendo().DropDownListFor(trans => trans.OccupationId)
+        .Filter("contains")
+            .DataTextField("Text")
+            .DataValueField("Id")
+            .OptionLabel("---Select---")
+            .DataSource(source => source.Read(read => read.Action("GetOccupationList", "Allotment", new { area="Property"})))
+            .HtmlAttributes(new { @class = "schemeForms", style = "width:100%" })
+        )
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.Label("Correspond Address", htmlAttributes: new { @class = "required" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.TextBoxFor(trans => trans.TransfereeAddress, new { @maxlength = "500", @class = "form-control" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.Label("Permanent Address", new { @class = "lbl-address-II required" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.TextBoxFor(trans => trans.TransfereeAddressII, new { @class = "txtIndividual form-control", @maxlength = "500" })
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.Label("Mobile No", htmlAttributes: new { @class = "required" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.TextBoxFor(trans => trans.MobileNo, htmlAttributes: new { @maxlength = "10", onkeypress = "return IsNumeric(event);", @class = "form-control" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.Label("Transferee Email", new { @class = "lbl-email" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.TextBoxFor(trans => trans.Email, new { @maxlength = "150", @class = "form-control" })
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.Label("Transferee PAN", htmlAttributes: new { @class = "lbl-pan" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.TextBoxFor(trans => trans.PAN, new { @maxlength = "10", @class = "form-control" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.Label("Aadhaar No", htmlAttributes: new { @class = "lbl-aadhaar-no" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.TextBoxFor(trans => trans.AadhaarNo, new { @maxlength = "30", @class = "form-control" })
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.Label("Current Allotment/Sector Rate", htmlAttributes: new { @class = "required" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @(Html.Kendo().NumericTextBoxFor(trans => trans.AllotmentRate)
+                .Min(0).Max(9999999999999)
+                .Spinners(false).Step(0).Enable(true)
+                .Events(e => e.Change("CalculateTransferChargeDetail"))
+                .HtmlAttributes(new { style = "width: 100%", @maxlength = "13", @class = "k-label schemeForms textBoxValueRightAlign" })
+        )
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.Label("Location Charges(INR)")
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @(Html.Kendo().NumericTextBoxFor(trans => trans.LocationCharge)
+            .Min(0).Max(99999999)
+            .Spinners(false).Step(0).Enable(true)
+            .Events(e => e.Change("CalculateTransferChargeDetail"))
+            .HtmlAttributes(new { style = "width: 100%", @maxlength = "8", @class = "k-label schemeForms textBoxValueRightAlign" })
+        )
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.Label("Tranfer Rate (sqm)", htmlAttributes: new { @class = "required" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @(Html.Kendo().NumericTextBoxFor(trans => trans.TransferRate)
+                .Min(0).Max(9999999999999)
+                .Spinners(false).Step(0).Enable(true)
+                .Events(e => e.Change("CalculateTransferChargeDetail"))
+                .HtmlAttributes(new { style = "width: 100%", @maxlength = "13", @class = "k-label schemeForms text-right" })
+        )
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.Label("Total Transfer Charge")
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @(Html.Kendo().NumericTextBoxFor(trans => trans.TotalTransferCharge)
+            .Min(0).Max(9999999999999)
+            .Spinners(false).Step(0).Enable(true)
+            .Events(e => e.Change("CalculateTransferChargeDetail"))
+            .HtmlAttributes(new { style = "width: 100%", @maxlength = "13", @class = "k-label schemeForms text-right" })
+        )
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    function FilterTransferTypeId() {
+        return {
+            transferTypeId: $("#TransferTypeId").val()
+        };
+    }
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+    });
+
+    function TransferTypeIdChangeEvent() {
+        //ClearTransfereeDetails();
+    }
+
+    function CalculateTransferChargeDetail() {
+        var alotmentrate = $("#AllotmentRate").val() == "" ? 0 : $("#AllotmentRate").val();
+        var locationcharge = $("#LocationCharge").val() == "" ? 0 : $("#LocationCharge").val();
+        var area = $("#TotalArea").val() == "" ? 0 : $("#TotalArea").val();
+        var intArea = parseFloat(area);
+        if ($("#DepartmentId").val() == 3 || $("#DepartmentId").val() == 7) {
+            var totalrate = parseFloat(parseFloat(alotmentrate) + parseFloat(locationcharge)).toFixed(2);
+            var totalcharge = parseFloat(parseFloat(totalrate) * parseFloat(intArea)).toFixed(2);
+            var leaserent = (totalcharge * 2.5) / 100;
+
+            $("#TransferRate").data("kendoNumericTextBox").value(totalrate);
+            $("#AnnualLeaseRent").val(totalcharge);
+            $("#TotalPropertyCost").val(totalcharge);
+            $("#TotalTransferCharge").data("kendoNumericTextBox").value(totalcharge.toFixed(2));
+        }
+        else if ($("#DepartmentId").val() == 4 || $("#DepartmentId").val() == 1) {
+            var chargerate = ($("#FunctionalStatus").val() != "" && $("#FunctionalStatus").val() == "Yes") ? 4 : 5;
+            var totalrate = parseFloat(parseFloat(alotmentrate) + parseFloat(locationcharge)).toFixed(2);
+            var totalcharge = parseFloat(parseFloat(totalrate) * parseFloat(intArea)).toFixed(2);
+            var leaserent = (totalcharge * 2.5) / 100;
+
+            $("#TransferRate").data("kendoNumericTextBox").value(totalrate);
+            $("#AnnualLeaseRent").val(totalcharge);
+            $("#TotalPropertyCost").val(totalcharge);
+            $("#TotalTransferCharge").data("kendoNumericTextBox").value(totalcharge * chargerate/100);
+        }
+        //var rslt = intArea * ($("#TransferRate").val() == "" ? 0 : $("#TransferRate").val());
+        //$("#TotalTransferCharge").val(rslt.toFixed(2));
+    }
+
+
+    //dropdownlist.wrapper.hide(); // call wrapper.show() to make it visible again
+    function TransfereeTypeChangeEvent() {
+        var dropdownlist = $("#TransfereeType").data("kendoDropDownList");
+        if ($("#TransfereeType").val() == '@NA.PMS.Common.Constants.Company') {
+            $(".row-individual").css("display", "none");
+            $(".lbl-address-II").html("Registered Office");
+            $(".lbl-transferee-master").html("Authorised Signatory");
+            $(".lbl-pan").html("Company PAN");
+            $(".lbl-email").html("Company Email");
+        }
+        else {
+            $(".row-individual").show();
+            $(".lbl-address-II").html("Permanent Address");
+            $(".lbl-transferee-master").html("Father/Husband Name");
+            $(".lbl-pan").html("Transferee PAN");
+            $(".lbl-email").html("Transferee Email");
+        }
+    }
+
+
+    function ValidateTransfereeDetails() {
+        var flag = true;
+        var transfereeType = $("#TransfereeType").val();
+        if ($("#TransferTypeId").val() == "") {
+            alertify.error("Select Transfer Type");
+            return flag = false;
+        }
+        if ($("#TransferSubTypeId").val() == "") {
+            alertify.error("Select Transfer SubType");
+            return flag = false;
+        }
+        if ($("#TransferDate").val() == "") {
+            alertify.error("Select Transfer Date");
+            return flag = false;
+        }
+        if ($("#TransfereeType").val() == "") {
+            alertify.error("Select Transferee Type");
+            return flag = false;
+        }
+        if ($("#Transferee").val() == "") {
+            alertify.error("Enter Transferee Name");
+            return flag = false;
+        }
+        if ($("#TransfereeMaster").val() == "") {
+            var msg = transfereeType == '@NA.PMS.Common.Constants.Company' ? "Enter Authorised signatory Name" : "Enter Transferee owner name";
+            alertify.error("msg");
+            return flag = false;
+        }
+        if ($("#TransfereeAddress").val() == "") {
+            alertify.error("Enter Transferee Correspond Address");
+            return flag = false;
+        }
+        if ($("#TransfereeAddressII").val() == "") {
+            var msg = transfereeType == '@NA.PMS.Common.Constants.Company' ? "Enter Registered Office Address" : " Enter Transferee Permanent Address";
+            alertify.error(msg);
+            return flag = false;
+        }
+        if ($("#MobileNo").val() == "") {
+            alertify.error("Enter Mobile Number");
+            return flag = false;
+        }
+        if ($("#MobileNo").val().length < 10) {
+            alertify.error("Please enter correct Mobile Number");
+            return flag = false;
+        }
+        if ($("#Email").val() != "") {
+            if (/^([a-zA-Z0-9_.+-])+\@@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(email) == false) {
+                alertify.error("Please enter a valid Email");
+                return flag = false;
+            }
+        }
+        if (/^[a-zA-Z0-9- ]*$/.test($("#PAN").val()) == false) {
+            alertify.error("PAN should only be alphanumeric");
+            return flag = false;
+        }
+        if (transfereeType != '@NA.PMS.Common.Constants.Company') {
+            if ($("#OccupationId").val() == '') {
+                alertify.error("Please select Occupation");
+                return flag = false;
+            }
+        }
+        else {
+            return flag;
+        }
+    }
+
+
+    function ClearTransfereeDetails() {
+        $("#TransferTypeId").data("kendoDropDownList").value('');
+        $("#TransferSubTypeId").data("kendoDropDownList").value('');
+        $("#TransfereeType").data("kendoDropDownList").value('');
+        $("#OccupationId").data("kendoDropDownList").value('');
+        $("#TransferDate").val('');
+        $("#Transferee").val('');
+        $("#TransfereeMaster").val('');
+        $("#TransfereeMother").val('');
+        $("#TransfereeAddress").val('');
+        $("#TransfereeAddressII").val('');
+        $("#MobileNo").val('');
+        $("#Email").val('');
+        $("#AadhaarNo").val('');
+    }
+
+</script>

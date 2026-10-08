@@ -1,0 +1,317 @@
+﻿@model NA.PMS.Model.TransferModel
+@using Kendo.Mvc.UI
+
+
+<div class="">
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"></div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.RadioButtonFor(model => model.TypeOfTransferee, NA.PMS.Common.Constants.genderIndividual) Individual
+            @Html.RadioButtonFor(model => model.TypeOfTransferee, NA.PMS.Common.Constants.genderCompany) Company
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"></div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"></div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Gender", new { @class = "genderClass" })
+            @Html.Label("Company Name", new { @class = "lblCompany" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(trans => trans.TransfereeCompanyName, new { @class = "txtCompany form-control", @maxlength = "100" })
+
+            @(Html.Kendo().DropDownListFor(trans => trans.TransfereeGenderName).Filter("contains")
+                    .Events(events => { events.Change("GenderChange"); })
+                    //.Name("frequency")
+                    .DataTextField("text")
+                    .DataValueField("text")
+                    .OptionLabel("Select")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetIndividualGenders", "Allotment");
+                        });
+                    })
+                    .HtmlAttributes(new { @class = "schemeForms", style = "width:100%" })
+            )
+            @Html.HiddenFor(m => m.ReqNo)
+            @Html.HiddenFor(m => m.Status)
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("First Name", new { @class = "lblIndividual" })           
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(trans => trans.TransfereeFirstName, new { @class = "txtIndividual form-control", @maxlength = "100" })          
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Middle Name", new { @class = "lblIndividual" })
+            @Html.Label("Authorized Signatory", new { @class = "lblCompany" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(trans => trans.TransfereeMiddleName, new { @class = "txtIndividual form-control", @maxlength = "100" })
+            @Html.TextBoxFor(trans => trans.TransfereeCompanySigningAuth, new { @class = "txtCompany form-control", @maxlength = "150" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Last Name", new { @class = "lblIndividual" })
+            @Html.Label("Registered Office", new { @class = "lblCompany" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(trans => trans.TransfereeLastName, new { @class = "txtIndividual form-control", @maxlength = "100" })
+            @Html.TextBoxFor(trans => trans.TransfereeCompanyRegOff, new { @class = "txtCompany form-control", @maxlength = "500" })
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Father's/Husband's Name", new { @class = "lblIndividual" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(trans => trans.TransfereeRelationName, new { @class = "txtIndividual form-control", @maxlength = "150" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Mother's Name", new { @class = "lblIndividual" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(trans => trans.TransfereeMotherName, new { @class = "txtIndividual form-control", @maxlength = "150" })
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Mobile Number")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(trans => trans.TransfereeMobileNo, htmlAttributes: new { @maxlength = "10", onkeypress = "return IsNumeric(event);", @class = "form-control" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Email")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(trans => trans.TransfereeEmail, new { @maxlength = "150", @class = "form-control" })
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Correspondence Address")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(trans => trans.TransfereeCorrespondenceAdd, new { @maxlength = "500", @class = "form-control" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Permanent Address", new { @class = "lblIndividual" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(trans => trans.TransfereePermanentAdd, new { @class = "txtIndividual form-control", @maxlength = "500" })
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("PAN")@*<span class="text-danger">*</span>*@
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(trans => trans.TransfereePAN, htmlAttributes: new { @class = "form-control" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Occupation", new { @class = "lblIndividual" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DropDownListFor(trans => trans.TransfereeOccupationId).Filter("contains")
+                //.Name("frequency")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel("Select")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetOccupation", "Allotment");
+                        });
+                    })
+                    .HtmlAttributes(new { @class = "schemeForms", style = "width:100%" })
+            )
+            @Html.HiddenFor(trans => trans.BalanceDues)
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $(".lblCompany").hide();
+        $(".companySpan").hide();
+        $(".txtCompany").hide();
+        GetDisabled();
+        GetTrasferAlloteDetails();
+        GenderChange();
+    });
+
+    $('input[type=radio][name=TypeOfTransferee]').change(function () {
+        var transfereeType = $("input[name='TypeOfTransferee']:checked").val();
+        var dropdownlist = $("#TransfereeGenderName").data("kendoDropDownList");
+        var dropdownlist1 = $("#TransfereeOccupationId").data("kendoDropDownList");
+        if (transfereeType == '@NA.PMS.Common.Constants.genderCompany') {
+            $(".genderClass").hide();
+            dropdownlist.wrapper.hide();
+            $(".lblIndividual").hide();
+            $(".individualSpan").hide();
+            $(".txtIndividual").hide();
+            dropdownlist1.wrapper.hide();
+            $(".lblCompany").show();
+            $(".companySpan").show();
+            $(".txtCompany").show();
+           // $("#TransfereeGenderId").data("kendoDropDownList").value('');
+        }
+        else {
+            $(".genderClass").show();
+            dropdownlist.wrapper.show();
+            $(".lblCompany").hide();
+            $(".companySpan").hide();
+            $(".txtCompany").hide();
+            $(".lblIndividual").show();
+            $(".individualSpan").show();
+            $(".txtIndividual").show();
+            dropdownlist1.wrapper.show();
+          //  $("#TransfereeGenderId").data("kendoDropDownList").value('');
+        }
+    });
+
+    function GenderChange() {
+        var dropdownlist = $("#TransfereeOccupationId").data("kendoDropDownList");
+        var dropdownlistGender = $("#TransfereeGenderName").data("kendoDropDownList");
+        if ($("#TransfereeGenderName").val() == '@NA.PMS.Common.Gender.Company') {
+            $(".genderClass").hide();
+            dropdownlistGender.wrapper.hide();
+            $(".lblIndividual").hide();
+            $(".individualSpan").hide();
+            $(".txtIndividual").hide();
+            dropdownlist.wrapper.hide();
+            $(".lblCompany").show();
+            $(".companySpan").show();
+            $(".txtCompany").show();
+            $("input[name=TypeOfTransferee][value='@NA.PMS.Common.Gender.Company']").prop("checked", true);
+        }
+        else {
+            $(".genderClass").show();
+            dropdownlistGender.wrapper.show();
+            $(".lblCompany").hide();
+            $(".companySpan").hide();
+            $(".txtCompany").hide();
+            $(".lblIndividual").show();
+            $(".individualSpan").show();
+            $(".txtIndividual").show();
+            dropdownlist.wrapper.show();
+            $("input[name=TypeOfTransferee][value='@NA.PMS.Common.Constants.genderIndividual']").prop("checked", true);
+        }
+    }
+
+    function GetDisabled() {
+        var ddlRid = $("#RId").data("kendoDropDownList");        
+        ddlRid.enable(false);
+        var ddlTransfereeGenderName = $("#TransfereeGenderName").data("kendoDropDownList");
+        ddlTransfereeGenderName.enable(false);
+        var ddlTransfereeOccupationId = $("#TransfereeOccupationId").data("kendoDropDownList");
+        ddlTransfereeOccupationId.enable(false);
+        $("#TransfereeFirstName").prop("disabled", true);
+        $("#TransfereeCompanyName").prop("disabled", true);
+        $("#TransfereeMiddleName").prop("disabled", true);
+        $("#TransfereeCompanySigningAuth").prop("disabled", true);
+        $("#TransfereeLastName").prop("disabled", true);
+        $("#TransfereeCompanyRegOff").prop("disabled", true);
+        $("#TransfereeRelationName").prop("disabled", true);
+        $("#TransfereeMotherName").prop("disabled", true);
+        $("#TransfereeMobileNo").prop("disabled", true);
+        $("#TransfereeEmail").prop("disabled", true);
+        $("#TransfereeCorrespondenceAdd").prop("disabled", true);
+        $("#TransfereePermanentAdd").prop("disabled", true);
+        $("#TransfereePAN").prop("disabled", true);
+        $("#TransfereeOccupationId").prop("disabled", true);
+        var ddlTransType = $("#TransferType").data("kendoDropDownList");
+        ddlTransType.enable(false);
+        //var ddlTransSubType = $("#TransferSubType").data("kendoDropDownList");
+        //ddlTransType.enable(false);
+        $("#GPAHolderName").prop("disabled", true);
+        $("#GPAHolderAdd").prop("disabled", true);
+        $("#TotalTransferCharge").prop("disabled", true);
+        $("#TransferChargePerSqMtr").prop("disabled", true);
+        //var datepicker = $("#GPAEffectiveFrom").data("kendoDatePicker");
+        //datepicker.enable(false);
+        var datepicker = $("#TransferDate").data("kendoDatePicker");
+        datepicker.enable(false);
+        //var datepicker = $("#GPAEffectiveTill").data("kendoDatePicker");
+        //datepicker.enable(false);
+        $("input[type=radio]").attr("disabled", true);
+    }
+
+    function GetTrasferAlloteDetails() {
+        var rId = $("#RId").val();
+        var reqNo = $("#hdnReqNo").val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rId: rId, reqNo: reqNo }),
+            url: '/PropertyRegistration/GetOriginalDetailsForTransferOnlyByRID',
+            success: function (result) {
+                if (result != null) {
+                    $("#lblScNa").html(result.SchemeName);
+                    $("#lblDeNa").html(result.DepttName);
+                    $("#lblApNa").html(result.ApplicantName);
+                    $("#lblGend").html(result.Gender);
+                    $("#lblReNa").html(result.RelationName);
+                    $("#lblPropTy").html(result.PropType);
+                    $("#lblCorrAdd").html(result.TransferorCorrAdd);
+                    $("#lblPerAdd").html(result.TransferorPerAdd);
+                    $("#lblArea").html(result.Area);
+                    $("#lblFloo").html(result.Floor);
+                    $("#lblProMo").html(result.PropMortgaged);
+                    $("#lblProFu").html(result.PropFunctional);
+                    $("#lblOTLR").html(result.OneTimeLeaseRent);
+                    $("#lblPropNo").html(result.PropNo);
+                    $("#hdnDepttId").val(result.DepttId);
+                    $("#hdnPropId").val(result.PropId);
+                    if (result.Gender.toLowerCase() == '@NA.PMS.Common.Constants.genderCompany'.toLowerCase()) {
+                        $(".mfGender").hide();
+                        $(".comGender").show();
+                    }
+                    else {
+                        $(".comGender").hide();
+                        $(".mfGender").show();
+                    }
+                    $("#lblCoNa").html(result.ApplicantCompany);
+                    $("#lblSiAu").html(result.ApplicantSiAu);
+                    $("#hdnTransfereeGenderName").val(result.Gender);
+                }
+                else {
+                    ClearValues();
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            },
+            error: function (obj) {
+                ClearValues();
+                alertify.error("Some error occured. Please try again later.");
+            }
+        });
+    }
+
+    function ClearValues() {
+        $("#lblScNa").html('');
+        $("#lblDeNa").html('');
+        $("#lblApNa").html('');
+        $("#lblGend").html('');
+        $("#lblReNa").html('');
+        $("#lblPropTy").html('');
+        $("#lblArea").html('');
+        $("#lblFloo").html('');
+        $("#lblProMo").html('');
+        $("#lblProFu").html('');
+        $("#BalanceDues").val('');
+        $("#lblCorrAdd").html('');
+        $("#lblPerAdd").html('');
+    }
+</script>

@@ -1,0 +1,95 @@
+﻿@using Kendo.Mvc.UI;
+@using NA.PMS.Model
+
+@{
+    ViewBag.Title = "Manage Department";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script src="~/Scripts/kendo.aspnetmvc.min.js"></script>
+<style>
+    .k-grid-content {
+        overflow-y: hidden;
+        overflow-x: hidden;
+    }
+</style>
+
+<div class="ManageAdminRoles">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Department</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                <a href="#" id="btnAddRole" class="" onclick="javascript:AddDepartment(event);">Add Department</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.UserManagement.NDARoleViewModel>()
+              .Name("gridDepartment")
+              .Columns(columns =>
+              {
+                  columns.Bound(c => c.Id).Hidden(true);
+                  columns.Bound(c => c.DepartmentId).Filterable(true);
+                  columns.Bound(c => c.Department).Title("Department");
+                  columns.Bound(c => c.CreatedDate).Title("Created Date").Format("{0:dd-MMM-yyyy}");
+                  columns.Bound(c => c.DepartmentId).Title("Action").ClientTemplate("<label class='hyperlink' onclick='javascript: DepartmentStatusChangeEvent(#=DepartmentId#)'>#if(IsActive==true){#<span>Lock</span>#}else{#<span>UnLock</span>#}#</label>");
+             })
+              .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+              .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(new[] { 10, 50, 100, 500 }).Info(true).PreviousNext(true).Input(true).Numeric(true).ButtonCount(10))
+              .DataSource
+              (
+                  dataSource => dataSource
+                      .Ajax()
+                      .Model(model => model.Id(p => p.Id))
+                      .ServerOperation(true)
+                      .Read(read => read.Action("GetDepartmentListAsDataSource", "Organization", new { area = "Admin" }))
+                      .PageSize(10)
+              )
+        )
+       
+    </div>
+</div>
+
+
+<div id="window-modal" class="modal fade" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog" style="min-height:250px; min-width:70%;border-radius:0;">
+        <div class="modal-content" style="border-radius:0;">
+            <div class="modal-body">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                @{Html.RenderPartial("_PartialDepartment");}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+
+    });
+
+    function DepartmentStatusChangeEvent(deptid) {
+        $.ajax({
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            type: "POST",
+            data: JSON.stringify({ DepartmentId: deptid, ActionType: "status", FilterType: "Department", MasterData: "Department" }),
+            url: '/Admin/Organization/SaveMasterDataInfoByType',
+            success: function (data) {
+                $('#gridDepartment').data('kendoGrid').dataSource.read();
+            },
+            error: function (msg) {
+                alert("Error Occured-" + msg.responseText);
+            }
+        });
+    }
+
+    function AddDepartment(event) {
+        event.preventDefault();
+        $('#window-modal').modal('show');       
+    }
+</script>
+
+

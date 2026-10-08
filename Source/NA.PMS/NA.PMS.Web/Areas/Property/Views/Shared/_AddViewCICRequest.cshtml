@@ -1,0 +1,192 @@
+﻿@model NA.PMS.Model.CICModel
+@using Kendo.Mvc.UI;
+
+<div class="form-bx">
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Change In Constitution", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DropDownListFor(model => model.Change_Type)
+                                                              .DataTextField("text")
+                                                              .DataValueField("id")
+                                                              .OptionLabel("--Select--")
+                                                              .DataSource(source =>
+                                                              {
+                                                                  source.Read(read =>
+                                                                  {
+                                                                      read.Action("GetChangeType", "CIC");
+                                                                  });
+                                                              })
+                                                            .HtmlAttributes(new { style = "width:100%;" })
+            )
+        </div>
+        <div id="changeInProductHideCharge">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("CIC Charge (INR)")
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.TextBoxFor(m => m.CIC_Charge, htmlAttributes: new { @class = "form-control", @maxlength = "16" })
+                @Html.HiddenFor(m => m.CIC_Charge, htmlAttributes: new { @id = "hdnCICCharges" })
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="changeInDirector">
+    <div class="form-bx">
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Name Of Director", htmlAttributes: new { @class = "required" })
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.TextBoxFor(m => m.Director_Name, htmlAttributes: new { @class = "form-control", @maxlength = "100" })
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.LabelFor(m => m.Type, htmlAttributes: new { @class = "required" })
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @(Html.Kendo().DropDownListFor(model => model.Type)
+                                                              .DataTextField("text")
+                                                              .DataValueField("id")
+                                                              .OptionLabel("Select")
+                                                              .DataSource(source =>
+                                                              {
+                                                                  source.Read(read =>
+                                                                  {
+                                                                      read.Action("GetType", "CIC");
+                                                                  });
+                                                              })
+                                                             .HtmlAttributes(new { style = "width:100%;" })
+                )
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Share", htmlAttributes: new { @class = "required" })
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                <div class="row">
+                    <div class="col-md-5 col-sm-6 col-xs-12 form-group" id="ddShareType">
+                        @(Html.Kendo().DropDownListFor(model => model.Share_Type)
+                                          .DataTextField("text")
+                                          .DataValueField("text")
+                                          .OptionLabel("Select")
+                                          .DataSource(source =>
+                                          {
+                                              source.Read(read =>
+                                              {
+                                                  read.Action("GetShareType", "CIC");
+                                              });
+                                          })
+                                         .HtmlAttributes(new { style = "width:100%;" })
+                        )
+                    </div>
+                    <div class="col-md-5 col-sm-6 col-xs-12 form-group" id="txtShareType">
+                        <input readonly="readonly" type="text" id="txtShare" class="form-control" />
+                    </div>
+                    <div class="col-md-7 col-sm-6 col-xs-12 form-group">
+                        @Html.TextBoxFor(m => m.Director_Share, htmlAttributes: new { @class = "form-control", @maxlength = "20" })
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                <button type="button" class="btn btn-default" value="Submit" id="btnAdd">Add</button>
+            </div>
+        </div>
+    </div>
+    <div class="k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.CICModel>()
+                                                       .Name("gridCIC")
+                                                      .Columns(columns =>
+                                                      {
+                                                          columns.Bound(c => c.SNo).Width(50);
+                                                          columns.Bound(c => c.Director_Name).Title("Director Name").Width(80);
+                                                          columns.Bound(c => c.TypeName).Width(50);
+                                                          columns.Bound(c => c.Director_Share).Title("Share").Width(80);
+                                                          columns.Bound(c => c.Director_Id).Hidden(true).Title("Action");
+                                                          columns.Bound(c => c.Director_Id).Title("Action").ClientTemplate("<a href='##' onclick='javascript: return RemoveRecord(this);' id='RemoveTag'>Remove</a>").Width(50).Filterable(false).Sortable(false);
+                                                      })
+                                                      .Sortable()
+                                                      .Filterable()
+                                                      .Resizable(resize => resize.Columns(true))
+                                                      .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                                                      .AutoBind(false)
+                                                      .DataSource
+                                                      (
+                                                         dataSource => dataSource
+                                                        .Ajax().Model(model => model.Id(p => p.Director_Id))
+                                                        .ServerOperation(true)
+                                                        .Read(read => read.Action("GetDirectorDetails", "CIC").Data("additionalInfo"))
+                                                        .PageSize(10)
+                                                      )
+        )
+    </div>
+</div>
+
+<div class="form-bx">
+    <div id="changeInFirmName">
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.LabelFor(m => m.OldFirmStatus)
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.TextBoxFor(m => m.OldFirmStatusName, new { @class = "form-control", @readonly = "readonly" })
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.LabelFor(m => m.NewFirmStatus)
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @(Html.Kendo().DropDownListFor(model => model.NewFirmStatus)
+                                                              .DataTextField("text")
+                                                              .DataValueField("id")
+                                                              .OptionLabel("Select")
+                                                              .DataSource(source =>
+                                                              {
+                                                                  source.Read(read =>
+                                                                  {
+                                                                      read.Action("GetFirmStatus", "CIC");
+                                                                  });
+                                                              })
+                                                            .HtmlAttributes(new { style = "width:100%;" })
+                )
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.LabelFor(m => m.OldFirmName)
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.TextBoxFor(m => m.OldFirmName, new { @class = "form-control", @readonly = "readonly" })
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.LabelFor(m => m.NewFirmName)
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.TextBoxFor(m => m.NewFirmName, htmlAttributes: new { @class = "form-control" })
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="form-bx">
+    <div id="changeInProduct">
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.LabelFor(m => m.OldFirmProduct)
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.TextBoxFor(m => m.OldFirmProduct, new { @class = "form-control", @readonly = "readonly" })
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.LabelFor(m => m.NewFirmProduct)
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.TextBoxFor(m => m.NewFirmProduct, htmlAttributes: new { @class = "form-control" })
+            </div>
+        </div>
+    </div>
+</div>

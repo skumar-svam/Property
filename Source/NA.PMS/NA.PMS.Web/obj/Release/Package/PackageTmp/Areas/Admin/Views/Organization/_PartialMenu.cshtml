@@ -1,0 +1,212 @@
+﻿@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions
+
+
+<div class="panel-body">
+    <div class="row form-group">
+        <div class="col-md-12" id="ApplicationMenu" style="text-align:center">
+            <input type="radio" name="menu-action" value="AddParentMenu" />Add Parent-Menu &nbsp;&nbsp;
+            <input type="radio" name="menu-action" value="UpdateParentMenu" />Update Parent-Menu &nbsp;&nbsp;
+            <input type="radio" name="menu-action" value="AddMenu" />Add Menu &nbsp;&nbsp;
+            <input type="radio" name="menu-action" value="UpdateMenu" />Update Menu
+        </div>
+    </div>
+    <div class="row form-group" style="padding-right:30px;">
+        <div class="col-md-3 col-sm-12 form-group col-20">
+            <label>Application</label>
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-30">
+            @(Html.Kendo().DropDownList()
+                  .Name("ddlMenuApplication")
+                  .OptionLabel("---select---")
+                  .DataTextField("Text")
+                  .DataValueField("Id")
+                  .Filter("contains")
+                  .DataSource(source => source.Read(read => read.Action("GetApplicationList", "Application", new { area = "Admin" })))
+                  .HtmlAttributes(new { style = "width:100%;" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-20">
+            <label>Parent Menu</label>
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-30">
+            @(Html.Kendo().DropDownList()
+                  .Name("ddlParentMenu")
+                  .OptionLabel("---select---")
+                  .DataTextField("Text")
+                  .DataValueField("Id")
+                  .Filter("contains")
+                  .DataSource(source => source.Read(read => read.Action("GetParentMenuList", "Application", new { area = "Admin" })))
+                  .HtmlAttributes(new { style = "width:100%;" })
+            )
+        </div>
+    </div>
+    <div class="row form-group" style="padding-right:30px;">
+        <div class="col-md-3 col-sm-12 form-group col-20">
+            <label>Ex Menu:</label>
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-30">
+            @(Html.Kendo().DropDownList()
+                  .Name("ddlMenu")
+                  .OptionLabel("---select---")
+                  .DataTextField("Text")
+                  .DataValueField("Id")
+                  .Filter("contains")
+                  .CascadeFrom("ddlParentMenu")
+                  .DataSource(source => source.Read(read => read.Action("GetMenuList", "Application", new { area = "Admin" }).Data("FilterParentMenu")).ServerFiltering(true))
+                  .HtmlAttributes(new { style = "width:100%;" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-20">
+            <label id="lbl-menu">New Menu:</label>
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-30">
+            <input type="text" maxlength="30" id="txtMenu" class="k-textbox" style="width:100%;" />
+        </div>
+    </div>
+    <div class="row form-group" style="text-align:right;padding-right:30px;">
+        <div class="col-md-12">
+            <input type="button" id="btnMenuRequest" class="k-button" value="Update" style="min-width:80px;" />
+            <input type="button" id="btnMenuClear" class="k-button" value="Clear" style="min-width:80px;" />
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+
+        $('input[type="radio"][name="menu-action"]').on("change", function () {
+            var action = $('input[type="radio"][name="menu-action"]:checked').val();
+            if (action == "AddParentMenu") {
+                $('#btnMenuRequest').val("Add Parent Menu");
+                $('#lbl-menu').text("New Parent Menu");
+                $('#ddlParentMenu').data("kendoDropDownList").value('');
+                //$('#ddlParentMenu').data("kendoDropDownList").enable(false);
+                $('#ddlMenu').data("kendoDropDownList").value('');
+                $('#ddlMenu').data("kendoDropDownList").enable(false);
+            }
+            else if (action == "UpdateParentMenu") {
+                $('#btnMenuRequest').val("Update Parent Menu");
+                $('#lbl-menu').text("New Parent Menu");
+                $('#ddlParentMenu').data("kendoDropDownList").enable(true);
+                $('#ddlMenu').data("kendoDropDownList").value('');
+                $('#ddlMenu').data("kendoDropDownList").enable(false);
+            }
+            else if (action == "AddMenu") {
+                $('#btnMenuRequest').val("Add Menu");
+                $('#lbl-menu').text("New Menu");
+                $('#ddlParentMenu').data("kendoDropDownList").value('');
+                $('#ddlParentMenu').data("kendoDropDownList").enable(true);
+                $('#ddlMenu').data("kendoDropDownList").value('');
+                $('#ddlMenu').data("kendoDropDownList").enable(false);
+            }
+            else if (action == "UpdateMenu") {
+                $('#btnMenuRequest').val("Update Menu");
+                $('#lbl-menu').text("New Menu");
+                $('#ddlParentMenu').data("kendoDropDownList").enable(true);
+                $('#ddlMenu').data("kendoDropDownList").enable(true);
+            }
+        });
+
+        $('#btnMenuRequest').click(function () {
+            SubmitApplicationMenuForm();
+        });
+
+    });
+
+    function FilterParentMenu() {
+        return { parentId: $('#ddlParentMenu').val() };
+    }
+
+    
+
+
+    function SubmitApplicationMenuForm() {
+        var flag = true;
+        var actiontype = $('input[type="radio"][name="menu-action"]:checked').val();
+        var applicationId = $('#ddlMenuApplication').data("kendoDropDownList").value();
+        var parentMenuId = $('#ddlParentMenu').data("kendoDropDownList").value();
+        var menuId = $('#ddlMenu').data("kendoDropDownList").value();
+        var menu = $('#txtMenu').val();
+        if (actiontype == "" || actiontype == undefined) {
+            flag = false;
+            alertify.error("Select Action type.");
+            return false;
+        }
+        if (applicationId == "") {
+            flag = false;
+            alertify.error("Select Application.");
+            return false;
+        }
+        if (actiontype == "AddParentMenu") {
+            if (menu == "") {
+                alertify.error("Enter Parent Menu name");
+                flag = false;
+            }
+            actiontype = "Add";
+        }
+        if (actiontype == "UpdateParentMenu") {
+            if (parentMenuId == "" || parentMenuId == undefined) {
+                alertify.error("Enter Parent Menu name");
+                flag = false;
+            }
+            if (menu == "") {
+                alertify.error("Enter Parent Menu name");
+                flag = false;
+            }
+            actiontype = "UpdateParentMenu";
+        }
+        if (actiontype == "AddMenu") {
+            if (menu == "") {
+                alertify.error("Enter Menu name");
+                flag = false;
+            }
+            actiontype = "Add";
+        }
+        if (actiontype == "UpdateMenu") {
+            if (menu == "") {
+                alertify.error("Enter Menu name");
+                flag = false;
+            }
+            actiontype = "Update";
+        }
+        if (flag) {
+            var MenuModel = {
+                ActionType: actiontype,
+                ApplicationId: $('#ddlMenuApplication').data("kendoDropDownList").value(),
+                ParentMenuId: $('#ddlParentMenu').data("kendoDropDownList").value(),
+                MenuId: $('#ddlMenu').data("kendoDropDownList").value(),
+                Menu: $('#txtMenu').val()
+            };
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ model: MenuModel }),
+                url: '/Admin/Organization/SaveMasterDataInfoByType',
+                success: function (result) {
+                    if ((result == '@ReturnType.Saved') || (result == '@ReturnType.Updated')) {
+                        alertify.success("Menu saved successfully.");
+                        ClearApplicationMenuFields();
+                        $('#ddlParentMenu').data("kendoDropDownList").dataSource.read();
+                        $('#ddlMenu').data("kendoDropDownList").dataSource.read();
+                    }
+                    else if (result == '@ReturnType.None') {
+                        alertify.error("Property Type doesn't exist.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again");
+                }
+            });
+        }
+    }
+
+    function ClearApplicationMenuFields() {
+        $('#ddlMenu').data("kendoDropDownList").value('');
+        $('#txtMenu').val('');
+    }
+
+</script>

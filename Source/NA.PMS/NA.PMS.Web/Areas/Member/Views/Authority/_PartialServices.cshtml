@@ -1,0 +1,228 @@
+﻿@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions
+
+
+<div class="panel-body">
+    <div class="row form-group">
+        <div class="col-md-12" id="ApplicationMenu" style="text-align:center">
+            <input type="radio" name="service-action" value="AddService" />Add Service &nbsp;&nbsp;
+            <input type="radio" name="service-action" value="UpdateService" />Update Service &nbsp;&nbsp;
+        </div>
+    </div>
+    <div class="row form-group" style="padding-right:30px;">
+        <div class="col-md-4">
+            <label style="padding:0;">Department</label>
+            @(Html.Kendo().DropDownList()
+                  .Name("ddl-DepartmentId")
+                  .OptionLabel("---select---")
+                  .DataTextField("Text")
+                  .DataValueField("Id")
+                  .Filter("contains")
+                  //.DataSource(source => source.Read(read => read.Action("GetApplicationList", "Application", new { area = "Admin" })))
+                .DataSource(source =>
+                {
+                    source.Custom()
+                    .ServerFiltering(true).ServerPaging(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    .Transport(transport => transport.Read(read => read.Action("GetDepartmentListAsDataSource", "Authority", new { area = "Member" })))
+                    .Schema(schema => schema.Data("Data").Total("Total")).PageSize(100);
+                })
+                  .HtmlAttributes(new { style = "width:100%;" })
+            )
+        </div>
+        <div class="col-md-2">
+           
+        </div>
+        <div class="col-md-6">
+            <label style="padding:0;">Services</label>
+            @(Html.Kendo().DropDownList()
+                  .Name("ddl-ServiceId")
+                  .OptionLabel("---select---")
+                  .DataTextField("Text")
+                  .DataValueField("Id")
+                  .Filter("contains")
+                  .CascadeFrom("ddl-DepartmentId")
+                  .CascadeFromField("DepartmentId")
+                  //.DataSource(source => source.Read(read => read.Action("GetPropertyServiceTypeList", "Authority", new { area = "Member" }).Data("FilterDepartMentIdII")).ServerFiltering(true))
+                  .DataSource(source =>
+                  {
+                        source.Custom()
+                        .ServerFiltering(true).ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetServiceTypeListAsDataSource", "Authority", new { area = "Member" }).Data("FilterDepartMentIdII")))
+                        .Schema(schema => schema.Data("Data").Total("Total")).PageSize(100);
+                  })
+                  .HtmlAttributes(new { style = "width:100%;" })
+                  .Events(e => e.Change("ServiceTypeChangeEvent"))
+            )
+        </div>
+    </div>
+    <div class="row form-group" style="padding-right:30px;">
+        <div class="col-md-1">
+            <label id="lbl-service-id" style="padding:0;">Id:</label>
+            <input type="hidden" id="txt-service-pk-id"/>
+            <input type="text" maxlength="3" id="txt-service-id" class="k-textbox" style="width:100%;" />
+        </div>
+        <div class="col-md-11">
+            <label id="lbl-service" style="padding:0;">Service Name:</label>
+            <input type="text" maxlength="200" id="txt-service" class="k-textbox" style="width:100%;min-width:110px;" />
+        </div>
+    </div>
+    <div class="row form-group" style="padding-right:30px;">
+        <div class="col-md-6">
+            <label style="padding:0;">Status:</label>
+            <input id="lbl-status" class="k-textbox" readonly="readonly"/>
+        </div>
+        <div class="col-md-6" style="text-align:right;">
+            <input type="button" id="btn-request" class="k-button" value="Update" style="min-width:80px;" />
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        $('input[type="radio"][name="service-action"]').on("change", function () {
+            var action = $('input[type="radio"][name="service-action"]:checked').val();
+            if (action == "AddService") {
+                $('#btn-request').val("Add Service");
+                $('#lbl-service').text("New Service");
+                $('#txt-service-pk-id').val('');
+                $('#txt-service-id').val('');
+                $('#txt-service').val('');
+                $('#lbl-status').val('');
+            }
+            else if (action == "UpdateService") {
+                $('#btn-request').val("Update Service");
+                $('#lbl-service').text("Service Name");
+            }
+        });
+
+        $('#btn-request').click(function () {
+            SaveServiceType();
+        });
+
+    });
+
+    function FilterDepartMentIdII() {
+        return { DepartmentId: $('#ddl-DepartmentId').val() };
+    }
+
+
+    function SaveServiceType() {
+        var flag = true;
+        var actiontype = $('input[type="radio"][name="service-action"]:checked').val();
+        var departmentId = $('#ddl-DepartmentId').data("kendoDropDownList").value();
+        var serviceId = $('#ddl-ServiceId').data("kendoDropDownList").value();
+        var service = $('#txt-service').val();
+        if (actiontype == "" || actiontype == undefined) {
+            flag = false;
+            alertify.error("Select Action type.");
+            return false;
+        }
+        if (departmentId == "") {
+            flag = false;
+            alertify.error("Select Department.");
+            return false;
+        }
+        if (actiontype == "UpdateService") {
+            if (serviceId == "" || serviceId == undefined) {
+                alertify.error("Select service name");
+                flag = false;
+            }
+        }
+        if ($('#txt-service-id').val().trim() == "") {
+            alertify.error("Enter Service Id");
+            flag = false;
+        }
+        if (service == "") {
+            alertify.error("Enter Service name");
+            flag = false;
+        }
+        if (flag) {
+            var ServiceModel = {
+                ActionType: actiontype,
+                DepartmentId: $('#ddl-DepartmentId').data("kendoDropDownList").value(),
+                //ServiceId: $('#ddl-ServiceId').data("kendoDropDownList").value(),
+                ServiceId: $('#txt-service-id').val(),
+                ServiceName: $('#txt-service').val(),
+                Id: $('#txt-service-pk-id').val()
+            };
+            var windowWidget = $(".kendo-popup-window").data("kendoWindow");
+            kendo.ui.progress(windowWidget.element, true);
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ model: ServiceModel }),
+                url: '@Url.Action("SavePropertyServiceType", "Authority", new { area = "Member" })',
+                success: function (result) {
+                    kendo.ui.progress(windowWidget.element, false);
+                    if (result == '@ReturnType.Saved') {
+                        $('.kendo-popup-window').data("kendoWindow").pin();
+                        alertify.success("Service saved successfully.");
+                        $('#gridServices').data("kendoGrid").dataSource.read();
+                        $('#ddl-ServiceId').data("kendoDropDownList").dataSource.read();
+                    }
+                    else if (result == '@ReturnType.Updated') {
+                        $('.kendo-popup-window').data("kendoWindow").pin();
+                        alertify.success("Service updated successfully.");
+                        $('#gridServices').data("kendoGrid").dataSource.read();
+                        $('#ddl-ServiceId').data("kendoDropDownList").dataSource.read();
+                    }
+                    else if (result == '@ReturnType.None') {
+                        alertify.error("Provider failed to update, try again.");
+                    }
+                    $('#ddl-ServiceId').data("kendoDropDownList").value('');
+                    $('#txt-service-pk-id').val('');
+                    $('#txt-service-id').val('');
+                    $('#txt-service').val('');
+                    $('#lbl-status').val('');
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    kendo.ui.progress(windowWidget.element, false);
+                    $('.kendo-popup-window').data("kendoWindow").close();
+                    alertify.error("Network error, try again");
+                }
+            });
+        }
+    }
+
+    function ServiceTypeChangeEvent() {
+        var actiontype = $('input[type="radio"][name="service-action"]:checked').val();
+        var id = $('#ddl-ServiceId').data("kendoDropDownList").value();
+        if (actiontype == "UpdateService" || actiontype == undefined) {
+            if (id != "" && id != undefined) {
+                $.ajax({
+                    type: "post",
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({ Id: id }),
+                    url: '@Url.Action("GetServiceTypeDetailById", "Authority", new { area = "Member" })',
+                    success: function (result) {
+                        if (result != null) {
+                            $('#txt-service-pk-id').val(result.Id);
+                            $('#txt-service-id').val(result.ServiceId);
+                            $('#txt-service').val(result.Text);
+                            $('#lbl-status').val(result.Status);
+                        }
+                        else {
+                            $('#txt-service-pk-id').val('');
+                            $('#txt-service-id').val('');
+                            $('#txt-service').val('');
+                            $('#lbl-status').val('');
+                        }
+                    },
+                    error: function (ajaxRequest, strError) {
+                        //alert(ajaxRequest.responseText);
+                        alertify.error("Network error, try again");
+                    }
+                });               
+            }
+        }
+    }
+
+</script>
+

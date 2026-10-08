@@ -1,0 +1,165 @@
+﻿@model NA.PMS.Model.ExtensionDetails
+@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@{
+    ViewBag.Title = "Manage Extension";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="ExtensionForm">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-3 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Extension</h1></div>
+            <div class="col-md-9 col-sm-12 col-xs-12 col-btn">
+                <a href="#" id="btnPrintChallan" class="">Generate Payment Challan</a>
+                <a href="#" id="btnAddExtension" class="" onclick="javascript: AddExtensionDetails(event);">Add Request</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.ExtensionDetails>()
+                .Name("gridExtensionDetails")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.IsSelected).Width(30).ClientTemplate("<input type='checkbox' #= IsSelected ? checked='checked':'' # class='inpchk' ></input>").HeaderTemplate(" <input type='checkbox' id='chkSelectAll' onchange='SelectAll(this)'/>").Filterable(false).Sortable(false).Title("");
+                    columns.Bound(c => c.Id).Title("Request No").ClientTemplate("<a href='" + "/Property/PropertyAllotment/ViewExtension/#= Id #'>#=Id#</a>").Width(130).Filterable(false);
+                    columns.Bound(c => c.Rid).Title("Registration Id").Width(150);
+                    columns.Bound(c => c.DepartmentName).Title("Department");
+                    columns.Bound(c => c.SectorName).Title("Sector").Width(100);
+                    columns.Bound(c => c.BlockName).Title("Block").Width(100);
+                    columns.Bound(c => c.PropertyNo).Title("Property No").Width(150);
+                    //columns.Bound(c => c.PropertyNumber).Title("Property No");
+                    columns.Bound(c => c.Created_Date).Title("Requested Date").Format("{0:dd/MM/yyyy}");
+                    columns.Bound(c => c.Approved_Date).Title("Approved Date").Format("{0:dd/MM/yyyy}");
+                    columns.Bound(c => c.AssignTo).Title("Assigned To");
+                    columns.Bound(c => c.StatusName).Title("Status").Width(130);
+                })
+        .Sortable()
+        .Filterable()
+        .Resizable(resize => resize.Columns(true))
+        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+        .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .Model(model => model.Id(p => p.Id))
+                                .ServerOperation(true).Sort(sort => sort.Add("Id").Descending())
+                        .Read(read => read.Action("GetExtensionDetails", "PropertyAllotment")).PageSize(20)
+                    )
+        )
+    </div>
+</div>
+
+<div id="divExtensionModel" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="padding-top:40px;">
+    <div class="modal-dialog" style="width: 60%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">  <b>Payment Challan</b></h4>
+            </div>
+            <div class="modal-body" id="divLetterChallanBody" style="overflow:auto;height:420px;">
+
+            </div>
+            <div style="page-break-after: always;"></div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="submit" id="btnPrintDiv" class="k-button" data-dismiss="modal" onclick="PrintDiv();">Print</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function AddExtensionDetails(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("AddExtension", "PropertyAllotment")';
+    }
+    var checkedRIds = [];
+    function SelectAll(e) {
+        var state = $(e).is(':checked');
+        if (state == true) {
+            var grid = $('#gridExtensionDetails').data("kendoGrid");
+            $.each(grid.dataSource.view(), function () {
+                $(".inpchk").prop('checked', 'checked');
+                if (this['IsSelected'] != state)
+                    this['IsSelected'] = state;
+                checkedRIds.push(this.Rid);
+                checkedPropertyIds.push(this.PropertyId);
+            });
+        } else {
+            $(".inpchk").removeAttr('checked');
+            var grid = $('#gridExtensionDetails').data("kendoGrid");
+            $.each(grid.dataSource.view(), function () {
+                this['IsSelected'] = false;
+                checkedRIds.pop(this.Rid);
+                checkedPropertyIds.pop(this.PropertyId);
+            });
+        }
+    }
+    var currentDate = new Date().toJSON().slice(0, 10);
+    //select selected checkboxes
+    $(function () {
+        $('#gridExtensionDetails').on('change', '.inpchk', function () {
+            var checked = $(this).is(':checked');
+            $("#chkSelectAll").removeAttr('checked');
+            if ($('.inpchk:checked').length == $('.inpchk').length) {
+                $("#chkSelectAll").prop('checked', 'checked');
+            }
+            var grid = $('#gridExtensionDetails').data().kendoGrid;
+            var dataItem = grid.dataItem($(this).closest('tr'));
+            dataItem.set('IsSelected', checked);
+            checkedRIds.push(dataItem.RID);
+        });
+
+    });
+
+    $("#btnPrintChallan").click(function () {
+        var items = $("#gridExtensionDetails").data("kendoGrid").dataSource.data();
+        var rIds = [];
+        var checkedRNs = [];
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            if (item.IsSelected == true) {
+                rIds.push(item.Rid);
+                checkedRNs.push(item.Id);
+            }
+        }
+        if (rIds.length > 0) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ requestNoList: checkedRNs, ridList: rIds }),
+                url: '/DocParser/PrintBulkExtensionChallan',
+                success: function (result) {
+                    $("#divLetterChallanBody").html(result);
+                    $("#divExtensionModel").modal('show');
+                },
+                error: function (obj) {
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            });
+        } else {
+            alertify.error("Please select atleast one record to print Extension Order.");
+        }
+    });
+
+    function PrintDiv() {
+        var contents = document.getElementById("divLetterChallanBody").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title>Extension Letter</title>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+</script>

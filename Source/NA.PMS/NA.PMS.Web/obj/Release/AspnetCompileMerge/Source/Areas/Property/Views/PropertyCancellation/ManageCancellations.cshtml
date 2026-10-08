@@ -1,0 +1,71 @@
+﻿@using Kendo.Mvc.UI
+
+@{
+    ViewBag.Title = "Manage Surrenders/Cancellations";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .linkCss {
+        color: #337ab7;
+        text-decoration: underline;
+    }
+
+        .linkCss:hover {
+            color: #337ab7;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+</style>
+<div>
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Surrenders/Cancellations</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                @*<a href="/Property/Default/Manage" target="_blank" >Manage</a>*@
+                <a href="#" id="btnRequest" class="" onclick="javascript: AddCancellation(event);">Add Request</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.PropertyCancellationModel>()
+        .Name("gridCancelProp")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.ReqNo).Title("Request No").Width(130).ClientTemplate("<a href=\"/Property/PropertyCancellation/ViewCancellation/#= ReqNo#\" id='v_#=ReqNo#'  style = 'width: 30px;' >#=ReqNo#</a>");
+            columns.Bound(c => c.RId).Title("Registration Id").Width(150);
+            columns.Bound(c => c.DepttName).Title("Department");
+            columns.Bound(c => c.AssignedTo).Title("Assigned To");
+            columns.Bound(c => c.ReqDate).Title("Request Date").Format("{0:dd/MM/yyyy}");
+            columns.Bound(c => c.ApprovedDate).Title("Approve Date").Format("{0:dd/MM/yyyy}");
+            columns.Bound(c => c.Status).Title("Status").Width(130);
+        })
+        .Sortable()
+        .Filterable()
+                .Resizable(resize => resize.Columns(true))
+                //.ToolBar(toolBar =>
+                //{
+                //    toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Add Request").HtmlAttributes(new { onclick = "javascript:AddCancellation(event);", @class = "k-button", id = "btnRequest" });
+                //})
+        .Pageable(pageable => pageable
+                                               .Enabled(true)
+                                               .Refresh(true)
+                                               .PageSizes(true)
+                                            )
+        .DataSource(dataSource => dataSource
+                .Ajax().Model(model => model.Id(c => c.ReqNo))
+                .ServerOperation(true).Sort(sort => sort.Add("ReqNo").Descending())
+                                .Read(read => read.Action("GetAllCancellationsSurrenders", "PropertyCancellation")).PageSize(20)
+        )
+        )
+    </div>
+</div>
+
+<script type="text/javascript">
+    function AddCancellation(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("AddCancellation", "PropertyCancellation")';
+    }
+</script>

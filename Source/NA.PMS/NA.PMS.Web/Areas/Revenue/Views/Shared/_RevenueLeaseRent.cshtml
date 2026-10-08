@@ -1,0 +1,149 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@using NA.PMS.Common;
+
+<div class="col-md-12 k-grid-content" id="leaserent-reports">
+    @(Html.Kendo().Grid<NA.PMS.Model.LeaseRentViewModel>()
+                .Name("GridLeaseRentReport")
+                .Excel(excel => excel.AllPages(true).Filterable(true).FileName("LeaseRevenueReport.xlsx"))
+                .ToolBar(toolsExcel => toolsExcel.Excel())
+                .Columns(columns =>
+                {
+                    
+                    //columns.Bound(c => c.Id).Title("Id").Width(50);
+                    //columns.Bound(c => c.RegistrationId).Title("Registration Id").ClientTemplate("<a href='" + "/Property/PropertyAllotment/PropertyDetails/#= RegistrationId #'>#= RegistrationId #</a>").Filterable(true);
+                    //columns.Bound(c => c.PremiumPaidDuration).Title("FY").Hidden(true);
+                    //columns.Bound(c => c.LeaseRentPremium).Title("Lease Rent(Yearly) (<span class='fa fa-rupee'></span>)").ClientGroupFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>").ClientTemplate("#if(LeaseRentPremium <= 0){#"+' '+"#}else{#"+ "<a href='" + "/Revenue/Finance/LeaseRentReport/#= LeaseRentPremium #'>#= LeaseRentPremium #</a>"+"#}#").Filterable(true);
+                    //columns.Bound(c => c.LeaseRentDues).Title("Dues (<span class='fa fa-rupee'></span>)").ClientGroupFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>").ClientTemplate("#if(LeaseRentDues <= 0){#" + ' ' + "#}else{#" + "#= LeaseRentDues #" + "#}#").Filterable(true);
+                    //columns.Bound(c => c.TotalArear).Title("Arear (<span class='fa fa-rupee'></span>)").ClientGroupFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>").ClientTemplate("#if(TotalArear <= 0){#" + ' ' + "#}else{#" + "#= TotalArear #" + "#}#").Filterable(true);
+                    //columns.Bound(c => c.ReceiptSubHead).Title("Receipt Head");
+                    //columns.Bound(c => c.PaidAmount).Title("Paid Amount").ClientGroupFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>").ClientTemplate("#if(PaidAmount <= 0){#" + ' ' + "#}else{#" + "#= PaidAmount #" + "#}#").Filterable(true);
+                    columns.Group(group => group.Title("Expected Revenue (<span class='fa fa-rupee'></span>)").HeaderHtmlAttributes(new { style = "text-align: center;" })
+                         .Columns(info =>
+                         {
+                            info.Bound(c => c.PremiumPaidDuration).Title("FY").Hidden(true);
+                            info.Bound(c => c.LeaseRentPremium).Title("Lease Rent(Yearly) (<span class='fa fa-rupee'></span>)").ClientGroupFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>").ClientTemplate("#if(LeaseRentPremium <= 0){#" + ' ' + "#}else{#" + "<a href='" + "/Revenue/Finance/Report?financialYear= #= PremiumPaidDuration #'>#= LeaseRentPremium #</a>" + "#}#").Filterable(true);
+                            //info.Bound(c => c.LeaseRentPremium).Title("Lease Rent(Yearly) (<span class='fa fa-rupee'></span>)").ClientGroupFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>").ClientTemplate("#if(LeaseRentPremium <= 0){#" + ' ' + "#}else{#" + "<label class='hyperlink' onclick='javascript:ViewLeaseRent(this)'>#= LeaseRentPremium #</label>" + "#}#").Filterable(true);
+                            info.Bound(c => c.LeaseRentDues).Title("Dues (<span class='fa fa-rupee'></span>)").ClientGroupFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>").ClientTemplate("#if(LeaseRentDues <= 0){#" + ' ' + "#}else{#" + "#= LeaseRentDues #" + "#}#").Filterable(true);
+                            info.Bound(c => c.TotalArear).Title("Arear (<span class='fa fa-rupee'></span>)").ClientGroupFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>").ClientTemplate("#if(TotalArear <= 0){#" + ' ' + "#}else{#" + "#= TotalArear #" + "#}#").Filterable(true);
+                        })
+                         );
+                    columns.Group(group => group.Title("Received Amount (<span class='fa fa-rupee'></span>)").HeaderHtmlAttributes(new { style = "text-align: center;" })
+                        .Columns(info =>
+                        {
+                            info.Bound(x => x.ReceiptSubHead);
+                            info.Bound(x => x.PaidAmount).Title("Paid Amount (<span class='fa fa-rupee'></span>)").ClientGroupFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>").ClientTemplate("#if(PaidAmount <= 0){#" + ' ' + "#}else{#" + "<a href='" + "/Revenue/Finance/LeaseRentReport?actionType= #= ReceiptSubHead #'>#= PaidAmount #</a>" + "#}#").Filterable(true);//.ClientTemplate("#if(PaidAmount <= 0){#" + ' ' + "#}else{#" + "#= PaidAmount #" + "#}#").Filterable(true);
+                        })
+                        );
+                })
+                .Sortable()
+                .Filterable()
+                .Resizable(resize => resize.Columns(true))
+                .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .Model(model => model.Id(p => p.Id))
+                        .ServerOperation(true)
+                                .Read(read => read.Action("GetRevenueGeneratedList", "Payment", new { area = "Revenue" }).Data("FilterParam")).PageSize(10)
+                                .Aggregates(aggregates => aggregates.Add(p => p.LeaseRentPremium).Sum())
+                                .Aggregates(aggregates => aggregates.Add(p => p.LeaseRentDues).Sum())
+                                .Aggregates(aggregates => aggregates.Add(p => p.TotalArear).Sum())
+                               .Aggregates(aggregates => aggregates.Add(p => p.PaidAmount).Sum())
+                               //.Aggregates(aggregates => aggregates.Add(p => p.PaidAmount).Sum())
+                               .Group(g => g.Add(f => f.PremiumPaidDuration))
+                               
+                    )
+    )
+</div>
+
+
+<div class="col-md-12" style="border:solid #e2e3e4; border-width:0 1px 1px; display:none;">
+    <div class="row" style="margin-top:15px;">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label>Lease Rent in 2017-2018:</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="lbl-form-control" id="totalrevenue"></label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label>Lease Rent Deues:</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="lbl-form-control" id="totaldues"></label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label>Lease Rent Arears:</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="lbl-form-control" id="totalarears"></label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label>Defaulters :</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="lbl-form-control" id="defaulterdues"></label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    
+
+    function GetRevenueWithDefaulters() {
+        $.ajax({
+            type: "post",
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            data: JSON.stringify({ DepartmentId: $("#DepartmentId").val() }),
+            url: '@Url.Action("GetRevenueWithDefaulterList", "Payment", new { area = "Revenue" })',
+            success: function (result) {
+                if (result != null) {
+                    $('#totalrevenue').text(result.TotalPremium);
+                    $('#totaldues').text(result.DuesAmount);
+                    $('#totalareas').text(result.TotalArear);
+                    $('#defaulterdues').text(result.DefaulterAmount);
+                }
+                else {
+                    //alertify.error("Dues is not updated");
+                    return false;
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Something is wrong, try again later");
+            }
+        });
+    }
+</script>

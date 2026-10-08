@@ -1,0 +1,231 @@
+﻿@model NA.PMS.Model.MutationModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@{
+    ViewBag.Title = "Add Mutation Request";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .k-window {
+        width: 39%;
+        min-height: 180px;
+    }
+</style>
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Add Mutation Request</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+
+                @{Html.RenderPartial("_PartialMutation");}
+
+            </div>
+            <div class="box-button text-center">
+                <input type="button" id="btnBack" value="Back" class="btn btn-default" />
+                <input type="button" id="btnAdd" value="Submit for Approval" class="btn btn-add" />
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@(Html.Kendo().Window().Name("assignToWindow").Title("Assign To").Modal(true).Visible(false).Content(@<text>
+        <div class="container-fluid">
+            <div class="row topSpace">
+                <div class="col-md-3 col-md-offset-1">
+                    @Html.Label("Assign To: ")
+                </div>
+                <div class="col-md-6">
+                    @(Html.Kendo().DropDownListFor(model => model.User)
+                       .Name("User")
+                       .DataTextField("text")
+                       .DataValueField("id")
+                      .OptionLabel("Select").Filter("contains").AutoBind(false)
+                      .DataSource(source =>
+                      {
+                          source.Read(read =>
+                          {
+                              read.Action("GetAssineToByDepttId", "PropertyRegistration").Data("AdditionalData");
+                          });
+                      })
+                      .HtmlAttributes(new { style = "width:100%" })
+                    )
+                </div>
+            </div>
+            <div class="row topSpace bottomSpace">
+                <div class="col-md-6 col-md-offset-4">
+                    <input type="button" class="btn btn-default" id="btnPopupSubmit" value="Submit" />
+                    <input type="button" class="btn btn-default closePopup" value="Close" />
+                </div>
+            </div>
+        </div>
+</text>)
+.Draggable()
+.Resizable()
+//.Width(400)
+.Actions(actions => actions.Close())
+)
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#btnAdd").click(function () {
+            var rid = $("#RId").val();
+            var mutDate = $("#MutationDate").val();
+            var transDeedDate = $("#TransferDeedDate").val();
+            var bahiNo = $("#BahiNo").val();
+            var bahiZildNo = $("#BahiZildNo").val();
+            var bahiPageNo = $("#BahiPageNo").val();
+            var SINo = $("#SINo").val();
+            var ReqNo = $("#ReqNo").val();
+            var transferDate = $("#TransferDate").val();
+            //Resolved Bug#120
+            var dtMutDate = new Date(mutDate);
+            var dtTransDeedDate = new Date(transDeedDate);
+            var dtTransferDate = new Date(transferDate);
+            var reqRefNo = $('#OnlineRequestRefNo').val();
+            if (rid == "") {
+                alertify.error("Please select RID.");
+                return false;
+            }
+            if (reqRefNo == "") {
+                alertify.error("Please enter Request Ref. No.");
+                return false;
+            }
+
+            if (reqRefNo.length < 3) {
+                alertify.error("Request Ref. No. length must be 3 characters");
+                return false;
+            }
+
+            if (mutDate == "") {
+                alertify.error("Please enter Mutation Date.");
+                return false;
+            }
+            if (transDeedDate == "") {
+                alertify.error("Please enter Transfer Deed Date.");
+                return false;
+            }
+            if (bahiNo == "") {
+                alertify.error("Please enter Bahi Number.");
+                return false;
+            }
+            if (bahiZildNo == "") {
+                alertify.error("Please enter Bahi Zild Number.");
+                return false;
+            }
+            if (bahiPageNo == "") {
+                alertify.error("Please enter Bahi Page Number.");
+                return false;
+            }
+            if (SINo == "") {
+                alertify.error("Please enter SI Number.");
+                return false;
+            }
+            //if (dtTransDeedDate <= dtTransferDate) {
+            //    alertify.error("Transfer Deed Date can't be earlier than, or equal to Transfer Date");
+            //    return false;
+            //}
+            //if (dtMutDate <= dtTransDeedDate) {
+            //    alertify.error("Mutation Date can't be earlier than, or equal to Transfer Deed Date");
+            //    return false;
+            //}
+            //if (dtTransDeedDate < dtTransferDate) {
+            //    alertify.error("Transfer Deed Date can't be earlier to Transfer Date");
+            //    return false;
+            //}
+            $("#assignToWindow").data("kendoWindow").center();
+            $("#User").data("kendoDropDownList").dataSource.read();
+            $("#assignToWindow").data("kendoWindow").open();
+        });
+
+        $("#btnPopupSubmit").click(function () {
+            var mutDate = $("#MutationDate").val();
+            var transDeedDate = $("#TransferDeedDate").val();
+            var bahiNo = $("#BahiNo").val();
+            var bahiZildNo = $("#BahiZildNo").val();
+            var bahiPageNo = $("#BahiPageNo").val();
+            var SINo = $("#SINo").val();
+            var userVal = $("#User").val();
+            var ReqNo = $("#ReqNo").val();
+            var rId = $("#RId").val();
+            var transDate = $("#TransferDate").val();
+            var transType = $("#lblTransTy").html();
+            var reqRefNo = $('#OnlineRequestRefNo').val();
+            if (userVal == "" || userVal == null) {
+                alertify.error("Please select a User.");
+                return false;
+            }
+            else {
+                //Create new Form
+                var formData = new FormData();
+                var file = $('#fileDoc')[0];
+                formData.append("fileTransDeed", file.files[0]);
+                formData.append("mutDate", mutDate);
+                formData.append("transDeedDate", transDeedDate);
+                formData.append("bahiNo", bahiNo);
+                formData.append("bahiZildNo", bahiZildNo);
+                formData.append("bahiPageNo", bahiPageNo);
+                formData.append("SINo", SINo);
+                formData.append("userVal", userVal);
+                formData.append("ReqNo", ReqNo);
+                formData.append("rId", rId);
+                formData.append("transDate", transDate);
+                formData.append("transType", transType);
+                formData.append("RequestReferenceNo", reqRefNo);
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    //contentType: 'application/json; charset=utf-8',
+                    //data: JSON.stringify({ mutDate: mutDate, transDeedDate: transDeedDate, bahiNo: bahiNo, bahiZildNo: bahiZildNo, bahiPageNo: bahiPageNo, SINo: SINo, userVal: userVal, ReqNo: ReqNo, rId: rId, transDate: transDate, transType: transType }),
+                    data: formData,
+                    url: '/PropertyRegistration/SaveMutationDetails',
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    success: function (result) {
+                        if (result == true) {
+                            $("#assignToWindow").data("kendoWindow").close();
+                            alertify.success("Data saved successfully.");
+                            window.location.href = '@Url.Action("ManageMutation", "PropertyRegistration")';
+                            return false;
+                        }
+                        else {
+                            $("#assignToWindow").data("kendoWindow").close();
+                            alertify.error("No new Transfer Request exists for the selected RID.");
+                        }
+                    },
+                    error: function (objAjaxRequest, strError) {
+                        var respText = objAjaxRequest.responseText;
+                        //alert(respText);
+                        $("#assignToWindow").data("kendoWindow").close();
+                        alert("Some error occured. Please try again later.");
+                    }
+                });
+
+            }
+        });
+
+        $(".closePopup").click(function () {
+            $("#assignToWindow").data("kendoWindow").close();
+        });
+
+        $("#btnBack").click(function () {
+            window.location.href = '@Url.Action("ManageMutation", "PropertyRegistration")';
+        });
+    });
+
+    function AdditionalData() {
+        return {
+            depttId: $("#DepttId").val()
+        };
+    }
+</script>

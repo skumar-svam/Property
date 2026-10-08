@@ -1,0 +1,190 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@using NA.PMS.Common;
+@using NA.PMS.Model
+@model NA.PMS.Model.PaymentViewModel
+
+<style>
+    .form-control {
+        width: 95%;
+        float: right;
+    }
+
+    .k-button {
+        min-width: 80px;
+    }
+</style>
+
+<div class="">
+    <h2 class="blck-heading" style="margin-bottom:15px;">Account Basic Info</h2>
+    <div class="form-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+
+        <div class="row">
+            <div class="col-md-6 col-sm-12 col-xs-12 form-group">
+                <label>Allottee Name</label>
+                @Html.TextBoxFor(model => model.Applicant, htmlAttributes: new { @class = "form-control", @maxlength = "50", style="width:97%;" })
+            </div>
+
+            <div class="col-md-6 col-sm-12 col-xs-12 form-group">
+                <label>Allottee Address</label>
+                @Html.TextBoxFor(model => model.Applicant, htmlAttributes: new { @class = "form-control", @maxlength = "50", style = "width:97%;" })
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Department</label>
+                @Html.TextBoxFor(model => model.Department, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Sector</label>
+                @Html.TextBoxFor(model => model.SectorName, htmlAttributes: new { @class = "form-control", @maxlength = "8" })
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Block</label>
+                @Html.TextBoxFor(model => model.BlockName, htmlAttributes: new { @class = "form-control", @maxlength = "8" })
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Plot/Flat No</label>
+                @Html.TextBoxFor(model => model.PlotNo, htmlAttributes: new { @class = "form-control", @maxlength = "40" })
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Allotment Date</label>
+                @(Html.Kendo().DatePickerFor(model => model.AllotmentDate).HtmlAttributes(new {@id="basic-allotment-date", style = "width:95%;float:right;" }))
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Allotted Area(sqm)</label>
+                @(Html.Kendo().NumericTextBoxFor(m => m.AllottedArea).Name("basic-allotted-area")
+                    .Min(0).Max(9999999999999999)
+                    .Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right" })
+                )
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Total Area(sqm)</label>
+                @(Html.Kendo().NumericTextBoxFor(m => m.TotalArea).Name("basic-total-area")
+                    .Min(0).Max(9999999999999999)
+                    .Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right" })
+                )
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Allotment Money</label>
+                @(Html.Kendo().NumericTextBoxFor(m => m.AllotmentMoney).Name("basic-allotment-money")
+                    .Min(0).Max(9999999999999999)
+                    .Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right" })
+                )
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Allotment Rate(psqm)</label>
+                @(Html.Kendo().NumericTextBoxFor(m => m.AllotmentRate).Name("basic-allotment-rate")
+                    .Min(0).Max(9999999999999999)
+                    .Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right" })
+                )
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Location Charge(psqm)</label>
+                @(Html.Kendo().NumericTextBoxFor(m => m.LocationCharge).Name("basic-location-charge")
+                    .Min(0).Max(9999999999999999)
+                    .Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right" })
+                )
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Total Allotment Rate(psqm)</label>
+                @(Html.Kendo().NumericTextBoxFor(m => m.TotalAllotmentRate).Name("basic-total-allotment-rate")
+                    .Min(0).Max(9999999999999999)
+                    .Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right" })
+                )
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Total Property Cost</label>
+                @(Html.Kendo().NumericTextBoxFor(m => m.TotalPropertyCost).Name("basic-total-premium")
+                    .Min(0).Max(9999999999999999)
+                    .Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right" })
+                )
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Earnest Money</label>
+                @(Html.Kendo().NumericTextBoxFor(m => m.EarnestMoney).Name("basic-earnest-money")
+                    .Min(0).Max(9999999999999999)
+                    .Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right" })
+                )
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Balance Allotment Money</label>
+                @(Html.Kendo().NumericTextBoxFor(m => m.BalanceAllotmentAmount).Name("basic-balance-allotment")
+                    .Min(0).Max(9999999999999999)
+                    .Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right" })
+                )
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>One Year Advance Lease Rent</label>
+                @(Html.Kendo().NumericTextBoxFor(m => m.AdvanceLeaseRent).Name("basic-advance-leaserent")
+                    .Min(0).Max(9999999999999999)
+                    .Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right" })
+                )
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Penal Interest(%)</label>
+                @(Html.Kendo().NumericTextBoxFor(m => m.PenalInterest).Name("basic-penal-interest")
+                    .Min(0).Max(9999999999999999)
+                    .Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right" })
+                )
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Lease Deed Date</label>
+                @(Html.Kendo().DatePickerFor(model => model.LeaseDeedDate).HtmlAttributes(new { @id = "basic-leasedeed-date", style = "width:95%;float:right;" }))
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Possession Date</label>
+                @(Html.Kendo().DatePickerFor(model => model.PossessionDate).HtmlAttributes(new { @id = "basic-possession-date", style = "width:95%;float:right;" }))
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Functional Date</label>
+                @(Html.Kendo().DatePickerFor(model => model.FunctionalDate).HtmlAttributes(new { @id = "basic-functional-date", style = "width:95%;float:right;" }))
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                <label>Transfer Date</label>
+                @(Html.Kendo().DatePickerFor(model => model.TransferDeedDate).HtmlAttributes(new { @id = "basic-transfer-date", style = "width:95%;float:right;" }))
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        CalculateBalanceAllotmentMoney();
+    });
+
+    function CalculateBalanceAllotmentMoney() {
+        var allotment = $('#basic-allotment-money').val() == "" ? 0 : parseFloat($('#basic-allotment-money').val()).toFixed(2);
+        var earnest = $('#basic-earnest-money').val() == "" ? 0 : parseFloat($('#basic-earnest-money').val()).toFixed(2);
+        var balance = Number(allotment) - Number(earnest);
+        $('#basic-balance-allotment').data("kendoNumericTextBox").value(balance);
+    }
+</script>
+
+
+
+

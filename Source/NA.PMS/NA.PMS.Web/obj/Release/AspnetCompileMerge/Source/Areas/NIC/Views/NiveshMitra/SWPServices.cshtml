@@ -1,0 +1,221 @@
+﻿@model NA.PMS.NICServices.SWPApiServiceViewModel
+@using Kendo.Mvc.UI;
+@using NA.PMS.NICServices;
+@{
+    ViewBag.Title = "NIC Services";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .col-md-3-lbl{
+        width:20%;
+    }
+    .col-md-3-txt{
+        width:30%;
+    }
+    .k-pager-wrap .k-dropdown {
+        width: 5.5em;
+    }
+</style>
+
+<div class="ManageRequestServices">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Nivesh Mitra Services</h1></div>
+            <div class="col-md-6 col-sm-6 col-xs-12 mandatory">
+                <a id="a-add-service" class="btn btn-add" href="/NIC/NiveshMitra/UpdateInfo" target="_blank" style="border-radius:0;">Update Service</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.NICServices.SWPApiServiceViewModel>()
+                .Name("GridServiceRequest")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.Department).Title("Department").Width(140).Sortable(false);
+                    columns.Bound(c => c.NICServiceCode).Title("Service Code").Width(140).Sortable(false);
+                    columns.Bound(c => c.ServiceName).Title("Service Name");
+                    columns.Bound(c => c.ServiceCharge).Title("Charges").Width(130).ClientTemplate("#if(ServiceCharge!=null){#<label>#=ServiceCharge#</label>#}else{# --- #}#").Width(100).Sortable(false);
+                    columns.Bound(c => c.Status).Title("Status").Width(100).ClientTemplate("#if(StatusId==1){#<label class='hyperlink' onclick='ChangeNICServiceStatus(#=Id#)'>Active</label>#}else{#<label class='hyperlink'  onclick='ChangeNICServiceStatus(#=Id#)'> In Active </label>#}#").Sortable(false);
+                    //columns.Bound(c => c.Id).Title("Action").ClientTemplate("<a href='/NIC/ManageNiveshMitra/AddEditServices/#=Id#' target='_blank'>Add/Edit</a>").Width(100).Sortable(false).Filterable(false);
+                })
+                .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(new[]{5,10,25,50}).Input(true).ButtonCount(5).PreviousNext(true))
+                .AutoBind(true)
+                .DataSource(dataSource => dataSource
+                    .Ajax().Group(g=>g.Add(gf=>gf.Department))
+                    .Model(model => model.Id(c => c.Id))
+                    .ServerOperation(true)
+                    .Read(read => read.Action("GetNiveshMitraServices", "NiveshMitra", new { area = "NIC" })).PageSize(10)
+                    .Sort(s => s.Add(r => r.NICServiceCode).Ascending())
+                )
+        )
+
+    </div>
+
+  
+</div>
+
+<div id="divServiceModel" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="padding-top:40px;" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" style="width: 65%">
+        <div class="modal-content" style="border-radius:0;background:url(/Content/Images/boxed-bg.jpg) repeat;">
+            <div class="modal-header" style="padding:6px">
+                <h4 class="modal-title" style="text-align:center;">  <b>ADD/EDIT Nivesh Mitra Service</b></h4>
+            </div>
+            <div class="modal-body" id="divServiceBody" style="overflow:auto;min-height:200px; padding-right:40px;">
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="required">  Nivesh Mitra Service: </label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @(Html.Kendo().DropDownList()
+                            .Name("ServiceCodeName")
+                            .DataTextField("NICServiceCode")
+                            .DataValueField("Id")
+                            .OptionLabel("--Select--")
+                            //.Filter("contains")
+                            .DataSource(source =>
+                            {
+                                source.Custom()
+                                .ServerFiltering(true)
+                                .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                .Transport(transport => transport.Read(read => read.Action("GetNiveshMitraServices", "NiveshMitra")))
+                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                .PageSize(100);
+                            })
+                            .Events(e=>e.Change("NICServiceChangeEvent"))
+                            .HtmlAttributes(new { style = "width:100%;" })
+                        )
+                    </div>
+                    <div class="col-md-6 col-sm-12 col-xs-12 form-group">
+                        <label class="srvc-name lbl-form-control" style="width:90%; float:right;"></label>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="required"> Citizen Services: </label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                       @(Html.Kendo().DropDownListFor(m => m.CitizenServiceId)
+                           .DataTextField("StatusCode")
+                           .DataValueField("Id")
+                           .OptionLabel("--Select--")
+                           //.AutoClose(false)
+                           //.DataSource(source => source.Read(read => read.Action("GetNiveshMitraServiceStatus", "NiveshMitra")))
+                            .DataSource(source =>
+                            {
+                                source.Custom()
+                                .ServerFiltering(true)
+                                .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                .Transport(transport => transport.Read(read => read.Action("GetNiveshMitraServiceStatus", "NiveshMitra")))
+                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                .PageSize(100);
+                            })
+                            .Events(e=>e.Change("CitizenServiceChangeEvent"))
+                           .HtmlAttributes(new { style = "width: 100%; height:100%" })
+                        )
+                    </div>
+                    <div class="col-md-6 col-sm-12 col-xs-12 form-group">
+                        <label class="ctzn-srvc-name lbl-form-control" style="width:90%; float:right;"></label>
+                    </div>
+                </div>
+                <div class="row" id="divDescription">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="">Amount:</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.TextBoxFor(model => model.Amount, htmlAttributes: new { @class = "form-control", @maxlength = "15" })
+                    </div>
+                </div>
+            </div>
+            <div style="page-break-after: always;"></div>
+            <div class="modal-footer" style="text-align: center;padding:6px;">
+                <button type="submit" id="btn-close" class="k-button" data-dismiss="modal" style="min-width:80px;">Close</button>
+                <button type="button" id="btn-submit" class="k-button" style="min-width:80px;">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+
+    function NICServiceChangeEvent() {
+        var serviceCode = $('#ServiceCodeName').data("kendoDropDownList").text();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ NICServiceCode: serviceCode }),
+            url: '/NIC/NiveshMitra/GetNiveshMitraServices',
+            success: function (result) {
+                if (result.Data.length != 0) {
+                    $('.srvc-name').html(result.Data[0].ServiceName);
+                }
+                else {
+                    $('.srvc-name').html('');
+                }
+            },
+            error: function (ajaxRequest, strError) {
+            }
+        });
+    }
+
+    function CitizenServiceChangeEvent() {
+        var statusId = $('#CitizenServiceId').val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ CitizenStatusId: statusId }),
+            url: '/NIC/NiveshMitra/GetNiveshMitraServiceStatus',
+            success: function (result) {
+                if (result.Data.length != 0) {
+                    $('.ctzn-srvc-name').html(result.Data[0].CitizenStatusName);
+                }
+                else {
+                    $('.ctzn-srvc-name').html('');
+                }
+            },
+            error: function (ajaxRequest, strError) {
+            }
+        });
+    }
+
+    function ChangeNICServiceStatus(id) {
+        if (id != undefined && id != "") {
+            var flag = alertify.confirm(
+                "Nivesh Mitra Service Status", //as title
+                "Are you sure to change status", // as message
+                function () {
+                    $.ajax({
+                        dataType: 'json',
+                        type: 'Post',
+                        contentType: 'application/json; charset=utf-8',
+                        data: JSON.stringify({ Id: id, ActionType: "Service" }),
+                        url: '/NIC/NiveshMitra/ActivateSWPServiceStatus',
+                        success: function (result) {
+                            if (result != null && result.ReturnTypeId == '@SWPReturnTypeId.Updated') {
+                                alertify.success("Status changed successfully.");
+                                $('#GridServiceRequest').data("kendoGrid").dataSource.read();
+                            }
+                            else {
+                                alertify.error("Status does not change.");
+                            }
+                        },
+                        error: function (ajaxRequest, strError) {
+                        }
+                    });
+                },
+                function () {
+
+                }
+            );
+        }
+    }
+</script>
+
+
+

@@ -1,0 +1,728 @@
+﻿@model NA.PMS.Model.TransferModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@using NA.PMS.Common;
+@{
+    ViewBag.Title = "Add Transfer Request";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    #transferee_detail_header {
+        display: none;
+    }
+
+    #transferee_detail_formbox {
+        display: none;
+    }
+
+    .k-window {
+        width: 39%;
+        height: 30%;
+    }
+</style>
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Add Transfer Request</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <h2 class="blck-heading">Registration Id</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Registration Id", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(m => m.RId)
+                                .Filter("contains")
+                                .DataTextField("text")
+                                .DataValueField("id")
+                                .OptionLabel("Select")
+                                .DataSource(source =>
+                                {
+                                    source.Custom()
+                                   .ServerFiltering(true)
+                                   .PageSize(100).ServerPaging(true)
+                                   .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                   .Transport(transport =>
+                                   {
+                                       transport.Read("GetRIDsForTransfer", "PropertyRegistration");
+                                   }).Schema(schema =>
+                                   {
+                                       schema.Data("Data")
+                                       .Total("Total");
+                                   }).PageSize(100);
+                                })
+                                .Events(events => { events.Change("RIdChange"); })
+                                .HtmlAttributes(new { @class = "schemeForms", style = "width:100%" })
+                            )
+                        </div>
+
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Property Number")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label id="lblPropNo" class="lbl-form-control"></label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.LabelFor(m => m.ReqRefNo, htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.ReqRefNo, new { @class = "form-control", onkeypress = "return IsNumeric(event);", maxlength = "8", @onchange = "RequestIdCheck();" })@*onchange="RequestIdCheck()"*@
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="blck-heading" id="allottee_detail_header">Allottee Details</h2>
+                <div  id="allottee_detail_formbox">
+
+                    @{Html.RenderPartial("_TransferAllotteDetails");}
+
+                </div>
+
+                <h2 class="blck-heading" id="transfer_detail_header">Transfer Details</h2>
+                <div class="form-bx" id="transfer_detail_formbox">
+
+                    @{Html.RenderPartial("_TransferDetailsDocs");}
+
+                </div>
+
+                <h2 class="blck-heading" id="transferee_detail_header">Transferee Details</h2>
+                <div class="form-bx" id="transferee_detail_formbox">
+
+                    @{Html.RenderPartial("_TransferAddTransferee");}
+
+                </div>
+            </div>
+            <div id="hdnDiv">
+                @(Html.Kendo().DatePickerFor(m => m.PossessionDate)
+                                          .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" }))
+            </div>
+            <div class="box-button text-center">
+                <input type="button" id="btnBack" value="Back" class="btn btn-default" />
+                <input type="button" id="btnNxt" value="Next" class="btn btn-default" />
+                <input type="button" id="btnCncl" value="Cancel" class="btn btn-default" />
+                <input type="button" id="btnSubmit" value="Add for Approval" class="btn btn-add" />
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@(Html.Kendo().Window().Name("assignToWindow").Title("Assign To").Modal(true).Visible(false).Content(@<text>
+        <div class="container-fluid">
+            <div class="row topSpace">
+                <div class="col-md-4 col-sm-6 col-md-offset-1">
+                    @Html.Label("Assign To: ")
+                </div>
+                <div class="col-md-5 col-sm-6">
+                    @(Html.Kendo().DropDownListFor(model => model.User)
+                       .Name("User")
+                       .DataTextField("text")
+                       .DataValueField("id")
+                       .OptionLabel("Select").Filter("contains").AutoBind(false)
+                       .DataSource(source =>source.Read(read =>read.Action("GetAssineToByDepttId", "PropertyRegistration").Data("AdditionalData")))
+                       .HtmlAttributes(new { style = "width:100%" })
+                    )
+                </div>
+            </div>
+            <div class="row topSpace">
+                <div class="col-md-7 col-sm-6 col-md-offset-5">
+                    <input type="button" class="btn btn-add" id="btnPopupSubmit" value="Submit" />
+                    <input type="button" class="btn btn-default closePopup" value="Close" />
+                </div>
+            </div>
+        </div>
+</text>)
+.Draggable()
+.Resizable()
+//.Width(500)
+//.Height(200)
+.Actions(actions => actions.Close())
+)
+
+<script type="text/javascript">
+    function AdditionalData() {
+        return {
+            depttId: $("#hdnDepttId").val()
+        };
+    }
+
+    function TransChange() {
+        var trans = $("#TransferType").val();
+        if (trans == '@NA.PMS.Common.Constants.GPATransType') {
+            alertify.error("Please fill GPA details.");
+            $("#TransferType").data("kendoDropDownList").value("");
+            $("#TransferSubType").data("kendoDropDownList").value("");
+        }
+    }
+
+    $(document).ready(function () {
+        $(".GPAField").hide();
+        $("#hdnDiv").hide();
+        $("#addTransfereeTab").hide();
+        $("#btnBack").hide();
+        $("#btnSubmit").hide();
+        $(".comGender").hide();
+
+        $("#btnCncl").click(function () {
+            window.location.href = '@Url.Action("ManageTransfers", "PropertyRegistration")';
+        });
+
+        $("#btnPopupSubmit").click(function () {
+            var rId = $("#RId").val();
+            var propId = $("#hdnPropId").val();
+            var applicantName = $("#lblApNa").html();
+            var applicantGender = $("#lblGend").html();
+            var applicantRelativeName = $("#lblReNa").html();
+            var applicantPropType = $("#lblPropTy").html();
+            var compName = $("#lblCoNa").html();
+            var signAuth = $("#lblSiAu").html();
+            var Area = $("#lblArea").html();
+            var floor = $("#lblFloo").html();
+            var transferorCorrAdd = $("#lblCorrAdd").html();
+            var transferorPerAdd = $("#lblPerAdd").html();
+            var userVal = $("#User").val();
+            var transType = $("#TransferType").val();
+            var transSubType = $("#TransferSubType").val();
+            var transDate = $("#TransferDate").val();
+            //var GPAHolderName = $("#GPAHolderName").val();
+            //var GPAHolderAdd = $("#GPAHolderAdd").val();
+            //var GPAEffectiveFrom = $("#GPAEffectiveFrom").val();
+            //var GPAEffectiveTill = $("#GPAEffectiveTill").val();
+            var transChargePerSqMrt = $("#TransferChargePerSqMtr").val();
+            var totTransCharge = $("#TotalTransferCharge").val();
+            var transfereeGender = $("#TransfereeGenderId").val();
+            var transfereeCompanyName = $("#TransfereeCompanyName").val();
+            var transfereeFrstName = $("#TransfereeFirstName").val();
+            var trasfereeSignAuth = $("#TransfereeCompanySigningAuth").val();
+            var transfereeMiddleName = $("#TransfereeMiddleName").val();
+            var transfereeLstName = $("#TransfereeLastName").val();
+            var transfereeCompanyRegOfc = $("#TransfereeCompanyRegOff").val();
+            var TransfereeRelName = $("#TransfereeRelationName").val();
+            var TransfereeMotherName = $("#TransfereeMotherName").val();
+            var TransfereeMobile = $("#TransfereeMobileNo").val();
+            var TransfereeEmail = $("#TransfereeEmail").val();
+            var TransfereeCorrAdd = $("#TransfereeCorrespondenceAdd").val();
+            var TransfereePerAdd = $("#TransfereePermanentAdd").val();
+            var TransfereePAN = $("#TransfereePAN").val();
+            var TransfereeOccupation = $("#TransfereeOccupationId").val();
+            var OnlineReqRefNo = $("#ReqRefNo").val();
+
+            var currentrate = $('#CurrentPropertyRate').val();
+            var locationcharge = $('#LocationCharge').val();
+            var totalcost = $('#TotalPropertyCost').val();
+            var leaserent = $('#AnnualLeaseRent').val();
+
+            if (userVal == "" || userVal == null) {
+                alertify.error("Please select a User.");
+                return false;
+            }
+
+            if (OnlineReqRefNo == "") {
+                alertify.error("Please enter Request Ref. No.");
+                return false;
+            }
+
+            if (OnlineReqRefNo.length < 3) {
+                alertify.error("Request Ref. No. length must be 3 characters");
+                return false;
+            }
+            if (currentrate == "" || currentrate == 0) {
+                alertify.error("Please Enter Current Property Rate");
+                return false;
+            }
+            else {
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({
+                        rId: rId, propId: propId, applicantName: applicantName, applicantGender: applicantGender, applicantRelativeName: applicantRelativeName, applicantPropType: applicantPropType, Area: Area, floor: floor, userVal: userVal, transType: transType, transSubType: transSubType, transDate: transDate, transChargePerSqMrt: transChargePerSqMrt, totTransCharge: totTransCharge, transfereeGender: transfereeGender, transfereeCompanyName: transfereeCompanyName, transfereeFrstName: transfereeFrstName, trasfereeSignAuth: trasfereeSignAuth, transfereeMiddleName: transfereeMiddleName, transfereeLstName: transfereeLstName, transfereeCompanyRegOfc: transfereeCompanyRegOfc, TransfereeRelName: TransfereeRelName, TransfereeMotherName: TransfereeMotherName, TransfereeMobile: TransfereeMobile, TransfereeEmail: TransfereeEmail, TransfereeCorrAdd: TransfereeCorrAdd, TransfereePerAdd: TransfereePerAdd, TransfereePAN: TransfereePAN, TransfereeOccupation: TransfereeOccupation, compName: compName, signAuth: signAuth, OnlineReqRefNo: OnlineReqRefNo, transferorCorrAdd: transferorCorrAdd, transferorPerAdd: transferorPerAdd
+                    }),
+                    url: '/PropertyRegistration/SaveTransferData',
+                    success: function (result) {
+                        if (result == true) {
+                            $("#assignToWindow").data("kendoWindow").close();
+                            alertify.success("Data saved successfully.");
+                            window.location.href = '@Url.Action("ManageTransfers", "PropertyRegistration")';
+                        }
+                        //else {
+                        //    alertify.error("No new Transfer Request exists for the selected RID.");
+                        //}
+                    },
+                    error: function (objAjaxRequest, strError) {
+                        var respText = objAjaxRequest.responseText;
+                        //alert(respText);
+                    }
+                });
+
+            }
+        });
+
+        $("#btnNxt").click(function () {
+            var ddlRid = $("#RId").data("kendoDropDownList");
+            ddlRid.enable(false);
+            var rId = $("#RId").val();
+            var transtype = $("#TransferType").val();
+            var transSubType = $("#TransferSubType").val();
+            //var transDate = $("#TransferDate").val();
+            //var transDate = $("#TransferDate").data("kendoDatePicker").value();
+            var transDate = $("#TransferDate").val();
+            var possessionDate = $("#PossessionDate").data("kendoDatePicker").value();
+            var transCharge = $("#TransferChargePerSqMtr").val();
+
+            var dtTransDate = new Date(transDate);
+            var dtPossessionDate = new Date(possessionDate);
+
+            if (rId == '') {
+                ClearValues();
+                alertify.error("Please select an RID");
+                ddlRid.enable(true);
+                return false;
+            }
+            if (transtype == '') {
+                alertify.error("Please select a Transfer Type");
+                ddlRid.enable(true);
+                return false;
+            }
+            if (transSubType == '') {
+                alertify.error("Please select a Transfer Sub-type");
+                ddlRid.enable(true);
+                return false;
+            }
+            if (transDate == '') {
+                alertify.error("Please enter Transfer Applied On");
+                ddlRid.enable(true);
+                return false;
+            }
+            if (transCharge == '') {
+                alertify.error("Please enter Transfer Charge (per sqmtr)");
+                ddlRid.enable(true);
+                return false;
+            }
+            if (parseInt(transCharge) < 0) {
+                alertify.error("Transfer Charge (per sqmtr) can't be less than 0");
+                ddlRid.enable(true);
+                return false;
+            }
+            //Bug#201 - Resolved
+            //if (dtTransDate < dtPossessionDate) {
+            //    alertify.error("Transfer Date can't be earlier than Possession Date");
+            //    ddlRid.enable(true);
+            //    return false;
+            //}
+
+            //TODO: GPA Fields
+            $("#allottee_detail_header").hide();
+            $("#allottee_detail_formbox").hide();
+            $("#transfer_detail_header").hide();
+            $("#transfer_detail_formbox").hide();
+
+            $("#transferee_detail_header").show()
+            $("#transferee_detail_formbox").show()
+
+
+            $("#detailDocsTab").hide();
+            $("#btnNxt").hide();
+            $("#addTransfereeTab").show();
+            $("#btnBack").show();
+            $("#btnSubmit").show();
+        });
+
+        $("#btnBack").click(function () {
+            var ddlRid = $("#RId").data("kendoDropDownList");
+            ddlRid.enable(true);
+
+            $("#allottee_detail_header").show();
+            $("#allottee_detail_formbox").show();
+            $("#transfer_detail_header").show();
+            $("#transfer_detail_formbox").show();
+
+            $("#transferee_detail_header").hide()
+            $("#transferee_detail_formbox").hide()
+
+            $("#addTransfereeTab").hide();
+            $("#btnBack").hide();
+            $("#btnSubmit").hide();
+            $("#detailDocsTab").show();
+            $("#btnNxt").show();
+        });
+
+        $(".closePopup").click(function () {
+            $("#assignToWindow").data("kendoWindow").close();
+        });
+
+        $("#btnSubmit").click(function () {
+            var gender = $("#TransfereeGenderId").val();
+            var cmpnyName = $("#TransfereeCompanyName").val();
+            var signAuth = $("#TransfereeCompanySigningAuth").val();
+            var RO = $("#TransfereeCompanyRegOff").val();
+            var mobileNo = $("#TransfereeMobileNo").val();
+            var email = $("#TransfereeEmail").val();
+            var corrAdd = $("#TransfereeCorrespondenceAdd").val();
+            var PAN = $("#TransfereePAN").val();
+            var frstName = $("#TransfereeFirstName").val();
+            var lstName = $("#TransfereeLastName").val();
+            var relName = $("#TransfereeRelationName").val();
+            var perAdd = $("#TransfereePermanentAdd").val();
+            var occupation = $("#TransfereeOccupationId").val();
+            var middleName = $("TransfereeMiddleName").val();
+            var motherName = $("#TransfereeMotherName").val();
+            var balDueTD = parseFloat($("#BalanceDues").val());
+            var transfereeType = $("input[name='TypeOfTransferee']:checked").val();
+            if (transfereeType == '@NA.PMS.Common.Constants.genderIndividual') {
+                if (gender == '') {
+                    alertify.error("Please select Gender");
+                    return false;
+                }
+            }
+
+            if (transfereeType == '@NA.PMS.Common.Constants.genderCompany') {
+                if (cmpnyName == '') {
+                    alertify.error("Please enter Company Name");
+                    return false;
+                }
+                if (signAuth == '') {
+                    alertify.error("Please enter Authorized Signatory");
+                    return false;
+                }
+                if (RO == '') {
+                    alertify.error("Please enter Registered Office");
+                    return false;
+                }
+                if (mobileNo == '') {
+                    alertify.error("Please enter Mobile Number");
+                    return false;
+                }
+                if (email == '') {
+                    alertify.error("Please enter Email");
+                    return false;
+                }
+                if (corrAdd == '') {
+                    alertify.error("Please enter Correspondence Address");
+                    return false;
+                }
+                //if (PAN == '') {
+                //    alertify.error("Please enter PAN");
+                //    return false;
+                //}
+                if (!/^[a-zA-Z ]*$/g.test(signAuth)) {
+                    alertify.error("Authorized Signatory should contain only alphabets and spaces");
+                    return false;
+                }
+                if (mobileNo.length < 10) {
+                    alertify.error("Please enter correct Mobile Number");
+                    return false;
+                }
+                if (email != "") {
+                    if (/^([a-zA-Z0-9_.+-])+\@@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(email) == false) {
+                        alertify.error("Please enter a valid Email");
+                        return false;
+                    }
+                }
+                if (/^[a-zA-Z0-9- ]*$/.test(PAN) == false) {
+                    alertify.error("PAN should only be alphanumeric");
+                    return false;
+                }
+                if (balDueTD > 0) {
+                    alertify.error("Please clear your dues before Transfer process.");
+                    return false;
+                }
+                $("#assignToWindow").data("kendoWindow").center();
+                $("#User").data("kendoDropDownList").dataSource.read();
+                $("#assignToWindow").data("kendoWindow").open();
+            }
+            else {
+                if (frstName == '') {
+                    alertify.error("Please enter First Name");
+                    return false;
+                }
+                if (lstName == '') {
+                    alertify.error("Please enter Last Name");
+                    return false;
+                }
+                if (relName == '') {
+                    alertify.error("Please enter Father's/Husband's Name");
+                    return false;
+                }
+                if (mobileNo == '') {
+                    alertify.error("Please enter Mobile Number");
+                    return false;
+                }
+                if (email == '') {
+                    alertify.error("Please enter Email");
+                    return false;
+                }
+                if (corrAdd == '') {
+                    alertify.error("Please enter Correspondence Address");
+                    return false;
+                }
+                if (perAdd == '') {
+                    alertify.error("Please enter Permanent Address");
+                    return false;
+                }
+                //if (PAN == '') {
+                //    alertify.error("Please enter PAN");
+                //    return false;
+                //}
+                if (occupation == '') {
+                    alertify.error("Please select Occupation");
+                    return false;
+                }
+                if (!/^[a-zA-Z&/ ]*$/g.test(frstName)) {
+                    alertify.error("First Name should contain alphabets, space, / and &");
+                    return false;
+                }
+                if (!/^[a-zA-Z&/ ]*$/g.test(middleName)) {
+                    alertify.error("Middle Name should contain alphabets, space, / and &");
+                    return false;
+                }
+                if (!/^[a-zA-Z&/ ]*$/g.test(lstName)) {
+                    alertify.error("Last Name should contain alphabets, space, / and &");
+                    return false;
+                }
+                if (!/^[a-zA-Z ]*$/g.test(relName)) {
+                    alertify.error("Father's/Husband's Name should contain only alphabets and spaces");
+                    return false;
+                }
+                if (motherName != '') {
+                    if (!/^[a-zA-Z ]*$/g.test(motherName)) {
+                        alertify.error("Mother's Name should contain only alphabets and spaces");
+                        return false;
+                    }
+                }
+                if (mobileNo.length < 10) {
+                    alertify.error("Please enter correct Mobile Number");
+                    return false;
+                }
+                if (email != '') {
+                    if (/^([a-zA-Z0-9_.+-])+\@@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(email) == false) {
+                        alertify.error("Please enter a valid Email");
+                        return false;
+                    }
+                }
+                if (/^[a-zA-Z0-9- ]*$/.test(PAN) == false) {
+                    alertify.error("PAN should only be alphanumeric");
+                    return false;
+                }
+                if (balDueTD > 0) {
+                    alertify.error("Please clear your dues before Transfer process.");
+                    return false;
+                }
+                $("#assignToWindow").data("kendoWindow").center();
+                $("#User").data("kendoDropDownList").dataSource.read();
+                $("#assignToWindow").data("kendoWindow").open();
+            }
+        });
+
+        $("#TransferChargePerSqMtr").blur(function () {
+            var area = $("#lblArea").html();
+            var intArea = parseFloat(area);
+            var rslt = intArea * $("#TransferChargePerSqMtr").val();
+            $("#TotalTransferCharge").val(rslt.toFixed(2));
+        });
+    });
+
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+
+    function RIdChange() {
+        var rId = $("#RId").val();
+        if (rId == '') {
+            ClearValues();
+            alertify.error("Please select an RID");
+            return false;
+        }
+        //GetKYADetails(rId);
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rId: rId }),
+            url: '/PropertyRegistration/GetOriginalDetailsForTransferByRID',
+            success: function (result) {
+                if (result != null) {
+                    if (result.isLeaseDeedExecuted == false) {
+                        ClearValues();
+                        alertify.error("Please execute Lease Deed for this RID before Transfer process");
+                        $("#RId").data('kendoDropDownList').value('');
+                        return false;
+                    }
+                    else {
+                        $("#lblScNa").html(result.SchemeName);
+                        $("#lblDeNa").html(result.DepttName);
+                        if (result.Gender == '@NA.PMS.Common.Constants.genderCompany') {
+                            $(".mfGender").hide();
+                            $("#lblCoNa").html(result.TransfereeCompanyName);
+                            $("#lblSiAu").html(result.TransfereeCompanySigningAuth);
+                            $(".comGender").show();
+                        }
+                        else {
+                            $(".comGender").hide();
+                            $("#lblApNa").html(result.ApplicantName);
+                            $("#lblReNa").html(result.RelationName);
+                            $(".mfGender").show();
+                        }
+                        $("#lblGend").html(result.Gender);
+                        $("#lblPropNo").html(result.PropNo);
+                        $("#lblPropTy").html(result.PropType);
+                        $("#lblArea").html(result.Area);
+                        $("#lblFloo").html(result.Floor);
+                        $("#lblProMo").html(result.PropMortgaged);
+                        $("#lblProFu").html(result.PropFunctional);
+                        $("#lblOTLR").html(result.OneTimeLeaseRent);
+                        $("#lblCorrAdd").html(result.TransferorCorrAdd);
+                        $("#lblPerAdd").html(result.TransferorPerAdd);
+                        $("#hdnDepttId").val(result.DepttId);
+                        $("#hdnPropId").val(result.PropId);
+                        $("#BalanceDues").val(result.BalanceDues);
+                        $("#PossessionDate").data("kendoDatePicker").value(result.PossessionDate);
+                        if (result.isGPA == true) {
+                            var intGPA = parseInt('@NA.PMS.Common.Constants.GPATransType');
+                            $("#TransferType").data("kendoDropDownList").select(intGPA);
+                            $("#TransferType").data("kendoDropDownList").enable(false);
+                            $("#GPAHolderName").val(result.GPAHolderName);
+                            $("#GPAHolderAdd").val(result.GPAHolderAdd);
+                            $("#GPAEffectiveFrom").data("kendoDatePicker").value(result.GPAEffectiveFrom);
+                            $("#GPAEffectiveTill").data("kendoDatePicker").value(result.GPAEffectiveTill);
+                            $(".GPAField").show();
+                            $('#divGPArow1').show();
+                            $('#divGPArow2').show();
+                        }
+                        else {
+                            $("#TransferType").data("kendoDropDownList").select('');
+                            $("#TransferType").data("kendoDropDownList").enable(true);
+                            $("#GPAHolderName").val('');
+                            $("#GPAHolderAdd").val('');
+                            $("#GPAEffectiveFrom").data("kendoDatePicker").value('');
+                            $("#GPAEffectiveTill").data("kendoDatePicker").value('');
+                            $(".GPAField").hide();
+                            $('#divGPArow1').hide();
+                            $('#divGPArow2').hide();
+                        }
+                    }
+                }
+                else {
+                    ClearValues();
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            },
+            error: function (obj) {
+                ClearValues();
+                alertify.error("Some error occured. Please try again later.");
+            }
+        });
+    }
+
+    function GetKYADetails(rId) {
+        //var rId = $("#RId").val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ RegistrationId: rId }),
+            url: '/Property/PropertyRegistration/GetKYADetailsForRid',
+            success: function (result) {
+                if (result != null) {
+                    if (result.StatusId == "2") {
+                        alertify.error("Your KYA has been Rejected. Please Complete your KYA again.");
+                        $('#btnNxt').attr('disabled', 'disabled');
+                        return false;
+                    }
+                    else if (result.StatusId == "" || result.StatusId == null) {
+                        alertify.error("Please Complete your KYA.");
+                        $('#btnNxt').prop('disabled', true);
+                        return false;
+                    }
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+
+    function ClearValues() {
+        $("#lblScNa").html('');
+        $("#lblDeNa").html('');
+        $("#lblApNa").html('');
+        $("#lblGend").html('');
+        $("#lblReNa").html('');
+        $("#lblPropTy").html('');
+        $("#lblArea").html('');
+        $("#lblFloo").html('');
+        $("#lblProMo").html('');
+        $("#lblProFu").html('');
+        $("#BalanceDues").val('');
+        $("#lblCorrAdd").html('');
+        $("#lblPerAdd").html('');
+        //$("#lblOTLR").html('');
+    }
+
+    function RequestIdCheck() {
+        var request = $("#ReqRefNo").val();
+        rModel = {
+            RequestId: $("#ReqRefNo").val(),
+            RegistrationId: $("#RId").val(),
+            ServiceId: "1"
+        }
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ model: rModel }),
+            url: '/Property/PropertyRegistration/IsRequestIdIsExist',
+            success: function (result) {
+                if (result != '@ReturnType.Exist') {
+                    if (result == '@NAStatusId.Completed') {
+                        alertify.error("This Request is Completed");
+                    }
+                    else if (result == '@NAStatusId.Initiated') {
+                        alertify.error("This Request is in Initiated State. Please Forward this request first.");
+                    }
+                    else if (result == '@NAStatusId.Objection') {
+                        alertify.error("This Request in Objection State.");
+                    }
+                    else if (result == '@NAStatusId.Rejected') {
+                        alertify.error("This Request is Rejected");
+                    }
+                    else if (result == '@NAStatusId.Cancelled') {
+                        alertify.error("This Request is cancelled");
+                    }
+                    else if (result == '@NAStatusId.Withdrawn') {
+                        alertify.error("This Request is Withdrawn by Allottee.");
+                    }
+                    else {
+                        alertify.error("Request no. mismatch. Please enter a valid Request No.");
+                    }
+                    $("#ReqRefNo").val('');
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+</script>

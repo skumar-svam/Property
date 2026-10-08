@@ -1,0 +1,230 @@
+﻿@model NA.PMS.Model.Property.PropertyPossessionModel
+@using Kendo.Mvc.UI
+@{
+    ViewBag.Title = "Possession Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="PossessionReport">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Possession Report</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                @*<a href="#" id="btnExportExcel" class="" onclick="javascript:ExportToExcel(event);">Export To Excel</a>
+                <a href="#" id="btnExportPdf" class="" onclick="javascript:ExportToPdf(event);">Export To PDF</a>*@
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12">
+        <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            <h2 class="blck-heading" style="margin-bottom:0;">Search Property</h2>
+            <div class="" style="">
+                <div class="row">                   
+                    <div class="col-md-2 col-sm-2 col-xs-12 form-group" style="padding-left:10px;">
+                        @Html.Label("Department")
+                        @(Html.Kendo().DropDownList()
+                            .Name("ddlDepartment")
+                            .DataTextField("text")
+                            .DataValueField("id")
+                            .OptionLabel("--Select--")
+                            .Filter("contains")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetDepartmentListForLoginUser", "Report");
+                                });
+                            })
+                            .HtmlAttributes(new { style = "width:96%;margin-right:10px;" })
+                            .Events(e=>e.Change("FilterPossessionReport"))
+                        )
+                        @Html.Hidden("ddlScheme", "")
+                    </div>
+                                   
+                    <div class="col-md-2 col-sm-2 col-xs-12 form-group">
+                        @Html.Label("Possession status")
+                        @(Html.Kendo().DropDownList()
+                             .Name("ddlPossessionStatus")
+                            .DataTextField("text")
+                            .DataValueField("text")
+                            .OptionLabel("--Select--")
+                            .Filter("contains")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("PropertyPossessionStatus", "Report");
+                                });
+                            })
+                            .HtmlAttributes(new { style = "width:96%;" })
+                                    .Events(e => e.Change("FilterPossessionReport"))
+                        )
+                    </div>
+                    <div class="col-md-2 col-sm-2 col-xs-12 form-group">
+                        @Html.Label("Area Change")
+                        @(Html.Kendo().DropDownList()
+                             .Name("ddlAreaChange")
+                            .DataTextField("text")
+                            .DataValueField("text")
+                            .OptionLabel("--Select--")
+                            .Filter("contains")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("AreaChangeOnPossession", "Report");
+                                });
+                            })
+                            .HtmlAttributes(new { style = "width:96%;" })
+                            .Events(e => e.Change("FilterPossessionReport"))
+                        )
+                    </div>
+                    <div class="col-md-2 col-sm-2 col-xs-12 form-group">
+                        @Html.Label("Sector")
+                        @Html.Kendo().TextBox().Name("SectorName").HtmlAttributes(new { style = "width:96%", @maxlength = "10" })
+                    </div>
+                    <div class="col-md-2 col-sm-2 col-xs-12 form-group">
+                        <label>Date From</label>
+                        @(Html.Kendo().DatePicker().Name("kendoStartDate").HtmlAttributes(new { style = "width:96%;" }).Events(e => e.Change("FilterPossessionReport")))
+                    </div>
+                    <div class="col-md-2 col-sm-2 col-xs-12 form-group">
+                        <label>Date To</label>
+                        @(Html.Kendo().DatePicker().Name("kendoEndDate").HtmlAttributes(new { style = "width:96%;" }).Events(e => e.Change("FilterPossessionReport")))
+                    </div>
+                </div>
+                <div class="row">
+                    
+                    
+                    <div class="col-md-12 col-sm-12 col-xs-12 form-group" style="text-align:right">
+                        @*@Html.Label("")<br />*@
+                        <input type="button" id="btnAdvanceSearch" class="btn btn-add" value="Search" />
+                        <input type="button" id="btnClear" class="btn btn-default" value="Clear" style="margin-right:10px;" />
+                    </div>
+                </div>
+
+                
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.Property.PropertyPossessionModel>()
+              .Name("gridPossessionReport")
+                .ToolBar(tools => tools.Excel())
+                .ToolBar(tools => tools.Pdf())
+                .Pdf(pdf => pdf
+                    .AllPages()
+                    .AvoidLinks()
+                    .PaperSize("A4")
+                    .Scale(0.8)
+                    .Margin("2cm", "1cm", "1cm", "1cm")
+                    .Landscape()
+                    .RepeatHeaders()
+                    .TemplateId("page-template")
+                    .FileName("PossessionReport.pdf")
+                    .ProxyURL(Url.Action("Pdf_Export_Save", "Report"))
+                )
+                .Excel(excel => excel
+                    .FileName("PossessionReport.xlsx")
+                    .AllPages(true)
+                    .Filterable(true)
+                    .ProxyURL(Url.Action("Excel_Export_Save", "Report"))
+                )
+              .Columns(columns =>
+                {
+                    //columns.Bound(c => c.Rid).Title("Registration Id").Width(150).ClientTemplate("<a href=\"/Property/Possession/ViewPossessionOrder/#= Rid#\" id='v_#=Rid#'  style = 'width: 30px;' >#=Rid#</a>");
+                    //columns.Bound(c => c.Rid).Title("Registration Id").Width(150).ClientTemplate("<a href=\"/Property/Possession/ViewPossessionOrder/#= EncryptedRid#\">#=Rid#</a>");
+                    columns.Bound(c => c.Rid).Title("Registration Id").Width(150);
+                    columns.Bound(c => c.DepartmentName).Title("Department Name");
+                    columns.Bound(c => c.PropertyNumber).Title("Property No").Filterable(false);
+                    columns.Bound(c => c.ApplicantName).Title("Applicant").Filterable(false);
+                    columns.Bound(c => c.PossessionOrderDate).Title("Order Date").Format("{0:dd/MM/yyyy}");
+                    columns.Bound(c => c.PossessionDueDate).Title("Due Date").Format("{0:dd//MM/yyyy}");
+                    columns.Bound(c => c.PossessionDate).Title("Possession Date").Format("{0:dd/MM/yyyy}");
+                    columns.Bound(c => c.AreaChange).Title("Area Change").Width(150).ClientTemplate("#= AreaChange==null?'No':AreaChange #");
+                    columns.Bound(c => c.AreaChangeType).Title("Change Type");
+                })
+              .Sortable()
+              .Filterable()
+              //.Groupable()
+              .Resizable(resize => resize.Columns(true))
+              .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+              .DataSource(dataSource => dataSource
+                  .Ajax()
+                  .Model(model => model.Id(c => c.Rid))
+                  .ServerOperation(true)
+                  //.Read(read => read.Action("GetPossessionReport", "Report").Data("FilterSearchField")).PageSize(10)
+                  .Read(read => read.Action("SearchPossessionReport", "Report").Data("FilterSearchField")).PageSize(10)
+              )
+        )
+    </div>
+</div>
+
+<script type="text/javascript">
+    function FilterStatus() {
+        return { status: $('#ddlFunctional').val() }
+    }
+    function FilterSearchField() {
+        return {
+            department: $('#ddlDepartment').val(),
+            scheme: $('#ddlScheme').val(),
+            possession: $('#ddlPossessionStatus').val(),
+            areaChange: $('#ddlAreaChange').val(),
+            sector: $('#SectorName').val(),
+            startDate: $('#kendoStartDate').val(),
+            endDate: $('#kendoEndDate').val()
+        }
+    }
+    function FilterPossessionReport() {
+        $('#gridPossessionReport').data("kendoGrid").dataSource.read();
+    }
+    function ExportToPdf() {
+        $("#gridPossessionReport").data("kendoGrid").saveAsPDF();
+    }
+    function ExportToExcel() {
+        $("#gridPossessionReport").data("kendoGrid").saveAsExcel();
+    }
+    function ClearFields() {        
+        $('#ddlDepartment').data("kendoDropDownList").value('');
+        //$('#ddlScheme').data("kendoDropDownList").value('');
+        $('#ddlScheme').val('');
+        $('#ddlPossessionStatus').data("kendoDropDownList").value('');
+        $('#ddlAreaChange').data("kendoDropDownList").value('');
+        $('#SectorName').val('');
+        $('#kendoStartDate').data("kendoDatePicker").value('');
+        $('#kendoEndDate').data("kendoDatePicker").value('');
+        $('#gridPossessionReport').data("kendoGrid").dataSource.read();
+    }
+
+    $('#btnAdvanceSearch').click(function () {
+        var department = $('#ddlDepartment').val();
+        var schemeName = $('#ddlScheme').val();
+        var possession = $('#ddlPossessionStatus').val();
+        var areachange = $('#ddlAreaChange').val();
+        var sectorName = $('#SectorName').val();
+        var startDate = $('#kendoStartDate').val();
+        var endDate = $('#kendoEndDate').val();
+
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ department: department, scheme: schemeName, possession: possession, areaChange: areachange, sector: sectorName, startDate: startDate, endDate: endDate }),
+            url: '@Url.Action("SearchPossessionReport", "Report")',
+            success: function (result) {
+                if (result != null) {
+                    $('#gridPossessionReport').data("kendoGrid").dataSource.read();
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Something is wrong, try again later");
+            }
+        });
+    });
+
+    $('#btnClear').click(function () {
+        ClearFields();
+    });
+
+</script>

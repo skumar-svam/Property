@@ -1,0 +1,276 @@
+﻿@model NA.PMS.Model.LetterViewModel
+@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+
+@{
+    ViewBag.Title = "Manage Letter";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .top-margin {
+        margin-top: 6px;
+        width: 80px;
+    }
+
+    .lbl-status-action {
+        cursor: pointer;
+        color: blue;
+    }
+
+    .glyphicon-print {
+        cursor: pointer;
+    }
+    .col-hide{
+        display:none;
+    }
+</style>
+
+<div class="ManageRequestServices">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Manage Letter</h1></div>
+            <div class="col-md-6 col-sm-6 col-xs-12 col-btn">
+                @Html.ActionLink("Generate Letter", "Letter", new { controller = "Authority", area = "Member" }, htmlAttributes: new { target = "_blank" })
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12" style="border-left:1px solid #abc;border-right:1px solid #abc;">
+        <div class="row form-group">
+            <div class="col-md-2 pad-left">
+                @Html.Label("Department")
+                @(Html.Kendo().DropDownListFor(model => model.DepartmentId)
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel(" -- Select --")
+                    .DataSource(source => source.Read(read => read.Action("GetDepartmentList", "ServiceRequest")))
+                    .Events(e => e.Change("ChangeDepartmentEvent"))
+                   .HtmlAttributes(new { style = "width:95%;float:right;", @class = "input-disabled" })
+                )
+            </div>
+            <div class="col-md-2 pad-left col-hide">
+                @Html.Label("Start Date")
+                @(Html.Kendo().DatePickerFor(model => model.StartDate).Events(e => e.Change("ChangeDepartmentEvent")).HtmlAttributes(new { style = "width:95%;float:right;" }))
+            </div>
+            <div class="col-md-2 pad-left col-hide">
+                @Html.Label("End Date")
+                @(Html.Kendo().DatePickerFor(model => model.EndDate).Events(e => e.Change("ChangeDepartmentEvent")).HtmlAttributes(new { style = "width:95%;float:right;" }))
+            </div>
+            <div class="col-md-2 pad-left col-hide">
+                @Html.Label("Letter Template")
+                @(Html.Kendo().DropDownListFor(model => model.TemplateId)
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel(" -- select --")
+                    .CascadeFromField("DepartmentId")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax")
+                        .Transport(transport => transport.Read(read => read.Action("GetLetterTemplateListByDepartmentAsDataSource", "Authority", new { area = "Member" }).Data("FilterDepartment")))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(100);
+                    })
+                        //.DataSource(source => source.Read(read => read.Action("GetLettersByTemplateDepartment", "Report").Data("FilterDepartment")).ServerFiltering(true))
+                    .HtmlAttributes(new { style = "width: 90%; float:right;" })
+                    .CascadeFrom("DepartmentId")
+                    .Events(e => e.Change("ChangeDepartmentEvent"))
+                )
+            </div>
+            <div class="col-md-2 col-hide" style="text-align:center;">
+                <label style="width:100%;"> </label>
+                <button type="button" id="btnSearch" class="k-button top-margin" value="Search">Search</button>
+                <button type="button" id="btnClear" class="k-button top-margin" value="Clear">Clear</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.LetterViewModel>()
+                .Name("GridGeneratedLetter")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.RegistrationId).Hidden();
+                    columns.Bound(c => c.Id).Hidden();
+                    columns.Bound(c => c.DepartmentId).Hidden();
+                    //columns.Bound(c => c.ChallanId).Title("Challan Id").Width(130);//.ClientTemplate("<a href='" + "/Member/ServiceRequest/RequestDetail/#= Id #" + "' target='_blank'>#=Id#</a>");
+                    columns.Bound(c => c.RegistrationId).Title("Registration Id").Width(150);//.ClientTemplate("<label class='hyperlinkcss' onclick='javascript:RedirectForServices(#=ServiceId#, #=RId#)'>#=RId#</label>");
+                    columns.Bound(c => c.Department).Title("Department").Width(130);
+                    columns.Bound(c => c.PropertyNo).Title("Property").Width(130);
+                    columns.Bound(c => c.Applicant).Title("Applicant");
+                    columns.Bound(c => c.MobileNo).Title("Mobile No").Width(130);
+                    columns.Bound(c => c.AllotmentDate).Title("Allotment Date").Width(140).Format("{0:dd-MMM-yyyy}");
+                    //columns.Bound(c => c.Id).Title("Letter").Width(110).ClientTemplate("<label class='hyperlinkcss' onclick='javascript:DisplayChallan(this)'>#=Id#</label>");
+                    columns.Bound(c => c.LetterContent).Hidden();
+                })
+                .Sortable()
+                .Filterable()
+                .Resizable(resize => resize.Columns(true))
+                .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .ClientDetailTemplateId("template")
+                .AutoBind(true)
+                .DataSource(dataSource => dataSource
+                    .Ajax()
+                    .Model(model => model.Id(c => c.Id))
+                    .ServerOperation(true)
+                    .Read(read => read.Action("GetGeneratedLetterList", "Authority", new { area = "Member" }).Data("FilterSearchParameter")).PageSize(10)
+                    //.Sort(s => s.Add(r => r.CreatedDate).Descending())
+                )
+        )
+    </div>
+
+</div>
+
+<div class="col-md-12 popup-window" id="ChallanWindow" style="min-height:250px;background:url(/Content/Images/boxed-bg.jpg) repeat;">
+    <div class="row form-group" style="height:500px; overflow:auto;">
+        <div id="divChallanBody2"></div>
+    </div>
+    <div class="row">
+        <div class="col-md-12" style="text-align:center">
+            <button type="button" class="k-button" onclick="PrintChallan();" style="width:100px;">Print</button>
+            <button type="button" class="k-button" onclick="CloseChallan();" style="width:100px;">Close</button>
+        </div>
+    </div>
+</div>
+
+
+<div id="divPrintChallan" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="padding-top:40px;">
+    <div class="modal-dialog" style="width: 60%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">  <b>Challan</b></h4>
+            </div>
+            <div class="modal-body" style="overflow:auto; height:400px;">
+                <style>
+                    .tr-no, .i-no {
+                        padding-left: 20px;
+                    }
+
+                    .td-amount {
+                        padding-right: 30px;
+                    }
+                </style>
+                <div id="divChallanBody"></div>
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="submit" id="btnPrintDiv" class="k-button" data-dismiss="modal" onclick="PrintChallan();">Print</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script id="template" type="text/kendo-tmpl">
+    @(Html.Kendo().Grid<NA.PMS.Model.LetterViewModel>()
+            .Name("grid_#=Id#") // template expression, to be evaluated in the master context
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Title("Letter Id").Width(140).ClientTemplate("<label class='hyperlink' onclick='javascript:OpenLetterWindow(this)'>#= Id #</label>"); 
+                columns.Bound(o => o.Template).Title("Template");
+                columns.Bound(o => o.CreatedBy);
+                columns.Bound(o => o.CreatedDate).Title("Created Date").Width(150).Format("{0:dd/MM/yyyy}");
+                columns.Bound(o => o.BarcodeValue).Width(210).Title("Barcode").ClientTemplate("<label class='hyperlink' onclick='javascript:OpenLetterWindow(this)'>#= BarcodeValue #</label>");
+                columns.Bound(o => o.LetterContent).Hidden(true);                                           
+            })
+            .DataSource(dataSource => dataSource
+                .Ajax()
+                .PageSize(10)
+                .Read(read => read.Action("GetGeneratedLetterListById", "Authority", new { rid = "#=RegistrationId#" }))
+                .Sort(s => s.Add(r => r.Id).Descending())
+            )
+            .ToClientTemplate()
+    )
+</script>
+<script>
+    function dataBound() {
+        this.expandRow(this.tbody.find("tr.k-master-row").first());
+    }
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.popup-window').kendoWindow({
+            modal: true,
+            title: "Noida Authority Letter",
+            //actions: false, 
+            actions: ["Minimize","Maximize","Close"],
+            visible: false,
+            width: "75%"
+        });
+
+        $('#btnSearch').click(function () {
+            ChangeDepartmentEvent();
+        });
+
+        $('#btnClear').click(function () {
+            $('#DepartmentId').data("kendoDropDownList").value("");
+            $('#StartDate').data("kendoDatePicker").value("");
+            $('#EndDate').data("kendoDatePicker").value("");
+            $("#GridGeneratedLetter").data("kendoGrid").dataSource.read();
+        });
+
+    })
+
+    function FilterDepartment() {
+        return { departmentId: $('#DepartmentId').val() }
+    }
+
+    function FilterSearchParameter() {
+        return {
+            DepartmentId: $('#DepartmentId').val(),
+            TemplateId: $('#TemplateId').val(),
+            StartDate: $('#StartDate').val(),
+            EndDate: $('#EndDate').val()
+        };
+    }
+    function ChangeDepartmentEvent() {
+        $("#GridGeneratedLetter").data("kendoGrid").dataSource.read();
+    }
+
+    function OpenLetterWindow(row) {
+        var tr = $(row).parent().parent();
+        var content = $(tr).children("td:eq(5)").text();
+        $("#divChallanBody2").html(content);
+        //$("#divPrintChallan").modal('show');
+
+        $(".popup-window").data("kendoWindow").open();
+        $(".popup-window").data("kendoWindow").center();
+    }
+
+    function CloseChallan() {
+        $(".popup-window").data("kendoWindow").close();
+    }
+
+    function PrintChallan() {
+        var contents = document.getElementById("divChallanBody2").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('<style>.row-btn{display:none;}</style>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+</script>
+
+

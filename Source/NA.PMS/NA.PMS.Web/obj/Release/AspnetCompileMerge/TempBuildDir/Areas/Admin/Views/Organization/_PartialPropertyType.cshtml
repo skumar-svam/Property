@@ -1,0 +1,208 @@
+﻿@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions
+
+
+<div class="panel-body">
+    <div class="row form-group">
+        <div class="col-md-12" id="Application" style="text-align:center">
+            <input type="radio" name="propertytype-action" value="AddPropertyType" />Add &nbsp;&nbsp;
+            <input type="radio" name="propertytype-action" value="UpdatePropertyType" />Update
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-3 col-sm-12 form-group col-20">
+            <label>Department</label>
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-30">
+            @(Html.Kendo().DropDownList()
+                  .Name("ddlPTDepartment")
+                  .OptionLabel("---select---")
+                          .Filter("contains")
+                  .DataTextField("Text")
+                  .DataValueField("Id")
+                  .DataSource(source => source.Read(read => read.Action("GetDepartmentList", "Application", new { area = "Admin" })))
+                  .HtmlAttributes(new { style = "width:100%;" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-20">
+            <label>Reference Id</label>
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-30">
+            <input type="text" maxlength="4" id="txtPropertyTypeId" class="k-textbox" style="width:100%;"/>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-3 col-sm-12 form-group col-20">
+            <label>Ex Property Type:</label>
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-30">
+            @(Html.Kendo().DropDownList()
+                  .Name("ddlPropertyType")
+                  .OptionLabel("---select---")
+                  .Filter("contains")
+                  .DataTextField("Text")
+                  .DataValueField("Id")
+                  .CascadeFrom("ddlPTDepartment")
+                  .Events(e => e.Change("GetPropertyTypeDetail"))
+                  .DataSource(source => source.Read(read => read.Action("GetPropertyTypeByDepartment", "Application", new { area = "Admin" }).Data("FilterPTDepartment")).ServerFiltering(true))
+                  .HtmlAttributes(new { style = "width:100%;" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-20">
+            <label>New Property Type:</label>
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-30">
+            <input type="text" maxlength="49" id="txtPropertyType" class="k-textbox" style="width:100%;"/>
+        </div>
+    </div>
+    <div class="row form-group" style="text-align:right;">
+        <div class="col-md-12">
+            <input type="button" id="btnPTRequest" class="k-button" value="Update" style="min-width:80px;" />
+            <input type="button" id="btnPTClear" class="k-button" value="Clear" style="min-width:80px;" />
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        $('input[type="radio"][name="propertytype-action"]').on("change", function () {
+            var action = $('input[type="radio"][name="propertytype-action"]:checked').val();
+            if (action == "AddPropertyType") {
+                $('#btnPTRequest').val("Add");
+                $('#ddlPropertyType').data("kendoDropDownList").value('');
+                $('#ddlPropertyType').data("kendoDropDownList").enable(false);
+            }
+            else {
+                $('#btnPTRequest').val("Update");
+                $('#ddlPropertyType').data("kendoDropDownList").enable(true);
+            }
+        });
+
+
+        $('#btnPTRequest').click(function () {
+            SubmitPropertyTypeForm();
+        });
+
+        $('#btnPTClear').click(function () {
+            ClearPropertyTypeFields();
+        });
+
+        $('#ddlPTDepartment').change(function () {
+            $('#txtPropertyTypeId').val('');
+            $('#txtPropertyType').val('');
+        });
+    });
+
+    function FilterPTDepartment() {
+        return { departmentId: $('#ddlPTDepartment').val() };
+    }
+
+
+    function GetPropertyTypeDetail() {
+        var departmentId = $('#ddlPTDepartment').data("kendoDropDownList").value();
+        var propertyTypeId = $('#ddlPropertyType').data("kendoDropDownList").value();
+        if (propertyTypeId != "" && propertyTypeId != "") {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ Id: propertyTypeId, DepartmentId: departmentId }),
+                url: '@Url.Action("GetPropertyTypeDetailById", "Application", new { area = "Admin" })',
+                success: function (result) {
+                    if (result != null) {
+                        $('#txtPropertyTypeId').val(result.TypeId);
+                        $('#txtPropertyType').val(result.PropertyType);
+                    }
+                    else {
+                        $('#txtPropertyTypeId').val('');
+                        $('#txtPropertyType').val('');
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again");
+                }
+            });
+        }
+    }
+
+    function SubmitPropertyTypeForm() {
+        var flag = true;
+        var actiontype = $('input[type="radio"][name="propertytype-action"]:checked').val();
+        var departmentId = $('#ddlPTDepartment').data("kendoDropDownList").value();
+        var propertyTypeId = "";
+        var propertyType = $('#txtPropertyType').val();
+        if (actiontype == "" || actiontype == undefined) {
+            flag = false;
+            alertify.error("Select Action type.");
+            return false;
+        }
+        if (departmentId == "") {
+            flag = false;
+            alertify.error("Select Department.");
+            return false;
+        }
+        if (actiontype == "AddPropertyType") {
+            propertyTypeId = $('#txtPropertyTypeId').val();
+            if (propertyTypeId == "") {
+                alertify.error("Enter Property Type Id");
+                flag = false;
+            }
+            if (propertyType == "") {
+                alertify.error("Enter Property Type name");
+                flag = false;
+            }
+            actiontype = "Add";
+        }
+        if (actiontype == "UpdatePropertyType") {
+            propertyTypeId = $('#txtPropertyTypeId').val();
+            if (propertyTypeId == "") {
+                alertify.error("Select existing Property Type");
+                flag = false;
+            }
+            else if (propertyType == "") {
+                alertify.error("Enter Property Type name");
+                flag = false;
+            }
+            actiontype = "Update";
+        }
+        if (flag) {
+            var PropertyModel = {
+                ActionType: actiontype,
+                DepartmentId: $('#ddlPTDepartment').data("kendoDropDownList").value(),
+                PropertyTypeId: propertyTypeId,
+                PropertyType: $('#txtPropertyType').val(),
+                Id: $('#ddlPropertyType').data("kendoDropDownList").value()
+            };
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ model: PropertyModel }),
+                url: '@Url.Action("SavePropertyType", "Application", new { area="Admin"})',
+                success: function (result) {
+                    if ((result == '@ReturnType.Saved') || (result == '@ReturnType.Updated')) {
+                        alertify.success("Property Type saved successfully.");
+                        ClearPropertyTypeFields();
+                        $('#ddlPropertyType').data("kendoDropDownList").dataSource.read();
+                    }
+                    else if (result == '@ReturnType.None') {
+                        alertify.error("Property Type doesn't exist.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again");
+                }
+            });
+        }
+    }
+
+    function ClearPropertyTypeFields() {
+        $('#ddlPropertyType').data("kendoDropDownList").value('');
+        $('#txtPropertyTypeId').val('');
+        $('#txtPropertyType').val('');
+    }
+
+</script>

@@ -1,0 +1,198 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@model NA.PMS.Model.AdvanceSearchModel
+
+<style>
+    .k-grid .k-grid-header .k-header .k-link {
+      overflow: visible !important; white-space: normal !important; 
+      text-align:center;
+   }
+</style>
+<div class="AdvanceSearchProperty">
+
+    <div class="col-md-12 content-top-spce" style="padding:0;">
+        <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            <h2 class="blck-heading" style="margin-bottom:5px;">Advance Search</h2>
+            <div class="form-bx">
+                <div class="row">
+                    <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                        @Html.Label("Department")
+                        @(Html.Kendo().DropDownListFor(model => model.DepartmentId)
+                            .DataTextField("Name")
+                            .DataValueField("Value")
+                            .OptionLabel("--Select--")
+                            .Filter("contains")
+                            .DataSource(source => source.Read(read => read.Action("GetDepartmentForAdvanceSearch", "PropertyAllotment")))
+                            .HtmlAttributes(new { style = "width:100%;" })
+                        )
+                    </div>
+                    <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                        @Html.Label("Registration Id")
+                        @Html.TextBoxFor(model => model.RegistrationId, htmlAttributes: new { @class = "form-control", @maxlength = "10" })
+                    </div>
+                    <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                        @Html.Label("Sector")
+                        @Html.TextBoxFor(model => model.Sector, htmlAttributes: new { @class = "form-control", @maxlength = "10" })
+                    </div>
+                    <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                        @Html.Label("Block")
+                        @Html.TextBoxFor(model => model.Block, htmlAttributes: new { @class = "form-control", @maxlength = "10" })
+                    </div>
+                    <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                        @Html.Label("Property No")
+                        @Html.TextBoxFor(model => model.PlotNo, htmlAttributes: new { @class = "form-control", @maxlength = "10" })
+                    </div>
+
+                </div>
+
+                <div class="row">
+                    <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                        @Html.Label("Name")
+                        @Html.TextBoxFor(model => model.Applicant, htmlAttributes: new { @class = "form-control", @maxlength = "30" })
+                    </div>
+                    <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                        @Html.Label("Father Name")
+                        @Html.TextBoxFor(model => model.ApplicantMaster, htmlAttributes: new { @class = "form-control", @maxlength = "30" })
+                    </div>
+
+                    <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                        @Html.Label("Address")
+                        @Html.TextBoxFor(model => model.Address, htmlAttributes: new { @class = "form-control", @maxlength = "100" })
+                    </div>
+                    <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                        @Html.Label("Mobile No")
+                        @Html.TextBoxFor(model => model.MobileNo, htmlAttributes: new { @class = "form-control", @maxlength = "10" })
+                    </div>
+                    <div class="col-md-2 col-sm-3 col-xs-12 form-group" style="text-align:right">
+                        @Html.Label("")<br />
+                        <input type="button" id="btnAdvanceSearch" class="btn btn-add" value="Search" />
+                        <input type="button" id="btnClear" class="btn btn-default" value="Clear" />
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.AllotmentModel>()
+                   .Name("gridAdvanceSearch")
+                    .ToolBar(tools => tools.Excel())
+                    .ToolBar(tools => tools.Pdf())
+                    .Pdf(pdf => pdf
+                        .AllPages()
+                        .AvoidLinks()
+                        .PaperSize("A4")
+                        .Scale(0.8)
+                        .Margin("2cm", "1cm", "1cm", "1cm")
+                        .Landscape()
+                        .RepeatHeaders()
+                        .TemplateId("page-template")
+                        .FileName("AllottedProperty.pdf")
+                        .ProxyURL(Url.Action("Pdf_Export_Save", "PropertyAllotment"))
+                    )
+                    .Excel(excel => excel
+                        .FileName("AllottedProperty.xlsx")
+                        .AllPages(true)
+                        .Filterable(true)
+                        .ProxyURL(Url.Action("Excel_Export_Save", "PropertyAllotment"))
+                    )
+                  .Columns(columns =>
+                  {
+                      //columns.Bound(c => c.RID).Title("Registration Id");
+                      columns.Bound(c => c.RID).ClientTemplate("<a href='" + "/Property/PropertyAllotment/PropertyDetails/#= RID #'>#= RID #</a>").Title("Registration Id").Filterable(true);
+                      columns.Bound(c => c.PropertyId).Title("Property ID");//Added on 27 feb 2018
+                      columns.Bound(c => c.SchemeName).Title("Scheme Name");//Added on 7 Sep 2017
+                      columns.Bound(c => c.DepartmentName).Title("Department Name");
+                      columns.Bound(c => c.SectorName).Title("Sector");
+                      columns.Bound(c => c.BlockName).Title(" Block");
+                      columns.Bound(c => c.PropertyNumber).Title("Plot No.");
+                      columns.Bound(c => c.ApplicantName).Title("Applicant's Name");
+                      columns.Bound(c => c.CorresspondingAddress).Title("Corressponding address");
+                      //columns.Bound(c => c.MobileNumber).Title("Mobile No");
+                      columns.Bound(c => c.OldRID).Title("Old RID");
+                      columns.Bound(c => c.TotalArea).Title("Area (in sqm)");
+                      //columns.Bound(c => c.AllotmentDate).Title("Allottment Date").Format("{0:dd-MMM-yyyy}");
+                      columns.Bound(c => c.IsSubleased).Title("Registry Type").ClientTemplate("#=RegistryType#");
+                      columns.Bound(c => c.IsThisPropertyHasDocument).ClientTemplate("#if(IsThisPropertyHasDocument){# <center><span class='glyphicon glyphicon-download'></span></center> #}else{# <center>--</center> #}#").Title(" ").Filterable(true).Width(50);
+                  })
+                  .Sortable()
+                  .Filterable()
+                  .Resizable(resize => resize.Columns(true))
+                  .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                  //.Groupable()
+                    .DataSource
+                        (
+                            dataSource => dataSource
+                                .Ajax().Model(model => model.Id(p => p.RID))
+                                .ServerOperation(true).Sort(s=>s.Add(d=>d.SectorId))
+                                .Read(read => read.Action("AdvanceSearchForAllottedProperty", "PropertyAllotment").Data("AdvanceSearchAttribute"))
+                                .PageSize(10)
+                        )
+        )
+    </div>
+</div>
+
+
+
+<script>
+
+    $('#btnAdvanceSearch').click(function () {
+        //var Rid = $('#Rid').val();
+        //var dept = $('#DepartmentId').val();
+        //var sect = $('#SectorName').val();
+        //var blok = $('#BlockName').val();
+        //var prpt = $('#PlotNumber').val();
+        //var addr = $('#Address').val();
+        ////var mName = $('#MotherName').val();
+        //var mName = null;
+        //var fName = $('#FatherOrHusbandName').val();
+        //var name = $('#ApplicantName').val();
+        //var mobile = $('#MobileNumber').val();
+        //$.ajax({
+        //    dataType: 'json',
+        //    type: 'Post',
+        //    contentType: 'application/json; charset=utf-8',
+        //    data: JSON.stringify({ rid: Rid, department: dept, sector: sect, block: blok, plot: prpt, mobileNumber: mobile, name: name, fatherName: fName, motherName: mName, address: addr }),
+        //    url: '/PropertyAllotment/AdvanceSearchForAllottedProperty',
+        //    success: function (result) {
+        $("#gridAdvanceSearch").data("kendoGrid").dataSource.query({ page: 1, pageSize: 10 });
+        $("#gridAdvanceSearch").data("kendoGrid").dataSource.read();
+        //    },
+        //    error: function (ajaxRequest, strError) {
+        //        //alert(ajaxRequest.responseText);
+        //        alertify.error("Something is wrong, try again later");
+        //    }
+        //});
+    });
+
+    $('#btnClear').click(function () {
+        $('#RegistrationId').val('');
+        $('#DepartmentId').data('kendoDropDownList').value('');
+        $('#Sector').val('');
+        $('#Block').val('');
+        $('#PlotNo').val('');
+        $('#Address').val('');
+        $('#ApplicantMaster').val('');
+        $('#Applicant').val('');
+        $('#MobileNo').val('');
+        $("#gridAdvanceSearch").data("kendoGrid").dataSource.read();
+    });
+
+    function AdvanceSearchAttribute() {
+        var ObjAdvanceSearchDetails = {
+            RegistrationId: $('#RegistrationId').val(),
+            DepartmentId: $('#DepartmentId').val(),
+            Sector: $('#Sector').val(),
+            Block: $('#Block').val(),
+            PlotNo: $('#PlotNo').val(),
+            Applicant: $('#Applicant').val(),
+            ApplicantMaster: $('#ApplicantMaster').val(),
+            MotherName: null,
+            MobileNo: $('#MobileNo').val(),
+            Address: $('#Address').val(),
+        };
+        return ObjAdvanceSearchDetails;
+    }
+
+</script>

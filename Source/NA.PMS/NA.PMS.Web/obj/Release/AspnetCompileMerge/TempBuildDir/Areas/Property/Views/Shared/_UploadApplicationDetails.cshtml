@@ -1,0 +1,96 @@
+﻿<div class="col-md-12 blnk-rw"></div>
+<div class="col-md-12 content-top-spce">
+    <div style="padding:10px 0"></div>
+    <div class="form-bx">
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Photo", htmlAttributes: new { @class = "required" })
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                <input type="file" onchange="FileSelectionPhoto()" name="photoDoc" id="photoDoc" />
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Signature", htmlAttributes: new { @class = "required" })
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                <input type="file" onchange="FileSelectionSign()" name="signDoc" id="signDoc" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Proposal Document")
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                <input type="file" onchange="FileSelectionDoc()" name="proposalDoc" id="proposalDoc" />
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function FileSelectionPhoto() {
+        var allowedFiles = ['jpg', 'jpeg'];//, 'png', 'jpg', 'jpeg'];
+        var regex = new RegExp("([a-zA-Z0-9\s_\\.\-:])+(" + allowedFiles.join('|') + ")$");
+        if (!regex.test($("#photoDoc").val().toLowerCase())) {
+            alertify.error('Invalid file type. Please select a valid .jpg file.');
+            $("#photoDoc").val('');
+            return false;
+        }
+        if (!regex.test($("#photoDoc").val().toLowerCase())) {
+            alertify.error('Invalid file type. Please select a valid .jpg file.');
+            $("#photoDoc").val('');
+            return false;
+        }
+        var fileSize = $("#photoDoc").get(0).files[0].size;
+        if (fileSize > 20000) {
+            alertify.error('File size should not be greater than 20KB.');
+            $("#photoDoc").val('');
+            return false;
+        }
+    }
+
+    function FileSelectionSign() {
+        var allowedFiles1 = ['jpg', 'jpeg'];//, 'png', 'jpg', 'jpeg'];
+        var regex = new RegExp("([a-zA-Z0-9\s_\\.\-:])+(" + allowedFiles1.join('|') + ")$");
+        if (!regex.test($("#signDoc").val().toLowerCase())) {
+            alertify.error('Invalid file type. Please select a valid .jpg file.');
+            $("#signDoc").val('');
+            return false;
+        }
+        if (!regex.test($("#signDoc").val().toLowerCase())) {
+            alertify.error('Invalid file type. Please select a valid .jpg file.');
+            $("#signDoc").val('');
+            return false;
+        }
+        var fileSize = $("#signDoc").get(0).files[0].size;
+        if (fileSize > 20000) {
+            alertify.error('File size should not be greater than 20KB.');
+            $("#signDoc").val('');
+            return false;
+        }
+    }
+
+    function FileSelectionDoc() {
+        var allowedFiles2 = ['pdf'];//, 'png', 'jpg', 'jpeg'];
+        var regex = new RegExp("([a-zA-Z0-9\s_\\.\-:])+(" + allowedFiles2.join('|') + ")$");
+        if (!regex.test($("#proposalDoc").val().toLowerCase())) {
+            alertify.error('Invalid file type. Please select a valid .pdf file.');
+            $("#proposalDoc").val('');
+            return false;
+        }
+        if (!regex.test($("#proposalDoc").val().toLowerCase())) {
+            alertify.error('Invalid file type. Please select a valid .pdf file.');
+            $("#proposalDoc").val('');
+            return false;
+        }
+        var fileSize = $("#proposalDoc").get(0).files[0].size;
+        if (fileSize > 20480000) {
+            alertify.error('File size should not be greater than 20MB.');
+            $("#proposalDoc").val('');
+            return false;
+        }
+    }
+</script>

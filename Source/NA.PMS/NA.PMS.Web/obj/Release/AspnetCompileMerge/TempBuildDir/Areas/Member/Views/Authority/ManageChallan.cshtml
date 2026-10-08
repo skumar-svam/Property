@@ -1,0 +1,388 @@
+﻿@model NA.PMS.Model.ChallanViewModel
+@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@{
+    ViewBag.Title = "Manage Challan";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .top-margin {
+        margin-top: 6px;
+        width: 80px;
+    }
+
+    .lbl-status-action {
+        cursor: pointer;
+        color: blue;
+    }
+
+    .glyphicon-print {
+        cursor: pointer;
+    }
+    #ChallanWindow{
+        display:none;
+    }
+    .hyperlink.verify{
+        font-weight: bold;
+        color: blue;
+    }
+    .hyperlink.cancel{
+        font-weight: bold;
+        color: darkred;
+    }
+    .k-grid .k-grid-header .k-header .k-link {
+      overflow: visible !important; white-space: normal !important; 
+      text-align:center;
+   }
+</style>
+
+<div class="ManageRequestServices">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Manage Challan</h1></div>
+            <div class="col-md-6 col-sm-6 col-xs-12 col-btn">
+                @Html.ActionLink("Online Payment", "OnlinePayment", new { controller = "Authority", area = "Member" }, htmlAttributes: new { target = "_blank" })
+                @Html.ActionLink("Create Challan", "BankChallan", new { controller = "Authority", area = "Member" }, htmlAttributes: new { target = "_blank" })
+                @Html.ActionLink("Property Challan", "Challan", new { controller = "Authority", area = "Member" }, htmlAttributes: new { target = "_blank" })
+                @Html.ActionLink("Verify Challan", "ChallanVerification", new { controller = "Authority", area = "Member" }, htmlAttributes: new { target = "_blank" })
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12" style="border-left:1px solid #abc;border-right:1px solid #abc;">
+        <div class="row form-group">
+            <div class="col-md-2 col-sm-6 col-xs-12 pad-left">
+                @Html.Label("Department")
+                @(Html.Kendo().DropDownListFor(model => model.DepartmentId)
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel(" -- Select --")
+                    .DataSource(source => source.Read(read => read.Action("GetDepartmentList", "ServiceRequest")))
+                    .Events(e => e.Change("ChangeDepartmentEvent"))
+                   .HtmlAttributes(new { style = "width:95%;float:right;", @class = "input-disabled" })
+                )
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12 pad-left">
+                @Html.Label("Start Date")
+                @(Html.Kendo().DatePickerFor(model => model.StartDate).Events(e => e.Change("ChangeDepartmentEvent")).HtmlAttributes(new { style = "width:95%;float:right;" }))
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12 pad-left">
+                @Html.Label("End Date")
+                @(Html.Kendo().DatePickerFor(model => model.EndDate).Events(e => e.Change("ChangeDepartmentEvent")).HtmlAttributes(new { style = "width:95%;float:right;" }))
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12 pad-left">
+                @Html.Label("Status")
+                @(Html.Kendo().DropDownListFor(model => model.StatusId)
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .OptionLabel("--select--")
+                    .BindTo(new List<SelectListItem>() {
+                          new SelectListItem() { Text = "Verified", Value = "1" },
+                          new SelectListItem() { Text = "Not Verified", Value = "2" },
+                          new SelectListItem() { Text = "Canceled", Value = "3" }
+                      })
+                    .HtmlAttributes(new { style = "width:95%;float:right;" })
+                    .Events(e => e.Change("ChangeDepartmentEvent"))
+                )
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12 pad-left">
+                @Html.Label("Bank")
+                @(Html.Kendo().DropDownListFor(model => model.BankId)
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel("---select---")
+                    .Filter("contains")
+                    .DataSource(source =>
+                    {
+                        source.Custom().ServerFiltering(true).ServerPaging(true).Type("aspnetmvc-ajax")
+                        .Transport(transport => transport.Read("GetBankListAsDataSource", "Authority", new { area = "Member" }))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(100);
+                    })
+                    .Events(model => model.Change("ChangeDepartmentEvent"))
+                    .HtmlAttributes(new { style = "width: 95%; float:right;" })
+                )
+            </div>
+
+            <div class="col-md-2 col-sm-6 col-xs-12 pad-left" style="text-align:right">
+                <label style="width:100%;"> </label>
+                <button type="button" id="btnSearch" class="k-button top-margin" value="Search">Search</button>
+                <button type="button" id="btnClear" class="k-button top-margin" value="Clear">Clear</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.ChallanViewModel>()
+                .Name("GridGeneratedChallan")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.Id).Hidden();
+                    columns.Bound(c => c.DepartmentId).Hidden();
+                    columns.Bound(c => c.ChallanContent).Hidden();
+                    //columns.Bound(c => c.ChallanId).Title("Challan Id").Width(130);//.ClientTemplate("<a href='" + "/Member/ServiceRequest/RequestDetail/#= Id #" + "' target='_blank'>#=Id#</a>");
+                    columns.Bound(c => c.RegistrationId).Title("RId").Width(130).Sortable(false);//.ClientTemplate("<label class='hyperlinkcss' onclick='javascript:RedirectForServices(#=ServiceId#, #=RId#)'>#=RId#</label>");
+                    columns.Bound(c => c.Department).Title("Department").Width(130).Sortable(false);
+                    columns.Bound(c => c.PropertyNo).Title("Property").Width(130).Sortable(false);
+                    columns.Bound(c => c.Applicant).Title("Applicant").Sortable(false);
+                    columns.Bound(c => c.MobileNo).Title("Mobile No").Width(130).Sortable(false);
+                    columns.Bound(c => c.TotalAmount).Title("Total Amount (<span class='fa fa-rupee'></span>)").Width(120).Sortable(false);
+                    columns.Bound(c => c.GeneratedDate).Title("Date").Width(130).Format("{0:dd-MMM-yyyy}").Sortable(false);
+                    columns.Bound(c => c.ChallanId).Title("Challan").Width(110).Sortable(false).ClientTemplate("<label class='hyperlinkcss' onclick='javascript:DisplayChallan(this)'>#=ChallanId#</label>");
+                    //columns.Bound(c => c.IsVerified).Title("Status").Width(120).ClientTemplate("#if(IsActive == true){ if(IsVerified==true){#<label>Verified</label>#}else{#<label class='hyperlink verify' onclick='javascript:VerifyChallan(#=Id#)'>Verify</label>&nbsp;&nbsp;<label class='hyperlink cancel' onclick='javascript:CancelChallan(#=Id#)'>Cancel</label>#}}else{#<label>Cancelled</label>#}#");
+                    columns.Bound(c => c.ChallanStatus).Title("Status").Width(120).Sortable(false).ClientTemplate("#if(IsActive == true){ if(IsVerified==true){#<label>Verified</label>#}else{if(IsBankUserId==true){#<label class='hyperlink verify' onclick='javascript:VerifyChallan(#=Id#)'>Verify</label>#}else{ #<label class='hyperlink verify' onclick='javascript:VerifyChallan(#=Id#)'>Verify</label>&nbsp;&nbsp;<label class='hyperlink cancel' onclick='javascript:CancelChallan(#=Id#)'>Cancel</label>#}}}else{#<label>Cancelled</label>#}#");
+                    //columns.Bound(c => c.ChallanContent).Hidden();
+                    columns.Bound(c => c.BankName).Title("Bank").Width(110).Sortable(false);
+                    //columns.Bound(c => c.Id).Title("Action").Width(110).ClientTemplate("#if(IsActive == true){ if(IsVerified==true){#<label>Verified</label>#}else{#<label class='hyperlink verify' onclick='javascript:PayOnlineChallan(this)'>Pay Online</label>#}}else{#<label>Cancelled</label>#}#");
+                    
+                })
+                .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .ClientDetailTemplateId("template")
+                .AutoBind(true)
+                .DataSource(dataSource => dataSource
+                    .Ajax().ServerOperation(true)
+                    .Model(model => model.Id(c => c.Id))                    
+                    .Read(read => read.Action("GetGeneratedChallanList", "Authority", new { area = "Member" }).Data("FilterSearchParameter")).PageSize(10)
+                    .Sort(s => s.Add(r => r.Id).Descending())
+                )
+        )
+    </div>
+
+</div>
+
+
+
+<div class="col-md-12 popup-window" id="ChallanWindow" style="height:470px;background:url(/Content/Images/boxed-bg.jpg) repeat; overflow:auto;">
+    <div class="row form-group" style="overflow:auto">
+        <style>
+            .td-amount {
+                padding-right: 30px;
+            }
+
+            #divChallanBody2 {
+                padding: 5px;
+            }
+
+            #authorityChallan {
+                border: 1px solid black;
+                padding: 5px;
+            }
+        </style>
+        <div id="divChallanBody2"></div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-12" style="text-align:center">
+            <button type="button" class="k-button" onclick="PrintChallan();" style="width:100px;">Print</button>
+            <button type="button" class="k-button" onclick="CloseChallan();" style="width:100px;">Close</button>
+        </div>
+    </div>
+</div>
+
+
+<div id="divPrintChallan" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="padding-top:40px;">
+    <div class="modal-dialog" style="width: 60%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">  <b>Challan</b></h4>
+            </div>
+            <div class="modal-body" style="overflow:auto; height:400px;">
+                <style>
+                    .tr-no, .i-no{
+                        padding-left:20px;
+                    }
+                    .td-amount {
+                        padding-right: 30px;
+                    }
+                </style>
+                <div id="divChallanBody"></div>
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="submit" id="btnPrintDiv" class="k-button" data-dismiss="modal" onclick="PrintChallan();">Print</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script id="template" type="text/kendo-tmpl">
+    @(Html.Kendo().Grid<NA.PMS.Model.ChallanViewModel>()
+            .Name("grid_#=Id#") // template expression, to be evaluated in the master context
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Hidden(true);
+                columns.Bound(o => o.AccountHead);
+                columns.Bound(o => o.AccountSubHead);//.ClientTemplate("<span>#= ServiceName #<br/><small ><b>Receiving Date:</b>&nbsp;#= CreatedDate#</small></span>");
+                columns.Bound(o => o.Amount);
+                //columns.Bound(o => o.ChallanContent).Width(130).Title("Update Status").ClientTemplate("<label class='lbl-status-action' onclick='javascript:OpenStatusWindow(this)'>#=Status#</label>");
+                //columns.Bound(o => o.RequestDate).Format("{0:dd/MM/yyyy}").Width(120);
+            })
+            .DataSource(dataSource => dataSource
+                .Ajax()
+                .PageSize(10)
+               .Read(read => read.Action("GetGeneratedChallanAmountList", "Authority", new { challanId = "#=Id#" }))
+            )
+            .ToClientTemplate()
+    )
+</script>
+<script>
+    function dataBound() {
+        this.expandRow(this.tbody.find("tr.k-master-row").first());
+    }
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.popup-window').kendoWindow({
+            modal: true,
+            title: "Noida Authority Challan",
+            actions: false, // [ "Minimize", "Maximize"],
+            visible: false,
+            width: "70%"
+        });
+
+        $('#btnSearch').click(function () {
+            ChangeDepartmentEvent();
+        });
+
+        $('#btnClear').click(function () {
+            $('#DepartmentId').data("kendoDropDownList").value("");
+            $('#StartDate').data("kendoDatePicker").value("");
+            $('#EndDate').data("kendoDatePicker").value("");
+            $("#GridGeneratedChallan").data("kendoGrid").dataSource.read();
+        });
+
+    })
+
+    function FilterSearchParameter() {
+        return {
+            DepartmentId: $('#DepartmentId').val(),
+            StartDate: $('#StartDate').val(),
+            EndDate: $('#EndDate').val(),
+            StatusId: $('#StatusId').val(),
+            BankId: $('#BankId').val()
+        };
+    }
+    function ChangeDepartmentEvent() {
+        $("#GridGeneratedChallan").data("kendoGrid").dataSource.read();
+    }
+
+    function PayOnlineChallan(cell){
+        var tr = $(cell).parent().parent();
+        var id = $(tr).children("td:eq(1)").text();
+        var rid = $(tr).children("td:eq(3)").text();
+        window.location.href = "/Online/Payment/Index?rid=" + rid + "&id=" + id + "&actionflag=Challan";
+    }
+
+    function VerifyChallan(row) {
+        var flag = confirm("Are You sure to verify this challan");
+        if (flag) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ Id: row, ActionType: "Verify" }),
+                url: '/Member/Authority/VerifyChallanDetailById',
+                success: function (result) {
+                    if (result == '@ReturnType.Updated') {
+                        alertify.success("Challan verfied successfully.");
+                        $('#GridGeneratedChallan').data('kendoGrid').dataSource.read();
+                    }
+                    else if (result == '@ReturnType.Exist') {
+                        alertify.success("Challan already verfied.");
+                        $('#GridGeneratedChallan').data('kendoGrid').dataSource.read();
+                    }
+                    else if (result == '@ReturnType.Cancelled') {
+                        alertify.error("Challan already Cancelled.");
+                        $('#GridGeneratedChallan').data('kendoGrid').dataSource.read();
+                    }
+                    else if (result == '@ReturnType.None') {
+                        alertify.error("Provider failed to update, try again later.");
+                        $('#GridGeneratedChallan').data('kendoGrid').dataSource.read();
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    alertify.error("Network Error, please try again later.");
+                }
+            });
+        }     
+    }
+
+
+    function CancelChallan(row) {
+        var flag = confirm("Are You sure to cancel this challan");
+        if (flag) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ Id: row, ActionType: "Cancel" }),
+                url: '/Member/Authority/VerifyChallanDetailById',
+                success: function (result) {
+                    if (result == '@ReturnType.Cancelled') {
+                        alertify.success("Challan cancelled successfully.");
+                        $('#GridGeneratedChallan').data('kendoGrid').dataSource.read();
+                    }
+                    else if (result == '@ReturnType.Verified') {
+                        alertify.success("Challan already verfied.");
+                        $('#GridGeneratedChallan').data('kendoGrid').dataSource.read();
+                    }
+                    else if (result == '@ReturnType.None') {
+                        alertify.error("Provider failed to update, try again later.");
+                        $('#GridGeneratedChallan').data('kendoGrid').dataSource.read();
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    alertify.error("Network Error, please try again later.");
+                }
+            });
+        }
+    }
+
+
+    function DisplayChallan(row) {
+        var tr = $(row).parent().parent();
+        var content = $(tr).children("td:eq(3)").text();
+        $("#divChallanBody2").html(content);
+        //$("#divPrintChallan").modal('show');
+
+        $(".popup-window").data("kendoWindow").open();
+        $(".popup-window").data("kendoWindow").center();
+    }
+
+    function CloseChallan() {
+        $(".popup-window").data("kendoWindow").close();
+    }
+
+    function PrintChallan() {
+        var contents = document.getElementById("divChallanBody2").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write(' <style>.td-amount {padding-right: 30px;}#divChallanBody2 {padding: 5px;font-size:10pt;}#authorityChallan {border: 1px solid black;padding: 5px;}</style>');
+        //frameDoc.document.write('<style>.row-btn{display:none;}</style>');
+        frameDoc.document.write('</head><body style="font-size:10pt;">');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        CloseChallan();
+        return false;
+    }
+
+</script>

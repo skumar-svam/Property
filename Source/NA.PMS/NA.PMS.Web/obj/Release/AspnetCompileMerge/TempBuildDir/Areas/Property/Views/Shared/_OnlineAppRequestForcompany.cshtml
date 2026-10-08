@@ -1,0 +1,97 @@
+﻿@model NA.PMS.Model.OnlineApplicationFormModel
+@using Kendo.Mvc.UI;
+@using NA.PMS.Common
+
+<div id="OnlineAppRequestForcompany">
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Company", new { @class = "required" })
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(model => model.CompanyName, new { @class = "form-control", @maxlength = "100", @onchange = "GetCompanyName();" })
+            @Html.HiddenFor(model => model.IsCompany)
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Company Type", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DropDownListFor(model => model.CompanySelType)
+                                   .Name("CompanySelType")
+                                  .DataTextField("text")
+                                  .DataValueField("id")
+                                    .OptionLabel(" -- Please Select --")                  
+                                    .DataSource(source => source.Read(read => read.Action("GetCompanyType", "Allotment")))
+                                  .Enable(true)
+                                  .AutoBind(true)
+                                  .Filter("contains")
+                                  .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" })
+            )
+            @Html.ValidationMessageFor(model => model.SchemeId, "", new { @class = "text-danger" })
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Signing Authority", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(model => model.SigningAuthority, new { @class = "form-control", @maxlength = "150" })
+            @Html.ValidationMessageFor(model => model.SigningAuthority, "", new { @class = "text-danger" })
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">    
+            @Html.Label("Registered Office", htmlAttributes: new { @class = "required" })        
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">       
+            @Html.TextAreaFor(model => model.RegisteredOffice, new { @class = "form-control", @maxlength = "150" })   
+        </div>
+    </div>       
+
+   
+</div>
+
+<script type="text/javascript">
+    //function OnAreaChange() {
+    //    if ($("#Area").val() == "") {
+    //        $('#ApplicationFee').val("");
+    //        $('#ProcessingFee').val("");
+    //        $('#earnestMoney').val("");
+    //        $('#Amount').val("");
+    //    }
+    //    else {
+    //        var id = $("#SchemeId").val();
+    //        $.ajax({
+    //            dataType: 'json',
+    //            type: 'Post',
+    //            contentType: 'application/json; charset=utf-8',
+    //            data: JSON.stringify({ id: id }),
+    //            url: "/Allotment/GetAreaDetails",
+    //            success: function (data) {
+    //                if (data != null) {
+    //                    $('#ApplicationFee').val(data.ApplicationFee);
+    //                    $('#ProcessingFee').val(data.ProcessingFee);
+    //                    CalculateAmount();
+    //                    GetEarneshMoney();
+    //                }
+    //                else {
+    //                    $('#ApplicationFee').val("");
+    //                    $('#ProcessingFee').val("");
+    //                    CalculateAmount();
+    //                }
+    //            },
+    //            error: function (objAjaxRequest, strError) {
+    //                var respText = objAjaxRequest.responseText;
+    //                //alert("error");
+    //            }
+    //        });
+    //    }
+    //}
+
+    function ClearCompanyFields() {
+        $('#CompanyName').val('');
+        $('#IsCompany').val('');
+        $('#SigningAuthority').val('');
+        $('#RegisteredOffice').val('');
+        $('#CompanySelType').data("kendoDropDownList").value('');
+    }
+
+</script>

@@ -1,0 +1,57 @@
+﻿@model NA.PMS.Model.MortgageModel
+@using Kendo.Mvc.UI;
+@{
+    ViewBag.Title = "ApprovalMortgage";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .k-grid-content{
+        overflow-y:hidden;
+    }
+</style>
+
+<div class="ApprovalMortgage">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Approval Mortgage</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                @*<a href="#" id="btnAddApplication" class="" onclick="javascript:AddApplication(event);">Add Application</a>*@
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.MortgageModel>()
+                      .Name("gridApprovalMortgage")
+              .Columns(columns =>
+              {
+                  columns.Bound(c => c.RequestNo).Width(150).ClientTemplate("<a href='" + "/Property/PropertyRegistration/MortgageRequestApproval/#= EncodedParameter #'>#=RequestNo#</a>").Width(80).Filterable(false);
+                  columns.Bound(c => c.RID).Title("Registration Id").Width(150);
+                  columns.Bound(c => c.SchemeName).Title("Scheme Name");
+                  columns.Bound(c => c.DepartmentName).Title("Department Name");
+                  columns.Bound(c => c.StatusName).Title("Status");
+                  columns.Bound(c => c.MortgageDate).Title("Request Date").Format("{0:dd/MM/yyyy}");
+                  columns.Bound(c => c.ApplicantName).Title("Applicant's Name");
+                  columns.Bound(c => c.MortgageType).Title("Mortgage Type");
+              })
+              .Sortable()
+              .Filterable()
+              .Resizable(resize => resize.Columns(true))
+              .Groupable()
+              .Pageable
+              (
+                pageable => pageable
+                .Enabled(true)
+                .Refresh(true)
+                .PageSizes(true)
+              )
+              .DataSource
+              (
+                dataSource => dataSource
+                .Ajax().Model(model => model.Id(p => p.RequestNo))
+                                .ServerOperation(true).Sort(sort => sort.Add("RequestNo").Descending()).Read(read => read.Action("GetAllMortgageByApprover", "PropertyRegistration"))
+                .PageSize(10)
+              )
+        )
+    </div>
+</div>

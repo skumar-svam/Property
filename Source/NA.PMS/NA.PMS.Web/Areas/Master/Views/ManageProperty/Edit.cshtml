@@ -1,0 +1,698 @@
+﻿@model NA.PMS.Model.PropertyModel
+@using Kendo.Mvc.UI
+@using NA.PMS.Common
+
+@{
+    ViewBag.Title = "Edit Property";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (Html.BeginForm("SavePropertyDetail", "ManageProperty", FormMethod.Post, new { enctype = "multipart/form-data", id = "propertyform" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Edit Property</h1></div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+                </div>
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="col-md-12 content-top-spce">
+                <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                    <h2 class="blck-heading">Property Detail</h2>
+                    <div class="form-bx">
+                        <div>
+                            @Html.HiddenFor(m => m.refId)
+                            @Html.HiddenFor(m => m.PropertyNo)
+                            @Html.HiddenFor(m => m.PropertyId)
+                            @Html.HiddenFor(m => m.RegistrationId)
+                            @Html.HiddenFor(m => m.LandRatePerSqMet)
+                            @Html.HiddenFor(m => m.allotementMoney)
+                            @Html.HiddenFor(m => m.EarnestMoney)
+                            @Html.HiddenFor(m => m.IsLocationCharged, htmlAttributes: new { @id="hdnIsLocationCharged"})
+                            @Html.HiddenFor(m => m.locationCharges)
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">                              
+                                @Html.Label("Scheme Name", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(m => m.schemeId)
+                                  .Filter("contains")
+                                  .DataTextField("Text")
+                                  .DataValueField("Value")
+                                  .BindTo(Model.schemeCollection)
+                                  .HtmlAttributes(new { style = "width:100%" })
+                                )
+                                @Html.ValidationMessageFor(model => model.schemeId, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Department", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(m => m.departmentId)
+                                    .Filter("contains")
+                                    .DataTextField("Text")
+                                    .DataValueField("Value")
+                                    .OptionLabel("---Select---")
+                                    .Events(events => { events.Change("SchemeSelection"); })
+                                    .DataSource(source =>source.Read(read => read.Action("GetDepartment", "ManageProperty").Data("filterSchemes")).ServerFiltering(true))
+                                    .Enable(true)
+                                    .AutoBind(false)
+                                    .CascadeFrom("schemeId")
+                                    .HtmlAttributes(new { style = "width:100%" })
+                                )
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Property Type", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(m => m.propertyTypeId)
+                                  .Filter("contains")
+                                  .DataTextField("Text")
+                                  .DataValueField("Value")
+                                  .OptionLabel("---Select---")
+                                  .Events(events => { events.Change("SchemeSelection"); })
+                                  .DataSource(source =>source.Read(read => read.Action("GetPropertyTypeBySchemeAndDeptId", "ManageProperty").Data("filterSectorValues")).ServerFiltering(true))
+                                  .HtmlAttributes(new { style = "width: 100%" })
+                                  .CascadeFrom("departmentId")
+                                  .Enable(true)
+                                  .AutoBind(false)
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Sector", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(m => m.sectorId)
+                                  .Filter("contains")
+                                  .DataTextField("Text")
+                                  .DataValueField("Value")
+                                  .OptionLabel("-Select-")
+                                  .Events(events => { events.Change("SchemeSelection"); })
+                                  .DataSource(source =>
+                                    {
+                                        source.Read(read => read.Action("GetSectorBySchemeAndDeptId", "ManageProperty").Data("filterSectorValuesByPropId"))
+                                        .ServerFiltering(true);
+                                    })
+                                .HtmlAttributes(new { style = "width:100%" })
+                                .CascadeFrom("propertyTypeId")
+                                .Enable(true)
+                                .AutoBind(false)
+                                )
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Block", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(m => m.blockId)
+                                  .Filter("contains")
+                                  .DataTextField("Text")
+                                  .DataValueField("Value")
+                                  .OptionLabel("---Select---")
+                                  .Events(events => { events.Change("SchemeSelection"); })
+                                  .DataSource(source =>
+                                    {
+                                        source.Read(read =>read.Action("GetBlockBySchemeAndDeptId", "ManageProperty").Data("filterBlockBySector"))
+                                        .ServerFiltering(true);
+                                    })
+                                 .HtmlAttributes(new { style = "width: 100%" })
+                                 .CascadeFrom("sectorId")
+                                 .Enable(true)
+                                 .AutoBind(false)
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Property / Plot No", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.plotProperty, new { @class = "form-control", @maxlength = "10", onkeypress = "return ValidateSpace(event);" })
+                                @(Html.ValidationMessageFor(m => m.plotProperty))
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                               @Html.Label("Floor/Area Range", new { @id = "lblFloor", @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(m => m.floorId)
+                                  .Filter("contains")
+                                  .DataTextField("Text")
+                                  .DataValueField("Value")
+                                  .OptionLabel("---Select---")
+                                  .Events(events => { events.Change("SchemeSelection"); })
+                                  .DataSource(source =>source.Read(read => read.Action("GetFloorBySchemeAndDeptId", "ManageProperty").Data("filterFloor")).ServerFiltering(true))
+                                  .HtmlAttributes(new { style = "width: 100%" })
+                                  .Events(events => { events.Change("CheckTotalAreaRange"); })
+                                  .CascadeFrom("blockId")
+                                  .Enable(true)
+                                  .AutoBind(false)
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Total Area (sqm)", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().NumericTextBoxFor(m => m.totalArea)
+                                    .Min(0)
+                                    .Max(9999999999999999)
+                                    .Spinners(false).Step(0)
+                                    .Enable(true)
+                                    .HtmlAttributes(new { style = "width: 100%", @maxlength = "13", @class = "text-right", @onchange = "CheckTotalAreaRange();" })
+                                )
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Covered Area (sqm)", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().NumericTextBoxFor(m => m.coveredArea)
+                                    .Min(0)
+                                    .Max(99999999999999)
+                                    .Spinners(false).Step(0)
+                                    .Enable(true)
+                                    .HtmlAttributes(new { style = "width: 100%", @maxlength = "14", @class = "text-right" })
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Actual Area (sqm)", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().NumericTextBoxFor(m => m.actualArea)
+                                    .Min(0)
+                                    .Max(99999999999999)
+                                    .Spinners(false).Step(0)
+                                    .Enable(true)
+                                    .HtmlAttributes(new { style = "width: 100%", @maxlength = "14", @class = "text-right" })
+                                )
+                             </div>
+                        </div>
+                        <div class="row row-housing">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Property Cost", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().NumericTextBoxFor(m => m.PropertyCost)
+                                    .Min(0)
+                                    .Max(99999999999999)
+                                    .Spinners(false).Step(0)
+                                    .Enable(true)
+                                    .HtmlAttributes(new { style = "width: 100%", @maxlength = "14", @class = "text-right", @onchange = "CalculateTotalPropertyCost();" })
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Civil Cost", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().NumericTextBoxFor(m => m.civilCost)
+                                    .Min(0)
+                                    .Max(99999999999999)
+                                    .Spinners(false).Step(0)
+                                    .Enable(true)
+                                    .HtmlAttributes(new { style = "width: 100%", @maxlength = "14", @class = "text-right", @onchange = "CalculateTotalPropertyCost();" })
+                                )
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label>Total Property Cost</label><i class="fa fa-inr" aria-hidden="true"></i>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.TotalPropertyCost, new { @class = "form-control text-right", @readonly = "readonly" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Registry", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(m => m.RegistryName)
+                                    .Filter("contains")
+                                    .DataTextField("text")
+                                    .DataValueField("text")
+                                    .OptionLabel("---Select---")
+                                    .DataSource(source =>source.Read(read =>read.Action("GetRegistry", "ManageProperty")))                                      
+                                    .HtmlAttributes(new { @class = "schemeForms", style = "width: 100%" })
+                                )
+                            </div>
+                        </div>
+
+                        <div class="row" id="dvLandRate">
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-rate form-group">
+                                <label>Land Rate (sqm)</label>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-rate form-group">
+                                @(Html.Kendo().NumericTextBoxFor(m => m.LandRate)
+                                    .Min(0)
+                                    .Max(99999999999999)
+                                    .Spinners(false).Step(0)
+                                    .Enable(true)
+                                    .Events(e => e.Change("CalculateTotalPropertyCost"))
+                                    .HtmlAttributes(new { style = "width: 100%", @maxlength = "14", @class = "text-right" })
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label>Parent Property Id</label>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.ParentPropertyId, new { @class = "form-control text-right", @placeholder= "Parent PID" })
+                            </div>
+                        </div>
+
+                        <div class="row location-charge charge-option form-group">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Location Charges")
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label>@Html.RadioButtonFor(m => m.IsLocationCharged, "Yes") Yes</label>
+                                <label>@Html.RadioButtonFor(m => m.IsLocationCharged, "No") No</label>
+                            </div>
+                        </div>
+                        <div class="row row-charge location-charge form-group" id="dvLocationCharge">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Location Type", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(m => m.locationId)
+                                    .Filter("contains")
+                                    .DataTextField("Text")
+                                    .DataValueField("Value")
+                                    .OptionLabel("-Select-")
+                                    .BindTo(Model.locationTypeCollection)
+                                    .HtmlAttributes(new { style = "width:100%" })
+                                )
+                            </div>
+
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Charges (Per Sq Mtr)", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().NumericTextBoxFor(m => m.charges)
+                                    .Min(0)
+                                    .Max(999999999999999)
+                                    .Spinners(false).Step(0)
+                                    .Enable(true)
+                                    .HtmlAttributes(new { style = "width: 100%", @maxlength = "16", @class = "text-right", @onchange = "TotalAreaChange();" })
+                                )
+                            </div>
+                        </div>
+                        <div class="row" id="dvProject">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label>Project</label></div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(m => m.ProjectId)
+                                .Filter("contains")
+                                .DataTextField("Text")
+                                .DataValueField("Id")
+                                .OptionLabel("-Select-")
+                                .DataSource(source => source.Read(read => read.Action("GetProjectsByPRid", "ManageProperty").Data("FilterParentPropertyId")).ServerFiltering(true))
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                .Enable(true)
+                                .AutoBind(true)
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group"></div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="box-button text-center">
+                    <input type="button" id="btnCancel" value="Cancel" class="btn btn-default" />
+                    <input value="Update" type="button" id="btnSubmit" class="btn btn-add" />
+
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<script type="text/javascript">
+    var spaceKeys = new Array();
+    spaceKeys.push(8); //Backspace
+    function ValidateSpace(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = (keyCode != 32);
+        if (ret == false)
+            return false;
+    }
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1 || keyCode == 46);
+        if (ret == false)
+            return false;
+    }
+
+    $(document).ready(function () {
+        var department = $("#departmentId").val();
+
+        if (department == '@NADepartment.GroupHousing') {
+            $("#dvProject").show();  //Show in case of group housing only (Project)
+        }
+        else {
+            $("#dvProject").hide();
+        }
+
+        if (department == '@NADepartment.Housing') {
+            $("#locationId").data("kendoDropDownList").enable(false);
+            $("#locationId").data("kendoDropDownList").value("");
+            $("#charges").data("kendoNumericTextBox").enable(false);
+            $("#charges").data("kendoNumericTextBox").value('');
+
+            $('.location-charge').css("display", "none");
+            $('.col-rate').css("display", "none");
+            $('.row-housing').show();
+        }
+        else {
+            $("#locationId").data("kendoDropDownList").enable(true);
+            $("#charges").data("kendoNumericTextBox").enable(true);
+
+            $('.location-charge').show();
+            $('.col-rate').show();
+            $('.row-housing').css("display", "none");
+        }
+
+        $('#departmentId').change(function () {
+            if ($('#departmentId').val() == '') {
+                $('.row-housing').css("display", "none");
+                $('.col-rate').css("display", "none");
+                $('.location-charge').css("display", "none");
+            }
+            else if ($('#departmentId').val() == '@NADepartment.Housing') {
+                    $('.charge-option').css("display", "none");
+                    $('.row-charge').css("display", "none");
+                    $('.col-rate').css("display", "none");
+                    $('.row-housing').show();
+            }
+            else {
+                $('.charge-option').show();
+                $('.row-charge').show();
+                $('.col-rate').show();
+                $('.row-housing').css("display", "none");
+            }
+        });
+
+        if ($('#ParentPropertyId').val() != "") {
+            $('#ParentPropertyId').attr("readonly","readonly");
+        }
+        else {
+            $('#ParentPropertyId').attr("readonly", false);
+        }
+
+        if ($("#hdnIsLocationCharged").val() == 'True') {
+            $("input[type='radio'][name='IsLocationCharged'][value='Yes']").attr("checked",true);
+            ToggleLocationCharges();
+        }
+        else {
+            $("input[type='radio'][name='IsLocationCharged'][value='No']").attr("checked",true);
+            ToggleLocationCharges();
+        }
+
+        $("input[type='radio'][name='IsLocationCharged']").on('change', function () {
+            ToggleLocationCharges();
+        });
+
+        $('#btnSubmit').click(function () {
+            UpdatePropertyDetail();
+        });
+
+        $("#btnCancel").click(function () {
+            window.location.href = '@Url.Action("Manage", "ManageProperty")';
+        });
+    });
+
+
+    $(function () {
+        $("form").kendoValidator();
+    });
+
+    function filterSchemes() {
+        return {
+            schemeId: $("#schemeId").val()
+        };
+    }
+    function filterSectorValues() {
+        return {
+            schemeId: $("#schemeId").val(),
+            departmentId: $("#departmentId").val()
+        };
+    }
+    function filterSectorValuesByPropId() {
+        return {
+            schemeId: $("#schemeId").val(),
+            departmentId: $("#departmentId").val(),
+            propTypeId: $("#propertyTypeId").val()
+        };
+    }
+    function filterBlockBySector() {
+        return {
+            schemeId: $("#schemeId").val(),
+            departmentId: $("#departmentId").val(),
+            propTypeId: $("#propertyTypeId").val(),
+            sectorId: $("#sectorId").val()
+        };
+    }
+    function filterFloor() {
+        return {
+            schemeId: $("#schemeId").val(),
+            departmentId: $("#departmentId").val(),
+            propTypeId: $("#propertyTypeId").val(),
+            sectorId: $("#sectorId").val(),
+            blockId: $("#blockId").val()
+        };
+    }
+
+    function FilterParentPropertyId() {
+        return { ParentPropertyId: $("#ParentPropertyId").val() == "" ? 0 : $("#ParentPropertyId").val() };
+    }
+
+    function CheckTotalAreaRange(event) {
+        if ($("#totalArea").val() != '') {
+            TotalAreaChange();
+        }
+        SchemeSelection(event)
+    }
+
+
+    function UpdatePropertyDetail() {
+        if ($("#plotProperty").val().trim() == '') {
+            alert("Please enter Property/Plot No Number");
+            $("#plotProperty").val('');
+            return false;
+        }
+        else {
+            if (!isNaN(parseFloat($("#plotProperty").val().trim()))) {
+                if ((parseFloat($("#plotProperty").val().trim())) == 0) {
+                    alertify.error("Please enter Property/Plot No other than 0");
+                    $("#plotProperty").val('');
+                    return false;
+                }
+            }
+        }
+        var validateStatus = ValidateForm();
+        //CheckAreaRange();
+        if (validateStatus != false) {
+            //document.getElementById("btnSubmit").disabled = true;
+            $.ajax({
+                url: '@(Url.Action("CheckDuplicateProperty", "ManageProperty"))',
+                type: 'POST',
+                dataType: 'json',
+                data: { secotrId: $("#sectorId").val(), blockId: $("#blockId").val(), plotNo: $("#plotProperty").val(), refId: $("#refId").val() },
+                success: function (result) {
+                    if (result == true) {
+                        alertify.error("Property already exists");
+                        //document.getElementById("btnSubmit").disabled = false;
+                        return false;
+                    }
+                    else {
+                        $('#propertyform').submit();
+                    }
+                }
+            });
+        }
+        else {
+            //document.getElementById("btnSubmit").disabled = false;
+        }
+    }
+
+    function ToggleLocationCharges() {
+        var isLocationCharged = $("input[type='radio'][name='IsLocationCharged']:checked").val();
+        $('#locationCharges').val(isLocationCharged);
+        if (isLocationCharged == "Yes") {
+            $("#hdnIsLocationCharged").val(true);
+            $("#locationId").data("kendoDropDownList").enable(true);
+            $("#charges").data("kendoNumericTextBox").enable(true);
+
+            $("#charges").attr("data-val-required", "Charges is required");
+            $("#locationId").attr("data-val-required", "Location is required");
+            $("#charges").attr("data-val-regex", "Charges must be decimal.");
+            $("#charges").attr("data-val-range", "Charges must be decimal(15,2) and greater than 0");
+            $('.row-charge').show();
+        }
+        else {
+            $("#hdnIsLocationCharged").val(false);
+            $("#locationId").data("kendoDropDownList").enable(false);
+            $("#locationId").data("kendoDropDownList").value('');
+            $("#charges").data("kendoNumericTextBox").enable(false);
+            $("#charges").data("kendoNumericTextBox").value('');
+
+            $("#charges").removeAttr("data-val-required");
+            $("#locationId").removeAttr("data-val-required");
+            $("#charges").removeAttr("data-val-regex");
+            $("#charges").removeAttr("data-val-range");
+
+            TotalAreaChange();
+
+            $('.row-charge').css("display", "none");
+        }
+    }
+
+
+    function CalculateTotalPropertyCost() {
+        if ($('#departmentId').val() != "") {
+            if ($('#departmentId').val() == '@NADepartment.Housing') {
+                //$("#LandRate").data("kendoNumericTextBox").value('');
+                var propertycost = $('#PropertyCost').val();
+                var civilcost = $('#civilCost').val();
+                propertycost = (isNaN(Math.round(parseFloat(propertycost).toFixed(2)))) ? 0 : (parseFloat(propertycost).toFixed(2))
+                civilcost = (isNaN(Math.round(parseFloat(civilcost).toFixed(2)))) ? 0 : (parseFloat(civilcost).toFixed(2));
+
+                var totalcost = parseFloat(propertycost) + parseFloat(civilcost);
+                totalcost = (isNaN(Math.round(parseFloat(totalcost).toFixed(2)))) ? '' : Math.round(parseFloat(totalcost).toFixed(2));
+                $("#TotalPropertyCost").val(totalcost);
+            }
+            else {
+                //$('#civilCost').data("kendoNumericTextBox").value('');
+                var totalcost;
+                var landrate = $("#LandRate").val() == "" ? 0 : $("#LandRate").val();
+                var totalarea = $("#totalArea").val() == "" ? 0 : $("#totalArea").val();
+                if ($("#charges").val() != '') {
+                    landrate = (parseFloat(landrate).toFixed(2));
+                    var charges = (parseFloat($("#charges").val()).toFixed(2));
+                    var totalCharges = parseFloat(landrate) + parseFloat(charges);
+                    totalcost = (isNaN(Math.round(parseFloat(totalCharges * parseFloat(totalarea).toFixed(2)).toFixed(2)))) ? '' : Math.round(parseFloat(totalCharges * parseFloat(totalarea).toFixed(2)).toFixed(2));
+                }
+                else
+                    totalcost = (isNaN(Math.round(parseFloat(landrate * parseFloat(totalarea).toFixed(2)).toFixed(2)))) ? '' : Math.round(parseFloat(landrate * parseFloat(totalarea).toFixed(2)).toFixed(2));
+                $("#TotalPropertyCost").val(totalcost);
+            }
+        }
+        else {
+
+        }
+    }
+
+    function SchemeSelection(event) {
+        var schemeId = $("#schemeId").val();
+        var departmentId = $("#departmentId").val();
+        var floorId = $("#floorId").val();
+        var blockId = $("#blockId").val();
+        var sectorId = $("#sectorId").val();
+        var propertyTypeId = $("#propertyTypeId").val();
+        if (departmentId != '') {
+            if (departmentId == '@NADepartment.Housing') {
+                $('.row-housing').show();
+                $('.col-rate').css("display", "none");
+                $('.location-charge').css("display", "none");
+
+                $('#LandRate').data("kendoNumericTextBox").value('');
+                $("#PropertyCost").attr("data-val-required", "Property Cost is required");
+                $("#civilCost").attr("data-val-required", "Civil Cost is required");
+                ToggleLocationCharges();
+            }
+            else {
+                $('.row-housing').css("display", "none");
+                $('.col-rate').show();
+                $('.location-charge').show();
+                ToggleLocationCharges();
+            }
+            $.ajax({
+                url: '/Master/ManageProperty/GetLandRate',
+                type: 'Post',
+                data: { schemeId: schemeId, departmentId: departmentId, floorId: floorId, blockId: blockId, sectorId: sectorId, propertyTypeId: propertyTypeId },
+                cache: false,
+                success: function (result) {
+                    if (result.departmentId == '@NADepartment.Housing') {
+                        $('#civilCost').data("kendoNumericTextBox").value(result.civilCost);
+                        $('#PropertyCost').data("kendoNumericTextBox").value(result.PropertyCost);
+                        //$('#LandRate').data("kendoNumericTextBox").value('');
+                        //$('#LandRatePerSqMet').val('');
+                    }
+                    else {
+                        $('#LandRate').data("kendoNumericTextBox").value(result.LandRate);
+                        $('#LandRatePerSqMet').val(result.LandRate);
+                        //$('#civilCost').data("kendoNumericTextBox").value('');
+                        //$('#PropertyCost').data("kendoNumericTextBox").value('');
+                    }
+
+                    //SetTotalPropertyCost();
+                    CalculateTotalPropertyCost();
+                }
+            });
+        }
+        else {
+            $("#TotalPropertyCost").val('');
+        }
+    }
+
+    function TotalAreaChange() {
+        if ($("#departmentId").val() != '') {
+            var dropdownlist = $("#floorId").data("kendoDropDownList");
+            var totalArea = $("#totalArea").val();
+            if ($("#departmentId").val() != '@NADepartment.Housing') {
+                var actualarea = $("#actualArea").val();
+                var coveredarea = $("#coveredArea").val();
+                if (dropdownlist.text().includes(">")) {
+                    var areaRange = dropdownlist.text().split(">");
+                    if (totalArea <= parseInt(areaRange[1].trim())) {
+                        alertify.error("Enter Total Area greater than Area Range.");
+                        $("#totalArea").data("kendoNumericTextBox").value('');
+                    }
+                }
+                else if (dropdownlist.text().includes("<")) { //Added on 27th Feb. 2017 for the following missing validation:
+                    var areaRange = dropdownlist.text().split("<");
+                    if (totalArea >= parseInt(areaRange[1].trim())) {
+                        alertify.error("Please enter Total Area less than Area Range.");
+                        $("#totalArea").data("kendoNumericTextBox").value('');
+                    }
+                }
+                else {   //New validatione ends here
+                    var areaRange = dropdownlist.text().split("-");
+                    if (totalArea < parseFloat(areaRange[0].trim()) || totalArea > parseFloat(areaRange[1].trim())) {
+                        alertify.error("Please enter Total Area within Area Range.");
+                        $("#totalArea").data("kendoNumericTextBox").value('');
+                    }
+                }
+            }
+            CalculateTotalPropertyCost();
+        }
+        else {
+
+        }
+    }
+
+    function ValidateForm() {
+        var status = true;
+        status = $("#schemeId").kendoValidator().data("kendoValidator").validate();
+        status = $("#departmentId").kendoValidator().data("kendoValidator").validate();
+        status = $("#sectorId").kendoValidator().data("kendoValidator").validate();
+        status = $("#blockId").kendoValidator().data("kendoValidator").validate();
+        status = $("#plotProperty").kendoValidator().data("kendoValidator").validate();
+        status = $("#propertyTypeId").kendoValidator().data("kendoValidator").validate();
+        status = $("#floorId").kendoValidator().data("kendoValidator").validate();
+        status = $("#totalArea").kendoValidator().data("kendoValidator").validate();
+        status = $("#actualArea").kendoValidator().data("kendoValidator").validate();
+        status = $("#RegistryName").kendoValidator().data("kendoValidator").validate();
+        status = $("#locationId").kendoValidator().data("kendoValidator").validate();
+        status = $("#charges").kendoValidator().data("kendoValidator").validate();
+        status = $("#PropertyCost").kendoValidator().data("kendoValidator").validate();
+        status = $("#civilCost").kendoValidator().data("kendoValidator").validate();
+        return status;
+    }
+
+</script>

@@ -1,0 +1,192 @@
+﻿@model NA.PMS.Model.GPAModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+<style>
+    .linkCss {
+        color: #337ab7;
+        text-decoration: underline;
+    }
+
+        .linkCss:hover {
+            color: #337ab7;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+</style>
+
+<h2 class="blck-heading">Details</h2>
+<div class="form-bx">
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Nomination Name", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(nom => nom.NomineeName, new { @maxlength = "99", @class = "form-control" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Relation", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(nom => nom.NomineeRelation, new { @maxlength = "99", @class = "form-control" })
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Nomination Date", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DatePickerFor(nom => nom.NominationDate)
+                                  .HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"></div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group" style="text-align:right">
+            <input type="button" value="Add" id="btnAddNominee" class="btn btn-add" />
+        </div>
+    </div>
+
+</div>
+<div class="col-md-12 k-grid-content">
+    @(Html.Kendo().Grid<NA.PMS.Model.GPAModel>()
+        .Name("gridNominees")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.NomineeId).Hidden(true).Width(10);
+            columns.Bound(c => c.SNo).Title("Serial No.").Width(100);
+            columns.Bound(c => c.NomineeName).Title("Nomination Name").Width(100);
+            columns.Bound(c => c.NomineeRelation).Title("Relation").Width(100);
+            columns.Bound(c => c.NominationDate).Title("Nomination Date").Width(100).Format("{0:dd/MM/yyyy}");
+            columns.Bound(c => c.NomineeId).Title("Action").Width(100).ClientTemplate("<a onclick='javascript:RemoveNominee(this);' class='linkCss'>Remove</a>").Width(35).Filterable(false).Sortable(false);
+        })
+        .Sortable()
+        .Filterable()
+                .Resizable(resize => resize.Columns(true))
+            //.ToolBar(toolBar =>
+            //{
+            //    toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Add").HtmlAttributes(new { onclick = "javascript:AddNominee(event);", @class = "k-button", id = "btnRequest" });
+            //})
+        .Pageable(pageable => pageable
+                                               .Enabled(true)
+                                               .Refresh(true)
+                                               .PageSizes(true)
+                                            ).AutoBind(false)//Read grid on RID selection in Add screen and on document.ready in Edit screen
+        .DataSource(dataSource => dataSource
+                .Ajax().Model(model => model.Id(c => c.NomineeId))
+        .ServerOperation(true)
+                .Read(read => read.Action("GetNomineeData", "PropertyRegistration").Data("GetRID")).PageSize(20)
+        )
+    )
+</div>
+
+
+
+<script type="text/javascript">
+    function GetRID() {
+        return {
+            rid: $("#RId").val()
+        };
+    }
+
+    $(document).ready(function () {
+        $("#btnAddNominee").click(function () {            
+            var flag;
+            var rid = $("#RId").val();
+            var nomName = $("#NomineeName").val();
+            var relation = $("#NomineeRelation").val();
+            var nomDate = $("#NominationDate").val();
+            var allotmentDate = $("#AllotmentDate").val();
+            var dtNomDate = new Date(nomDate);
+            var dtAllotmentDate = new Date(allotmentDate);
+            if (rid == '') {
+                alertify.error("Please select RID");
+                return false;
+            }
+            if (nomName == '') {
+                alertify.error("Please enter Nomination Name");
+                return false;
+            }
+            if (relation == '') {
+                alertify.error("Please enter Relation");
+                return false;
+            }
+            if (nomDate == '') {
+                alertify.error("Please enter Nomination Date");
+                return false;
+            }
+            if (dtNomDate <= dtAllotmentDate) {
+                alertify.error("Nomination Date can't be earlier than, or equal to Allotment Date");
+                return false;
+            }
+            var grid = $("#gridNominees").data("kendoGrid");
+            var data = grid.dataSource._data;
+            $.each(data, function (p, row) {
+                if (nomName.toLowerCase() == row.NomineeName.toLowerCase()) {
+                    flag = 0;
+                    return false;
+                }
+            });
+            if (flag == 0) {
+                alertify.error("Can't enter two nominees by the same name.");
+                return false;
+            }
+            else {
+                $("#btnAddNominee").attr("disabled", true);
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ rid: rid, nomName: nomName, relation: relation, nomDate: nomDate }),
+                    url: '/PropertyRegistration/AddNominee',
+                    success: function (result) {
+                        if (result == true) {
+                            $("#gridNominees").data("kendoGrid").dataSource.read();
+                            $("#NomineeName").val('');
+                            $("#NomineeRelation").val('');
+                            $("#NominationDate").data("kendoDatePicker").value('');
+                            alertify.success("Data saved successfully.");
+                        }
+                        else
+                            alertify.error("Some error occured. Please try again later.");
+                        $("#btnAddNominee").attr("disabled", false);
+                    },
+                    error: function (objAjaxRequest, strError) {
+                        var respText = objAjaxRequest.responseText;
+                        alertify.error("Some error occured. Please try again later.");
+                        //alert(respText);
+                    }
+                });
+            }
+        });
+    });
+
+    function RemoveNominee(row) {
+        var r = confirm("Are you sure?");
+        if (r == true) {
+            var tr = $(row).parent().parent();
+            var id = $(tr).children("td:eq(0)").text();
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: id }),
+                url: '/PropertyRegistration/RemoveNominee',
+                success: function (result) {
+                    if (result == true || result == "True" || result == "true") {
+                        $("#gridNominees").data("kendoGrid").dataSource.read();
+                        alertify.success("Data updated successfully.");
+                    }
+                    else
+                        alertify.error("Some error occured. Please try again later.");
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    alertify.error("Some error occured. Please try again later.");
+                    //alert(respText);
+                }
+            });
+        }
+        else {
+            return false;
+        }
+    }
+</script>

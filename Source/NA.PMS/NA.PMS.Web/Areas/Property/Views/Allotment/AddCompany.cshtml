@@ -1,0 +1,498 @@
+﻿@model NA.PMS.Model.CICModel
+@using Kendo.Mvc.UI;
+@{
+    ViewBag.Title = "Add Company";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Add Company</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <input type="hidden" id="ApplicationId" />
+                <input type="hidden" id="RId" />
+                <h2 class="blck-heading">Add Company Details</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+                            @Html.Label("Scheme Name", htmlAttributes: new { @class = "required" })
+                            <input type="hidden" id="hdnIsAllotted" />
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(model => model.SchemeId)
+                                  .Name("SchemeId")
+                                  .DataTextField("schemeName")
+                                  .DataValueField("schemeId")
+                                    .OptionLabel(" -- Please Select --")
+                                  .DataSource(source => source.Read(read => read.Action("GetSchemeListForAllotment", "Allotment")))
+                                  .Enable(true)
+                                  .AutoBind(true)
+                                  .Filter("contains")
+                                  .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" })
+                            )
+                        </div>
+
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+                            @Html.Label("Department", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(model => model.DepartmentId)
+                                  .Name("DepartmentId")
+                                  .DataTextField("DepartmentName")
+                                  .DataValueField("DepartmentId")
+                                  .OptionLabel(" -- Please Select --")
+                                  .DataSource(source => source.Read(read => read.Action("FilterDepartmentOnScheme", "Allotment").Data("FilterDepartment"))
+                                                                      .ServerFiltering(true))
+                                  .Enable(false)
+                                  .AutoBind(false)
+                                          .Filter("contains")
+                                  .CascadeFrom("SchemeId")
+                                  .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" })
+                            )
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+                            @Html.Label("Form Number", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(model => model.FormId)
+                                          .Name("formno")
+                                          .DataTextField("text")
+                                          .DataValueField("id")
+                                  .OptionLabel(" -- Please Select --")
+                                                  .DataSource(source => source.Read(read => read.Action("GetAllCompanyForms", "Allotment").Data("filterForms"))
+                                                                      .ServerFiltering(true))
+                                  .Enable(false)
+                                  .AutoBind(false)
+                                          .Filter("contains")
+                                                  .CascadeFrom("DepartmentId,SchemeId")
+                                  .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" })
+                                          .Events(m => m.Change("GetApplicantDetails"))
+                            )
+                        </div>
+
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                        </div>
+                    </div>
+
+                </div>
+                <h2 class="blck-heading">Applicant Details</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+                            @Html.Label("Applicant's Name")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group rdio-bx">
+                            <span id="ApplicantName"></span>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+                            @Html.Label("Gender")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group rdio-bx">
+                            <span id="Gender"></span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+                            @Html.Label("Email Address")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group rdio-bx">
+                            <span id="Email"></span>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+                            @Html.Label("Mobile Number")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group rdio-bx">
+                            <span id="MobileNumber"></span>
+                        </div>
+                    </div>
+                </div>
+                <h2 class="blck-heading">Firm Details</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+                            @Html.Label("Firm Name", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group rdio-bx">
+                            @Html.TextBoxFor(m => m.NewFirmName, htmlAttributes: new { @class = "form-control", @maxlength = "100" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+                            @Html.Label("Product Name", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group rdio-bx">
+                            @Html.TextBoxFor(m => m.NewFirmProduct, htmlAttributes: new { @class = "form-control", @maxlength = "100" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+                            @Html.Label("Firm Status", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group rdio-bx">
+                            @(Html.Kendo().DropDownListFor(model => model.NewFirmStatus)
+                      .DataTextField("text")
+                      .DataValueField("id")
+                      .OptionLabel("Select")
+                      .DataSource(source =>
+                      {
+                          source.Read(read =>
+                          {
+                              read.Action("GetFirmStatus", "CIC");
+                          });
+                      }).HtmlAttributes(new { style = "width:100%;" }))
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group rdio-bx">
+
+                        </div>
+                    </div>
+                </div>
+                <h2 class="blck-heading">Shareholder Details</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+                            @Html.Label("Stake holder/Director", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group rdio-bx">
+                            @Html.TextBoxFor(m => m.Director_Name, htmlAttributes: new { @class = "form-control", @maxlength = "100" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+                            @Html.Label("Type", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group rdio-bx">
+                            @(Html.Kendo().DropDownListFor(model => model.Type)
+                              .DataTextField("text")
+                              .DataValueField("id")
+                              .OptionLabel("Select")
+                              .DataSource(source =>
+                              {
+                                  source.Read(read =>
+                                  {
+                                      read.Action("GetType", "CIC");
+                                  });
+                              })
+                            .HtmlAttributes(new { style = "width:100%;" })
+                            )
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+                            @Html.Label("Share (In %)", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group rdio-bx">
+                            @Html.TextBoxFor(m => m.Director_Share, htmlAttributes: new { @class = "form-control", @maxlength = "5" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group rdio-bx" style="text-align:right">
+                            <input type="submit" id="btnAdd" value="Add" class="btn btn-add" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group rdio-bx">
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+                           
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group rdio-bx">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 form-group">
+                            <div class="k-grid-content" style="padding-left:30px;">
+                                @(Html.Kendo().Grid<NA.PMS.Model.CICModel>()
+                           .Name("gridCIC")
+                          .Columns(columns =>
+                          {
+                              columns.Bound(c => c.SNo);
+                              columns.Bound(c => c.Director_Name).Title("Director Name");
+                              columns.Bound(c => c.TypeName);
+                              columns.Bound(c => c.Type).Hidden(true);
+                              columns.Bound(c => c.Director_Share).Title("Share (In %)");
+                              columns.Bound(c => c.Director_Id).Hidden(true).Title("Action");
+                              columns.Bound(c => c.Director_Id).Title("Action").ClientTemplate("<a href='##' onclick='javascript:RemoveRecord(this);'>Remove</a>").Filterable(false).Sortable(false);
+                          })
+                          .Sortable()
+                          .Filterable()
+                          .Resizable(resize => resize.Columns(true))
+                          .Pageable
+                          (
+                            pageable => pageable
+                            .Enabled(true)
+                            .Refresh(true)
+                            .PageSizes(true)
+                          ).AutoBind(false)
+                          .DataSource
+                          (
+                             dataSource => dataSource
+                            .Ajax().Model(model => model.Id(p => p.Director_Id))
+                        .ServerOperation(true)
+                                .Read(read => read.Action("GetDirectorDetailsByAppID", "Allotment").Data("additionalInfo"))
+                            .PageSize(10)
+                          )
+                                )
+                            </div>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+            
+            <div class="box-button text-center">
+                <input type="button" id="btnCancel" value="Cancel" class="btn btn-default" onclick="javascript: window.location = '@Url.Action("ManageApplication", "Allotment")';" />
+                <input type="button" value="Submit" id="btnSubmit" class="btn btn-add" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function FilterDepartment() {
+        return { SchemeId: $("#SchemeId").val() };
+    }
+
+    function filterForms() {
+        return {
+            SchemeId: $("#SchemeId").val(),
+            DepartmentId: $("#DepartmentId").val()
+        };
+    }
+
+    function GetApplicantDetails() {
+        $('#ApplicantName').empty();
+        $('#Gender').empty();
+        $('#MobileNumber').empty();
+        $('#Email').empty();
+        $('#ApplicationId').val(0);
+        $('#NewFirmName').val("");
+        $('#NewFirmProduct').val("");
+        $("#NewFirmStatus").data("kendoDropDownList").value(0);
+        $('#RId').val("");
+        if ($('#formno').val() == "") {
+            alertify.error("Please select Form Number");
+        }
+        else {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ formno: $("#formno").val(), schemeID: $("#SchemeId").val(), departmentID: $("#DepartmentId").val() }),
+                url: '@Url.Action("GetApplicantInfo", "Allotment")',
+                success: function (data) {
+                    {
+                        $('#ApplicantName').html(data.ApplicantName);
+                        $('#Gender').html(data.Gender);
+                        $('#MobileNumber').html(data.MobileNumber);
+                        $('#Email').html(data.Email);
+                        $('#ApplicationId').val(data.applicationId);
+                        $('#NewFirmName').val(data.NewFirmName);
+                        $("#NewFirmStatus").data("kendoDropDownList").value(data.NewFirmStatus);
+                        $('#NewFirmProduct').val(data.NewFirmProduct);
+                        $('#RId').val(data.Rid);
+                        $('#hdnIsAllotted').val(data.IsAllotted);
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+        setTimeout(function () {
+            $("#gridCIC").data("kendoGrid").dataSource.read();
+            var grid = $("#gridCIC").data("kendoGrid");
+            var recordCount = grid.dataSource.data().length;
+            $("#gridCIC").show();
+        }, 2000);
+
+    }
+
+    function additionalInfo() {
+        return { applicationID: $('#ApplicationId').val() };
+    }
+
+    $(document).ready(function () {
+        var grid = $("#gridCIC").data("kendoGrid");
+        var Sno = grid.dataSource.data().length;
+        if (Sno == 0) {
+            $("#gridCIC").hide();
+        }
+        else { $("#gridCIC").show(); }
+        $('#btnAdd').click(function () {
+            if (validateDirectorDetails())
+                SaveCIC();
+        });
+        $('#btnSubmit').click(function () {
+            if (validateCompanyDetails())
+                AddCompanyDetails();
+        });
+    });
+
+    function AddCompanyDetails() {
+        if ($('#RId').val() == null || $('#RId').val() == "") {
+            var newFirmName = $('#NewFirmName').val();
+            var newFirmProduct = $('#NewFirmProduct').val();
+            var newFirmStatus = $('#NewFirmStatus').val();
+            var appId = $('#ApplicationId').val();
+            var grid = $("#gridCIC").data("kendoGrid");
+            var data = grid.dataSource._data;
+
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ data: JSON.stringify(data), appId: appId, NewFirmName: newFirmName, NewFirmProduct: newFirmProduct, NewFirmStatus: newFirmStatus }),
+                url: '/Allotment/AddCompanyDetails',
+                success: function (result) {
+                    if (result == true) {
+                        window.location.href = '@Url.Action("ManageApplication", "Allotment")';
+                        return false;
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+        else {
+            alertify.error("Already Alloted.");
+        }
+    }
+
+    function SaveCIC() {
+        var directorName = $('#Director_Name').val();
+        var directorShare = $('#Director_Share').val();
+        var type = $('#Type').val();
+        var typeName = $("#Type").data("kendoDropDownList").text();
+        var appId = $('#ApplicationId').val();
+        var grid = $("#gridCIC").data("kendoGrid");
+        var gridData = grid.dataSource;
+        var Sno = grid.dataSource.data().length + 1;
+        var data = grid.dataSource._data;
+        if (parseInt(directorShare) > 100) {
+            alertify.error("Sum of Shares can't exceed 100%");
+            return false;
+        }        
+        var sum = 0;
+        $.each(data, function (p, row) {
+            sum = sum + parseInt(row.Director_Share) + parseInt(directorShare);
+            if (sum > 100) {
+                alertify.error("Sum of Shares can't exceed 100%");
+                return false;
+            }
+        });
+        if (sum <= 100) {
+            gridData.insert(Sno + 1, { SNo: Sno, Director_Name: directorName, TypeName: typeName, Type: type, Director_Share: directorShare });
+            $("#gridCIC").show();
+            $('#Director_Name').val("");
+            $('#Director_Share').val("");            
+            $("#Type").data("kendoDropDownList").value(0);
+        }
+    }
+
+    function validateDirectorDetails() {
+        var dirName = $('#Director_Name').val().trim();
+        var dirShare = $('#Director_Share').val().trim();
+        var type = $('#Type').val();
+        var flag = false;
+        if ($("#hdnIsAllotted").val()=="true")
+        {
+            alertify.error("CIC Required.");
+            flag = false;
+        }
+        else if (dirName == "") {
+            alertify.error("Please enter Name of Stake holder/Director");
+        }
+        else if (dirShare == "") {
+            alertify.error('Please enter Share');
+        }
+        else if (isNaN(dirShare)) {
+            alertify.error("Please enter a number.");
+        }
+        else if (type == "") {
+            alertify.error("Please select Type");
+        }
+        else { flag = true; }
+        return flag;
+    }
+
+    function validateCompanyDetails() {       
+        var schemeId = $('#SchemeId').val();
+        var departmentId = $('#DepartmentId').val();
+        var formno = $('#formno').val();
+        var newFirmName = $('#NewFirmName').val();
+        var newFirmProduct = $('#NewFirmProduct').val();
+        var newFirmStatus = $('#NewFirmStatus').val();        
+        var grid = $("#gridCIC").data("kendoGrid");
+        var nuOfrecords = grid.dataSource.data().length;
+        var flag = false;
+        if ($("#hdnIsAllotted").val() == "true") {
+            alertify.error("CIC Required.");
+            flag = false;
+        }
+        else if (schemeId == "") {
+            alertify.error("Please select Scheme Name");
+        }
+        else if (departmentId == "") {
+            alertify.error("Please select Department Name");
+        }
+        else if (formno == "") {
+            alertify.error("Please select Form Number");
+        }
+        else if (newFirmName == "") {
+            alertify.error("Please select Firm Name");
+        }       
+        else if (newFirmProduct == "") {
+            alertify.error("Please select Firm Product");
+        }
+        else if (newFirmStatus == "") {
+            alertify.error("Please select Firm Status");
+        }
+        else if (nuOfrecords == 0) {
+            alertify.error("Please enter at Share Holder Details");
+        }
+        else { flag = true; }
+        return flag;
+    }
+
+    function RemoveRecord(row) {
+        var tr = $(row).parent().parent();
+        var dirID = $(tr).children("td:eq(5)").text();
+
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ data: JSON.stringify(data), appId: appId, NewFirmName: newFirmName, NewFirmProduct: newFirmProduct, NewFirmStatus: newFirmStatus }),
+            url: '/Allotment/AddCompanyDetails',
+            success: function (result) {
+                if (result == true) {
+                    window.location.href = '@Url.Action("ManageApplication", "Allotment")';
+                    return false;
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+</script>

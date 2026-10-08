@@ -1,0 +1,481 @@
+﻿@using Kendo.Mvc.UI
+@using NA.PMS.Common
+@using System.Linq
+
+@{
+    ViewBag.Title = "ServiceDashboard";
+    var userInfo = HttpContext.Current.Session["CurrentUser"] as NA.PMS.Web.Models.CurrentUserDetail;
+    if (userInfo != null)
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Blank.cshtml";
+    }
+}
+
+<style>
+    .grid-header {
+        text-align: center;
+    }
+
+    .hyperlink {
+        color: darkblue;
+        font: bold;
+    }
+
+    .HeadBackClr {
+        background-color: aliceblue;
+    }
+
+    .TotalBackClr {
+        background-color: #e7e7e7;
+    }
+
+    .compBackClr {
+        background-color: #00B050;
+    }
+
+    .compBeyondBackClr {
+        background-color: #00B050;
+    }
+
+    .withdrawnBackClr {
+        background-color: #fd360a;
+    }
+
+    .RejectBackClr {
+        background-color: #ee1616;
+    }
+
+    .objectionBackClr {
+        background-color: #e08e0b;
+    }
+
+    .pendingwithinBackClr {
+        background-color: #ff8d00;
+    }
+
+    .MoreThanMonthBackClr {
+        background-color: #c3491c;
+    }
+
+    .MoreThanWeekBackClr {
+        background-color: coral;
+    }
+
+    .MoreThanFortnightBackClr {
+        background-color: orangered;
+    }
+
+    .k-grid tr td {
+        border-bottom: 0.2px solid white;
+        border-right: 0.2px solid white;
+        text-align: center;
+    }
+
+    .k-grid tr th {
+        border: 0.2px solid white;
+    }
+
+    .k-grid .k-grid-header .k-header .k-link {
+        overflow: visible !important;
+        white-space: normal !important;
+        text-align: center;
+        /*color: white;*/
+    }
+
+    .btn_successround {
+        /*background-color: #63d827;*/
+        color: white;
+        border-color: #ddd;
+        border-radius: 100%;
+    }
+    .btn_total{
+        color: black;
+        border-color: #ddd;
+        border-radius: 100%;
+    }
+    .k-grid tbody .k-button {
+        /*min-width: 50px;*/
+    }
+
+    .k-grid-header th.k-header {
+        background: #78c3b9;
+    }
+    .blck-heading{
+        border:1px solid white;
+        margin-bottom:0;
+        color:black;
+        background:#78c3b9;
+    }
+    .k-footer-template td{
+        background:#78c3b9;
+        color:black;
+    }
+    .textBTN{min-width: 40%;
+    text-align: center;
+    max-width: 55%;
+    border: white;
+    
+    }
+</style>
+
+<div id="div-graph-services">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Service Status Report</h1></div>
+        </div>
+    </div>
+    <div class="col-md-12  blnk-rw" ></div>
+    <div class="row" >
+        <div class="col-md-3" style="padding:10px;">
+            <label>Start Date</label>
+            @(Html.Kendo().DatePicker().Name("TimelineServiceStartDate")
+                    .Events(e => e.Change("TimelineServiceChangeEvent"))
+                    .HtmlAttributes(new { style = "width:90%;" })
+            )
+        </div>
+        <div class="col-md-3" style="padding:10px;">
+            <label>End Date</label>
+            @(Html.Kendo().DatePicker().Name("TimelineServiceEndDate")
+                    .Events(e => e.Change("TimelineServiceChangeEvent"))
+                    .HtmlAttributes(new { style = "width:90%;" })
+            )
+        </div>
+        <div class="col-md-3" style="padding:10px;">
+            <label>Request Type</label>
+            @(Html.Kendo().DropDownList()
+                  .Name("DDLRequestType")
+                  .DataTextField("Text")
+                  .DataValueField("Value")
+                  .OptionLabel(" --- Select ---")
+                  .BindTo(new List<SelectListItem>() {
+                      new SelectListItem() { Text = "Online", Value = "Online" },
+                      new SelectListItem() { Text = "JSK", Value = "JSK" },
+                      new SelectListItem() { Text = "NIC Nivesh Mitra", Value = "NIC Nivesh Mitra" }
+                  })
+                  .Value("Online")
+                  .HtmlAttributes(new { style = "width: 90%;" })
+                  .Events(e => e.Change("TimelineRequestTypeChangeEvent"))
+            )
+        </div>
+        <div class="col-md-3 form-group" style="padding-top:30px;">
+            <input type="button" id="btnTimeline" value="Citizen Charter Timeline" class="btn btn-default btnclass" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12" style="margin-top:20px;">
+            <div class="row rw-spce">
+                <div class="col-md-12">
+                    <input type="hidden" id="DeptId" />
+                    @*<h2 class=" blck-heading" style="border-left:1px solid white;border-right:1px solid white;margin-bottom:0;color:white;background-color:#3f3f92;" id="ServiceHead">Timeline Of Services ( Online and JSK )</h2>*@
+                    <h2 class=" blck-heading" style="" id="ServiceHead">Timeline Of Services ( Online & JSK )</h2>
+                    <div class="col-md-12 k-grid-content" >
+                        @(Html.Kendo().Grid<NA.PMS.Model.ServiceViewModel>()
+                    .Name("GridSeviceTimeline")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(c => c.DepartmentId).Hidden(true);
+                        columns.Bound(c => c.Department).Title("Department").Width(110).ClientTemplate("<label class='hyperlink' onclick='javascript:ServiceByDepartment(#= DepartmentId #,\"#= Department #\")'>#= Department #</label>").ClientFooterTemplate("Total Count:");//.HeaderHtmlAttributes(new { style = "background-color:aliceblue;" });
+                        columns.Bound(c => c.Total).Title("Total Request").Width(110).ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "" }).ClientTemplate("<input type='text' value='#= Total #' class='textBTN btn_total TotalBackClr' readonly='readonly'>");//.HeaderHtmlAttributes(new { style = "background-color:#00bfff;" }) TotalBackClr
+                        columns.Group(g =>
+                            g.Title("Completed").HeaderHtmlAttributes(new { style = "text-align: center;" })//background-color:#63d827;
+                            .Columns(info =>
+                            {
+                                info.Bound(x => x.CompletedWithinTime).Title("Within Time").ClientFooterTemplate("#=sum#").ClientTemplate("<input type='text' value='#= CompletedWithinTime #' class=' textBTN btn_successround compBackClr' readonly='readonly'>").HtmlAttributes(new { @class = ""});//.HeaderHtmlAttributes(new { style = "background-color:lawngreen;" });compBackClr
+                               // info.Bound(x => x.CompletedWithinTime).Title("Within Time").ClientFooterTemplate("#=sum#").ClientTemplate("<label class='btn_successround '>#= CompletedWithinTime #</label>");
+                                info.Bound(x => x.CompletedBeyondTime).Title("Beyond Time").ClientFooterTemplate("#=sum#").ClientTemplate("<input type='text' value='#= CompletedBeyondTime #' class='textBTN btn_successround compBeyondBackClr' readonly='readonly'>").HtmlAttributes(new { @class = "" });//.HeaderHtmlAttributes(new { style = "background-color:#ffa500;" })compBeyondBackClr
+                                info.Bound(x => x.TotalReject).Title("Rejected").ClientFooterTemplate("#=sum#").ClientTemplate("<input type='text' value='#= TotalReject #' class='textBTN btn_successround RejectBackClr' readonly='readonly'>").HtmlAttributes(new { @class = "" });//.HeaderHtmlAttributes(new { style = "background-color:#679b67;"})RejectBackClr
+                                info.Bound(x => x.WithDrawn).Title("Withdrawn").ClientFooterTemplate("#=sum#").ClientTemplate("<input type='text' value='#= WithDrawn #' class='textBTN btn_successround withdrawnBackClr' readonly='readonly'>").HtmlAttributes(new { @class = "" });//.HeaderHtmlAttributes(new { style = "background-color:#9acb32;" })withdrawnBackClr
+                            })
+                        );
+                        columns.Group(g =>
+                            g.Title("Pending").HeaderHtmlAttributes(new { style = "text-align: center;" })//background-color:orange;
+                            .Columns(info =>
+                            {
+                                info.Bound(x => x.PendingWithTime).Title("Within Time").ClientFooterTemplate("#=sum#").ClientTemplate("<input type='text' value='#= PendingWithTime #' class='textBTN btn_successround pendingwithinBackClr' readonly='readonly'>").HtmlAttributes(new { @class = "" });//.HeaderHtmlAttributes(new { style = "background-color:yellow" })pendingwithinBackClr
+                                info.Bound(c => c.PendingMoreThanWeek).Title("More Than a Week").ClientFooterTemplate("#=sum#").ClientTemplate("<input type='text' value='#= PendingMoreThanWeek #' class='textBTN btn_successround MoreThanWeekBackClr' readonly='readonly'>").HtmlAttributes(new { @class = "" });//.HeaderHtmlAttributes(new { style = "background-color:#fa8072;" })MoreThanWeekBackClr
+                                info.Bound(c => c.PendingMoreThanFortNight).Title("More Than Fortnight").ClientFooterTemplate("#=sum#").ClientTemplate("<input type='text' value='#= PendingMoreThanFortNight #' class='textBTN btn_successround MoreThanFortnightBackClr' readonly='readonly'>").HtmlAttributes(new { @class = "" });//.HeaderHtmlAttributes(new { style = "background-color:#ff0000;" })MoreThanFortnightBackClr
+                                info.Bound(c => c.PendingMoreThanOneMonth).Title("More Than a Month").ClientFooterTemplate("#=sum#").ClientTemplate("<input type='text' value='#= PendingMoreThanOneMonth #' class='textBTN btn_successround MoreThanMonthBackClr' readonly='readonly'>").HtmlAttributes(new { @class = "" });//.HeaderHtmlAttributes(new { style = "background-color:#8b0000;" })MoreThanMonthBackClr
+                                info.Bound(c => c.TotalObjection).Title("Objection").ClientFooterTemplate("#=sum#").ClientTemplate("<input type='text' value='#= TotalObjection #' class='textBTN btn_successround objectionBackClr'readonly='readonly'>").HtmlAttributes(new { @class = "" });//.HeaderHtmlAttributes(new { style = "background-color:#add8e6;" })objectionBackClr
+                                //info.Group(i => i.Title("Defaulter")//.HeaderHtmlAttributes(new { style = "text-align: center;background-color:red;" })
+                                //    .Columns(location =>
+                                //    {
+                                //        location.Bound(c => c.PendingMoreThanWeek).Title("More Than a Week").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "MoreThanWeekBackClr" });//.HeaderHtmlAttributes(new { style = "background-color:#fa8072;" })
+                                //        location.Bound(c => c.PendingMoreThanFortNight).Title("More Than Fortnight").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "MoreThanFortnightBackClr" });//.HeaderHtmlAttributes(new { style = "background-color:#ff0000;" })
+                                //        location.Bound(c => c.PendingMoreThanOneMonth).Title("More Than a Month").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "MoreThanMonthBackClr" });//.HeaderHtmlAttributes(new { style = "background-color:#8b0000;" })
+                                //        location.Bound(c => c.TotalObjection).Title("Objection").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "objectionBackClr" });//.HeaderHtmlAttributes(new { style = "background-color:#add8e6;" })
+                                //    })
+                                //);
+                            })
+                        );
+                    })
+                    .Resizable(resize => resize.Columns(true))
+                                //.Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                    .AutoBind(true)
+                    .DataSource
+                    (
+                        dataSource => dataSource
+                        .Ajax().ServerOperation(true)
+                        .Read(read => read.Action("GetServiceTimelineReportsAsDataSource", "Report", new { area = "Reports" }).Data("FilterParameterTimeline"))
+                        .Aggregates(aggregates =>
+                        {
+                            aggregates.Add(p => p.Total).Sum();
+                            aggregates.Add(p => p.CompletedWithinTime).Sum();
+                            aggregates.Add(p => p.CompletedBeyondTime).Sum();
+                            aggregates.Add(p => p.PendingWithTime).Sum();
+                            aggregates.Add(p => p.PendingMoreThanWeek).Sum();
+                            aggregates.Add(p => p.PendingMoreThanFortNight).Sum();
+                            aggregates.Add(p => p.PendingMoreThanOneMonth).Sum();
+                            aggregates.Add(p => p.TotalReject).Sum();
+                            aggregates.Add(p => p.TotalObjection).Sum();
+                            aggregates.Add(p => p.WithDrawn).Sum();
+                        })
+                    )
+                                //.HtmlAttributes(new {  })
+                        )
+                    </div>
+                </div>
+            </div>
+
+            <div class="row rw-spce" id="ServiceDepartmentWise">
+                <div class="col-md-12">
+                    <input type="hidden" id="hdSubType" />
+                    <input type="hidden" id="hdServiceId" />
+                    <h2 class=" blck-heading" style="border-left:1px solid green;border-right:1px solid green;margin-bottom:0;" id="depthead">Timeline Of Services Department Wise</h2>
+                    <div class="col-md-12 k-grid-content">
+                        @(Html.Kendo().Grid<NA.PMS.Model.ServiceViewModel>()
+                    .Name("GridServiceDetailsDeptWise")
+                            .Columns(columns =>
+                    {
+                        columns.Bound(c => c.ServiceId).Hidden(true);
+                        columns.Bound(c => c.ServiceName).Title("Service Name").ClientFooterTemplate("Total Count:").Width(200);
+                        columns.Bound(c => c.Total).Title("Total Request").ClientTemplate("<input type='button' value='#= TotalReceived #' class='k-button btn_total TotalBackClr' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,1)'>").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "" });//TotalBackClr
+                        columns.Group(g =>
+                            g.Title("Completed").HeaderHtmlAttributes(new { style = "text-align: center;" })//background-color:#63d827;
+                            .Columns(info =>
+                            {
+                                info.Bound(x => x.CompletedWithinTime).Title("Within Time").ClientTemplate("<input type='button' value='#= CompletedWithinTime #' class='k-button btn_successround compBackClr' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,2)'>").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "" });
+                                info.Bound(x => x.CompletedBeyondTime).Title("Beyond Time").ClientTemplate("<input type='button' value='#= CompletedBeyondTime #' class='k-button btn_successround compBeyondBackClr' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,3)'>").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "" });
+                                info.Bound(x => x.TotalReject).Title("Rejected").ClientTemplate("<input type='button' value='#= TotalReject #' class='k-button btn_successround RejectBackClr' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,8)'>").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "" });
+                                info.Bound(x => x.WithDrawn).Title("Withdrawn").ClientTemplate("<input type='button' value='#= WithDrawn #' class='k-button btn_successround withdrawnBackClr' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,10)'>").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "" });
+                            })
+                        );
+                        columns.Group(g =>
+                            g.Title("Pending").HeaderHtmlAttributes(new { style = "text-align: center;" })//background-color:orange;
+                            .Columns(info =>
+                            {
+                                info.Bound(x => x.PendingWithTime).Title("Within Time").ClientTemplate("<input type='button' value='#= PendingWithTime #' class='k-button btn_successround pendingwithinBackClr' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,4)'>").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "" });
+                                info.Bound(c => c.PendingMoreThanWeek).Title("More Than a Week").ClientTemplate("<input type='button' value='#= PendingMoreThanWeek #' class='k-button btn_successround MoreThanWeekBackClr' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,5)'>").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "" });
+                                info.Bound(c => c.PendingMoreThanFortNight).Title("More Than Fortnight").ClientTemplate("<input type='button' value='#= PendingMoreThanFortNight #' class='k-button btn_successround MoreThanFortnightBackClr' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,6)'>").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "" });
+                                info.Bound(c => c.PendingMoreThanOneMonth).Title("More Than a Month").ClientTemplate("<input type='button' value='#= PendingMoreThanOneMonth #' class='k-button btn_successround MoreThanMonthBackClr' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,7)'>").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "" });
+                                info.Bound(c => c.TotalObjection).Title("Objection").ClientTemplate("<input type='button' value='#= TotalObjection #' class='k-button btn_successround objectionBackClr' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,9)'>").ClientFooterTemplate("#=sum#").HtmlAttributes(new { @class = "" });
+                                //info.Group(i => i.Title("Defaulter").HeaderHtmlAttributes(new { style = "text-align: center;" })
+                                //    .Columns(location =>
+                                //    {
+                                //        location.Bound(c => c.PendingMoreThanWeek).Title("More Than a Week").ClientTemplate("<label class='hyperlink' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,5)'>#= PendingMoreThanWeek #</label>").ClientFooterTemplate("#=sum#");
+                                //        location.Bound(c => c.PendingMoreThanFortNight).Title("More Than Fortnight").ClientTemplate("<label class='hyperlink' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,6)'>#= PendingMoreThanFortNight #</label>").ClientFooterTemplate("#=sum#");
+                                //        location.Bound(c => c.PendingMoreThanOneMonth).Title("More Than a Month").ClientTemplate("<label class='hyperlink' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,7)'>#= PendingMoreThanOneMonth #</label>").ClientFooterTemplate("#=sum#");
+                                //        location.Bound(c => c.TotalObjection).Title("Objection").ClientTemplate("<label class='hyperlink' onclick='javascript:ServiceDetailsByServiceId(#= DepartmentId #,#= ServiceId #,9)'>#= TotalObjection #</label>").ClientFooterTemplate("#=sum#");
+                                //    })
+                                //);
+                            })
+                        );
+                    })
+                    .Resizable(resize => resize.Columns(true))
+                                //.Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                    .AutoBind(true)
+                    .DataSource
+                    (
+                        dataSource => dataSource
+                        .Ajax().ServerOperation(true)
+                        .Read(read => read.Action("GetServiceTimelineReportsAsDataSource", "Report", new { area = "Reports" }).Data("FilterData"))
+                        .Aggregates(aggregates =>
+                        {
+                            aggregates.Add(p => p.Total).Sum();
+                            aggregates.Add(p => p.CompletedWithinTime).Sum();
+                            aggregates.Add(p => p.CompletedBeyondTime).Sum();
+                            aggregates.Add(p => p.PendingWithTime).Sum();
+                            aggregates.Add(p => p.PendingMoreThanWeek).Sum();
+                            aggregates.Add(p => p.PendingMoreThanFortNight).Sum();
+                            aggregates.Add(p => p.PendingMoreThanOneMonth).Sum();
+                            aggregates.Add(p => p.TotalObjection).Sum();
+                            aggregates.Add(p => p.TotalReject).Sum();
+                            aggregates.Add(p => p.WithDrawn).Sum();
+                        })
+                    ))
+                    </div>
+                </div>
+            </div>
+
+            <div class="row rw-spce" id="ServiceDetailsDeptWise">
+                <div class="col-md-12">
+                    <h2 class=" blck-heading" style="border-left:1px solid green;border-right:1px solid green;margin-bottom:0;" id="service">Service Details</h2>
+                    <div class="col-md-12 k-grid-content">
+                        @(Html.Kendo().Grid<NA.PMS.Model.ServiceViewModel>()
+                    .Name("GridSeviceDetails")
+                    .Columns(columns =>
+                    {
+                        //columns.Bound(c => c.ServiceId).Hidden(true);
+                        columns.Bound(c => c.RequestId).Title("Ref No").Width(110).ClientTemplate("<a href='" + "/Member/ServiceRequest/RequestDetail/#= RequestId #" + "' target='_blank'>#=RequestId#</a>");
+                        columns.Bound(c => c.RegistrationNo).Title("RegistrationId").Width(110);
+                        columns.Bound(c => c.PropertyNo).Title("Property No").Width(110);
+                        columns.Bound(c => c.Applicant).Title("Applicant Name").Width(160);
+                        columns.Bound(c => c.RequestDate).Title("Request Date").Width(110).Format("{0:dd-MMM-yyyy}");
+                        columns.Bound(c => c.Status).Title("Status").Width(110);
+                        columns.Bound(c => c.Approver).Title("Forwarded To").Width(110);
+                        columns.Bound(c => c.ValidationDate).Title("Forwarded Date").Width(110).Format("{0:dd-MMM-yyyy}");
+                        columns.Bound(c => c.ApprovalDate).Title("Approval Date").Width(110).Format("{0:dd-MMM-yyyy}");
+
+                    })
+                    .Resizable(resize => resize.Columns(true))
+                    .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                    .AutoBind(true)
+                    .DataSource
+                    (
+                        dataSource => dataSource
+                        .Ajax().ServerOperation(true)
+                        .Read(read => read.Action("GetServiceTimelineReportsAsDataSource", "Report", new { area = "Reports" }).Data("FilterDataByServiceId"))
+                    ))
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="PopupTimeline" class="container-fluid">
+    @*<h2 class=" blck-heading" style="border-left:1px solid green;border-right:1px solid green;margin-bottom:0;">Citizen Charter Timeline</h2>*@
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.ServiceViewModel>()
+                    .Name("GridCitizenCharterTimeline")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(c => c.DepartmentId).Hidden(true);
+                        columns.Bound(c => c.Department).Title("Department");
+                        columns.Bound(c => c.ServiceName).Title("Service Name");
+                        columns.Bound(c => c.Timeline).Title("Timeline (In Days)").Filterable(false);
+                    })
+                    .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                    .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                    .AutoBind(true)
+                    .Groupable()
+                    .DataSource
+                    (
+                        dataSource => dataSource
+                        .Ajax().ServerOperation(true)
+                        .Read(read => read.Action("GetCitizenCharterTimelineList", "Report", new { area = "Reports" }))
+                        .Group(group => group.Add(p => p.Department))
+                    ))
+    </div>
+</div>
+
+
+
+<script>
+    $(document).ready(function () {
+        var userInfo = '@HttpContext.Current.Session["CurrentUser"]';
+        if (userInfo == '' || userInfo == null) {
+            $('#div-graph-services').css({ "margin": "40px" });
+        }
+        TimelineRequestTypeChangeEvent();
+
+        $('#ServiceDepartmentWise').hide();
+        $('#ServiceDetailsDeptWise').hide();
+        var startdate = '2018-01-01';
+        $('#TimelineServiceStartDate').data("kendoDatePicker").value(startdate);
+        var todayDate = kendo.toString(kendo.parseDate(new Date()), 'MM/dd/yyyy');
+        $("#TimelineServiceEndDate").data("kendoDatePicker").value(todayDate);
+        //$("#PopupTimeline").hide();
+        $('#btnTimeline').click(function () {
+            $('#GridCitizenCharterTimeline').data("kendoGrid").dataSource.read();
+            $("#PopupTimeline").data("kendoWindow").center();
+            $("#PopupTimeline").data("kendoWindow").open();
+            //var win = $("#PopupTimeline").data("kendoWindow");
+            //win.center();
+            //win.open();
+        });
+    });
+
+    $('#PopupTimeline').kendoWindow({
+        modal: true,
+        title: "Citizen Charter Timeline",
+        visible: false,
+        width: "70%"//, height: "30%"
+    });
+
+    function FilterParameterTimeline() {
+        var today = new Date().toDateString();
+        return {
+            ActionType: 'All',
+            StartDate: $('#TimelineServiceStartDate').val() == "" ? "2018-01-01" : $('#TimelineServiceStartDate').val(),
+            EndDate: $('#TimelineServiceEndDate').val() == "" ? today : $('#TimelineServiceEndDate').val(),
+            RequestThrough: $('#DDLRequestType').val()
+        }
+    }
+
+    function ServiceByDepartment(row,row1){
+
+        $('#depthead').html("Timeline Of Services Department Wise: "+ row1);
+        $('#DeptId').val(row);
+        $('#GridSeviceTimeline').data("kendoGrid").dataSource.read();
+        $('#GridServiceDetailsDeptWise').data("kendoGrid").dataSource.read();
+        $('#ServiceDepartmentWise').show();
+    }
+
+    function FilterData(){
+        return {
+            ActionType: 'DepartmentWise',
+            DepartmentId: $('#DeptId').val(),
+            StartDate: $('#TimelineServiceStartDate').val(),
+            EndDate: $('#TimelineServiceEndDate').val(),
+            RequestThrough: $('#DDLRequestType').val()
+        }
+    }
+
+    function ServiceDetailsByServiceId(deptId,serviceId,type){
+        $('#DeptId').val(deptId);
+        $('#hdSubType').val(type);
+        $('#hdServiceId').val(serviceId);
+        $('#GridSeviceDetails').data("kendoGrid").dataSource.read();
+        $('#ServiceDetailsDeptWise').show();
+    }
+
+    function FilterDataByServiceId() {
+        return {
+            ActionType: 'ServiceDetails',
+            DepartmentId: $('#DeptId').val(),
+            StartDate: $('#TimelineServiceStartDate').val(),
+            EndDate: $('#TimelineServiceEndDate').val(),
+            ActionTypeId: $('#hdSubType').val(),
+            ServiceId: $('#hdServiceId').val(),
+            RequestThrough: $('#DDLRequestType').val()
+        }
+    }
+
+    function TimelineServiceChangeEvent() {
+        $('#GridSeviceTimeline').data("kendoGrid").dataSource.read();
+        $('#GridServiceDetailsDeptWise').data("kendoGrid").dataSource.read();
+        $('#GridSeviceDetails').data("kendoGrid").dataSource.read();
+    }
+
+    function TimelineRequestTypeChangeEvent() {
+        var reqTypeHead=$('#DDLRequestType').val();
+        if(reqTypeHead != ""){
+            $('#ServiceHead').html("Timeline Of Services ( "+ reqTypeHead +" )");
+        }
+        else {
+            $('#ServiceHead').html("Timeline Of Services ( ALL )");
+        }
+        $('#GridSeviceTimeline').data("kendoGrid").dataSource.read();
+        $('#GridServiceDetailsDeptWise').data("kendoGrid").dataSource.read();
+        $('#GridSeviceDetails').data("kendoGrid").dataSource.read();
+        $('#ServiceDepartmentWise').hide();
+        $('#ServiceDetailsDeptWise').hide();
+    }
+
+</script>
+
+

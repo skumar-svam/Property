@@ -1,0 +1,141 @@
+﻿@model NA.PMS.Model.NotificationsModel
+@{
+    ViewBag.Title = "Notification";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">View Notification</h1></div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <h2 class="blck-heading">Notification Info</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Scheme Name")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(model => model.schemeName)
+                        </div>
+                   
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Notification Name")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(model => model.notificationName)
+                        </div>
+                    </div>
+
+                    <div class="row  form-group">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Scheme Start Date")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(model => model.notificationStart)
+                        </div>
+                   
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Scheme End Date")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(model => model.notificationEnd)
+                        </div>
+                    </div>
+
+                    <div class="row  form-group">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Booklet Cost")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(model => model.bookletCost)
+                        </div>
+                    
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Media Type")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @{
+                                var i = Model.mediaList.Count();
+                                for (var md = 0; md < Model.mediaList.Count(); md++)
+                                {
+                                    @Html.DisplayFor(model => model.mediaList[md].mediaType)
+                                    if (md == i - 1)
+                                    {
+                                        @Html.Raw("  ")
+                                    }
+                                    else
+                                    {
+                                        @Html.Raw(",  ")
+                                    }
+                                }
+
+                            }
+                        </div>
+                    </div>
+
+
+
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label>Scheme Payment Mode</label>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @{
+                                var j = Model.paymentModeList.Count();
+                                for (var md = 0; md < Model.paymentModeList.Count(); md++)
+                                {
+                                    @Html.DisplayFor(model => model.paymentModeList[md].paymentModeName)
+                                    if (md == j - 1)
+                                    {
+                                        @(" ")
+                                    }
+                                    else
+                                    {
+                                        @(",  ")
+                                    }
+                                }
+                            }
+
+                        </div>
+                   
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label>Old Notification</label>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.oldNotificationName)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label>Puplish Date</label>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m=>m.publishDate)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                        </div>
+                    </div>
+                   
+                </div>
+            </div>
+            <div class="box-button text-center">
+                <input type="button" id="btnClose" value="Back" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $("#btnClose").click(function () {
+        window.location.href = '@Url.Action("Manage", "Notifications")';
+    });
+</script>

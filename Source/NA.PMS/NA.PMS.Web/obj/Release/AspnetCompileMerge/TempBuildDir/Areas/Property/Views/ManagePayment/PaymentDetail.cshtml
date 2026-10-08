@@ -1,0 +1,123 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@model NA.PMS.Model.PaymentViewModel
+
+@{
+    ViewBag.Title = "PaymentDetail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .blnk-rw-2{
+        padding-bottom:6px;
+    }
+
+</style>
+
+<div class="ManagePayment">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Partial/Full Payments</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+               
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12" style="border-left:1px solid #aaa; border-right:1px solid #aaa; ">
+        <div class="row blnk-rw-2">
+            <div class="col-md-3" style="padding-left:15px;">
+                @Html.Label("Department")
+                @(Html.Kendo().DropDownListFor(model => model.DepartmentId)
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel("--select--")
+                    .Filter("contains")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>read.Action("GetDepartmentList", "ManagePayment"));
+                    })
+                    .HtmlAttributes(new { style = "width:100%;" })
+                    .Events(e => e.Change("SearchPaymentDetail"))
+                )
+            </div>
+            <div class="col-md-3" style="padding-left:15px;">
+                @Html.Label("Premium Dues Paid")
+                @(Html.Kendo().DropDownListFor(model => model.IsTotalPremiumPaid)
+                    .DataTextField("Text")
+                    .DataValueField("Text")
+                    .OptionLabel("--select--")
+                    .Filter("contains")
+                    .DataSource(source =>
+                    {
+                        source.Read(read => read.Action("GetYesNoStatus", "ManagePayment"));
+                    })
+                    .HtmlAttributes(new { style = "width:100%;" })
+                    .Events(e => e.Change("SearchPaymentDetail"))
+                )
+            </div>
+            <div class="col-md-3" style="padding-left:15px;">
+                @Html.Label("OTLR Paid")
+                @(Html.Kendo().DropDownListFor(model => model.IsOneTimeLeasePaid)
+                    .DataTextField("Text")
+                    .DataValueField("Text")
+                    .OptionLabel("--select--")
+                    .Filter("contains")
+                    .DataSource(source =>
+                    {
+                        source.Read(read => read.Action("GetYesNoStatus", "ManagePayment"));
+                    })
+                    .HtmlAttributes(new { style = "width:100%;" })
+                    .Events(e => e.Change("SearchPaymentDetail"))
+                )
+            </div>
+            <div class="col-md-3">
+
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.PaymentViewModel>()
+            .Name("gridPayment")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.EncodedRid).Hidden();
+                columns.Bound(c => c.Id).Hidden();
+                columns.Bound(c => c.RegistrationNo).Title("Registration Id").Width("130");//.ClientTemplate("<a href='" + "/Property/ManagePayment/Payment/#= EncodedRid #'>#=RegistrationNo#</a>");
+                columns.Bound(c => c.DepartmentName).Title("Department").Width("130");
+                columns.Bound(c => c.SectorName).Title("Sector").Width("70");
+                columns.Bound(c => c.BlockName).Title("Block").Width("70");
+                columns.Bound(c => c.PlotNo).Title("Property No").Width("100");
+                columns.Bound(c => c.Applicant).Title("Applicant");
+                //columns.Bound(c => c.PropertyNo).Title("Property No.");
+                columns.Bound(c => c.NDCDate).Title("NDC Date").Format("{0:dd-MM-yyyy}");
+                columns.Bound(c => c.LeaseRentUpto).Title("Lease Rent Upto Date");
+            })
+            .Sortable()
+            .Filterable()
+            .Resizable(resize => resize.Columns(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+            .DataSource
+            (
+                dataSource => dataSource
+                    .Ajax().Model(model => model.Id(p => p.Id)).ServerOperation(true)//.Sort(sort => sort.Add("RECEIPT_ID").Descending())
+                    .Read(read => read.Action("GetPartialOrFullPaymentDetails", "ManagePayment").Data("FilterParameter")).Sort(s=>s.Add("Id").Descending()).PageSize(10)
+            )
+        )
+    </div>
+</div>
+
+<script type="text/javascript">
+    function FilterParameter() {
+        return {
+            departmentId : $('#DepartmentId').val(),
+            isPremiumPaid: $('#IsTotalPremiumPaid').val(),
+            isLeaseRentPaid: $('#IsOneTimeLeasePaid').val()
+        }
+    }
+
+    function SearchPaymentDetail() {
+        $('#gridPayment').data("kendoGrid").dataSource.read();
+    }
+</script>

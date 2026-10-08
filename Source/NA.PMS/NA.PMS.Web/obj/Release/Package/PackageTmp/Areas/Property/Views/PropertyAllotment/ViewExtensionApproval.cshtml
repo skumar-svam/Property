@@ -1,0 +1,188 @@
+﻿@using Kendo.Mvc.UI
+@model NA.PMS.Model.ExtensionDetails
+
+@{
+    ViewBag.Title = "View Extension For Approval";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">View Extension Approval</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory"></div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <div>
+                    <input type="hidden" id="hdnAcceptReject" />
+                    @Html.HiddenFor(m => m.Id)
+                </div>
+                <div class="form-bxes">
+                    @{Html.RenderPartial("_AddEditExtension", Model);}
+                </div>
+            </div>
+            <div class="box-button text-center">
+                <button type="button" value="Cancel" id="bckbtn" class="btn btn-default" onclick="javascript: window.location = '@Url.Action("ManageExtensionApproval", "PropertyAllotment")';">Back</button>
+                @if (Model.Status == @NA.PMS.Common.Constants.InProgress)
+                {
+                    <button type="button" class="btn btn-default" value="Submit" id="btnSubmitApprove">Approve</button>
+                    <button type="button" class="btn btn-default" value="Submit" id="btnSubmitReject">Reject</button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div id='divCommentPost' class='col-md-12 adminfeediv'>
+    <div class="row form-group">
+        <div class="col-md-3">
+            @Html.Label("Enter Comment :")
+        </div>
+        <div class="col-md-8">
+            @Html.TextAreaFor(model => model.Comment, new { style = "width: 100%; height:30px;", @maxlength = "500" })
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-12" style="text-align:center;padding-top:20px;">
+            <button type='submit' id="btnCommentPostApprove" class='btn btn-default' value='Save'>Post</button>
+            <button type='button' class='btn btn-default' value='Cancel' onclick="CloseCommnetPostPopUp();">Close</button>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-12" id='DivCommentView'>
+    <div class="row form-group">
+        <div class="col-md-3">
+            @Html.Label("From :")
+        </div>
+        <div class="col-md-8">
+            @Html.DisplayFor(model => model.AssignTo)
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-3">
+            @Html.Label("Date :")
+        </div>
+        <div class="col-md-8">
+            @Html.DisplayFor(model => model.Approved_Date)
+        </div>
+        <div>
+
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-3">
+            @Html.Label("Comments:")
+        </div>
+        <div class="col-md-8">
+            @Html.TextAreaFor(model => model.Comment, new { style = "", disabled = "disabled", @class = "form-control" })
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-12" style="text-align:center">
+            <button type='button' class='btn btn-default' style="align-items :center; " value='Cancel' onclick="CloseCommnetPopUp();">Close</button>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        GetPropertyDetails();
+        $("#btnSubmitApprove").click(function () {
+            OpenCommentPostPopUp();
+            $('#hdnAcceptReject').val('');
+            $('#hdnAcceptReject').val('true');
+        });
+        $("#btnSubmitReject").click(function () {
+            OpenCommentPostPopUp();
+            $('#hdnAcceptReject').val('');
+            $('#hdnAcceptReject').val('false');
+        });
+        $("div[id='divCommentPost']").kendoWindow({
+            modal: true,
+            visible: false,
+            width: "40%"
+        });
+        $("div[id='DivCommentView']").kendoWindow({
+            title: "Comment",
+            modal: true,
+            visible: false,
+            width: "40%"
+        });
+        if(($('#Status').val()== @NA.PMS.Common.Constants.Approved) || ($('#Status').val()== @NA.PMS.Common.Constants.RejectedProp))
+        {
+            $('#btnViewComments').show();
+        }
+        $("a#btnViewComments").click(function () {
+            OpenCommentViewPopUp()
+        });
+        var datepicker = $("#Leasedeeddate").data("kendoDatePicker");
+        datepicker.readonly();
+        var datepicker = $("#Possessiondate").data("kendoDatePicker");
+        datepicker.readonly();
+        $("#Rid").data("kendoDropDownList").enable(false);
+        $("#OnlineRequestRefNo").attr("readonly",true);
+        $("#bckbtn").click(function (){
+            var PendencyReq = '@Request.QueryString["pr"]';
+            if (PendencyReq == 'true') {
+                window.location.href = '@Url.Action("PendencyReport", "Report", new { Area = "Reports" })';
+            }
+            else {    window.location.href = '@Url.Action("ManageExtensionApproval", "PropertyAllotment")';}
+        })
+    });
+
+    function OpenCommentPostPopUp() {
+        var win = $("#divCommentPost").data("kendoWindow");
+        win.center();
+        win.open();
+    }
+
+    function CloseCommnetPostPopUp() {
+        var win = $("#divCommentPost").data("kendoWindow");
+        win.close();
+    }
+
+    function OpenCommentViewPopUp() {
+        var win = $("#DivCommentView").data("kendoWindow");
+        win.center();
+        win.open();
+    }
+
+    function CloseCommnetPopUp() {
+        var win = $("#DivCommentView").data("kendoWindow");
+        win.close();
+    }
+
+    $("#btnCommentPostApprove").click(function () {
+        var Id = $("#Id").val();
+        var comment = $("#Comment").val();
+        var acceptReject = $('#hdnAcceptReject').val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ Id: Id, comment: comment, acceptReject: acceptReject }),
+            url: '/PropertyAllotment/SaveCommentByID',
+            success: function (result) {
+                if (result == true) {
+                    window.location.href = '@Url.Action("ManageExtensionApproval", "PropertyAllotment")';;
+                    return false;
+                }
+                else {
+                    alertify.error("Comment not updated.");
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    });
+</script>

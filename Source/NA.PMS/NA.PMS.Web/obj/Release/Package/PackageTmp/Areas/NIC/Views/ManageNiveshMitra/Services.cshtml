@@ -1,0 +1,70 @@
+﻿@model NA.PMS.Model.NMServicesVM
+@using Kendo.Mvc.UI;
+
+@{
+    ViewBag.Title = "Services";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="ManageRequestServices">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Manage Nivesh Services</h1></div>
+            <div class="col-md-6 col-sm-6 col-xs-12 mandatory">
+                <a target="_blank" class="btn btn-default" href="/NIC/ManageNiveshMitra/">Back</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.NMServicesVM>()
+                                .Name("GridServiceRequest")
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(c => c.ServiceCode).Title("Service Code").Width(70);
+                                    columns.Bound(c => c.ServiceName).Title("Service Name").Width(180);
+                                    columns.Bound(c => c.Status).Title("Status").ClientTemplate("#if(Status){#<label>Active</label>#}else{# In Active #}#").Width(100).Sortable(false);
+                                    columns.Bound(c => c.Id).Title("Action").ClientTemplate("<a href='/NIC/ManageNiveshMitra/AddEditServices/#=Id#' target='_blank'>Add/Edit</a>").Width(100).Sortable(false).Filterable(false);
+                                })
+                                .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                                .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                                .AutoBind(true)
+                                .ClientDetailTemplateId("Servicetemplate")
+                                .DataSource(dataSource => dataSource
+                                    .Ajax()
+                                    .Model(model => model.Id(c => c.Id))
+                                    .ServerOperation(true)
+                                    .Read(read => read.Action("GetNiveshMitraServices", "ManageNiveshMitra", new { area = "NIC" })).PageSize(10)
+                                    .Sort(s => s.Add(r => r.ServiceCode).Ascending())
+                                )
+        )
+    </div>
+
+    <script id="Servicetemplate" type="text/kendo-tmpl">
+        @(Html.Kendo().Grid<NA.PMS.Model.NMServicesVM>()
+                                    .Name("GridService_#=ServiceCode#")
+                                    .Columns(columns =>
+                                    {
+                                        columns.Bound(c => c.CitizenServiceName).Title("Citizen Service Name").Width(180);
+                                        columns.Bound(c => c.DepartmentName).Title("Dept Name").Width(100);
+                                        columns.Bound(c => c.Amount).Title("Amount").Width(100);
+                                        columns.Bound(c => c.Status).Title("Status").ClientTemplate("#if(Status){#<label>Active</label>#}else{# In Active #}#").Width(100).Sortable(false);
+                                    })
+                                    .DataSource(dataSource => dataSource
+                                        .Ajax()
+                                        .Model(model => model.Id(c => c.Id))
+                                        .ServerOperation(true)
+                                        .Read(read => read.Action("GetCitizenServiceDetailsbyServiceId", "ManageNiveshMitra", new { area = "NIC", ServiceCode = "#=ServiceCode#" })).PageSize(10)
+                                        .Sort(s => s.Add(r => r.ServiceCode).Ascending())
+                                    )
+                                   .Pageable()
+                                    .Sortable()
+                                    .ToClientTemplate()
+        )
+    </script>
+</div>
+<script type="text/javascript">
+
+
+</script>
+

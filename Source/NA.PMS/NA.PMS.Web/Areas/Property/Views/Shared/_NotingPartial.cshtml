@@ -1,0 +1,417 @@
+﻿@model NA.PMS.Model.NotingDetailsModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@using Kendo.Mvc.Infrastructure;
+
+<link rel="stylesheet" href="http://kendo.cdn.telerik.com/2017.1.118/styles/kendo.common.min.css">
+<link rel="stylesheet" href="http://kendo.cdn.telerik.com/2017.1.118/styles/kendo.rtl.min.css">
+<link rel="stylesheet" href="http://kendo.cdn.telerik.com/2017.1.118/styles/kendo.default.min.css">
+<link rel="stylesheet" href="http://kendo.cdn.telerik.com/2017.1.118/styles/kendo.mobile.all.min.css">
+
+@*<link href="~/Content/KendoCSS/2016.2/kendo.common.min.css" rel="stylesheet" />
+<link href="~/Content/KendoCSS/2016.2/kendo.rtl.min.css" rel="stylesheet" />
+<link href="~/Content/KendoCSS/2016.2/kendo.default.min.css" rel="stylesheet" />
+<link href="~/Content/KendoCSS/2016.2/kendo.mobile.all.min.css" rel="stylesheet" />*@
+
+@*<script src="http://code.jquery.com/jquery-1.12.3.min.js"></script>*@
+<script src="http://kendo.cdn.telerik.com/2017.1.118/js/angular.min.js"></script>
+<script src="http://kendo.cdn.telerik.com/2017.1.118/js/jszip.min.js"></script>
+<script src="http://kendo.cdn.telerik.com/2017.1.118/js/kendo.all.min.js"></script>
+
+@*<script src="~/Scripts/jquery-1.10.2.js"></script>*@
+@*<script src="~/Scripts/KendoJS/2016.2/angular.min.js"></script>
+<script src="~/Scripts/KendoJS/2016.2/jszip.min.js"></script>
+<script src="~/Scripts/KendoJS/2016.2/kendo.all.min.js"></script>*@
+<script src="~/Scripts/KendoJS/2016.2/kendo.pdf.min.js"></script>
+
+<style>
+    #divViewComment {
+        min-height: 450px;
+        max-height: 500px;
+    }
+    #NotingDetails .k-editor-toolbar-wrap{
+        display:none;
+    }
+    .k-button.btn-pad{
+        padding-left:20px;
+        padding-right:20px;
+    }
+</style>
+<div class="divNotingClass content-top-spce">
+    <div class="col-md-12" style="border:solid #e2e3e4; border-width:0 1px 0px 1px">
+        <div class="form-bx">
+            <div class="row">
+                @Html.HiddenFor(model=>model.Rid)
+                @*@Html.HiddenFor(model => model.NotingDetails, new { @id="hdnNoting"})*@
+            </div>
+            <div class="row">
+                <div class="col-md-12" style="padding-left:30px;">
+                    @*<label style="float:left">Noting Details</label>
+                    <label style="float:right; cursor:pointer;" id="btnViewComment" class="k-button btn-pad">View</label>                   
+                    <label style="float:right; cursor:pointer;" id="btnDownload" class="k-button btn-pad">Download</label>
+                    <label style="float:right; cursor:pointer;" id="btnPrintNotingDetail" class="k-button btn-pad">Print</label>*@
+                </div>
+                <div class="col-md-12" style="padding-left:30px;">                   
+                    @(Html.Kendo().EditorFor(model => model.NotingDetails)
+                        .Name("NotingDetails")
+                                  .Pdf(pdf => pdf
+                                      .Margin(20, 20, 20, 20)
+                                      .PaperSize("A4")
+                                      
+                                      .ProxyURL(Url.Action("Pdf_Export_Save", "PropertyAllotment", new { area="Property"}))
+                                  )
+                                .Tools(tools => tools
+                                    .Clear()
+                                    .CustomTemplate(t => t.Template("<label onclick='javascript:ViewDetail()' style='vertical-align:middle;' class='k-button btn-pad'>View</label>"))
+                                    //.CustomTemplate(t => t.Template("<label onclick='javascript:PrintDetails()' style='vertical-align:middle;' class='k-button'>Print</label>"))
+                                    //.CustomTemplate(t => t.Template("<label onclick='javascript:DownloadDetails(this)' style='vertical-align:middle;' class='k-button'>Download</label>"))
+                                    .Print()
+                                    .Pdf()
+                                    )
+                        .HtmlAttributes(new { style = "height:240px; width:100%;" })
+                        .Resizable(resizable => resizable.Content(true).Toolbar(true))
+                    )
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12" id="divCurrentNotes" style="padding-left:30px;">
+                    @Html.Label("Write notes:-")
+                    @(Html.Kendo().EditorFor(model => model.AddNotingDetails)
+                        .Name("AddNotingDetails")
+                        .Pdf(pdf => pdf
+                                    .Margin(20, 20, 20, 20)
+                                    .PaperSize("A4")
+                                    .ProxyURL(Url.Action("Pdf_Export_Save", "PropertyAllotment", new { area = "Property" }))
+                                    )                      
+                        .Tools(tools=>tools
+                              //.CustomTemplate(t => t.Template("<label onclick='javascript:DownloadCurrentNotes(this)' style='vertical-align:middle;' class='k-button'>Download</label>"))
+                              //.CustomTemplate(t => t.Template("<label onclick='javascript:PrintCurrentNotes(this)' style='vertical-align:middle;' class='k-button'>Print</label>"))
+                              .FontColor()
+                              //.FontName()
+                              .FontSize()
+                              //.BackColor()
+                              //.ForeColor()
+                              .Print()
+                              .Pdf()
+                              //.ExportAs(export=>export.Proxy("EditorExport","PropertyRegistration"))
+                        )
+                        .HtmlAttributes(new { style = "height:240px; width:100%;" })
+                        .Resizable(resizable => resizable.Content(true).Toolbar(true))
+                    )
+                </div>
+            </div>
+        </div>
+        <div class="box-button text-center">
+            <input type='button' id="btnBack" class='btn btn-default' value='Back' />
+            <input type="button" id="btnAddComment" class="btn btn-add" value="Add Notes" style="margin-right:15px;" />
+            @if (Model.IsNotingDetailShow == true)
+            {
+                <input type="button" id="btnSubmitForApprovallink" class="btn btn-add" alt="click to open Check List popup" value="Move" />
+            }
+        </div>
+    </div>
+</div>
+
+<div id="divViewComment">
+    <div class="row">
+        <div id="divCommentBody" class="col-md-12 form-group">
+            <div id="comment" style="word-wrap:break-word;">
+                @Model.ViewComments
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id='divAssineRequetApproval' class='adminfeediv'>
+    <div class="row" style="padding-top:15px;padding-bottom:40px;">
+        <div class="col-md-4 col-sm-4 col-xs-12 col-for-label form-group">
+            @Html.Label("Send to :")
+        </div>
+        <div class="col-md-5 col-sm-6 col-xs-12 form-group">
+            @(Html.Kendo().DropDownListFor(model => model.User)
+            .Name("User")
+            .DataTextField("text")
+            .DataValueField("id")
+            .Filter("contains")
+            .OptionLabel("Select")
+            .DataSource(source =>
+            {
+                source.Read(read =>
+                {
+                    read.Action("GetAssineTo", "Allotment");
+                });
+            })
+            .HtmlAttributes(new { style = "width:100%" })
+            )
+            @Html.ValidationMessageFor(model => model.User)
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12 form-group" style="text-align:center">
+            <button type='button' class='btn btn-default' value='Cancel' onclick="CloseCommnetPopUpForApproval();">Close</button>
+            <button type='submit' id="btnRequetForApproval" class='btn btn-default' value='Save'>Submit</button>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $("#btnBack").click(function () {
+        window.history.back();
+    });
+    $(document).ready(function () {
+        $('#NotingDetails').data('kendoEditor').body.contentEditable=false;
+        var editor = $('#AddNotingDetails').data('kendoEditor');
+        if ('@Model.IsNotingDetailShow' == 'True') {
+            editor.body.contentEditable = true;
+        }
+        else {
+            editor.body.contentEditable = false;
+        }
+
+        $("div[id='divViewComment']").kendoWindow({
+            modal: true,
+            title: "Noting Details",
+            actions: ["Pin", "Minimize", "Maximize", "Close"],
+            visible: false,
+            width: "75%"
+        });
+
+        $("div[id='divAssineRequetApproval']").kendoWindow({
+            modal: true,
+            title: "Move Noting",
+            visible: false,
+            width: "39%"
+        });
+        $("#btnSubmitForApprovallink").click(function () {
+            OpenAssineRequetApprovalPopUp()
+        });
+    });
+
+    function OpenAssineRequetApprovalPopUp() {
+        var win = $("#divAssineRequetApproval").data("kendoWindow");
+        win.center();
+        win.open();
+    }
+    function CloseCommnetPopUpForApproval() {
+        var win = $("#divAssineRequetApproval").data("kendoWindow");
+        win.close();
+    }
+
+    $('#btnViewComment').click(function () {
+        var win = $("#divViewComment").data("kendoWindow");
+        win.center();
+        win.open();
+    })
+
+    $("#btnRequetForApproval").click(function () {
+        var rid = $("#Rid").val();
+        var user = $("#User").val();
+        if (user == "") {
+            alertify.error("Please select assignee user");
+            return false;
+        }
+        else {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ rid: rid, user: user }),
+                url: '/PropertyRegistration/SubmitForMoveNoting',
+                success: function (result) {
+                    if (result == 0) {
+                        alertify.error("Noting is not moved to other user");
+                    }
+                    else {
+                        alertify.success("This noting is moved to other user.")
+                        window.location.href = '@Url.Action("ManageNotings", "PropertyRegistration")';
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    //alert(respText);
+                }
+
+            });
+        }
+    });
+
+    $("#btnAddComment").click(function () {
+        var rid = $("#Rid").val();
+        var AddNotingDetails = $("#AddNotingDetails").val().trim();
+        if (AddNotingDetails == "") {
+            alertify.error("Please write your comment.");
+            return false;
+        }
+        else {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json:charset=utf-8',
+                data: JSON.stringify({ rid: rid, addNotingDetails: AddNotingDetails }),
+                url: '/PropertyRegistration/AddNotingsDetails',
+                success: function (result) {
+                    if (result != "") {
+                        alertify.success("Your comment is added successfully.")
+                        $('#AddNotingDetails').data("kendoEditor").value('');
+                        window.location.reload();
+                    }
+                    else {
+                        alertify.error("Your comment is not saved");
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+    });
+
+    $('#btnDownload').click(function (e) {
+        var contents = $('#NotingDetails').data("kendoEditor");
+        contents.saveAsPDF();
+        //var rid = $('#Rid').val();
+        //var content = $('#hdnNoting').val();
+        //var content = $('#NotingDetails').val();
+        //var content = document.getElementById("comment").innerHTML;
+        //if (content != "" || content != null) {
+        //    $.ajax({
+        //        type: 'Post',
+        //        contentType: 'application/json:charset=utf-8',
+        //        data: JSON.stringify({ content: content.toString() }),
+        //        url: '/PropertyAllotment/DownloadNotingDetails',
+        //        success: function (result) {
+        //            alertify.success(result);
+        //        },
+        //        error: function (err) {
+        //            alertify.error("Data field is not valid");
+        //        }
+        //    });
+        //}
+        //else {
+        //    alertify.error("content is not available");
+        //}
+    });
+
+    $('#btnUpload').click(function () {
+        var formData = new FormData();
+        var file = $('#fileUploadId')[0];
+        formData.append("fileUploadId", file.files[0]);
+
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            data: formData,
+            url: '/PropertyRegistration/UploadDocumnetDoc',
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function (result) {
+                $("#AddNotingDetails").data("kendoEditor").value(result);
+            },
+            error: function (err) {
+                //alert(err.statusText);
+                alertify.error("Data field is not valid");
+                //$('#loadingImg').css("display", "none");
+                file.value = null;
+            }
+        });
+
+
+    });
+
+    $('#btnPrintNotingDetail').click(function () {
+        var flag = "previous";
+        PrintDiv(flag);
+    });
+
+    function ViewDetail() {
+        var win = $("#divViewComment").data("kendoWindow");
+        win.center();
+        win.open();
+    }
+
+    function PrintDetails() {
+        //alert("testing");
+        var flag = "previous";
+        PrintDiv(flag);
+    }
+
+    function PrintCurrentNotes() {
+        var flag = "newnotes";
+        PrintNotingDiv(flag);
+    }
+
+    function DownloadDetails() {
+        var contents = $('#NotingDetails').data("kendoEditor");
+        contents.saveAsPDF();
+    }
+
+    function DownloadCurrentNotes() {
+        var contents = $('#AddNotingDetails').data("kendoEditor");
+        contents.saveAsPDF();
+    }
+
+    function PrintDiv(flag) {
+
+        var contents;
+        if (flag == "previous") {
+            contents = document.getElementById("comment").innerHTML;
+        }
+        //if (flag == "newnotes") {
+        //    //contents = document.getElementById("AddNotingDetails").data("kendoEditor");
+        //    contents = $('#divCurrentNotes').find('iframe').innerHTML;
+        //    //contents.print();
+        //    //contents = document.getElementById("divCurrentNotes").innerHTML;
+        //}
+        //alert(contents);
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+    function PrintNotingDiv(e) {
+
+        var contents;
+        if (flag == "previous") {
+            contents = document.getElementById("comment").innerHTML;
+        }
+        if (flag == "newnotes") {
+            contents = contents = document.getElementById("AddNotingDetails").innerHTML;
+        }       
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+</script>

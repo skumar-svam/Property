@@ -1,0 +1,272 @@
+﻿@using NA.PMS.Common
+@using NA.PMS.Model
+@using Kendo.Mvc.UI
+
+@{
+    ViewBag.Title = "Manage Employee";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+   
+    .linkCss {
+        color: #337ab7;
+        text-decoration: underline;
+    }
+
+    .linkCss:hover {
+        color: #337ab7;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+    .k-grid-content{
+        overflow-y:hidden;
+        overflow-x:hidden;
+    }
+    .modal-body{
+        margin:0;
+        padding:0;
+    }
+
+</style>
+
+
+<div class="SA-ManageUsers">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Employee</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                <a href="/Admin/Organization/Employee" id="btn-add-emp" target="_blank">Register Employee</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+
+    <div>
+        <input type="hidden" id="hdnRoleID" />
+    </div>
+
+    <div class="k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.UserManagement.NDAUserViewModel>()
+        .Name("gridUsers")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.Id).Hidden(true);
+            columns.Bound(c => c.IsActive).Hidden(true);
+            columns.Bound(c => c.UserName).Title("Username").Width(130).ClientTemplate("<a href='/Admin/Organization/Employee?UserRefId= #= UserRefId#' >#=UserName#</a>").Filterable(false).Sortable(false);
+            columns.Bound(c => c.FullName).Title("Name");
+            columns.Bound(c => c.Email).Title("Email");
+            columns.Bound(c => c.MobileNo).Title("Mobile No").Width(120);
+            columns.Bound(c => c.UserProfile).Title("Profile");
+            columns.Bound(c => c.Id).Title("Action").Width(70).ClientTemplate("#if(IsActive == true){#<a class='gridEdit' href='/Admin/Organization/Employee/#= UserRefId#' target='_blank'> Edit</a>#} else {#<span class='gridNotEdit'>Edit</span>#} #").Filterable(false).Sortable(false);
+            columns.Bound(c => c.Id).Title("Role").Width(110).ClientTemplate("#if(IsActive == true){#<a onClick = 'javascript:ViewAdminUserRole(#= id#)' class='linkCss'><span class='glyphicon glyphicon-eye-open'></span>View Role</a>#} else {#<span>View Role</span>#} #").Filterable(false).Sortable(false);
+            columns.Bound(c => c.Id).Title("Lock/Unlock").Width(110).ClientTemplate("#if(IsActive == true){#  <a onclick='javascript:LockUnlockToggle(#=UserRefId#);' class='linkCss'><i class='fa fa-lock' aria-hidden='true'></i> Lock</a> #} else{#<a  onclick='javascript:LockUnlockToggle(#=UserRefId#);' class='linkCss'> <i class='fa fa-unlock' aria-hidden='true'></i> Unlock</a>#}#").Filterable(false).Sortable(false);
+            columns.Bound(c => c.Id).Title("Password").Width(100).ClientTemplate("<a onClick = 'javascript:ResetPassword(#= UserRefId#)' class='linkCss'>Reset</a>").Filterable(false).Sortable(false);
+        })
+        .Filterable().Resizable(resize => resize.Columns(true))
+        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(new[] { 10, 20, 50, 100, 500 }).Info(true).PreviousNext(true).Input(true).Numeric(true).ButtonCount(10))
+        .ClientDetailTemplateId("template")
+        .DataSource(dataSource => dataSource
+            .Ajax().Model(model => model.Id(p => p.Id))
+             .ServerOperation(true)
+             .Read(read => read.Action("GetUsersAsDataSource", "Organization", new { area = "Admin" })).PageSize(10)
+             .Sort(s => s.Add(o => o.Id).Descending())
+        )
+        )
+    </div>
+
+    <script id="template" type="text/kendo-tmpl">
+        @(Html.Kendo().Grid<NA.PMS.UserManagement.NDAUserViewModel>()
+            .Name("grid_#=Id#")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.DepartmentsName).Title("Department");
+            })
+            .DataSource(dataSource => dataSource
+                    .Ajax()
+                    .Model(model => model.Id(p => p.Id))
+                    .ServerOperation(true)
+                    .Read(read => read.Action("GetDepartmentListByIdAsDataSource", "Organization", new { area = "Admin", UserRefId = "#=Id#" }))
+            )
+            .ToClientTemplate()
+        )
+
+    </script>
+    <script>
+        function dataBound() {
+            this.expandRow(this.tbody.find("tr.k-master-row").first());
+        }
+    </script>
+</div>
+
+
+
+<div id="DivRoleView" class="modal fade" role="dialog" style="padding-top:100px;">
+    <div class="modal-dialog">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">User Role</h4>
+            </div>
+            <div class="modal-body">
+                <div class="k-grid-content">
+                    @(Html.Kendo().Grid<NA.PMS.UserManagement.NDARoleViewModel>()
+                        .Name("gridRoles")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(c => c.RoleId).Hidden(true);
+                            columns.Bound(c => c.ApplicationId).Hidden(true).Title("Application Id").Width(35);
+                            columns.Bound(c => c.RoleName).Title("Role Name").Width(50);
+                            //columns.Bound(c => c.RoleType).Title("Role Type").Width(50);
+                            columns.Bound(c => c.AplicationName).Title("Application Name").Width(50);
+                            columns.Bound(c => c.CreatedBy).Title("User Name").Width(50);
+                        })
+                        .Resizable(resize => resize.Columns(true))
+                        .DataSource(dataSource => dataSource
+                                .Ajax().Model(model => model.Id(p => p.RoleId))
+                                .ServerOperation(true)
+                                        .Read(read => read.Action("GetApplicationRoleDetailByIdAsDataSource", "Organization").Data("FilterData")).PageSize(5)
+                        )
+                        .AutoBind(true)
+
+                    )
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="DivResetPassword" class="modal fade" role="dialog" style="padding-top:100px;" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog lg">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Reset Password</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row form-group">
+                    <div class="col-sm-10 col-sm-offset-1">
+                        <input type="hidden" id="txtUserId" name="txtUserId" />
+                        <input type="hidden" id="txtPassword" name="txtPassword" />
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-sm-10 col-sm-offset-1">
+                        <label class="label-text" id="lblPassword"></label>
+                        <label class="label-text" id="lblPassword2"></label>
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-sm-5"></div>
+                    <div class="col-sm-5">
+                        <button type="button" class="btn btn-default" id="btnSubmitPassword">Update</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('#btnSubmitPassword').click(function () {
+            var newPass = $('#txtPassword').val();
+            var userId = $('#txtUserId').val();
+            var umodel = {
+                UserRefId: userId,
+                NewPassword: newPass,
+                ActionType: "changepassword"
+            };
+            ResetActionForEmployee(umodel);
+            //ResetPasswordBySuperAdmin();
+        });
+
+    });
+
+
+    var userid; var nPass;
+    function ResetPassword(row) {
+        userid = row;
+        var randomString = GeneratePassword();
+        nPass = randomString;
+        $('#txtUserId').val(row);
+        $('#txtPassword').val(randomString);
+        $('#lblPassword').text("Your new password is: " + randomString);
+        $('#lblPassword2').text("If you wish to update the password in system, click on Update.");
+        $('#DivResetPassword').modal('show');
+    }
+
+    function GeneratePassword() {
+        var text = "";
+        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        var possible1 = "@@#$&";
+        var possible2 = "0123456789";
+
+        for (var i = 0; i < 8; i++)
+        {          
+            text += possible.charAt(Math.floor(Math.random() * possible.length)) ;
+        }
+        text += possible1.charAt(Math.floor(Math.random() * possible1.length)) + possible2.charAt(Math.floor(Math.random() * possible2.length));
+        return text;
+    }
+
+    function LockUnlockToggle(userid) {
+        if(userid != undefined && userid != ""){
+            var umodel = {
+                UserRefId: userid,
+                ActionType: "lockunlock"
+            };
+            ResetActionForEmployee(umodel);
+        }
+    }
+
+    function ViewAdminUserRole(row) {
+        //alert("show modal" + row);
+        $("#hdnRoleID").val(row);
+        $("#gridRoles").data("kendoGrid").dataSource.read();
+        $('#DivRoleView').modal('show');
+    }
+
+    function FilterData() {
+        //alert($("#hdnRoleID").val());
+        return { UserRefId: $("#hdnRoleID").val() };
+    }
+
+    function ResetActionForEmployee(umodel) {
+        if (umodel != null && umodel != undefined) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ user: umodel }),
+                url: '/Admin/Organization/SaveEmployeeInfoByActionType',
+                success: function (result) {
+                    if (result != null) {
+                        if (result.ReturnTypeId == '@ReturnType.Success') {
+                            $("#gridUsers").data("kendoGrid").dataSource.read();
+                            alertify.success("User updated successfully.");
+                        }
+                        $('#DivResetPassword').modal('hide');
+                    }
+                    else
+                        alertify.error("Provider failed to update Info, try later.");
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+    }
+</script>

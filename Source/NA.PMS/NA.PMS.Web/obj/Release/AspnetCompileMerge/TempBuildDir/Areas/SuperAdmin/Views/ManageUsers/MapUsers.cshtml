@@ -1,0 +1,337 @@
+﻿@model NA.PMS.Model.UsersModel
+@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@{
+    ViewBag.Title = "Map Users";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/Scripts/kendo.aspnetmvc.min.js"></script>
+
+<style>
+    .link {
+        color: blue;
+        text-decoration: underline;
+    }
+
+    .link:hover {
+        color: blue;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    #divSearchUsers {
+        display: none;
+    }
+
+    #divSearchPanel {
+        display: none;
+    }
+
+    #UsersSearchGrid {
+        border: 1 !important;
+    }
+    .k-grid-content{
+        overflow-y:hidden;
+        overflow-x:hidden;
+    }
+</style>
+
+<div class="MapUsersRole">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Users mapping with Role</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+               
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 content-top-spce">
+        <div class="col-md-12">
+            <h2 class="col-md-12 blck-heading">Map User with Role</h2>
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            <label>Select Application</label>
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(model => model.applicationID)
+                                .Name("Applications")
+                                .DataTextField("ApplicationName")
+                                .DataValueField("ApplicationId")
+                                .Filter("contains")
+                                .OptionLabel("Select")
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("GetApplications", "ManageAdminRoles");
+                                    });
+                                })
+                                .HtmlAttributes(new { style = "width: 100%;" })
+                                .Events(e => e.Change("ApplicationChange"))
+                            )
+                        </div>
+
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            <label>Select Role</label>
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(model => model.roleId)
+                                .Name("ApplicationRoles").CascadeFrom("Applications")
+                                .DataValueField("roleId").AutoBind(false)
+                                .DataTextField("roleName")
+                                .Filter("contains")
+                                .OptionLabel("Select")
+                                .HtmlAttributes(new { style = "width:100%;" })
+                                .DataSource(source => source.Read(read => read.Action("GetRoles", "MenuMappingAdmin").Data("FilterRoleOnApplication")).ServerFiltering(true))
+                                .Events(e => e.Change("ApplicationRoleChange"))
+                            )
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            <label>Search Users</label>
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownList()
+                                .Name("UserName")
+                                .DataValueField("empID").AutoBind(false)
+                                .DataTextField("empID")
+                                .Filter(FilterType.Contains)
+                                .OptionLabel("Select")
+                                .HtmlAttributes(new { style = "width:100%;" })
+                                .DataSource(source => source.Read(read => read.Action("GetApplicationUsers", "ManageUsers").Data("FilterUserName")))
+                                .Events(e => e.Change("UserNameChange"))
+                            )
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12 k-grid-content" id="divSearchUsers">
+            @(Html.Kendo().Grid<NA.PMS.Model.UsersModel>()
+                .Name("UsersSearchGrid")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.id).Width(10).Title("ID").Hidden(true);
+                    columns.Bound(c => c.isActive).Hidden(true).Title("Is Locked?");
+                    columns.Bound(c => c.empID).Title("Employee ID").Filterable(false).Sortable(false);
+                    columns.Bound(c => c.fullName).Title("Name").Filterable(false).Sortable(false);
+                    columns.Bound(c => c.mobile).Title("Mobile Number").Filterable(false).Sortable(false);
+                    columns.Bound(c => c.email).Title("Email").Filterable(false).Sortable(false);
+                    //columns.Bound(c => c.strDeptts).Title("Departments").Filterable(false).Sortable(false);
+                    columns.Bound(c => c.id).Title("Action").ClientTemplate("<a onClick='javascript:MapUserToRole(this);' class='link'>Add</a>").Filterable(false).Sortable(false);
+                })
+                .DataSource(dataSource => dataSource
+                    .Ajax().Model(model => model.Id(p => p.id))
+                     .ServerOperation(false)
+                                    .Read(read => read.Action("SearchUsers", "ManageUsers").Data("FilterEmpID"))
+
+                )
+            )
+        </div>
+    </div>
+    
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 blck-heading-grid">Mapped Application Users</div>   
+    <div class="col-md-12 k-grid-content">      
+        @(Html.Kendo().Grid<NA.PMS.Model.UsersModel>()
+                .Name("ApplicationUsers")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.id).Width(10).Title("ID").Hidden(true);
+                    columns.Bound(c => c.roleId).Hidden(true);
+                    columns.Bound(c => c.applicationID).Hidden(true);
+                    columns.Bound(c => c.isActive).Hidden(true).Title("Is Locked?");
+                    columns.Bound(c => c.empID).Title("Username");
+                    columns.Bound(c => c.fullName).Title("Name");
+                    columns.Bound(c => c.mobile).Title("Mobile Number");
+                    columns.Bound(c => c.email).Title("Email");
+                    columns.Bound(c => c.strDeptts).Title("Departments");
+                    columns.Bound(c => c.roleName).Title("RoleName").Filterable(false).Sortable(false);
+                    columns.Bound(c => c.id).Title("Action").ClientTemplate("<a onClick = 'javascript:RemoveUser(this)' class='link'>Remove</a>").Filterable(false).Sortable(false);
+                })
+                .Sortable()
+                .Filterable()
+                .Groupable()
+                .Resizable(resize => resize.Columns(true))
+                .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .DataSource(dataSource => dataSource
+                    .Ajax().Model(model => model.Id(p => p.id))
+                     .ServerOperation(true)
+                            .Read(read => read.Action("GetAllUsers", "ManageUsers").Data("FilterApplicationAndRole")).PageSize(10)
+                )
+        )
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#btnSearch").click(function () {
+
+            $("#gridSearch").data("kendoGrid").dataSource.read();
+        });
+        //$("#gridRemove").data("kendoGrid").dataSource.read();
+
+        $("#btnClear").click(function () {
+            $("#empID").val('');
+            $("#gridSearch").data("kendoGrid").dataSource.read();
+        });
+    });
+
+    function FilterApplicationAndRole(){
+        return {
+            applicationId: $('#Applications').val(),
+            roleId: $('#ApplicationRoles').val()
+        };
+    }
+    function ApplicationChange(){
+        $("#ApplicationUsers").data("kendoGrid").dataSource.read();
+    }
+    function ApplicationRoleChange(){
+        $("#ApplicationUsers").data("kendoGrid").dataSource.read();
+    }
+
+    function AdditionalDataDDL() {
+        return { applicationID: $("#applications").val() };
+    }
+
+    function change(e) {
+        //$("#gridRemove").data("kendoGrid").dataSource.read();
+    }
+
+    function MapUserToRole(row) {
+        if ($("#Applications").val() == '' || $("#Applications").val() == 0) {
+            alertify.error("Please select an Application");
+            return false;
+        }
+
+        if ($("#ApplicationRoles").val() == '' || $("#ApplicationRoles").val() == 0) {
+            alertify.error("Please select a Role");
+            return false;
+        }
+
+        var tr = $(row).parent().parent();
+        var id = $(tr).children("td:eq(0)").text();
+        var roleID = $("#ApplicationRoles").val();
+        
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ id: id, roleID: roleID}),
+            url: '/ManageUsers/MapUserToRole',
+            success: function (result) {
+                if (result == 1) {
+                    $("#UserName").val('');
+                    alertify.success("User Role mapped successfully.");
+                    $("#UsersSearchGrid").data("kendoGrid").dataSource.read();
+                    //$("#gridRemove").data("kendoGrid").dataSource.read();
+                    $("#ApplicationUsers").data("kendoGrid").dataSource.read();
+                    
+                    $("#divSearchUsers").css("display", "none");
+                }
+                else if (result == 0) {
+                    alertify.error("User is already associated with a Role for this Application.");
+                    $("#divSearchUsers").css("display", "none");
+                }
+                else if (result == 2) {
+                    alertify.error("User is already an Admin for this Application.");
+                    $("#divSearchUsers").css("display", "none");
+                }
+                else {
+                    alertify.error("Some error occured. Please try again later.");
+                    $("#divSearchUsers").css("display", "none");
+                }
+            },
+            error: function (obj) {
+                //alert('Error While Saving Record.');
+            }
+        });
+    }
+
+    function RemoveUser(row) {
+        var tr = $(row).parent().parent();
+        var userid = $(tr).children("td:eq(0)").text();
+        var roleid = $(tr).children("td:eq(1)").text();
+        var applicationid = $(tr).children("td:eq(2)").text();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ userId: userid, roleId:roleid, applicationId:applicationid }),
+            url: '/ManageUsers/RemoveUser',
+            success: function (result) {
+                if (result == true) {
+                    alertify.success("User Role mapping removed successfully.");
+                    $("#ApplicationUsers").data("kendoGrid").dataSource.read();                   
+                }
+                else
+                    alertify.error("Some error occured. Please try again later.");
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+
+    function AdditionalData() {
+        var empID = $("#empID").val();
+        return {
+            empID: empID
+        };
+    }
+
+    function AdditionalData1() {
+        var roleID = $("#Roles").val();
+        //In case roleId is empty or null -> In this case, grid read action is not bein called on Server-side.
+        if (roleID == '' || roleID == 0) {
+            //$("#gridRemove").data("kendoGrid").dataSource.data([]);
+        }
+        else {
+            return {
+                roleID: roleID
+            };
+        }
+    }
+
+    function FilterRoleOnApplication() {
+        return { applicationID: $("#Applications").val() };
+    }
+    var uname;
+    function FilterUserName() {
+        return { empID: uname }
+    }
+    function FilterEmpID() {
+        return { empID: $("#UserName").val() }
+    }
+    function UserNameChange() {
+        uname = $("#UserName").val();
+        if (uname == null || uname == "") {
+            $("#divSearchUsers").css("display", "none");
+        }
+        else {
+            $("#UsersSearchGrid").data("kendoGrid").dataSource.read();
+            $("#divSearchUsers").show();
+        }        
+    }
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+

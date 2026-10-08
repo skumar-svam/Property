@@ -1,0 +1,192 @@
+﻿@model NA.PMS.NICServices.SWPPaymentViewModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+
+@{
+    ViewBag.Title = "PaymentReceipt";
+    Layout = "~/Views/Shared/_LayoutNIC.cshtml";
+}
+
+<style>
+    .row-pad {
+        padding-left: 30px;
+        padding-right: 30px;
+    }
+</style>
+
+<div id="div-payment" class="col-md-10 col-md-offset-1">
+    <div class="col-md-12 row-prnt">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12 col-prnt-lt"><h1 class="gridTitle">Online Payment Status</h1></div>
+            <div class="col-md-6 col-sm-6 col-xs-12 mandatory col-prnt-rt"></div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw hdr-ln"></div>
+    <div class="col-md-12 content-top-spce row-prnt" id="first-form">
+        <div class="inr-bx row-prnt" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            <h2 class="blck-heading">Payment Receipt</h2>
+            <div class="form-bx row-prnt" id="payment-receipt-body">
+                <div class="row row-pad">
+                    @*@{
+                        if (Model.HtmlContent != null && Model.HtmlContent != "")
+                        {
+                            @Html.Raw(Model.HtmlContent);
+                        }
+                    }*@
+
+                </div>
+                <div class="row">
+                    <div class="col-md-12" style="background:#00a182;display:none;">
+                        <div class="noida-logo"></div>
+                    </div>
+                    <div class="col-md-12">
+                        <h2 style="text-align:center;padding:0;margin-bottom:2px;">NEW OKHLA INDUSTRIAL DEVELOPMENT AUTHORITY</h2>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <h4 style="text-align:center;padding:0;margin-bottom:2px;">Sector-6 Administrator Office, NOIDA</h4>
+                    </div>
+                </div>
+                <div class="row ">
+                    <div class="col-md-12">
+                        <h5 style="text-align:center;padding:0;margin-top:3px;">Payment Receipt </h5>
+                    </div>
+                </div>
+                <div class="row row-pad">
+                    <div class="col-md-12">
+                        <span style="width:100%;float:left"><b> Scheme Form Id: &nbsp;<span id="ServiceRequestId">@Model.ApplicationFormId</span></b></span>
+                    </div>
+                </div>
+                <div class="row row-pad">
+                    <div class="col-md-12">
+                        <span style="width:100%;float:left"><b> Applicant Name: &nbsp;<span id="Name">@Model.Applicant</span></b></span>
+                    </div>
+                </div>
+                <div class="row row-pad">
+                    <div class="col-md-12">
+                        <span style="width:50%;float:left"><b> Department: &nbsp;<span id="DepartmentName">@Model.Department</span></b> </span>
+                        <span style="width:50%;text-align:right;float:right"><b>Online Request No.: &nbsp;<span id="Mobile">@Model.OnlineRequestId</span></b></span>
+                    </div>
+                </div>
+                @*<div class="row row-pad">
+                    <div class="col-md-12">
+                        <span style="width:50%;float:left"><b> Sector: &nbsp;<span id="DepartmentName">@Model.Sector</span></b> </span>
+                        <span style="width:50%;text-align:right;float:right"><b>Block: &nbsp;<span id="Mobile">@Model.Block</span></b></span>
+                    </div>
+                </div>
+                <div class="row row-pad">
+                    <div class="col-md-12">
+                        <span style="width:50%;float:left"><b> Plot No: &nbsp;<span id="DepartmentName">@Model.PlotNo</span></b> </span>
+                        <span style="width:50%;text-align:right;float:right"><b>Challan Date: &nbsp;<span id="Mobile">@Model.ChallanDate</span></b></span>
+                    </div>
+                </div>*@
+                <div class="row row-pad">
+                    <div class="col-md-12">
+                        <span style="width:50%;float:left"><b> Mobile No: &nbsp;<span id="DepartmentName">@Model.MobileNo</span></b> </span>
+                        <span style="width:50%;text-align:right;float:right"><b>Email: &nbsp;<span id="Mobile">@Model.Email</span></b></span>
+                    </div>
+                </div>
+                <div class="row row-pad">
+                    <div class="col-md-12">
+                        <span style="width:50%;float:left"><b> Bank Name: &nbsp;<span id="DepartmentName">@Model.BankName</span></b> </span>
+                        <span style="width:50%;text-align:right;float:right"><b>Account No: &nbsp;<span id="Mobile">@Model.AccountNo</span></b></span>
+                    </div>
+                </div>
+
+                <div class="row row-pad">
+                    <div class="col-md-12">
+                        <span style="width:50%;float:left"><b> Paid Amount: &nbsp;<span id="lbl-amount">@Model.Amount</span></b></span>
+                        <span style="width:50%;text-align:right;float:right"><b>Payment Status: &nbsp;<span id="lbl-paystatus">@Model.TransactionStatus</span></b></span>
+                    </div>
+                </div>
+                <div class="row row-pad">
+                    <div class="col-md-12">
+                        <span style="width:50%;float:left"><b> Payment Mode: &nbsp;<span id="lbl-mode">@Model.Mode</span></b></span>
+                        @{
+                            if (Model.Status == "success")
+                            {
+                                <span style="width:50%;text-align:right;float:right"><b>Transaction Id: &nbsp;<span id="lbl-transactionid">@Model.TransactionId</span></b></span>
+                            }
+                        }
+                    </div>
+                </div>
+                <div class="row row-pad">
+                    <div class="col-md-12">
+                        <span style="width:50%;float:left"><b> Payment Date: &nbsp;<span id="lbl-entry-date">@Model.EntryDate</span></b></span>
+                        @{
+                            if (Model.Status == "success")
+                            {
+                                <span style="width:50%;text-align:right;float:right"><b>Bank Reference No: &nbsp;<span id="lbl-bankrefno">@Model.BankReferenceNo</span></b></span>
+                            }
+                        }
+                    </div>
+                </div>
+
+                <div class="row row-pad row-btn">
+                    <div class="col-md-12" style="text-align: center; padding:15px 0px;">
+                        <button type="button" id="btnPrintDiv" class="btn btn-success" onclick=" PrintAcknowledgementReciept();">Print</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    @{
+        if (TempData["Message"] != null || TempData["Message"] == "")
+        {
+            @:alertify.success(TempData["Message"].toString());
+       }
+    }
+</script>
+
+<script>
+    $(document).ready(function () {
+        //$('.popup-window').kendoWindow({
+        //    modal: true,
+        //    title: "Service Request Acknowledgement",
+        //    visible: false,
+        //    width: "70%",
+        //    //height: "60%"
+        //});
+
+        //$('#btnClose').click(function () {
+        //    $(".popup-window").data("kendoWindow").close();
+        //    window.location.reload();
+        //    alertify.success("Request Submitted Successfully.");
+        //});
+    });
+
+    function PrintAcknowledgementReciept() {
+        var contents = document.getElementById("payment-receipt-body").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('<style>.row-btn{display:none;}</style>');
+        //frameDoc.document.write('<style>.noida-logo{background:url(/Content/Images/noida-acknowledgement.png);margin-left:150px;width:550px;height:70px;}</style>');
+        //frameDoc.document.write('<style>.popup-window{background:url(/Content/Images/logo-noida-small2.png) repeat;}</style>');
+        frameDoc.document.write('<style>.row-pad{padding: 0 30px;}</style>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+</script>
+
+
+

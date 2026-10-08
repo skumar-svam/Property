@@ -1,0 +1,94 @@
+﻿@model  NA.PMS.NICServices.SWPServicesViewModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+
+<style>
+    .col-md-4 {
+        margin-top: 0;
+    }
+
+    .k-textbox {
+        border-radius: 0;
+        width: 100%;
+    }
+</style>
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 col-20 form-group">
+        <label>Tenant Name:</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 col-30 form-group">
+        @Html.TextBoxFor(m => m.RentModel.TenantName, htmlAttributes: new { @class = "k-textbox", @maxlength = "50" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 col-20 form-group">
+        <label>Tenant Project:</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 col-30 form-group">
+        @Html.TextBoxFor(m => m.RentModel.TenantProject, htmlAttributes: new { @class = "k-textbox", @maxlength = "50" })
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 col-20 form-group">
+        <label>Renting Date:</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 col-30 form-group">
+        @(Html.Kendo().DatePickerFor(m => m.RentModel.RentingDate).HtmlAttributes(new { style = "width:100%;", @class = "input-disabled" }))
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 col-20 form-group">
+        <label>Rent Duration:</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 col-30 form-group">
+        @Html.TextBoxFor(m => m.RentModel.RentDuration, htmlAttributes: new { @class = "k-textbox", @maxlength = "2" })
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+
+    function SaveRentRequest() {
+        var name = $('input[type=text][name="RentModel.TenantName"]').val();
+        var project = $('input[type=text][name="RentModel.TenantProject"]').val();
+        var rdate = $('input[type=text][name="RentModel.RentingDate"]').val();
+        var duration = $('input[type=text][name="RentModel.RentDuration"]').val();
+        var description = $('#SreviceModel_Description').val();
+        if (name == "") {
+            $("#loader").hide();
+            alertify.error("Please enter tenant name");
+            return false;
+        }
+        if (project == "") {
+            $("#loader").hide();
+            alertify.error("Please enter tenant project name");
+            return false;
+        }
+        if (rdate == "") {
+            $("#loader").hide();
+            alertify.error("Please select Renting date");
+            return false;
+        }
+        if (/^[0-9]*$/.test(duration) == false || duration == "") {
+            $("#loader").hide();
+            alertify.error("Please enter Rent duration");
+            return false;
+        }
+        if (description == "") {
+            $("#loader").hide();
+            alertify.error("Please enter description");
+            return false;
+        }
+        else {
+            $("#loader").hide();
+            SubmitServiceRequestForm();
+        }
+
+    }
+
+    function ClearRentFields() {
+        $('input[type=text][name="RentModel.TenantName"]').val('');
+        $('input[type=text][name="RentModel.TenantProject"]').val('');
+        $('input[type=text][name="RentModel.RentDuration"]').val('');
+        $('input[type=text][name="RentModel.RentingDate"][data-role="datepicker"]').val('');
+    }
+
+</script>
+

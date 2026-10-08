@@ -1,0 +1,281 @@
+﻿@model NA.PMS.Model.CICModel
+@using Kendo.Mvc.UI;
+@{
+    ViewBag.Title = "ViewCIC";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">View CIC for Approval</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 col-btn" id="divComment">
+                    @Html.HiddenFor(m => m.Id)
+                    @Html.HiddenFor(m => m.Change_Type, new { @id = "TypeID" })
+                    <input type="hidden" id="hdnAcceptReject" />
+                    <input type="hidden" value="@Model.Status" id="hdnStatusID" />
+                    @if (Model.Status == @NA.PMS.Common.Constants.Approved)
+                    {
+                        <i style="font-size: 18px; " class=" glyphicon glyphicon-ok-sign" aria-hidden="true"></i>
+                        <strong style="color: lightgreen;font-size: 18px; padding-right: 10px; ">  @Html.DisplayFor(model => model.StatusName)</strong>
+                    }
+                    else if (Model.Status == @NA.PMS.Common.Constants.RejectedProp)
+                    {
+                        <strong style="color: red;font-size: 16px; padding-right: 10px; "><i class="glyphicon glyphicon-remove-sign" aria-hidden="true"></i>  @Html.DisplayFor(model => model.StatusName)</strong>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <h2 class="blck-heading">Allottee Information</h2>
+                <div class="form-bx">
+                    @Html.HiddenFor(m => m.Rid, htmlAttributes: new { id = "hdnRid" })
+                    @{
+                        Html.RenderPartial("_AloteeBasicDetails", Model);
+                    }
+                </div>
+                <h2 class="blck-heading">CIC Details</h2>               
+                <div class="">
+                    @{
+                        Html.RenderPartial("_AddViewCICRequest", Model);
+                    }
+                </div>
+            </div>
+            <div class="box-button text-center">
+                <button type="button" value="btnBack" id="btnCancel" class="btn btn-default" onclick="javascript: window.location = '@Url.Action("ManageCIC", "CIC")';">Back</button>
+                @if (Model.Status == @NA.PMS.Common.Constants.InProgress)
+                {
+                    <button type="button" class="btn btn-default" value="Submit" id="btnApproval">Approval</button>
+                    <button type="button" class="btn btn-default" value="Submit" id="btnReject">Reject</button>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id='divCommentPost' class='col-md-12 adminfeediv'>
+    <div class="row" style="margin-top:30px;">
+        <div class="col-md-3 col-md-offset-1">
+            @Html.Label("Enter Comment :")
+        </div>
+        <div class="col-md-7">
+            @Html.TextAreaFor(model => model.Comment, new {@class="form-control", style = "width:100%;height:100px;", @maxlength = "500" })
+        </div>
+    </div>
+    <div class="row" style="padding-top:20px;">
+        <div class="col-md-3 col-md-offset-1">
+
+        </div>
+        <div class="col-md-7">
+            <button type='submit' id="btnCommentPostApprove" class='btn btn-default' value='Save'>Post</button>
+            <button type='button' class='btn btn-default' value='Cancel' onclick="CloseCommnetPostPopUp();">Close</button>
+        </div>       
+    </div>    
+</div>
+
+<script type="text/javascript">
+
+    function additionalInfo() {
+        return { rid: $('#Rid').val() }
+    }
+
+    $(document).ready(function () {
+        var cType=$('#Change_Type').val();
+        GetPropertyDetails();
+        HideShowSection(cType);
+        $("#btnApproval").click(function () {
+            OpenCommentPostPopUp();
+            $('#hdnAcceptReject').val('');
+            $('#hdnAcceptReject').val('true');
+        });
+        $("#btnReject").click(function () {
+            OpenCommentPostPopUp();
+            $('#hdnAcceptReject').val('');
+            $('#hdnAcceptReject').val('false');
+        });
+        $("div[id='divCommentPost']").kendoWindow({
+            title: "Comments",
+            modal: true,
+            visible: false,
+            width: "40%"
+        });
+        $("#btnCommentPostApprove").click(function () {
+            if($("#Comment").val().trim()=="")
+            {
+                alertify.error("Please enter comment");
+            }
+            else{
+                ApprovReject();
+            }
+        });
+        $("#Rid").data("kendoDropDownList").enable(false);
+
+        $("#btnCancel").click(function () {
+            var PendencyReq = '@Request.QueryString["pr"]';
+            if (PendencyReq == 'true') {
+                window.location.href = '@Url.Action("PendencyReport", "Report", new { Area = "Reports" })';
+            }
+            else { window.location.href = '@Url.Action("ManageCIC", "CIC")'; }
+        });
+
+        $("#txtShareType").hide();
+    });
+
+    function HideShowSection(cType)
+    {
+        if((cType==@NA.PMS.Common.Constants.ChangeInDirector))
+        {
+            $('#changeInDirector').show();
+            $('#changeInFirmName').hide();
+            $('#changeInProduct').hide();
+            $("#gridCIC").data("kendoGrid").dataSource.read();
+            if(($('#hdnStatusID').val()==@NA.PMS.Common.Constants.InProgress))
+            {
+                $("#Change_Type").data("kendoDropDownList").enable(false);
+                $("#Type").data("kendoDropDownList").enable(false);
+                $("#Director_Name").attr('disabled','disabled');
+                $("#Director_Share").attr('disabled','disabled');
+                $("#CIC_Charge").attr('disabled','disabled');
+                $("#btnAdd").attr('disabled', 'disabled');
+                $("#Share_Type").data("kendoDropDownList").enable(false);
+                $("#ReqRefNo").attr('disabled','disabled');
+            }
+            else if(($('#hdnStatusID').val()==@NA.PMS.Common.Constants.RejectedProp))
+            {
+                $("#Type").data("kendoDropDownList").enable(true);
+                $("#Director_Name").removeAttr('disabled');
+                $("#Director_Share").removeAttr('disabled');
+                $("#CIC_Charge").removeAttr('disabled');
+                $("#btnAdd").removeAttr('disabled');
+                $("#Share_Type").data("kendoDropDownList").enable(true);
+                $("#ReqRefNo").removeAttr('disabled');
+            }
+        }
+        else if((cType==@NA.PMS.Common.Constants.ChangeInFirmName))
+        {
+            $('#changeInDirector').hide();
+            $('#changeInFirmName').show();
+            $('#changeInProduct').hide();
+            if(($('#hdnStatusID').val()==@NA.PMS.Common.Constants.InProgress))
+            {
+                $("#Change_Type").data("kendoDropDownList").enable(false);
+                $("#NewFirmStatus").data("kendoDropDownList").enable(false);
+                $("#NewFirmName").attr('disabled','disabled');
+                $("#CIC_Charge").attr('disabled','disabled');
+                $("#btnAdd").attr('disabled','disabled');
+            }
+            else if(($('#hdnStatusID').val()==@NA.PMS.Common.Constants.RejectedProp))
+            {
+                $("#Change_Type").data("kendoDropDownList").enable(true);
+                $("#NewFirmStatus").data("kendoDropDownList").enable(true);
+                $("#NewFirmName").removeAttr('disabled');
+                $("#CIC_Charge").removeAttr('disabled');
+                $("#btnAdd").removeAttr('disabled');
+            }
+        }
+        else if((cType==@NA.PMS.Common.Constants.ChangeInProduct))
+        {
+            $('#changeInDirector').hide();
+            $('#changeInFirmName').hide();
+            $('#changeInProduct').show();
+            if(($('#hdnStatusID').val()==@NA.PMS.Common.Constants.InProgress))
+            {
+                $("#Change_Type").data("kendoDropDownList").enable(false);
+                $("#NewFirmProduct").attr('disabled','disabled');
+                $("#CIC_Charge").attr('disabled','disabled');
+                $("#btnAdd").attr('disabled','disabled');
+            }
+            else if(($('#hdnStatusID').val()==@NA.PMS.Common.Constants.RejectedProp))
+            {
+                $("#Change_Type").data("kendoDropDownList").enable(true);
+                $("#NewFirmProduct").removeAttr('disabled');
+                $("#CIC_Charge").removeAttr('disabled');
+                $("#btnAdd").removeAttr('disabled');
+            }
+        }
+    }
+
+    function OpenCommentPostPopUp() {
+        var win = $("#divCommentPost").data("kendoWindow");
+        win.center();
+        win.open();
+    }
+
+    function CloseCommnetPostPopUp() {
+        var win = $("#divCommentPost").data("kendoWindow");
+        win.close();
+    }
+
+    function ApprovReject()
+    {
+        var requestNo = $("#Id").val();
+        var comment = $("#Comment").val().trim();
+        var acceptReject = $('#hdnAcceptReject').val();
+        var typeID = $('#TypeID').val();
+        if(comment=="")
+        {
+            alertify.error("Please enter Comment.");
+        }
+        else {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ requestNo: requestNo, comment: comment, acceptReject: acceptReject, typeID:typeID }),
+                url: '/CIC/SaveCommentByRequestID',
+                success: function (result) {
+                    if (result == true) {
+                        window.location.href = '@Url.Action("ManageCICApprover", "CIC")';;
+                        return false;
+                    }
+                    else {
+                        alertify.error("Comment not updated.");
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+    }
+
+    function RemoveRecord(row) {
+        var bflag = false;
+        if(($('#hdnStatusID').val()==@NA.PMS.Common.Constants.InProgress))
+        {
+            alertify.error("Record can't removed in view mode");
+            bflag = false;
+        }
+        else{
+            var tr = $(row).parent().parent();
+            var dirID = $(tr).children("td:eq(4)").text();
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ dirID: dirID }),
+                url: '/CIC/RemoveRecord',
+                success: function (result) {
+                    if (result == true) {
+                        bflag = true;
+                        $("#gridCIC").data("kendoGrid").dataSource.read();
+                        alertify.success("Record deleted successfully.");
+                    }
+                    else {
+                        bflag = false;
+                        alertify.error("Some error occured. Please try again later.");
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    bflag = false;                    
+                }
+            });
+        }
+        return bflag;
+    }
+</script>

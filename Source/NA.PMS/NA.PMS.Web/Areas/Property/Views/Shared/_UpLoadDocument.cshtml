@@ -1,0 +1,48 @@
+﻿@model NA.PMS.Model.PropertyDocument
+@using Kendo.Mvc.UI;
+
+<div class="row form-group">
+    <div class="col-sm-2">
+        <label>Select File</label>
+    </div>
+    <div class="col-sm-2">
+        @(Html.Kendo().Upload()
+            .Name("files")
+        )
+    </div>
+    <div class="col-sm-2">
+        <label>File Type</label>
+    </div>
+    <div class="col-sm-2">
+        @(Html.Kendo().DropDownListFor(m => m.DocumentType)
+                                    .Name("formno")
+                                    .Filter("contains")
+                                            .DataTextField("text")
+                                            .DataValueField("id")
+                                    .OptionLabel("Select")
+
+                                    .DataSource(source =>
+                                    {
+                                        source.Read(read =>
+                                        {
+                                            read.Action("GetAllDocumentType", "PropertyAllotment");
+                                        }).ServerFiltering(false);
+                                    })
+                                    .HtmlAttributes(new { style = "width:100%;" })
+        )
+        @Html.ValidationMessageFor(model => model.DocumentType, "", new { @class = "text-danger" })
+    </div>
+</div>
+<div class="row form-group">
+    <div class="col-sm-2">
+    </div>
+    <div class="col-sm-2">
+    </div>
+    <div class="col-sm-2">
+    </div>
+    <div class="col-sm-2">
+        <button type="submit" class="btn btn-block btn-primary" value="Submit" id="btnSubmit">Submit</button>
+    </div>
+    <div class="col-sm-2">
+    </div>
+</div>

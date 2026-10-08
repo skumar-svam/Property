@@ -1,0 +1,188 @@
+﻿@model NA.PMS.Model.CustomerDetailViewModel
+@using Kendo.Mvc.UI;
+@using NA.PMS.Common;
+
+@{
+    ViewBag.Title = "Property Detail";
+    Layout = "~/Views/Shared/_LayoutCustomer.cshtml";
+}
+<style type="text/css">
+    footer {
+        position: fixed !important;
+    }
+    .form-group{margin-bottom:12px;}
+</style>
+
+<div class="user-template">
+    <div class="col-md-12">
+        <div class="row row-heading">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="h1-title">Property Details</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 text-right">
+                <h1 class="h1-title">Registration No: @Model.CustomerModel.RegistrationId</h1>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 hr-div"></div>
+    <div class="col-md-12 content-border">
+        <div class="col-md-12">
+            <ul class="nav nav-tabs content-tabs" id="ulProperty" role="tablist">
+                <li class="active"><a href="#one" role="tab" data-toggle="tab">Basic Information</a></li>
+                <li><a href="#two" role="tab" data-toggle="tab">Property</a></li>
+                @*<li><a href="#three" role="tab" data-toggle="tab">Services</a></li>*@
+            </ul>
+        </div>
+        <div class="col-md-12 tabbable tab-content" id="divProperty" style="padding-top:15px;">
+            <div class="row tab-pane fade in active" id="one">
+                <div class="row">
+                    <div class="col-md-2 form-group"><label class="">Allottee Name:</label></div>
+                    <div class="col-md-4 form-group"><label class="lbl-form-control " id="lblName">@Model.CustomerModel.Applicant </label></div>
+                    <div class="col-md-2 form-group"><label class="">Allottee Type:</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control" >@Model.CustomerModel.ApplicantType</label></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2 form-group"><label class="">Father/Husband:</label></div>
+                    <div class="col-md-4 form-group"><label class="lbl-form-control">@Model.CustomerModel.ApplicantMaster</label></div>
+                    <div class="col-md-2 form-group"><label class="">Annual Income:</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control">@Model.CustomerModel.AnnualIncome</label></div>                   
+                </div>
+                <div class="row row-individual">
+                    <div class="col-md-2 form-group"><label class="">Mother Name:</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control">@Model.CustomerModel.MotherName</label></div>
+                    <div class="col-md-2 form-group"><label class="">Date Of Birth:</label></div>
+                    <div class="col-md-4 form-group"><label class="lbl-form-control">@Model.CustomerModel.DateOfBirth</label></div>                   
+                </div>
+                <div class="row">
+                    <div class="col-md-2 form-group"><label class="">Mobile Number:</label> </div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control" >@Model.CustomerModel.MobileNo</label></div>
+                    <div class="col-md-2 form-group"><label class="">Phone Number:</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control" >@Model.CustomerModel.PhoneNo</label></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2 form-group"><label class="">Email Id:</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control" >@Model.CustomerModel.Email</label></div>
+                    <div class="col-md-2 form-group"><label class="">Is Original Allottee:</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control">Yes</label></div>
+                </div>
+                <div class="row row-individual">
+                    <div class="col-md-2 form-group"><label class="">Occupation:</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control">@Model.CustomerModel.Occupation</label></div>
+                    <div class="col-md-2 form-group"><label class="">Relegion:</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control">@Model.CustomerModel.Religion</label></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2 form-group"><label class="">Pan No:</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control">@Model.CustomerModel.PanNo</label></div>
+                    <div class="col-md-2 form-group"><label class="">Aadhar No:</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control">@Model.CustomerModel.AadharNo</label></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2 form-group"><label class="">Correspond Address:</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control">@Model.CustomerModel.CorrespondAddress</label></div>
+                    <div class="col-md-2 form-group"><label class="">Permanent Address:</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control">@Model.CustomerModel.PermanentAddress</label></div>
+                </div>
+            </div>
+
+            <div class="row tab-pane fade" id="two">
+                <div class="row">
+                    <div class="col-md-2 form-group"><label class="">Scheme:</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control">@Model.PropertyModel.SchemeName</label></div>
+                    <div class="col-md-2 form-group"><label class="">Department:</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control">@Model.PropertyModel.Department</label></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2 form-group"><label class="">Sector:</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control">@Model.PropertyModel.SectorName</label></div>
+                    <div class="col-md-2 form-group"><label class="">Block:</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control">@Model.PropertyModel.BlockName</label></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2 form-group"><label class="">Plot/Flat/shop No:</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control">@Model.PropertyModel.PlotNo</label></div>
+                    <div class="col-md-2 form-group"><label class="">Property Category:</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control">@Model.PropertyModel.PropertyType</label></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2 form-group"><label class="">Area (In Sq.Mtr.):</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control">@Model.PropertyModel.ActualArea</label></div>
+                    <div class="col-md-2 form-group"><label class="">Rate Per Sq. Mtr:</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control"><span>&#8377</span> @Model.PropertyModel.LandRate</label></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2 form-group"><label class="">Total Area:</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control">@Model.PropertyModel.TotalArea</label></div>
+                    <div class="col-md-2 form-group"><label class="">Floor Area Ratio:</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control">@Model.PropertyModel.FloorAreaRatio</label></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2 form-group"><label class="">Allotment Date:</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control">@Model.PropertyModel.AllotmentDate</label></div>
+                    <div class="col-md-2 form-group"><label class="">Possession Date:</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control">@Model.PropertyModel.PossessionDate</label></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2 form-group"><label class="">Completion Date:</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control">@Model.PropertyModel.CompletionDate</label></div>
+                    <div class="col-md-2 form-group"><label class="">Functional Date:</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control">@Model.PropertyModel.FunctionalDate</label></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-2 form-group"><label class="">Registry Date:</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control">@Model.PropertyModel.RegistryDate</label></div>
+                    <div class="col-md-2 form-group"><label class="">Is NDC issued:</label></div>
+                    <div class="col-md-4 form-group"><label class=" lbl-form-control">@Model.PropertyModel.IsNDCIssued</label></div>
+                </div>
+            </div>
+
+            <div class="row tab-pane fade" id="three">
+                @*<div class="row">
+                    <div class="col-md-3 form-group"><label class="">Payment Due:</label></div>
+                    <div class="col-md-3 form-group"><label class=" lbl-form-control"  style="color:red">@Model.PaymentDue</label></div>
+                    <div class="col-md-3 form-group"><label class="">Last Payment Date:</label></div>
+                    <div class="col-md-3 form-group"><label class=" lbl-form-control" >@Model.LastPaymentDate</label></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 form-group"><label class="">Building Plan Approved:</label></div>
+                    <div class="col-md-3 form-group"><label class=" lbl-form-control" >@Model.BuildingPlanApproved</label></div>
+                    <div class="col-md-3 form-group"><label class="">Construction Completed:</label></div>
+                    <div class="col-md-3 form-group"><label class=" lbl-form-control" >@Model.ConstructionCompleted</label></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 form-group"><label class="">Status:</label></div>
+                    <div class="col-md-3 form-group"><label class=" lbl-form-control" >@Model.Status</label></div>
+                    <div class="col-md-3 form-group"><label class="">Mortgage Permission:</label></div>
+                    <div class="col-md-3 form-group"><label class=" lbl-form-control" >@Model.MortgagePermission</label></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 form-group"><label class="">Extension Given:</label></div>
+                    <div class="col-md-3 form-group"><label class=" lbl-form-control" >@Model.ExtensionGiven</label></div>
+                    <div class="col-md-3 form-group"><label class="">Rent Permission:</label></div>
+                    <div class="col-md-3 form-group"><label class=" lbl-form-control" >@Model.RentPermission</label></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 form-group"><label class="">Any Litigation:</label></div>
+                    <div class="col-md-3 form-group"><label class=" lbl-form-control" >@Model.LegalPreceedings</label></div>
+                    <div class="col-md-3 form-group"><label class="">Functional Date:</label></div>
+                    <div class="col-md-3 form-group"><label class=" lbl-form-control" >@Model.FunctionalDate</label></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 form-group"><label class="">Construction period allowed:</label></div>
+                    <div class="col-md-3 form-group"><label class=" lbl-form-control" >@Model.ConstructionPeriodAllowed Months</label></div>
+                    <div class="col-md-3 form-group"><label class="">Next Payment Due Date:</label></div>
+                    <div class="col-md-3 form-group"><label class=" lbl-form-control" >@Model.NextPaymentDueDate</label></div>
+                </div>*@
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        if ('@Model.CustomerModel.ApplicantType' == '@Constants.Company') {
+            //$('.row-individual').css("display", "none");
+        }
+        else {
+            $('.row-individual').show();
+        }
+    });
+</script>

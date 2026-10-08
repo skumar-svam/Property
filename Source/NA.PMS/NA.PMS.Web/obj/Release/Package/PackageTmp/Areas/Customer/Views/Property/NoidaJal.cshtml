@@ -1,0 +1,100 @@
+﻿@model NA.PMS.Model.PropertyDetail
+@using Kendo.Mvc.UI;
+
+@{
+    ViewBag.Title = "Noida Jal";
+    Layout = "~/Views/Shared/_LayoutCustomer.cshtml";
+}
+
+<div class="container-content">
+    <div class="col-md-12">
+        <div class="row row-heading">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="h1-title">Noida Jal</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn"> <h1 class="h1-title text-right">Registration Id:10000013 </h1> </div>
+        </div>
+    </div>
+    <div class="col-md-12 hr-div"></div>
+    <div class="col-md-12 k-grid-content">
+        <h2 class="grid-title">Payment History</h2>
+        @(Html.Kendo().Grid<NA.PMS.Model.JalViewModel>()
+            .Name("gridJAL")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Title("Receipt No").Width(80);
+                columns.Bound(c => c.Department).Title("Department").Width(80);
+                columns.Bound(c => c.Applicant).Title("Applicant").Width(80);               
+                columns.Bound(c => c.BillStartDate).Title("Start Date").Format("{0:dd/MM/yyyy}").Width(80);
+                columns.Bound(c => c.BillEndDate).Title("End Date").Format("{0:dd/MM/yyyy}").Width(80);
+                columns.Bound(c => c.BillAmount).Title("Bill").Width(80);
+                columns.Bound(c => c.BillDueDate).Title("Due Date").Format("{0:dd/MM/yyyy}").Width(80);
+            })
+            .Sortable()
+            .Filterable()
+            .Resizable(resize => resize.Columns(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+            .DataSource
+            (
+                dataSource => dataSource
+                .Ajax()
+                .Model(model => model.Id(p => p.Id))
+                .ServerOperation(true)
+                .Read(read => read.Action("GetJalPaymentDataList", "Property", new { area = "Customer" }))
+                .PageSize(10)
+            )
+        )
+    </div>
+</div>
+
+
+@*<div class="container-content">
+    <div class="col-md-12">
+        <div class="row row-heading">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="h1-title">Noida Jal</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 text-right">
+                <h1 class="h1-title">Registration No : @Model.RegistrationId</h1>
+            </div>
+        </div>
+        @{ Html.RenderPartial("PropertyBasicInfo", @Model);}
+    </div>
+    <div class="col-md-12 hr-div"></div>
+
+    <div class="col-md-12 k-grid-content">
+        <div data-role="droptarget" class="k-grouping-header">Drag a column header and drop it here to group by that column</div>
+        <div id="JalDetailGrid"></div>
+    </div>
+</div>*@
+
+<script>
+    $(document).ready(function () {
+        var RegistrationID = $("#hdnRegistrationID").val();
+        $("div#JalDetailGrid").kendoGrid({
+            dataSource: {
+                type: "json",
+                transport: {
+                    read: "/Customer/GetJalDetailsPaymentHistory/" + RegistrationID
+                },
+                pageSize: 5
+            },
+            //height: 250,
+            //filterable: true,
+            //groupable: true,
+            sortable: true,
+            pageable: {
+                refresh: true,
+                pageSizes: true,
+                buttonCount: 5
+            },
+            columns: [
+                        { title: 'Consumer No', field: 'ConsumerNumber' },
+                        { title: '', field: 'BillAmt', format: "{0:#,0.00}", headerTemplate: 'Bill Amount (&#8377)' },
+                        { title: '', field: 'PaidAmount', format: "{0:#,0.00}", headerTemplate: 'Paid Amount (&#8377)' },
+                        { title: '', field: 'Surcharge', format: "{0:#,0.00}", headerTemplate: 'Surcharge (&#8377)' },
+                        { title: 'Payment Date', field: 'PaymentDate', type: "date", format: "{0:dd-MMM-yyyy}" },
+                        { title: 'Bill From', field: 'BLFrom', type: "date", format: "{0:dd-MMM-yyyy}" },
+                        { title: 'Bill To', field: 'BLTo', type: "date", format: "{0:dd-MMM-yyyy}" },
+                        { title: 'Due Date', field: 'DueDate', type: "date", format: "{0:dd-MMM-yyyy}" }
+            ]
+        });
+    });
+</script>
+

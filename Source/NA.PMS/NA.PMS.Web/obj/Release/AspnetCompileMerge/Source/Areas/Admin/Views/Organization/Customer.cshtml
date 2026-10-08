@@ -1,0 +1,506 @@
+﻿@model NA.PMS.UserManagement.NDAUserViewModel
+@using Kendo.Mvc.UI
+@using System.Web.Optimization
+@using NA.PMS.Common
+
+@{
+    ViewBag.Title = "Register Customer";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .form-horizontal .form-group {
+        margin-right: 0;
+        margin-left: 0;
+    }
+
+    .form-horizontal label {
+        padding-top: 5px;
+    }
+</style>
+
+@using (Html.BeginForm("RegisterCustomerDetails", "Property", FormMethod.Post, new { @class = "form-horizontal", enctype = "multipart/form-data" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Register Customer</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <h2 class="blck-heading">Customer Information</h2>
+                <div class="form-bx">
+                    <div>
+                        @Html.HiddenFor(model => model.DepartmentId)
+                        @Html.HiddenFor(model => model.PropertyId)
+                        @Html.HiddenFor(model => model.SectorName)
+                        @Html.HiddenFor(model => model.BlockName)
+                        @Html.HiddenFor(model => model.FirstName)
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                            <label class="required">Registration Id</label>
+                        </div>
+                        <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(model => model.RegistrationId)
+                            .Filter("contains")
+                            .DataTextField("Text")
+                            .DataValueField("Id")
+                            .OptionLabel(" --- Select ---")
+                            .DataSource(source =>
+                            {
+                                source.Custom()
+                                .ServerFiltering(true)
+                                .ServerPaging(true)
+                                .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                .Transport(transport => transport.Read(read => read.Action("GetRegistrationIdListAsDataSource", "Organization", new { area = "Admin" }).Data("FilterRegistrationId")))
+                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                .PageSize(100);
+                            })
+                            .HtmlAttributes(new { style = "width: 100%;border-radius: 0;height: 30px;" })
+                            .Events(e => e.Change("RegistrationIdChangeEvent"))
+                            )
+                           
+                        </div>
+                        
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                            <label class="required">User Name</label>
+                        </div>
+                        <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.UserName, new { @class = "form-control", @readonly = "readonly" })
+                        </div>
+                        <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                            <label class="required">Department</label>
+                        </div>
+                        <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.Department, new { @class = "form-control", @maxlength = "100", @minlength = "2", @readonly = "readonly" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                            <label class="required">Customer Name</label>
+                        </div>
+                        <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.FullName, new { @class = "form-control", @maxlength = "500", @minlength = "2" })
+                        </div>
+                        <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                            <label class="required">Sector Name</label>
+                        </div>
+                        <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(model => model.SectorId)
+                            .DataValueField("Id")
+                            .DataTextField("Text")
+                            .OptionLabel("--Select--")
+                            .Filter("contains")
+                            .DataSource(source =>
+                            {
+                                source.Custom()
+                                .ServerFiltering(true)
+                                .ServerPaging(true)
+                                .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                .Transport(transport => transport.Read(read => read.Action("GetSectorListAsDataSource", "Organization", new { area = "Admin" }).Data("FilterSectorId")))
+                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                .PageSize(999);
+                            })
+                            .HtmlAttributes(new { style = "width: 100%;border-radius: 0;height: 30px;", @class = "input-disabled " })
+                            )
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                            <label class="required">Block Name</label>
+                        </div>
+                        <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(model => model.BlockId)
+                            .DataValueField("Id")
+                            .DataTextField("Text")
+                            .OptionLabel("--Select--")
+                            .Filter("contains")
+                            .DataSource(source =>
+                            {
+                                source.Custom()
+                                .ServerFiltering(true)
+                                .ServerPaging(true)
+                                .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                .Transport(transport => transport.Read(read => read.Action("GetBlockListAsDataSource", "Organization", new { area = "Admin" }).Data("FilterBlockId")))
+                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                .PageSize(999);
+                            })
+                            .HtmlAttributes(new { style = "width: 100%;border-radius: 0;height: 30px;", @class = "input-disabled " })
+                            )
+                        </div>
+                        <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                            <label class="required">Plot/Flat/Unit No</label>
+                        </div>
+                        <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.PlotNo, new { @class = "form-control ", @maxlength = "20" })
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                            <label class="required">Mobile No</label>
+                        </div>
+                        <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.MobileNo, new { @class = "form-control numeric-text", @maxlength = "10", onkeypress = "return IsNumeric(event);" })
+                        </div>
+                        <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                            <label>Email Id</label>
+                        </div>
+                        <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.Email, new { @class = "form-control", placeholder = "" })
+                        </div>
+                    </div>
+                  
+                    <div class="row">
+                        <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                            <label>Security Question</label>
+                        </div>
+                        <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(model => model.SecurityQuestion)
+                            .DataValueField("Value")
+                            .DataTextField("Value")
+                            .OptionLabel("---Select--")
+                            .Filter("contains")
+                            .DataSource(source =>
+                            {
+                                source.Custom()
+                                .ServerFiltering(true)
+                                .ServerPaging(true)
+                                .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                .Transport(transport => transport.Read(read => read.Action("GetSecurityQuestionListAsDataSource", "Organization", new { area = "Admin" }).Data("FilterSecurityQuestion")))
+                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                .PageSize(100);
+                            })
+                             .HtmlAttributes(new { style = "width: 100%;margin-right:15px;border-radius: 0;height: 30px;", @class = "" })
+                            )
+                        </div>
+                        <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                            <label>Security Answer</label>
+                        </div>
+                        <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.SecurityAnswer, new { @class = "form-control", @maxlength = "50", @minlength = "2" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                            <label>Customer Id</label>
+                        </div>
+                        <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                            @{
+                            List<SelectListItem> IdFileList = new List<SelectListItem>();
+                            IdFileList.Add(new SelectListItem { Text = "PAN Card", Value = "PANCard" });
+                            IdFileList.Add(new SelectListItem { Text = "Aadhar Card", Value = "AadharCard" });
+                            }
+                            @Html.DropDownListFor(model => model.UserIdFileType, IdFileList, "-- select your Id file --", new { @class = "form-control" })
+                        </div>
+                        <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+
+                        </div>
+                        <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                            <input class="" type="file" onchange="ChangeIdentityFile()" id="CustomerIdFile" name="userIdFile" />
+                            <span style="font-size:10px;">Only jpg, png and gif (50KB allowed)</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                            <label>Authority Letter</label>
+                        </div>
+                        <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                            @{
+                                List<SelectListItem> LetterFileList = new List<SelectListItem>();
+                                LetterFileList.Add(new SelectListItem { Text = "Allotment Letter", Value = "AllotmentLetter" });
+                                LetterFileList.Add(new SelectListItem { Text = "Transfer Letter", Value = "TransferLetter" });
+                            }
+                            @Html.DropDownListFor(model => model.PropertyFileType, LetterFileList, "-- select property document --", new { @class = "form-control" })
+                        </div>
+                        <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+
+                        </div>
+                        <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                            <input class="" type="file" id="AuthorityLetterFile" onchange="ChangeAuthorityLetter()" name="propertyFile" />
+                            <span style="font-size:10px;">Only jpg, png and gif(50KB allowed)</span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                            <label>Remarks</label>
+                        </div>
+                        <div class="col-md-10 col-80 col-sm-9 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.Remarks, new { @class = "form-control", @maxlength = "100", @minlength = "2" })
+                        </div>
+                    </div>
+                </div>
+                <div class="box-button text-center">
+                    <input type="button" id="btn-clear" value="Clear" class="btn btn-default" />
+                    <input type="button" id="btn-register" value="Register" class="btn btn-add" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#btn-clear').click(function () {
+            ClearInputFields();
+        });
+
+        $('#btn-register').click(function () {
+            var flag = ValidateInputField();
+            if (flag) {
+                SubmitCustomerForm();
+            }
+        });
+
+    });
+
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+
+    function FilterRegistrationId() {
+        return {
+            FilterType: "RID",
+            RegistrationId: $('#RegistrationId').val() != "" ? $('#RegistrationId').val() : null
+        };
+    }
+
+    function FilterSectorId() {
+        return {
+            SectorId: $('#SectorId').val(),
+            FilterType: "Sector"
+        }
+    }
+
+    function FilterBlockId() {
+        return {
+            BlockId: $('#BlockId').val(),
+            FilterType: "Block"
+        }
+    }
+
+    function FilterSecurityQuestion() {
+        return {
+            FilterType: "SecurityQuestion"
+        }
+    }
+
+    function ChangeAuthorityLetter() {
+        var letter = $("#AuthorityLetterFile").val();
+        var letterType = letter.split('.');
+        if (letterType[1] == "jpg" || letterType[1] == "png" || letterType[1] == "gif" || letterType[1] == "jpeg") {
+            if ($("#PropertyFileType").val() == "" || $("#PropertyFileType").val() == undefined) {
+                alertify.alert("Property File", "Please select a property letter type");
+                return false;
+            }
+            else {
+                var letter = document.getElementById('AuthorityLetterFile');
+                var fileSize = letter.files[0].size;
+                var sizeInKB = fileSize / 1024
+                if (sizeInKB > 50) {
+                    alertify.alert("Property File", "Please select Authority Letter File of 50 KB");
+                    $('#AuthorityLetterFile').val('');
+                    return false;
+                }
+            }
+        }
+        else {
+            alert("Only jpg, png and gif files are allowed");
+            $('#AuthorityLetterFile').val('');
+            return false;
+        }
+    }
+
+    function ChangeIdentityFile() {
+        var identityFile = $("#CustomerIdFile").val();
+        var fileType = identityFile.split('.');
+        if (fileType[1] == "jpg" || fileType[1] == "png" || fileType[1] == "gif" || fileType[1] == "jpeg") {
+            if ($("#UserIdFiletype").val() == "" || $("#UserIdFiletype").val() == undefined) {
+                alertify.alert("Customer Id File", "Select customer id file type");
+                return false;
+            }
+            else {
+                var idFile = document.getElementById('CustomerIdFile');
+                var fileSize = idFile.files[0].size;
+                var sizeInKB = fileSize / 1024
+                if (sizeInKB > 50) {
+                    alertify.alert("Customer Id File", "Please select Customer Id File of 50 KB");
+                    $('#CustomerIdFile').val('');
+                    return false;
+                }
+            }
+        }
+        else {
+            alert("Only jpg, png and gif files are allowed");
+            $('#CustomerIdFile').val('');
+            return false;
+        }
+    }
+
+    function SubmitCustomerForm() {
+        var _rid = $('#RegistrationId').val();
+        var formdata = new FormData($('form').get(0));
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: false, // Not to set any content header
+            processData: false, // Not to process data
+            data: formdata,
+            url: "/Admin/Organization/SaveAuthorityCustomer",
+            success: function (result) {
+                if (result.ReturnTypeId == '@ReturnType.Saved') {
+                    alertify.alert("Customer Info", _rid +"registered successfull.");
+                    ClearInputFields();
+                }
+                else if (result.ReturnTypeId == '@ReturnType.Updated') {
+                    alertify.alert("Customer Info", _rid + "updated successfull.");
+                    ClearInputFields();
+                }
+                else {
+                    alertify.alert("Customer Info", "Provider failed to register, try again");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                alertify.alert("Customer Info", "Network error, try again");
+            }
+        });
+    }
+
+    function IsValidEmail(email) {
+        var pattern = /^\b[A-Z0-9._%-]+@@[A-Z0-9.-]+\.[A-Z]{2,4}\b$/i;
+        return pattern.test(email);
+    }
+
+    function RegistrationIdChangeEvent() {
+        var _RegistrationId = $("#RegistrationId").val();
+        if (_RegistrationId != undefined && _RegistrationId != "") {
+            $.ajax({
+                url: '/Admin/Organization/ValidateCustomerRegistration',
+                type: 'POST',
+                dataType: 'json',
+                data: { RegistrationId: _RegistrationId },
+                success: function (result) {
+                    if (result.ReturnTypeId == '@ReturnType.Exist') {
+                        alertify.alert("Customer Info","Registration Id already exists");
+                        return false;
+                    }
+                    else if (result.ReturnTypeId == '@ReturnType.NotExist') {
+                        alertify.alert("Customer Info","Registration Id doesn't exists");
+                        return false;
+                    }
+                    else {
+                        $('#SectorId').data("kendoDropDownList").value(result.SectorId);
+                        $('#SectorName').val(result.SectorName);
+                        $('#BlockId').data("kendoDropDownList").value(result.BlockId);
+                        $('#BlockName').val(result.BlockName);
+                        $('#PlotNo').val(result.PlotNo);
+                        $('#PropertyId').val(result.TxtPropertyId);
+                        $('#DepartmentId').val(result.DepartmentId);
+                        $('#Department').val(result.Department);
+                        $('#UserName').val(result.RegistrationId);
+                        $('#FullName').val(result.FullName);
+                        $('#MobileNo').val(result.MobileNo);
+                        $('#Email').val(result.Email);
+                    }
+                }
+            });
+        }
+    }
+
+    function ValidateInputField() {
+        var flag = true;
+
+        if ($("#RegistrationId").val() == '') {
+            alert("Please select Registration Id");
+            flag = false;
+        }
+        else if ($("#RegistrationId").val().length > 8) {
+            alert("Registration id can't be more than 8 digits.");
+            flag = false;
+        }
+        else if ($('#SectorId').val() == '') {
+            alert("Please select Sector");
+            flag = false;
+        }
+        else if ($('#PlotNo').val().trim() == '') {
+            alert("Please enter Plot/Shop/Flat No.");
+            flag = false;
+        }
+        else if ($('#UserName').val().trim() == '') {
+            alert("Please enter User Name");
+            flag = false;
+        }
+        else if ($('#MobileNo').val().trim() == '') {
+            alert("Please enter Mobile no.");
+            flag = false;
+        }
+        else if ($('#Email').val().trim() != '') {
+            var flag = IsValidEmail($('#Email').val());
+            if (flag == false) {
+                alert("Please enter email id in correct format.");
+                flag = false;
+            }
+        }
+        else if ($("#SecurityQuestion").val() == '') {
+            alert("Please select Security Question.");
+            flag = false;
+        }
+        else if ($("#SecurityAnswer").val() == "") {
+            alert("Please enter Answer");
+            flag = false;
+        }
+        else if ($("#UserIdFileType").val() == "") {
+            alert("Please select id file Type");
+            flag = false;
+        }
+        else if ($("#CustomerIdFile").val() == "") {
+            alert("Please select id file");
+            flag = false;
+        }
+        else if ($("#PropertyFileType").val() == "") {
+            alert("Please select Authority letter Type");
+            flag = false;
+        }
+        else if ($("#AuthorityLetterFile").val() == "") {
+            alert("Please select Authority letter");
+            flag = false;
+        }
+        return flag;
+    }
+
+    function ClearInputFields() {
+        $('#RegistrationId').data("kendoDropDownList").value('');
+        $('#SectorId').data("kendoDropDownList").value('');
+        $('#BlockId').data("kendoDropDownList").value('');
+        $('#PlotNo').val('');
+        $('#PropertyId').val('');
+        $('#DepartmentId').val('');
+        $('#Department').val('');
+        $('#UserName').val('');
+        //$('#CustomerName').val('');
+        $('#MobileNo').val('');
+        $('#Email').val('');
+        $('#CustomerIdFile').val('');
+        $('#AuthorityLetterFile').val('');
+        $('#UserIdFileType').data("kendoDropDownList").value('');
+        $('#PropertyFileType').data("kendoDropDownList").value('');
+    }
+</script>
+
+
+
+

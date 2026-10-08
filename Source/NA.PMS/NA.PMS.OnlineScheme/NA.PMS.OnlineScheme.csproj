@@ -1,0 +1,674 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{6834F589-B23B-448F-8660-12454D38A19D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NA.PMS.OnlineScheme</RootNamespace>
+    <AssemblyName>NA.PMS.OnlineScheme</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Dapper">
+      <HintPath>..\packages\Dapper.1.38\lib\net45\Dapper.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.AWT.WinForms, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\BankOfBaroda\IKVM.AWT.WinForms.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Beans, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.Beans.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Charsets, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.Charsets.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Corba, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.Corba.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Core, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Jdbc, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.Jdbc.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Management, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.Management.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Media, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.Media.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Misc, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.Misc.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Naming, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.Naming.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Remoting, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.Remoting.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Security, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.SwingAWT, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.SwingAWT.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Text, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.Text.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Util, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.Util.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.XML.API, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.XML.API.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.Runtime, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\BankOfBaroda\IKVM.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.Runtime.JNI, Version=7.2.4630.5, Culture=neutral, PublicKeyToken=13235d27fcbfff58, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\BankOfBaroda\IKVM.Runtime.JNI.dll</HintPath>
+    </Reference>
+    <Reference Include="ipaypipe, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\BankOfBaroda\ipaypipe.dll</HintPath>
+    </Reference>
+    <Reference Include="Kendo.Mvc">
+      <HintPath>..\packages\KendoUI\Kendo.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="MiniProfiler">
+      <HintPath>..\packages\MiniProfiler.3.2.0.157\lib\net40\MiniProfiler.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Ninject">
+      <HintPath>..\packages\Ninject.3.2.0.0\lib\net45-full\Ninject.dll</HintPath>
+    </Reference>
+    <Reference Include="RazorEngine">
+      <HintPath>..\packages\RazorEngine.3.8.2\lib\net45\RazorEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Http.Formatting, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.7\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Helpers, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.Helpers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Mvc, Version=4.0.0.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.2\lib\net45\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Optimization">
+      <HintPath>..\packages\Microsoft.AspNet.Web.Optimization.1.1.3\lib\net40\System.Web.Optimization.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.Razor.3.2.3\lib\net45\System.Web.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Deployment, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Deployment.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.WebPages.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebPages.3.2.3\lib\net45\System.Web.WebPages.Razor.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Context\AccountHeadMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\AccountSubHeadMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\AlloteeListMaster.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\AllotmentMaster.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ApplicationDetail.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ApplicationPaymentDetail.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\AppSupportMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Audit.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Auto_Schedule.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\BankMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\BlockMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\BranchMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Building_Plan_Master.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Building_Plan_Trans.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Challan_Master.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Challan_Trans.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ChecklistMaster.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ChecklistTran.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ChecklistTypeMaster.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\CitizenService_Master.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ClientRequest.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Common_Config.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Completion_Details.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\CustomerMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Customer_ServiceRequest.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Customer_ServiceRequestCharges.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Customer_ServiceRequestDocument.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Customer_ServiceStatusTrans.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\DemandNoteDetail.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\DepartmentMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\DepartmentSubMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Director_Request_Master.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Document_Mst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\EmployeeMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ExcessAreaDetailMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Extension_Details.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Firm_Director_Master.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Firm_Master.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Firm_Type_Master.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\FloorMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\FunctionalDetail.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\GPA.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\GroupHousingProjectMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\HEAD_MASTER.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\HEAD_SUB_MASTER.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\KYADetail.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\LeaseRentPayment.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\LeaseRentPaymentTran.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Letter_History.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Letter_Signing_Authority.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\LocationChargeDetailMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\LocationMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\MortgageDetail.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\NAOS.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>NAOS.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\NAOS.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\NAOS.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>NAOS.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Context\NDCDetailMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\NICServiceMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\NICServiceStatu.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\NICsingalwindowSystem.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\NiveshMitraEntr_Master.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OccupationMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineApplicationDetail.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineApplicationDetails_trans.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineApplicationProcessDetail.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineAreawithRegisandProcfee.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineCheckListMaster.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineCheckLisTran.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineExtensionDetail.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineFirmDirectorMaster.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineFirmRequestMaster.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineFunctionalDetail.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineGPA.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineMortgageDetail.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlinePropertyCancellationDetail.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineRentPermissionDetail.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineSchemeDraw.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineService.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineTransferMutation.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\online_Director_Master.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\PossessionDetail.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Process_Master.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Product_Master.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Project_report.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\PropertyCompensationMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\PropertyLocationChargesTran.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\PropertyRateMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\PropertyTypeMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\QuotaMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\RebateMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\RECEIPT_AMOUNT_TRANS.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\RECEIPT_DETAIL_MASTER.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\RECEIPT_SUB_HEAD.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\RECIEPT_HEAD.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\RegistryDetail.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ReligionMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\RentPermissionDetail.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SchemeAreaMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SchemeBankTran.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SchemeCostTran.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SchemeDepartmentTran.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SchemeMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SchemeNotifTran.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SchemePropTran.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SchemeQuotaTran.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SchemeRebateTran.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SchemeRefundTran.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SchemeTypeMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SectorMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Service.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ServiceCheckList_Master.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ServiceRejectionDetail.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ServiceRequest_Documents.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ServiceStatu.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ServiceStatusTran.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ServiceTran.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SMSServicesMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\StatusMaster.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SubDepartmentMst.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Succ_Mut_Trans.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\TemplateMaster.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\UmApplicationMaster.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\UmDepartmentMaster.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\UmMenuMaster.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\UmRoleAppTran.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\UmRoleMaster.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\UmRoleMasterTran.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\UmUserDepartmentTran.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\UmUserMaster.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\UmUserMasterRole.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\UmUserSerialMaster.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\UmUserSubDepartmentTran.cs">
+      <DependentUpon>NAOS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Controllers\CommercialController.cs" />
+    <Compile Include="Controllers\DefaultController.cs" />
+    <Compile Include="Controllers\GroupHousingController.cs" />
+    <Compile Include="Controllers\HousingController.cs" />
+    <Compile Include="Controllers\IndustrialController.cs" />
+    <Compile Include="Controllers\InstitutionalController.cs" />
+    <Compile Include="Controllers\ResidentialController.cs" />
+    <Compile Include="Controllers\SchemePaymentController.cs" />
+    <Compile Include="Helpers\OnlineSchemeHelper.cs" />
+    <Compile Include="Helpers\SchemePaymentGateway.cs" />
+    <Compile Include="Helpers\SchemeConstant.cs" />
+    <Compile Include="Models\DefaultViewModel.cs" />
+    <Compile Include="Models\OnlineSchemeFormViewModel.cs" />
+    <Compile Include="Models\OSNICApiViewModel.cs" />
+    <Compile Include="Models\OSSchemeAreaViewModel.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Repositories\DefaultSchemeRepository.cs" />
+    <Compile Include="Repositories\IDefaultSchemeRepository.cs" />
+    <Compile Include="Repositories\IOnlineSchemeRepository.cs" />
+    <Compile Include="Repositories\OnlineSchemeRepository.cs" />
+    <Compile Include="Resources\OSMessages.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>OSMessages.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\TemplateModificators.cs" />
+    <Compile Include="Helpers\TemplateParser.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.Config">
+      <SubType>Designer</SubType>
+    </None>
+    <EntityDeploy Include="Context\NAOS.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>NAOS.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <None Include="Context\NAOS.edmx.diagram">
+      <DependentUpon>NAOS.edmx</DependentUpon>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\NA.PMS.Dal\NA.PMS.Dal.csproj">
+      <Project>{c3f16770-e087-4de6-ad92-b7d4b0807a2b}</Project>
+      <Name>NA.PMS.Dal</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\NA.PMS.Model\NA.PMS.Model.csproj">
+      <Project>{a8b97d82-4a88-47f9-bafe-21a94b364fd6}</Project>
+      <Name>NA.PMS.Model</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\OSMessages.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>OSMessages.Designer.cs</LastGenOutput>
+      <CustomToolNamespace>NA.PMS.OnlineScheme</CustomToolNamespace>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Context\NAOS.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>NAOS.edmx</DependentUpon>
+      <LastGenOutput>NAOS.Context.cs</LastGenOutput>
+    </Content>
+    <Content Include="Context\NAOS.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>NAOS.edmx</DependentUpon>
+      <LastGenOutput>NAOS.cs</LastGenOutput>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

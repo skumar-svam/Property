@@ -1,0 +1,190 @@
+﻿@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions
+
+
+<div class="panel-body">
+    <div class="row form-group">
+        <div class="col-md-12" id="Application" style="text-align:center">
+            <input type="radio" name="status-action" value="AddStatus" />Add &nbsp;&nbsp;
+            <input type="radio" name="status-action" value="UpdateStatus" />Update &nbsp;&nbsp;
+            <input type="radio" name="status-action" value="NewStatus" />New
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-3">
+            <label>Status Type</label>
+        </div>
+        <div class="col-md-3">
+            @(Html.Kendo().DropDownList()
+                  .Name("ddlStatusType")
+                  .OptionLabel("---select---")
+                  .DataTextField("Value")
+                  .DataValueField("Value")
+                  .DataSource(source => source.Read(read => read.Action("GetStatusTypeList", "Application", new { area = "Admin" })))
+                  .HtmlAttributes(new { style = "width:100%;" })
+            )
+        </div>
+        <div class="col-md-3">
+            <label>Status Type</label>
+        </div>
+        <div class="col-md-3">
+            <input type="text" maxlength="30" id="txtStatusType" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-3">
+            <label>Ex Status:</label>
+        </div>
+        <div class="col-md-3">
+            @(Html.Kendo().DropDownList()
+                  .Name("ddlStatus")
+                  .OptionLabel("---select---")
+                  .DataTextField("Text")
+                  .DataValueField("Id")
+                  .CascadeFrom("ddlStatusType")
+                  .DataSource(source => source.Read(read => read.Action("GetStatusListByType", "Application", new { area = "Admin" }).Data("FilterStatusType")).ServerFiltering(true))
+                  .HtmlAttributes(new { style = "width:100%;" })
+            )
+        </div>
+        <div class="col-md-3">
+            <label>New Status:</label>
+        </div>
+        <div class="col-md-3">
+            <input type="text" maxlength="30" id="txtStatus" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row form-group" style="text-align:right;">
+        <div class="col-md-12">
+            <input type="button" id="btnStatusRequest" class="k-button" value="Update" style="min-width:80px;" />
+            <input type="button" id="btnStatusClear" class="k-button" value="Clear" />
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+
+        $('input[type="radio"][name="status-action"]').on("change", function () {
+            var action = $('input[type="radio"][name="status-action"]:checked').val();
+            if (action == "AddStatus") {
+                $('#btnStatusRequest').val("Add");
+                $('#ddlStatus').data("kendoDropDownList").value('');
+                $('#ddlStatus').data("kendoDropDownList").enable(false);
+            }
+            else if (action == "UpdateStatus") {
+                $('#btnStatusRequest').val("Update");
+                $('#ddlStatusType').data("kendoDropDownList").enable(true);
+                $('#ddlStatus').data("kendoDropDownList").enable(true);
+            }
+            else if (action == "NewStatus") {
+                $('#btnStatusRequest').val("Add New");
+                $('#ddlStatusType').data("kendoDropDownList").value('');
+                $('#ddlStatusType').data("kendoDropDownList").enable(false);
+                $('#ddlStatus').data("kendoDropDownList").value('');
+                $('#ddlStatus').data("kendoDropDownList").enable(false);
+            }
+        });
+
+        $('#btnStatusRequest').click(function () {
+            SubmitStatusForm();
+        });
+
+        $('#btnStatusClear').click(function () {
+            ClearStatusFields();
+        });
+    });
+
+    function FilterStatusType() {
+        return { type: $('#ddlStatusType').val() };
+    }
+
+
+    function SubmitStatusForm() {
+        var flag = true;
+        var actiontype = $('input[type="radio"][name="status-action"]:checked').val();
+        var statusTypeId = $('#ddlStatusType').data("kendoDropDownList").value();
+        var statusId = $('#ddlStatus').data("kendoDropDownList").value();
+        var statusType = "";
+        var status = $('#txtStatus').val();
+        if (actiontype == "" || actiontype == undefined) {
+            flag = false;
+            alertify.error("Select Action type.");
+            return false;
+        }
+        if (actiontype == "AddStatus") {
+            if (statusTypeId == "") {
+                alertify.error("Select Status Type");
+                flag = false;
+            }
+            if (status == "") {
+                alertify.error("Enter Status Type");
+                flag = false;
+            }
+            statusType = $('#ddlStatus').data("kendoDropDownList").text();
+            actiontype = "Add";
+        }
+        if (actiontype == "UpdateStatus") {
+            if (statusTypeId == "") {
+                alertify.error("Select Status Type");
+                flag = false;
+            }
+            else if (status == "") {
+                alertify.error("Enter Status Type");
+                flag = false;
+            }
+            statusType = $('#ddlStatus').data("kendoDropDownList").text();
+            actiontype = "Update";
+        }
+        if (actiontype == "NewStatus") {
+            if (statusType == "") {
+                alertify.error("Enter Status Type");
+                flag = false;
+            }
+            else if (status == "") {
+                alertify.error("Enter Status Type");
+                flag = false;
+            }
+            statusType = $('#txtStatusType').val();
+            actiontype = "NewStatus";
+        }
+        if (flag) {
+            var PropertyModel = {
+                ActionType: actiontype,
+                StatusTypeId: $('#ddlStatusType').data("kendoDropDownList").value(),
+                StatusType: statusType,
+                StatusId: $('#ddlStatus').data("kendoDropDownList").value(),
+                Status: $('#txtStatus').val()
+            };
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ model: PropertyModel }),
+                url: '@Url.Action("SavePropertyType", "Application", new { area="Admin"})',
+                success: function (result) {
+                    if ((result == '@ReturnType.Saved') || (result == '@ReturnType.Updated')) {
+                        alertify.success("Status saved successfully.");
+                        ClearStatusFields();
+                        $('#ddlStatusType').data("kendoDropDownList").dataSource.read();
+                        $('#ddlStatus').data("kendoDropDownList").dataSource.read();
+                    }
+                    else if (result == '@ReturnType.None') {
+                        alertify.error("Status doesn't exist.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again");
+                }
+            });
+        }
+    }
+
+    function ClearStatusFields() {
+        $('#ddlStatus').data("kendoDropDownList").value('');
+        $('#txtStatusType').val('');
+        $('#txtStatus').val('');
+    }
+
+</script>

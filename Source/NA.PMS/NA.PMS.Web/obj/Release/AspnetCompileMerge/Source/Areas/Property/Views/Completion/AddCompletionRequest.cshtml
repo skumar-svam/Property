@@ -1,0 +1,134 @@
+﻿@{
+    ViewBag.Title = "AddCompletionRequest";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Completion Request</h1></div>
+                @*<div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>*@
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+
+                @{Html.RenderPartial("_PartialCompletion");}
+               
+            </div>
+            <div class="box-button text-center">
+                <input type="button" id="btnBack" value="Back" class="btn btn-default" />
+                <input type="button" value="Add" id="btnAdd" class="btn btn-add" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $("#btnAdd").click(function () {
+        var rId = $("#RId").val();
+        var completionDueDate = $("#CompletionDueDate").val();
+        var completionExecutionDate = $("#CompletionExecutionDate").val();
+        var completionType = $("#CompletionType").val();
+        var propNo = $("#lblPropNo").html();
+        var partCompletionArea = $("#PartCompletionArea").val();
+        var partCompletionPercentage = $("#PartCompletionPercentage").val();
+        var completionCharges = $("#CompletionCharges").val();
+        var extension = $("#lblExtension").html();
+        var depttId = $("#DepttId").val();
+        var viewName = $("#ViewName").val();
+        if (rId == "") {
+            alertify.error("Please select Registration Id.");
+            return false;
+        }
+        if (completionDueDate == "") {
+            alertify.error("Please select Completion Due Date.");
+            return false;
+        }
+        if (completionExecutionDate == "") {
+            alertify.error("Please select Completion Execution Date.");
+            return false;
+        }
+        if (Date.parse(completionExecutionDate) > Date.parse(completionDueDate)) {
+            alertify.error("Completion Execution Date should be be earlier to Completion Due Date");
+            return false;
+        }
+        if (completionType == "") {
+            alertify.error("Please select Completion Type.");
+            return false;
+        }
+        if (completionCharges == "") {
+            alertify.error("Please select Completion Charges.");
+            return false;
+        }
+        if (depttId != 6 && completionType == "Partial") {
+            alertify.error("Completion type Partial allow only in case of Group Housing.");
+            $("#CompletionType").data("kendoDropDownList").value('0');
+            return false;
+        }
+
+        if (completionType == "Partial") {
+            if (partCompletionPercentage == "") {
+                alertify.error("Please enter Completion Percentage.");
+                return false;
+            }
+            if (partCompletionArea == "") {
+                alertify.error("Please enter Completion Area.");
+                return false;
+            }
+        }
+        else {
+            partCompletionArea = null;
+            partCompletionPercentage = null;
+        }
+
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rId: rId }),
+            url: '/Completion/CheckForUniqueCompletionRequest',
+            success: function (result) {
+                if (result == true) {
+                    alertify.error("You have already requested for this Registration Id.");
+                    @*window.location.href = '@Url.Action("ManageCompletion", "Completion")';*@
+                }
+                else if (result == false) {
+                    $.ajax({
+                        dataType: 'json',
+                        type: 'Post',
+                        contentType: 'application/json; charset=utf-8',
+                        data: JSON.stringify({ completionDueDate: completionDueDate, completionExecutionDate: completionExecutionDate, rId: rId, completionType: completionType, propNo: propNo, partCompletionArea: partCompletionArea, partCompletionPercentage: partCompletionPercentage, completionCharges: completionCharges, extension: extension, viewName: viewName }),
+                        url: '/Completion/SaveCompletionDetails',
+                        success: function (result) {
+                            if (result == true) {
+                                alertify.success("Data saved successfully.");
+                                window.location.href = '@Url.Action("ManageCompletion", "Completion")';
+                            }
+                            else {
+                                alertify.error("Some error occured. Please try again later.");
+                            }
+                        },
+                        error: function (objAjaxRequest, strError) {
+                            alertify.error("Some error occured. Please try again later.")
+                        }
+                    });
+                }
+                else {
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                alertify.error("Some error occured. Please try again later.")
+            }
+        });
+
+    });
+
+    $("#btnBack").click(function () {
+        window.location.href = '@Url.Action("ManageCompletion", "Completion")';
+    });
+</script>

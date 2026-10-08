@@ -1,0 +1,35 @@
+﻿@using Kendo.Mvc.UI;
+@model NA.PMS.Model.PaymentSchedule
+<div class="col-md-12" style=" margin-top: 20px;">
+    <div class="row blck-heading-grid">
+        <div class="col-md-6 col-sm-6 col-xs-12">
+            <span>Lease Rent Trans Details</span>
+        </div>
+    </div>
+</div>
+<div class="col-md-12 k-grid-content">
+    @(Html.Kendo().Grid<NA.PMS.Model.LeaseRentViewModel>()
+                .Name("GridLeaseRentTrans")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.Id).Title("Id").Width(50).Hidden(true);
+                    columns.Bound(c => c.LeaseRentPremium).Title("Lease Rent Per Year (<span class='fa fa-rupee'></span>)");
+                    columns.Bound(c => c.DepositDate).Title("Payment Due Date").Format("{0:dd-MMM-yyyy}");  })
+                .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .Model(model => model.Id(p => p.Id))
+                        .ServerOperation(true)
+                        .Read(read => read.Action("GetLeaseRentTransDetails", "Payment", new { area = "Revenue" }).Data("LeaseRentTrans")).PageSize(10)
+
+                    )
+    )
+</div>
+<script type="text/javascript">
+    function LeaseRentTrans() {
+        registrationId = $("#hdnRID").val();
+        var model = { RegistrationId: registrationId };
+        return model;
+    }
+</script>

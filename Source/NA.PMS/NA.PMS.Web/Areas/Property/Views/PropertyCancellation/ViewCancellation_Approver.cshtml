@@ -1,0 +1,426 @@
+﻿@model NA.PMS.Model.PropertyCancellationModel
+@using Kendo.Mvc.UI
+@{
+    ViewBag.Title = "View Cancellation";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">View Cancellation</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 col-btn">
+                    <a href="#" id="btnComment">View Comments</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+
+                <div class="form-bx">
+                    <br />
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Type of Cancellation")</div>
+                        <div class="col-md-6 col-sm-3 col-xs-12 form-group">
+                            @Html.RadioButtonFor(model => model.TypeOfCancel, NA.PMS.Common.Constants.intCancellation) Cancellation
+                            @Html.RadioButtonFor(model => model.TypeOfCancel, NA.PMS.Common.Constants.intSurrender) Surrender
+                            @Html.RadioButtonFor(model => model.TypeOfCancel, NA.PMS.Common.Constants.intRestoration) Restoration
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Registration Id")</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.RId, htmlAttributes: new { @class = "form-control", onchange = "RIdChange()", @readonly = "readonly" })
+                            @*@(Html.Kendo().DropDownListFor(m => m.RId)
+                                .Filter("contains")
+                                .DataTextField("text")
+                                .DataValueField("id")
+                                .OptionLabel("Select")
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("GetRIDsByCancellationType", "PropertyCancellation").Data("GetCanType");
+                                    });
+                                })
+                                .Events(events => { events.Change("RIdChange"); })
+                                .HtmlAttributes(new { @class = "schemeForms" ,style="width:100%;"})
+                            )*@
+                            @Html.HiddenFor(m => m.Status)
+                            @Html.HiddenFor(m => m.ReqNo)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"></div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        </div>
+                    </div>
+                </div>
+                <div id="divAllotteeDetails">
+                    <h2 class="blck-heading">Allottee Details</h2>
+                    @{Html.RenderPartial("_TransferAllotteDetails");}
+                </div>
+
+                <div id="divCancellationDetails">
+                    <h2 class="blck-heading">Cancellation Details</h2>
+                    <div class="form-bx">
+                        <div class="row">
+                            @{Html.RenderPartial("_CancellationDetails", Model);}
+                        </div>
+                    </div>
+                </div>
+                <br />
+
+                <div id="divRestorationDetails">
+                    <h2 class="blck-heading">Restoration Details</h2>
+                    <div class="form-bx">
+                        <div class="row">
+                            @{Html.RenderPartial("_RestorationDetails", Model);}
+                        </div>
+                    </div>
+                </div>
+
+                <div id="RefundDetails">
+                    <h2 class="blck-heading">Refund Details</h2>
+                    <div class="form-bx">
+                        <div class="row">
+                            @{Html.RenderPartial("_RefundDetails");}
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="box-button text-center">
+                <input type="button" value="Approve" id="btnApprove" class="btn btn-default" />
+                <input type="button" value="Reject" id="btnReject" class="btn btn-default" />
+                <button type="button" value="back" class="btn btn-default" onclick="javascript: window.location = '@Url.Action("ManageCancellations_Approver", "PropertyCancellation")';">Back</button>
+</div>
+        </div>
+    </div>
+</div>
+
+<div id="divApproverWindow" class="col-md-12 popup-window" style="min-height:200px;">
+    <div class="row" style="margin-top:5px;">
+        <div class="col-md-12">
+            @Html.Label("Comment :")
+            @Html.TextAreaFor(m => m.ApproverComments, new { @class = "", @rows = "5", @maxlength = "500", style = "width:100%" })
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12" style="text-align:center">
+            <input type="button" class="btn btn-default" id="btnPopupSubmit" value="Submit" />
+            <input type="button" class="btn btn-default closePopup" value="Close" />
+        </div>
+    </div>
+</div>
+
+<div id="viewCommentsWindow" class="col-md-12 popup-window" style="min-height:200px;">
+    <div class="row" style="margin-top:5px;">
+        <div class="col-md-12">
+            @Html.Label("From :")
+            @Html.DisplayFor(model => model.From)
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            @Html.Label("Date :")
+            @Convert.ToString(string.Format("{0:dd/MM/yyyy}", Model.SubmittedDate))
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            @Html.Label("Comments : ")
+            @Html.TextAreaFor(model => model.Comment, new { @disabled = "disabled", @rows = "5", @style = "width:100%;" })
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12" style="text-align:center">
+            <input type="button" class="btn btn-default closePopup" value="Close" />
+        </div>
+    </div>
+</div>  
+
+<script type="text/javascript">
+    var i = 0;//To check whether "Approve" or "Reject" has been clicked.
+    $(document).ready(function () {
+
+        $('.popup-window').kendoWindow({
+            modal: true,
+            title: "Approver Comments",
+            visible: false,
+            width: "40%"
+        });
+
+        //Hide buttons according to Status.
+        var status = $("#Status").val();
+        //alert(status);
+        if (status == '@NA.PMS.Common.AllotmentStatus.Cancelled') {
+            $("#btnApprove").hide();
+            $("#btnReject").hide();
+        }
+
+        else if (status == '@NA.PMS.Common.AllotmentStatus.Approved') {
+            $("#btnApprove").hide();
+            $("#btnReject").hide();
+        }
+
+        else if (status == '@NA.PMS.Common.AllotmentStatus.Rejected') {
+            $("#btnApprove").hide();
+            $("#btnReject").hide();
+        }
+
+        //Gets Readonly values according to RID
+        var rId = $("#RId").val();
+        if (rId == '') {
+            $("#divAllotteeDetails").hide();
+            $("#RefundDetails").hide();
+            ClearValues();
+            alertify.error("Please select an RID");
+            return false;
+        }
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rId: rId }),
+            url: '/PropertyRegistration/GetOriginalDetailsForTransferByRID',
+            success: function (result) {
+                if (result != null) {
+                    $("#lblScNa").html(result.SchemeName);
+                    $("#lblDeNa").html(result.DepttName);
+                    $("#lblApNa").html(result.ApplicantName);
+                    $("#lblCoNa").html(result.TransfereeCompanyName);
+                    $("#lblGend").html(result.Gender);
+                    $("#lblReNa").html(result.RelationName);
+                    $("#lblPropTy").html(result.PropType);
+                    $("#lblArea").html(result.Area);
+                    $("#lblFloo").html(result.Floor);
+                    $("#lblProMo").html(result.PropMortgaged);
+                    $("#lblProFu").html(result.PropFunctional);
+                    $("#lblOTLR").html(result.OneTimeLeaseRent);
+                    $("#hdnDepttId").val(result.DepttId);
+                    $("#hdnPropId").val(result.PropId);
+                    $("#BalanceDues").val(result.BalanceDues);
+                    //Refund Details data
+                    $("#lblDedAmt").html(result.DeductionAmnt);
+                    $("#lblUnit").html(result.Unit);
+                    $("#lblDedApp").html(result.DeductionApplyOn);
+                    $("#lblRLP").html(result.RefundLockPeriod);
+                    $("#lblIntRate").html(result.InterestRate);
+                    $("#lblDAI").html(result.DaysAfterInterest);
+                    if (result.Gender.toLowerCase() == '@NA.PMS.Common.Constants.genderCompany'.toLowerCase()) {
+                        $(".mfGender").hide();
+                        $(".comGender").show();
+                    }
+                    else {
+                        $(".mfGender").show();
+                        $(".comGender").hide();
+                    }
+                    $("#divAllotteeDetails").show();
+                    $("#RefundDetails").show();
+                }
+                else {
+                    $("#divAllotteeDetails").hide();
+                    $("#RefundDetails").hide();
+                    ClearValues();
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            },
+            error: function (obj) {
+                $("#divAllotteeDetails").hide();
+                $("#RefundDetails").hide();
+                ClearValues();
+                alertify.error("Some error occured. Please try again later.");
+            }
+        });
+
+        DisableControls();
+
+        //Show hide Partial Views according to Type of Request
+        $("#divCancellationDetails").hide();
+        $("#divRestorationDetails").hide();
+        var cancelTypeOnLoad = $("input[name='TypeOfCancel']:checked").val();
+        if (cancelTypeOnLoad == '@NA.PMS.Common.Constants.intCancellation' || cancelTypeOnLoad == '@NA.PMS.Common.Constants.intSurrender') {
+            $("#divRestorationDetails").hide();
+            $("#divCancellationDetails").show();
+        }
+        else {
+            $("#divCancellationDetails").hide();
+            $("#divRestorationDetails").show();
+        }
+
+        //Always keep these two fields disabled
+        $('input[name=TypeOfCancel]').attr("disabled", true);
+        //var ddlRid = $("#RId").data("kendoDropDownList");
+        //ddlRid.enable(false);
+
+        //Button clicks
+        $("#btnComment").click(function () {
+            $("#viewCommentsWindow").data("kendoWindow").center();
+            $("#viewCommentsWindow").data("kendoWindow").open();
+        });
+
+        $(".closePopup").click(function () {
+            $("#viewCommentsWindow").data("kendoWindow").close();
+            $("#divApproverWindow").data("kendoWindow").close();
+
+        });
+
+        $("#btnApprove").click(function () {
+            $("#divApproverWindow").data("kendoWindow").center();
+            $("#divApproverWindow").data("kendoWindow").open();
+            i = 1;
+        });
+
+        $("#btnReject").click(function () {
+            $("#divApproverWindow").data("kendoWindow").center();
+            $("#divApproverWindow").data("kendoWindow").open();
+            i = 2;
+        });
+
+        $("#btnPopupSubmit").click(function () {
+            var comments = $("#ApproverComments").val();
+            var ReqNo = $("#ReqNo").val();
+            var type = $("input[name='TypeOfCancel']:checked").val();
+            if (i == 2) {
+                if ($("#ApproverComments").val() == "") {
+                    alertify.error("Please enter Comments.");
+                    return false;
+                }
+            }
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ comments: comments, intStatus: i, ReqNo: ReqNo, type: type }),
+                url: '/PropertyCancellation/SaveCancellationApprovalStatus',
+                success: function (result) {
+                    if (result == true) {
+                        $("#divApproverWindow").data("kendoWindow").close();
+                        $("#ApproverComments").val('');
+                        $("#btnApprove").hide();
+                        $("#btnReject").hide();
+                        alertify.success("Request saved successfully.");
+                        window.location.reload();
+                    }
+                    else {
+                        alertify.error("Some error occured. Please try again later.");
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    alertify.error("Some error occured. Please try again later.");
+                    //alert(respText);
+                }
+            });
+        });
+    });
+
+    function DisableControls() {
+        $("#ReasonOfCancel").prop("disabled", true);
+        var ddlYesNo = $("#RefundYesNo").data("kendoDropDownList");
+        ddlYesNo.enable(false);
+        var ddlType = $("#RefundType").data("kendoDropDownList");
+        ddlType.enable(false);
+        $("#RefundAmt").prop("disabled", true);
+        $("#RestorationReason").prop("disabled", true);
+        $("#RestorationCharges").prop("disabled", true);
+    }
+
+    //Change event of Refund DDL to enable disable Refund related fields accordingly -> Not used in this screen but required as we are using Partial View with the cahnge event of the control.
+    function RefundYesNoChange() {
+        var refundYesNo = $("#RefundYesNo").val();
+        if (refundYesNo == '@NA.PMS.Common.MortPrevLoan.no') {
+            var ddlType = $("#RefundType").data("kendoDropDownList");
+            ddlType.enable(false);
+            $("#RefundAmt").prop("disabled", true);
+        }
+        else {
+            var ddlType = $("#RefundType").data("kendoDropDownList");
+            ddlType.enable(true);
+            $("#RefundAmt").prop("disabled", false);
+        }
+    }
+
+    //Following functions not used but kept because same partial views are being used in Add and View
+    function RIdChange() {
+        var rId = $("#RId").val();
+        if (rId == '') {
+            $("#divAllotteeDetails").hide();
+            $("#RefundDetails").hide();
+            ClearValues();
+            alertify.error("Please select an RID");
+            return false;
+        }
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rId: rId }),
+            url: '/PropertyRegistration/GetOriginalDetailsForTransferByRID',
+            success: function (result) {
+                if (result != null) {
+                    $("#lblScNa").html(result.SchemeName);
+                    $("#lblDeNa").html(result.DepttName);
+                    $("#lblApNa").html(result.ApplicantName);
+                    $("#lblGend").html(result.Gender);
+                    $("#lblReNa").html(result.RelationName);
+                    $("#lblPropTy").html(result.PropType);
+                    $("#lblArea").html(result.Area);
+                    $("#lblFloo").html(result.Floor);
+                    $("#lblProMo").html(result.PropMortgaged);
+                    $("#lblProFu").html(result.PropFunctional);
+                    $("#lblOTLR").html(result.OneTimeLeaseRent);
+                    $("#hdnDepttId").val(result.DepttId);
+                    $("#hdnPropId").val(result.PropId);
+                    $("#BalanceDues").val(result.BalanceDues);
+                    //Refund Details data
+                    $("#lblDedAmt").html(result.DeductionAmnt);
+                    $("#lblUnit").html(result.Unit);
+                    $("#lblDedApp").html(result.DeductionApplyOn);
+                    $("#lblRLP").html(result.RefundLockPeriod);
+                    $("#lblIntRate").html(result.InterestRate);
+                    $("#lblDAI").html(result.DaysAfterInterest);
+                    $("#divAllotteeDetails").show();
+                    $("#RefundDetails").show();
+                }
+                else {
+                    $("#divAllotteeDetails").hide();
+                    $("#RefundDetails").hide();
+                    ClearValues();
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            },
+            error: function (obj) {
+                $("#divAllotteeDetails").hide();
+                $("#RefundDetails").hide();
+                ClearValues();
+                alertify.error("Some error occured. Please try again later.");
+            }
+        });
+    }
+
+    function GetCanType() {
+        var type = $("input[name='TypeOfCancel']:checked").val();
+        return {
+            type: type
+        };
+    }
+
+    function RefundTypeData() {
+        var rId = $("#RId").val();
+        var depttId = $("#hdnDepttId").val();
+        return { rId: rId, depttId: depttId };
+    }
+
+    function AdditionalData() {
+        return {
+            depttId: $("#hdnDepttId").val()
+        };
+    }
+</script>
+

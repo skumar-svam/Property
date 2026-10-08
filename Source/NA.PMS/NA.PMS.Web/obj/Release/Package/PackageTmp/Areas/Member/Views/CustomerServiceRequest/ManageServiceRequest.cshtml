@@ -1,0 +1,135 @@
+﻿@using Kendo.Mvc.UI
+@using Microsoft.Office.Interop.Word
+@using NA.PMS.Model;
+@model NA.PMS.Model.ServiceRequestModel
+@{
+    ViewBag.Title = "ManageServiceRequest";
+}
+
+<style>
+    /*#btnAddRole {
+        float: right;
+        width: 130px;
+    }*/
+    .linkcss:hover {
+        cursor: pointer;
+    }
+
+    .k-grid-content {
+        overflow-y: hidden;
+        overflow-x: hidden;
+    }
+    .k-grid .k-detail-cell{
+        margin:0;
+        padding:0;
+    }
+</style>
+
+<div id="divServiceRequest">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Service Request</h1></div>
+
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<ServiceRequestModel>()
+              .Name("gridServiceReq")
+              .Columns(columns =>
+              {
+                  columns.Bound(c => c.Id).Title("Request No");//.ClientTemplate("<a href='" + "/Property/PropertyAllotment/PropertyDetails/#= Registration_No #'>#= Registration_No #</a>").Title("Registration Id").Filterable(false);
+                  columns.Bound(c => c.ApplicantName).Title("Applicant");
+                  columns.Bound(c => c.DepartmentName).Title("Department");
+                  columns.Bound(c => c.ServiceName).Title("Service");
+                  columns.Bound(c => c.Description).Title("Description");
+                  columns.Bound(c => c.Created_Date).Title("Submission").Format("{0:dd-MMM-yyyy}");
+                  columns.Bound(c => c.Status).Title("Status");
+                  columns.Bound(c => c.Request_Status).Sortable(false).Width(00).Title("Action").ClientTemplate(
+                 "<span  class='fa fa-check acceptReject' serId='#=Id#' rType='A'>Accept</span> <span class='fa fa-close acceptReject' serId='#=Id#'  rType='R'>Reject</span>")
+                 .Sortable(false)
+                 .HtmlAttributes(new { @style = "cursor:pointer" });
+              })
+              .Sortable()
+              .Filterable()
+              .Resizable(resize => resize.Columns(true))
+              .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+              //.Groupable()
+             .ClientDetailTemplateId("template")
+              .DataSource
+              (
+                  dataSource => dataSource
+                      .Ajax()
+                      .Model(model => model.Id(p => p.Id))
+                      .ServerOperation(true)
+                              .Read(read => read.Action("GetCustomerServiceRequestList", "CustomerServiceRequest"))
+                      .PageSize(10)
+              )
+            .Events(events => events.DataBound("dataBound"))
+        )
+
+    </div>
+</div>
+
+<script id="template" type="text/kendo-tmpl">
+    @(Html.Kendo().Grid<ServiceRequestModel>()
+            .Name("grid_#=Id#") // template expression, to be evaluated in the master context
+            .Columns(columns =>
+            {
+                columns.Bound(o => o.Registration_No).Title("Registration Id").Width(120);
+                columns.Bound(o => o.Property_No).Title("Property").Width(120);
+                columns.Bound(o => o.Mobile).Title("Mobile").Width(120);//.ClientTemplate("\\#= ShipAddress \\#"); // escaped template expression, to be evaluated in the child/detail context
+                //columns.Bound(o => o.Email).Title("Email");
+                columns.Bound(o => o.Requestor).Title("Requestor");
+                columns.Bound(o => o.Comment).Title("Comment");
+                columns.Bound(o => o.ApplicantAddress).Title("Address");
+            })
+            .DataSource(dataSource => dataSource
+                .Ajax()
+                //.PageSize(10)
+                .Read(read => read.Action("GetCustomerServiceRequestDetailByRequestId", "CustomerServiceRequest", new { requestId = "#=Id#" }))
+            )
+            //.Pageable()
+            //.Sortable()
+            .ToClientTemplate()
+    )
+</script>
+
+
+<script type="text/javascript">
+
+    $(window).load(function () {
+        setTimeout(applyClick, 2000);
+    });
+
+    function dataBound() {
+        this.expandRow(this.tbody.find("tr.k-master-row").first());
+    }
+
+    function applyClick() {
+        $(".acceptReject").on("click", function () {
+            debugger;
+            var serId = $(this).attr("serId");
+            var rType = $(this).attr("rType");
+            //alert(serId + rType);
+            $.ajax({
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                type: "POST",
+                url: '/CustomerServiceRequest/AcceptRejectService/',
+                data: JSON.stringify({ serId: parseInt(serId), rType: rType }),
+                success: function (result) {
+                    if (result)
+                        alertify.success("Request has been " + (rType === 'A' ? "accepted" : "rejected") + " successfully.");
+
+                },
+                error: function (msg) {
+                    alert("Error Occured-" + msg.responseText);
+                }
+            });
+        });
+    }
+
+    
+   
+</script>

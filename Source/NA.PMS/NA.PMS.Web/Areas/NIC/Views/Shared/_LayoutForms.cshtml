@@ -1,0 +1,136 @@
+﻿@using System.Web.Optimization;
+@using NA.PMS.Common.Helpers;
+
+@{
+    var displayMiniProfiler = SettingsHelper.IsMiniProfilerEnabled;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+    @Styles.Render("~/Content/others")
+    @Styles.Render("~/bundles/KendoCSS")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/others")
+    @Scripts.Render("~/bundles/KendoJS")
+
+    <link href="~/Content/CSS/style-new.css" rel="stylesheet" />
+    <link href="~/Content/CSS/responsive.css" rel="stylesheet" />
+    <link href="~/Content/CSS/open-top-bx.css" rel="stylesheet" />
+    <script src="~/Scripts/kendo.aspnetmvc.min.js"></script>
+
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    
+    <link href="~/Areas/NIC/Content/Style/SWPTemplate.css" rel="stylesheet" />
+    <link href="~/Areas/NIC/Content/Style/SWPResponsiveTemplate.css" rel="stylesheet" />
+    <style>
+        #loaderImg {
+            margin: auto;
+            display: block;
+            border-radius: 7px;
+            position: relative;
+            top: 43%;
+            width: 86px
+        }
+
+        #loader {
+            width: 100%;
+            height: 100%;
+            opacity: 0.7;
+            z-index: 9999;
+            background-color: gray;
+            position: fixed;
+            display: none
+        }
+        .nic-header-content{
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            z-index:100;
+        }
+        .btn-nic-portal{
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            border:0;
+            padding:4px 4px;
+            background: #0c5298;
+            border-radius: 0;
+            color: #fff;
+        }
+        .mt-6{
+            margin-top:6px !important;
+        }
+        .col-md-3.col-20 {
+            width: 20% !important;
+        }
+
+        .col-md-3.col-30 {
+            width: 30% !important;
+        }
+
+        .col-md-3.col-40 {
+            width: 40% !important;
+        }
+
+        .col-md-9.col-60 {
+            width: 60% !important;
+        }
+        .nic-header-content{
+            height:110px;
+        }
+        
+        @@media (min-width : 320px) and (max-width : 540px){
+             .col-md-3.col-sm-3.col-xs-12.col-20.form-group{
+                width:100% !important;
+            }
+            .col-md-3.col-sm-3.col-xs-12.col-30.form-group{
+                    width:100% !important;
+            }
+            .col-md-3.col-40.col-sm-6.col-xs-12.form-group{
+                width: 100% !important;
+            }
+
+            .col-md-9.col-60.col-sm-6.col-xs-12.form-group {
+                width: 100% !important;
+            }
+        .nic-header-content{height:140px;}
+        }
+    </style>
+    <script>
+        $(".input-disabled").keypress(function () {
+            return false;
+        });
+    </script>
+  
+</head>
+<body style="background:#fff;">
+    <div id="loader">
+        <img id="loaderImg" src="~/Content/Images/Chimply_progress.gif">
+    </div>
+    <header class="nic-header-content" style="background:#fff;">
+        <div class="row" style="position:relative;text-align:right;z-index:2;">
+            <div class="col-md-12" style="right:150px;margin-top:2px;">
+                <input type="button" class="btn-nic-portal" value="Back Nivesh Mitra Portal"/>
+            </div>
+        </div>
+        <div class="row" style="position:relative;z-index:1;top:-30px;">
+            <div class="col-md-3 col-sm-12 col-xs-12 col-lg-3 col-sm-hdn">
+                <img src="~/Content/Images/govt_up.png" class="img-up-govt-left" />
+            </div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-lg-6 nic-header-title" style="text-align:center;">
+                <h1 class="nic-header-name">Nivesh Mitra</h1>
+                <p><span style="">Single Window Portal</span>, Govt. of Uttar Pradesh</p>
+                <p class="nic-header-title" style="text-align:center;color:green;">New Okhla Industrial Development Authority</p>
+                
+            </div>
+            <div class="col-md-3 col-sm-12 col-xs-12 col-lg-3 col-sm-hdn" style="text-align:right">
+                <img src="~/Content/Images/logo_udhyog_bandu_b.png" class="img-up-govt-right" />
+            </div>
+        </div>
+        
+    </header>
+    <div class="nic-main-content">              
+        @RenderBody()
+    </div>
+  
+</body>
+</html>

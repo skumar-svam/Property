@@ -1,0 +1,304 @@
+﻿@using Kendo.Mvc.UI
+@{
+    ViewBag.Title = "Super Admin";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@*<link href="@Url.Content("~/Content/kendo/2014.2.716/kendo.common.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/Content/kendo/2014.2.716/kendo.default.min.css")" rel="stylesheet" />
+
+    <script src="~/Scripts/kendo/2014.2.716/kendo.web.min.js"></script>
+    <script src="~/Scripts/kendo/2014.2.716/kendo.aspnetmvc.min.js"></script>*@
+@*<script src="~/Scripts/kendo.aspnetmvc.min.js"></script>*@
+<style>
+   
+    .linkCss {
+        color: #337ab7;
+        text-decoration: underline;
+    }
+
+    .linkCss:hover {
+        color: #337ab7;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+    .k-grid-content{
+        overflow-y:hidden;
+        overflow-x:hidden;
+    }
+    .modal-body{
+        margin:0;
+        padding:0;
+    }
+
+</style>
+
+
+<div class="SA-ManageUsers">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Users</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                <a href="#" id="btnAddUser" class="" onclick="javascript: AddUser(event);">Add User</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+
+    <div>
+        <input type="hidden" id="hdnRoleID" />
+    </div>
+
+    <div class="k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.UsersModel>()
+        .Name("gridUsers")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.id).Hidden(true);
+            columns.Bound(c => c.isActive).Hidden(true);
+            columns.Bound(c => c.empID).Title("Username").Width(130).ClientTemplate("<a href=\"/SuperAdmin/ManageUsers/ViewUser/#= id#\" id='v_#=id#'  style = 'width: 30px;' >#=empID#</a>").Filterable(false).Sortable(false);
+            columns.Bound(c => c.fullName).Title("Name");
+            columns.Bound(c => c.email).Title("Email");
+            columns.Bound(c => c.mobile).Title("Mobile No").Width(120);
+            //columns.Bound(c => c.strDeptts).Width(50).Title("Departments");
+            columns.Bound(c => c.id).Title("Action").Width(70).ClientTemplate("#if(isActive == true){#<a class='gridEdit' href=\"/SuperAdmin/ManageUsers/EditUser/#= id#\" id='e_#=id#'> Edit</a>#} else {#<span class='gridNotEdit'>Edit</span>#} #").Filterable(false).Sortable(false);
+            columns.Bound(c => c.id).Title("Role").Width(110).ClientTemplate("#if(isActive == true){#<a onClick = 'javascript:ViewAdminUserRole(#= id#)' class='linkCss'><span class='glyphicon glyphicon-eye-open'></span>View Role</a>#} else {#<span>View Role</span>#} #").Filterable(false).Sortable(false);
+            columns.Bound(c => c.id).Title("Lock/Unlock").Width(110).ClientTemplate("#if(isActive == true){#  <a onclick='javascript:LockUnlockToggle(this);' class='linkCss'><i class='fa fa-lock' aria-hidden='true'></i> Lock</a> #} else{#<a  onclick='javascript:LockUnlockToggle(this);' class='linkCss'> <i class='fa fa-unlock' aria-hidden='true'></i> Unlock</a>#}#").Filterable(false).Sortable(false);
+            columns.Bound(c => c.id).Title("Password").Width(100).ClientTemplate("<a onClick = 'javascript:ResetPassword(#= id#)' class='linkCss'>Reset</a>").Filterable(false).Sortable(false);
+        })
+        .Filterable().Resizable(resize => resize.Columns(true))
+        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(new[] { 10, 20, 50, 100, 500 }).Info(true).PreviousNext(true).Input(true).Numeric(true).ButtonCount(10))
+        .ClientDetailTemplateId("template")
+        .DataSource(dataSource => dataSource
+            .Ajax().Model(model => model.Id(p => p.id))
+             .ServerOperation(true)
+             .Read(read => read.Action("GetAllUsersSuper", "ManageUsers")).PageSize(10)
+             .Sort(s=>s.Add(o=>o.id).Descending())
+        )
+        )
+    </div>
+
+    <script id="template" type="text/kendo-tmpl">
+        @(Html.Kendo().Grid<NA.PMS.Model.UsersModel>()
+            .Name("grid_#=id#")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.strDeptts).Title("Department");
+            })
+            .DataSource(dataSource => dataSource
+                    .Ajax()
+                    .Model(model => model.Id(p => p.id))
+                    .ServerOperation(true)
+                    .Read(read => read.Action("GetDepartmentListByIdAsDataSource", "ManageUsers", new { area = "SuperAdmin", id = "#=id#" }))
+            )
+            .ToClientTemplate()
+        )
+
+    </script>
+    <script>
+        function dataBound() {
+            this.expandRow(this.tbody.find("tr.k-master-row").first());
+        }
+    </script>
+</div>
+
+
+
+<div id="DivRoleView" class="modal fade" role="dialog" style="padding-top:100px;">
+
+    <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">User Role</h4>
+            </div>
+            <div class="modal-body">
+                <div class="k-grid-content">
+                    @(Html.Kendo().Grid<NA.PMS.Model.AdminRoleDetail>()
+                        .Name("gridRoles")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(c => c.RoleId).Hidden(true);
+                            columns.Bound(c => c.ApplicationId).Hidden(true).Title("Application Id").Width(35);
+                            columns.Bound(c => c.RoleName).Title("Role Name").Width(50);
+                            //columns.Bound(c => c.RoleType).Title("Role Type").Width(50);
+                            columns.Bound(c => c.ApplicationName).Title("Application Name").Width(50);
+                            columns.Bound(c => c.createdBy).Title("User Name").Width(50);
+                        })
+                        .Resizable(resize => resize.Columns(true))
+                        .DataSource(dataSource => dataSource
+                                .Ajax().Model(model => model.Id(p => p.RoleId))
+                                .ServerOperation(true)
+                                .Read(read => read.Action("GetAdminRoleDetails", "ManageUsers").Data("FilterData")).PageSize(5)
+                        )
+                        .AutoBind(true)
+
+                    )
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="DivResetPassword" class="modal fade" role="dialog" style="padding-top:100px;" data-backdrop="static" data-keyboard="false">
+
+    <div class="modal-dialog lg">
+        <!-- Modal content-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">Reset Password</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row form-group">
+                    <div class="col-sm-10 col-sm-offset-1">
+                        <input type="hidden" id="txtUserId" name="txtUserId" />
+                        <input type="hidden" id="txtPassword" name="txtPassword" />
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-sm-10 col-sm-offset-1">
+                        <label class="label-text" id="lblPassword"></label>
+                        <label class="label-text" id="lblPassword2"></label>
+                    </div>
+                </div>
+                <div class="row form-group">
+                    <div class="col-sm-5"></div>
+                    <div class="col-sm-5">
+                        @*<button type="button" id="btnSubmitPassword" class="btn btn-block btn-primary">Update</button>*@
+                        <button type="button" class="btn btn-default" id="btnSubmitPassword">Update</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                    </div>
+                    <div class="col-sm-1">
+                        @*<button type="button" class="btn btn-block btn-danger" data-dismiss="modal">Cancel</button>*@
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script type="text/javascript">
+    function AddUser(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("AddUser", "ManageUsers")';
+    }
+    var userid; var nPass;
+    function ResetPassword(row) {
+        userid = row;
+        var randomString = GeneratePassword();
+        nPass = randomString;
+        $('#txtUserId').val(row);
+        $('#txtPassword').val(randomString);
+        $('#lblPassword').text("Your new password is: " + randomString);
+        $('#lblPassword2').text("If you wish to update the password in system, click on Update.");
+        $('#DivResetPassword').modal('show');
+    }
+
+    function GeneratePassword() {
+        var text = "";
+        var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        var possible1 = "@@#$&";
+        var possible2 = "0123456789";
+
+        for (var i = 0; i < 8; i++)
+        {          
+            text += possible.charAt(Math.floor(Math.random() * possible.length)) ;
+        }
+        text += possible1.charAt(Math.floor(Math.random() * possible1.length)) + possible2.charAt(Math.floor(Math.random() * possible2.length));
+        return text;
+    }
+
+    function LockUnlockToggle(row) {
+        var tr = $(row).parent().parent();
+        var id = $(tr).children("td:eq(1)").text();
+        var isActive = $(tr).children("td:eq(2)").text();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ id: id, isActive: isActive }),
+            url: '/ManageUsers/LockUnlockToggle',
+            success: function (result) {
+                if (result == true) {
+                    $("#gridUsers").data("kendoGrid").dataSource.read();
+                    alertify.success("User updated successfully.");
+                }
+                else
+                    alertify.error("Some error occured. Please try again later.");
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+
+    function ViewAdminUserRole(row) {
+        //alert("show modal" + row);
+        $("#hdnRoleID").val(row);
+        $("#gridRoles").data("kendoGrid").dataSource.read();
+        $('#DivRoleView').modal('show');
+    }
+
+    function FilterData() {
+        //alert($("#hdnRoleID").val());
+        return { userId: $("#hdnRoleID").val() };
+    }
+
+   
+
+   
+
+    $(document).ready(function () {
+        @{if (TempData["MesgAdd"] != null && TempData["MesgAdd"] != "")
+          {
+                @:alertify.success('Changes saved successfully.');
+                  }
+         }
+
+        $('#btnSubmitPassword').click(function () {
+            ResetPasswordBySuperAdmin();
+        });
+                  
+    });
+
+
+    function ResetPasswordBySuperAdmin() {
+        var newPass = $('#txtPassword').val();
+        var userId = $('#txtUserId').val();
+        if (newPass != "" && userid != "") {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ uid: userId, newPassword: newPass }),
+                url: '@Url.Action("ResetPasswordBySA", "Account", new { area = ""})',
+                success: function (result) {
+                    if (result == true) {
+                        $('#DivResetPassword').modal('hide');
+                        $("#gridUsers").data("kendoGrid").dataSource.read();
+                        alertify.success("User password updated successfully.");
+                    }
+                    else
+                        alertify.error("Some error occured. Please try again later.");
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+       
+    }
+</script>

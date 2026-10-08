@@ -1,0 +1,264 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@{
+    ViewBag.Title = "Manage Rent Permission";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/Scripts/_references.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+
+<style>
+    .bulkDialog {
+        display: none;
+    }
+    .k-grid-content{
+        overflow-y:hidden;
+    }
+    .test{
+        display:none;
+    }
+</style>
+<div id="divManageRentPermission">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Rent Permission</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                <a href="#" id="btnPrintChallan" class="">Print Challan</a>
+                @*<a href="#" id="btnPrint" class="">Print Letter</a>*@
+                <a href="#" id="AddRentRequest" class="" onclick="javascript: AddRentRequest(event);">Add Rent Request</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 row blnk-rw"></div>
+
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.RentModel>()
+        .Name("RentGrid")
+        .Columns(columns =>
+        {
+            //columns.Bound(c => c.IsSelected).ClientTemplate("<input type='checkbox' #= IsSelected ? checked='checked':'' # class='inpchk' ></input>").HeaderTemplate("#if(Status == 'Approved'){#  <input type='checkbox' id='chkSelectAll' onchange='SelectAll(this)' disabled='disabled'/> #} else{#<input type='checkbox' id='chkSelectAll' onchange='SelectAll(this)'/>#}#").Filterable(false).Sortable(false).Title("");
+            //columns.Bound(c => c.IsSelected).Width(30).ClientTemplate("<input type='checkbox' #= IsSelected ? checked='checked':'' # class='inpchk' ></input>").HeaderTemplate(" <input type='checkbox' id='chkSelectAll' onchange='SelectAll(this)' disabled='disabled'/>").Filterable(false).Sortable(false).Title("");
+            columns.Bound(c => c.IsSelected).Width(30).ClientTemplate("#if(Status == 'Approved'){#  <input type='checkbox'  disabled='disabled'/> #} else{#<input type='checkbox' #= IsSelected ? checked='checked':'' # class='inpchk'/>#}#").HeaderTemplate(" <input type='checkbox' id='chkSelectAll' onchange='SelectAll(this)'/>").Filterable(false).Sortable(false).Title(""); 
+            //columns.Bound(c => c.RentRequestId).Title("RentRequestId").Hidden(true);
+            columns.Bound(c => c.IsActive).Hidden(true).Title("Is Active?");
+            columns.Bound(c => c.EncryptedRequestNo).Hidden(true);
+            columns.Bound(c => c.RequestNo).Title("Request No").ClientTemplate("<a href='/Property/PropertyRegistration/EditRentRequest/#= EncryptedRequestNo#'>#= RequestNo#</a>").Filterable(false).Sortable(false);
+            columns.Bound(c => c.RID).Title("Registration Id");
+            columns.Bound(c => c.SchemeName).Title("Scheme");
+            columns.Bound(c => c.Department).Title("Department");
+            columns.Bound(c => c.Status).Title("Status");
+            columns.Bound(c => c.RequestDate).Title("Request Date").Format("{0:dd-MM-yyyy}"); ;
+            columns.Bound(c => c.ApplicantName).Title("Applicant's Name");
+            columns.Bound(c => c.TenantName).Title("Tenant Name");
+            //columns.Bound(c => c.RentRequestId).Title("Action").ClientTemplate("<a href=\"/Property/PropertyRegistration/ViewRent/#= RentRequestId#\" id='e_#=AllotmentId#'>View</a>").Filterable(false).Sortable(false);
+            //columns.Bound(c => c.IsSelected).Width(80).ClientTemplate("#if(Status == 'Approved'){#  <input type='checkbox' id='chkSelectAll' onchange='SelectAll(this)' disabled='disabled'/> #} else{#<input type='checkbox' id='chkSelectAll' onchange='SelectAll(this)'/>#}#").HeaderTemplate(" <input type='checkbox' id='chkSelectAll' onchange='SelectAll(this)' />").Filterable(false).Sortable(false).Title("");    
+        })
+        .Sortable()
+        .Groupable()
+        .Filterable()
+        .Resizable(resize => resize.Columns(true))
+        //.ToolBar(toolBar =>
+        //{
+        //    //toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Print Challan").HtmlAttributes(new { onclick = "javascript:PrintRentPermissionChallan(event);", @class = "k-button", id = "PrintRentChallan" });
+        //    toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Add Rent Request").HtmlAttributes(new { onclick = "javascript:AddRentRequest(event);", @class = "k-button", id = "AddRentRequest" });
+        //})
+        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+        .DataSource(dataSource => dataSource
+                                .Ajax().Model(model => model.Id(p => p.RequestNo))
+                                                        .ServerOperation(true).Sort(sort => sort.Add("RequestNo").Descending())
+                                .Read(read => read.Action("GetPropertyRentList", "PropertyRegistration")).PageSize(10)
+                    )
+        )
+    </div>
+
+</div>
+
+<div id="divRentPermissionModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="padding-top:40px;">
+    <div class="modal-dialog" style="width: 60%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">  <b>Payment Challan</b></h4>
+            </div>
+            <div class="modal-body" id="divLetterChallanBody" style="overflow:auto;height:420px;">
+
+            </div>
+            <div style="page-break-after: always;"></div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="submit" id="btnPrintDiv" class="k-button" data-dismiss="modal" onclick="PrintDiv();">Print</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bulkDialog" id="dialog" title="Print Challan/Letter" style="width:700px">
+    @{Html.RenderPartial("_PrintChallan"); }
+</div>
+
+<script>
+
+    $(document).ready(function () {
+         @{if (TempData["MesgAdd"] != null && TempData["MesgAdd"] != "")
+             {
+                 @:alertify.success('Rent Permission request added successfully.');
+             }
+         }
+    });
+
+    function AddRentRequest(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("AddRentRequest", "PropertyRegistration")';
+    }
+
+    function PrintRentPermissionChallan(event) {
+        event.preventDefault();
+        $("#dialog").dialog({
+            minHeight: 330,
+            width: 700
+        });
+    }
+
+    function PrintDiv() {
+        var contents = document.getElementById("divLetterChallanBody").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+
+
+    var checkedPropertyIds = [];
+    var checkedRIds = [];
+    //var checkedRNs = [];
+    var checkedRIDs = [];
+
+    function SelectAll(e) {
+        var tble = $(e).parent().parent();
+        //alert("");
+        var state = $(e).is(':checked');
+        if (state == true) {
+            var grid = $('#RentGrid').data("kendoGrid");
+            $.each(grid.dataSource.view(), function () {
+                $(".inpchk").prop('checked', 'checked');
+                if (this['IsSelected'] != state)
+                    this['IsSelected'] = state;
+                checkedRIds.push(this.Rid);
+                checkedPropertyIds.push(this.PropertyId);
+            });
+            var num = 0;
+            for(var i =0;i< checkedRIds.length;i++){
+                num++;
+            }
+            //alert(num);
+        } else {
+            $(".inpchk").removeAttr('checked');
+            var grid = $('#RentGrid').data("kendoGrid");
+            $.each(grid.dataSource.view(), function () {
+                this['IsSelected'] = false;
+                checkedRIds.pop(this.Rid);
+                checkedPropertyIds.pop(this.PropertyId);
+            });
+        }
+    }
+    var currentDate = new Date().toJSON().slice(0, 10);
+    //select selected checkboxes
+    $(function () {
+        $('#RentGrid').on('change', '.inpchk', function () {
+
+            var checked = $(this).is(':checked');
+            $("#chkSelectAll").removeAttr('checked');
+            if ($('.inpchk:checked').length == $('.inpchk').length) {
+                $("#chkSelectAll").prop('checked', 'checked');
+            }
+            var grid = $('#RentGrid').data().kendoGrid;
+            var dataItem = grid.dataItem($(this).closest('tr'));
+            dataItem.set('IsSelected', checked);
+            checkedRIds.push(dataItem.RID);
+            checkedPropertyIds.push(this.PropertyId);
+        });
+
+    });
+
+    $("#btnPrint").click(function () {
+        var items = $("#RentGrid").data("kendoGrid").dataSource.data();
+        var rIds = [];
+        var checkedRNs = [];
+        var propertyIds = [];
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+                  if (item.IsSelected == true) {
+                rIds.push(item.RID);
+                checkedRNs.push(item.RequestNo);
+            }
+        }
+        if (rIds.length > 0) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ requestNoList: checkedRNs, ridList: rIds }),
+                url:'/DocParser/PrintBulkRentPermissionLetter',
+                success: function (result) {
+                    $("#divLetterChallanBody").html(result);
+                    $("#divRentPermissionModal").modal('show');
+                },
+                error: function (obj) {
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            });
+        } else {
+            alertify.error("Please select atleast one record to print Rent Permission Request challan/letter.");
+        }
+    });
+
+    $("#btnPrintChallan").click(function () {
+        var items = $("#RentGrid").data("kendoGrid").dataSource.data();
+        var rIds = [];
+        var checkedRNs = [];
+        var propertyIds = [];
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            //alert("items=" + item.IsSelected);
+            if (item.IsSelected == true) {
+                rIds.push(item.RID);
+                checkedRNs.push(item.RequestNo);
+            }
+        }
+        if (rIds.length > 0) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ requestNoList: checkedRNs, ridList: rIds }),
+                url: '/DocParser/PrintBulkRentPermissionChallan',
+                success: function (result) {
+                    $("#divLetterChallanBody").html(result);
+                    $("#divRentPermissionModal").modal('show');
+                },
+                error: function (obj) {
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            });
+        } else {
+            alertify.error("Please select atleast one record to print  Rent Permission Request challan/letter.");
+        }
+    });
+
+</script>
+

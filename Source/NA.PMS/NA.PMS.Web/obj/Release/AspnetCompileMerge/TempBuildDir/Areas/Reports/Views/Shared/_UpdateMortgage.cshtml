@@ -1,0 +1,301 @@
+﻿@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+
+<div class="panel-body">
+    <div>
+        <input type="hidden" id="MDReferenceNo" />
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Registration Id:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().ComboBox()
+                .Name("MDRegistrationId")
+                .DataTextField("text")
+                .DataValueField("id")
+                .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => { transport.Read("GetRegistrationIdList", "Report"); })
+                        .Schema(schema => { schema.Data("Data").Total("Total"); })
+                        .PageSize(100);
+                    }
+                 )
+                 .Events(events => { events.Change("GetMortgageDetailsByRegistrationId"); })
+                .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label class="lbl-t-name">Reference No:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="50" id="MReferenceNo" class="k-textbox" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Mortgage Date:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input id="MMortgageDate" value="" title="MortgageDate"  style="width:100%" />
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Valid Upto:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input id="MValiduptoDate" value="" title="ValiduptoDate" style="width:100%" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label class="lbl-t-authority">Bank Name:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="50" id="MBankName" class="k-textbox" />
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Branch Name:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="100" id="MBrachName" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Processing Fee:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="10" id="MProcessingFee" class="k-textbox" />
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Sanction Amount:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="10" id="MSanctionAmount" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Mortgage Type:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().ComboBox()
+                .Name("MMortgageType")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .DataSource(source =>source.Read(read =>read.Action("GetMortgageType", "Report", new { area="Reports"})))
+                .HtmlAttributes(new { style = "width:100%;" })
+            )
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Loan NOC:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().ComboBox()
+            .Name("MPreviousLoanNOC")
+            .DataTextField("Text")
+            .DataValueField("Id")
+            .DataSource(source =>source.Read(read =>read.Action("GetPreviousLoanNoc", "Report", new { area="Reports"})))
+            .HtmlAttributes(new { style = "width:100%;" })
+            )
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Approval Date:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input value="" title="ApprovalDate" id="MApprovalDate" style="width:100%" />
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Status:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().ComboBox()
+                .Name("MStatusType")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .DataSource(source =>source.Read(read =>read.Action("GetStatusMasterList", "Report", new { area = "Reports" })))
+                .HtmlAttributes(new { style = "width:100%;" })
+            )
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 form-group" style="text-align:right;">
+            <input type="button" id="btnMortgageUpdate" value="Update" class="k-button" style="width:100px;" />
+            <input type="button" id="btnClearMortgageFields" value="Clear" class="k-button" style="width:100px;" />
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+   
+    $(document).ready(function () {
+        $("#MMortgageDate").kendoDatePicker(); 
+        $("#MValiduptoDate").kendoDatePicker();
+        $("#MApprovalDate").kendoDatePicker();
+
+
+        $('#btnClearMortgageFields').click(function () {
+            $('#MDRegistrationId').val('');
+            ClearMortgageDetails();
+        });
+
+        $('#btnMortgageUpdate').click(function () {
+            //if (ValidateMortgageFields()) {
+            //    UpdateMortgageDetail();
+            //}
+            UpdateMortgageDetail();
+        });
+
+    });
+
+    function GetMortgageDetailsByRegistrationId() {
+        var rid = $('#MDRegistrationId').val();
+        if (rid != "" && rid.length == 8) {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ registrationId: rid}),
+                url: '@Url.Action("GetMortgageDetailsByRid", "Report")',
+                success: function (result) {
+                    if (result != '') {
+                        $('#MDReferenceNo').val(result.Id);
+                        $('#MReferenceNo').val(result.OnlineRequestNo);
+                        $('#MMortgageDate').data("kendoDatePicker").value(result.MortgageDate);
+                        $('#MValiduptoDate').data("kendoDatePicker").value(result.ValidUpto);
+                        $('#MBankName').val(result.BankName);
+                        $('#MBrachName').val(result.BranchAddress);
+                        $('#MProcessingFee').val(result.ProcessingFee);
+                        $('#MSanctionAmount').val(result.SanctionedAmount);
+                        $('#MMortgageType').data("kendoComboBox").value(result.MortgageTypeId);
+                        $('#MPreviousLoanNOC').data("kendoComboBox").value(result.PreviousLoanNoc);
+                        $('#MApprovalDate').data("kendoDatePicker").value(result.ApproveDate);
+                        $('#MStatusType').data("kendoComboBox").value(result.MortgageStatusId)
+                    }
+                    else {
+                        alertify.error("Mortgage doesn't exist");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Mortgage doesn't exist");
+                }
+            });
+        }
+    }
+
+    function UpdateMortgageDetail() {
+        var MortgageModel = {
+            Id: parseInt($('#MDReferenceNo').val()),
+            RegistrationId: parseInt($('#MDRegistrationId').val()),
+            OnlineRequestNo: parseInt($('#MReferenceNo').val()),
+            MortgageDate: Date.parse($('#MMortgageDate').val()),
+            ValidUpto: Date.parse($('#MValiduptoDate').val()),
+            BankName: $('#MBankName').val(),
+            BranchAddress: $('#MBrachName').val(),
+            ProcessingFee: $('#MProcessingFee').val(),
+            SanctionedAmount: $('#MSanctionAmount').val(),
+            MortgageType: $('#MMortgageType').val(),
+            PreviousLoanNoc: $('#MPreviousLoanNOC').val(),
+            ApproveDate: Date.parse($('#MApprovalDate').val()),
+            MortgageStatusId: $('#MStatusType').val()
+        };
+        $.ajax({
+            type: "post",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ model: MortgageModel }),
+            url: '@Url.Action("UpdateMortgageDetail", "Report")',
+            success: function (result) {
+                if (result == '@ReturnType.Success') {
+                    alertify.success("Information updated successfully.");
+                    ClearMortgageDetails();
+                }
+                if (result == '@ReturnType.Failure') {
+                    alertify.error("Updation is failed.");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Please try again.");
+            }
+        });
+    }
+
+    function ValidateMortgageFields() {
+        var flag = true;
+        if ($('#MDRegistrationId').val().trim() == "") {
+            alertify.error("Please select Registration Id");
+            flag = false;
+        }
+        if ($('#MReferenceNo').val().trim() == "") {
+            alertify.error("Please enter online reference no");
+            flag = false;
+        }
+        if ($('#MMortgageDate').val().trim() == "") {
+            alertify.error("Please select Mortgage Date");
+            flag = false;
+        }
+        if ($('#MValiduptoDate').val().trim() == "") {
+            alertify.error("Please select valid upto date");
+            flag = false;
+        }
+        if ($('#MBankName').val().trim() == "") {
+            alertify.error("Please enter Bank name");
+            flag = false;
+        }
+        if ($('#MBrachName').val().trim() == "") {
+            alertify.error("Please enter Bank's branch name");
+            flag = false;
+        }
+        if ($('#MProcessingFee').val().trim() == "") {
+            alertify.error("Please enter processing fee");
+            flag = false;
+        }
+        if ($('#MSanctionAmount').val().trim() == "") {
+            alertify.error("Please enter sanction amount");
+            flag = false;
+        }
+        if ($('#MMortgageType').val().trim() == "") {
+            alertify.error("Please select mortgage type");
+            flag = false;
+        }
+        if ($('#MPreviousLoanNOC').val().trim() == "") {
+            alertify.error("Please select loan status");
+            flag = false;
+        }
+        if ($('#MApprovalDate').val().trim() == "") {
+            alertify.error("Please select Approval date");
+            flag = false;
+        }
+        if ($('#MStatusType').val().trim() == "") {
+            alertify.error("Please select status");
+            flag = false;
+        }
+        return flag;       
+    }
+
+    function ClearMortgageDetails() {
+        $('#MReferenceNo').val('');
+        $('#MMortgageDate').val('');
+        $('#MValiduptoDate').val('');
+        $('#MBankName').val('');
+        $('#MBrachName').val('');
+        $('#MProcessingFee').val('');
+        $('#MSanctionAmount').val('');
+        $('#MMortgageType').data("kendoComboBox").value('');
+        $('#MPreviousLoanNOC').data("kendoComboBox").value('');
+        $('#MApprovalDate').val('');
+        $('#MStatusType').data("kendoComboBox").value('');
+    }
+
+</script>

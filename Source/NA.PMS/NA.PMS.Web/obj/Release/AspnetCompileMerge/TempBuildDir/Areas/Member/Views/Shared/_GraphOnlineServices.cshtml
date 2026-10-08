@@ -1,0 +1,351 @@
+﻿
+@using Kendo.Mvc.UI
+@using NA.PMS.Common
+@using System.Linq
+
+@*<link rel="stylesheet" href="https://kendo.cdn.telerik.com/2019.1.220/styles/kendo.common-material.min.css" />
+<link rel="stylesheet" href="https://kendo.cdn.telerik.com/2019.1.220/styles/kendo.material.min.css" />*@
+
+<div id="div-Online-services">
+    <div class="row" style="padding-bottom:8px;">
+        <div class="col-md-3">
+            <label>Department</label>
+            @(Html.Kendo().DropDownList()
+                .Name("OnlineServiceDepartmentId")
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .OptionLabel(" --- Select ---")
+                .BindTo(new List<SelectListItem>() {
+                    new SelectListItem() { Text = "Institutional", Value = "1" },
+                    new SelectListItem() { Text = "Industrial", Value = "4" },
+                    new SelectListItem() { Text = "Commercial", Value = "2" },
+                    new SelectListItem() { Text = "Residential", Value = "3" },
+                    new SelectListItem() { Text = "Housing", Value = "5" },
+                    new SelectListItem() { Text = "Group Housing", Value = "6" },
+                    new SelectListItem() { Text = "5 % Abadi", Value = "7" }
+                })
+                .Events(e => e.Change("OnlineServiceChangeEvent"))
+                .HtmlAttributes(new { style = "width: 90%;" })
+            )
+        </div>
+        <div class="col-md-3">
+            <label>Start Date</label>
+            @(Html.Kendo().DatePicker().Name("OnlineServiceStartDate")
+                    .Events(e => e.Change("OnlineServiceChangeEvent"))
+                    .HtmlAttributes(new { style = "width:90%;" })
+            )
+        </div>
+        <div class="col-md-3">
+            <label>End Date</label>
+            @(Html.Kendo().DatePicker().Name("OnlineServiceEndDate")
+                    .Events(e => e.Change("OnlineServiceChangeEvent"))
+                    .HtmlAttributes(new { style = "width:90%;" })
+            )
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 demo-section k-content wide">
+            <div id="DivServicePieChartOnline"></div>
+        </div>
+        <div class="col-md-6 demo-section k-content wide">
+            <div id="DivServicePieChartOnlineII"></div>
+            @*<div id="DivServiceBarChartOnline"></div>*@
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12" style="margin-top:20px;">
+            <div class="row rw-spce">
+                <div class="col-md-12">
+                    <h2 class=" blck-heading" style="border-left:1px solid green;border-right:1px solid green;margin-bottom:0;">Status Of Services</h2>
+                    <div class="col-md-12 k-grid-content">
+                        @(Html.Kendo().Grid<NA.PMS.Model.ServiceViewModel>()
+                    .Name("GridOnlineServiceDetailStatus")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(c => c.ServiceName).Title("Service Name").ClientFooterTemplate("Total Count:");
+                        columns.Bound(c => c.Completed).Title("Completed").Width(110).ClientFooterTemplate("#=sum#");
+                        columns.Bound(c => c.Cancelled).Title("Cancelled").Width(110).ClientFooterTemplate("#=sum#");
+                        columns.Bound(c => c.Rejected).Title("Rejected").Width(110).ClientFooterTemplate("<div>#= sum #</div>");
+                        columns.Bound(c => c.Pending).Title("Pending").Width(110).ClientFooterTemplate("<div>#= sum #</div>");
+                        //columns.Bound(c => c.InProgress).Title("In Progresss").Width(110).ClientFooterTemplate("<div>#= sum #</div>");
+                        columns.Bound(c => c.TotalRequest).Title("Total Request").Width(110).ClientFooterTemplate("<div>#= sum #</div>");
+                        //columns.Bound(c => c.PercentInProgress).Title("Progress(%)").Width(110).ClientFooterTemplate("<div>#= average #</div>");
+                        //columns.Bound(c => c.DateMar).Title("Average Days").ClientFooterTemplate("<div>Avg: #= kendo.toString(average, '0.00') #</div>");//Gap Between submit date and approve date
+                    })
+                    .Resizable(resize => resize.Columns(true))
+                    .AutoBind(true)
+                    .DataSource
+                    (
+                        dataSource => dataSource
+                        .Ajax().ServerOperation(true)
+                        .Read(read => read.Action("GetServiceReportsAsDataSource", "Report", new { area = "Reports" }).Data("FilterParmaForOnlineServices"))
+                        .Aggregates(aggregates =>
+                        {
+                            aggregates.Add(p => p.Completed).Sum();
+                            aggregates.Add(p => p.Cancelled).Sum();
+                            aggregates.Add(p => p.Rejected).Sum();
+                            aggregates.Add(p => p.Pending).Sum();
+                            //aggregates.Add(p => p.InProgress).Sum();
+                            aggregates.Add(p => p.TotalRequest).Sum();
+                            aggregates.Add(p => p.PercentInProgress).Average();
+                        })
+                    ))
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    $(document).ready(function () {
+        var startdate = '2018-12-01';
+        $('#OnlineServiceStartDate').data("kendoDatePicker").value(startdate);
+        var todayDate = kendo.toString(kendo.parseDate(new Date()), 'MM/dd/yyyy');
+        $("#OnlineServiceEndDate").data("kendoDatePicker").value(todayDate);
+        $('#OnlineServiceDepartmentId').data("kendoDropDownList").value(1);
+
+        //GetTotalOnlineServiceListForGraph();
+
+        //GetOnlineServiceListForGraph();
+        //CreateBarGraphForOnlineServices(); 
+    });
+
+    function FilterParmaForOnlineServices() {
+        var today = new Date().toDateString();
+        return {
+            DepartmentId: $('#OnlineServiceDepartmentId').val() == "" ? 1 : $('#OnlineServiceDepartmentId').val(),
+            StartDate: $('#OnlineServiceStartDate').val() == "" ? "2018-12-01" : $('#OnlineServiceStartDate').val(),
+            EndDate: $('#OnlineServiceEndDate').val() == "" ? today : $('#OnlineServiceEndDate').val(),
+            RequestThrough:"Online"
+        }
+    }
+
+    function OnlineServiceChangeEvent() {
+        $('#GridOnlineServiceDetailStatus').data("kendoGrid").dataSource.read();
+        //GetOnlineServiceListForGraph();
+        GetTotalOnlineServiceListForGraph();
+        GetInProcessOnlineServiceListForGraph();
+    }
+
+
+    function GetTotalOnlineServiceListForGraph() {
+        var today = new Date().toDateString();
+        var departmentId = $('#OnlineServiceDepartmentId').val() == "" ? 1 : $('#OnlineServiceDepartmentId').val();
+        var startDate = $('#OnlineServiceStartDate').val() == "" ? "2018-12-01" : $('#OnlineServiceStartDate').val();
+        var endDate = $('#OnlineServiceEndDate').val() == "" ? today : $('#OnlineServiceEndDate').val();
+        var reqThrough = "Online";
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ DepartmentId: departmentId, StartDate: startDate, EndDate: endDate, RequestThrough: reqThrough, FilterType: "TotalServicesByDepartment" }),
+            url: '/Reports/Report/GetServiceReportsForGraphII',
+            success: function (result) {
+                if (result != null) {
+                    CreateTotalOnlineServiceRequestChart(result);
+                    //CreateBarGraphForOnlineServices(result);
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Network error, Please try again later.");
+            }
+        });
+    }
+
+    function CreateTotalOnlineServiceRequestChart(GraphData) {
+        //var date = $('#StatusDate').val();
+        $("#DivServicePieChartOnline").kendoChart({
+            title: {
+                text: "Total Service Request"
+            },
+            legend: {
+                //position: "bottom"
+                visible: false
+            },
+            dataSource: {
+                data: GraphData
+            },
+            seriesDefaults: {
+                labels: {
+                    visible: true,
+                    background: "transparent",
+                    template: "#= category #: \n #= value#"
+                }
+            },
+            //series: [{
+            //    type: "pie",
+            //    field: "TotalRequest",
+            //    categoryField: "ServiceName"
+            //}],
+            series: [{
+                type: "pie",
+                field: "Value",
+                categoryField: "Label",
+                //overlay: {
+                //    gradient: "none"
+                //}
+            }],
+            //chartArea: {
+            //    height:700
+            //},
+            seriesColors: ["#03a9f4", "#ff9800", "#fad84a", "#4caf50", "#FF0000", "#FF00FF", "#000080"],
+            tooltip: {
+                visible: true,
+                template: "#= category #: \n #= value#",
+                //contentLoad: function () {
+                //    alert("content is loaded");
+                //}
+            },
+            seriesClick: TotalOnlineServicesPieChartSeriesClickEvent,
+           // plotAreaClick: TotalServicesPieChartPlotAreaClickEvent,
+            //seriesHover: function () {
+            //    $("#DivServicePieChartI").css("cursor", "pointer");
+            //}
+        });
+    }
+
+    function TotalOnlineServicesPieChartSeriesClickEvent(e) {
+        var dept = e.category;
+        var departmentId = $('#OnlineServiceDepartmentId').val();
+        var startDate = $('#OnlineServiceStartDate').val();
+        var endDate = $('#OnlineServiceEndDate').val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ Department: dept, ActionType: dept, StartDate: startDate, EndDate: endDate, RequestThrough: "Online", FilterType: "ServicesByDepartment" }),
+            url: "/Reports/Report/GetServiceReportsForGraphII",
+            success: function (result) {
+                if (result != null) {
+                    CreateTotalOnlineServiceRequestChart(result)
+                    //CreateBarGraphForOnlineServices(result);
+                }
+                else {
+                    alertify.error("no data found.");
+                }
+
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+            }
+        });
+    }
+
+
+    //$(document).bind("kendo:skinChange", GetOnlineServiceListForGraph());
+    //$(document).bind("kendo:skinChange", CreateBarGraphForOnlineServices());
+
+
+    function GetInProcessOnlineServiceListForGraph() {
+        var today = new Date().toDateString();
+        var departmentId = $('#OnlineServiceDepartmentId').val();
+        var startDate = $('#OnlineServiceStartDate').val();
+        var endDate = $('#OnlineServiceEndDate').val();
+        var reqThrough = "Online";
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ DepartmentId: departmentId, StartDate: startDate, EndDate: endDate, RequestThrough: reqThrough, FilterType: "PendingServices" }),
+            url: '/Reports/Report/GetServiceReportsForGraphII',
+            success: function (result) {
+                if (result != null) {
+                    //CreateTotalOnlineServiceRequestChart(result);
+                    CreateTotalOnlineServiceInProcessPieChart(result);
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Network error, Please try again later.");
+            }
+        });
+    }
+
+    function CreateTotalOnlineServiceInProcessPieChart(GraphData) {
+        //var date = $('#StatusDate').val();
+        $("#DivServicePieChartOnlineII").kendoChart({
+            title: {
+                text: "In Process Services"
+            },
+            legend: {
+                //position: "bottom"
+                visible: false
+            },
+            dataSource: {
+                data: GraphData
+            },
+            seriesDefaults: {
+                labels: {
+                    visible: true,
+                    background: "transparent",
+                    template: "#= category #: \n #= value#"
+                }
+            },
+            //series: [{
+            //    type: "pie",
+            //    field: "TotalRequest",
+            //    categoryField: "ServiceName"
+            //}],
+            series: [{
+                type: "pie",
+                field: "Value",
+                categoryField: "Label",
+                //overlay: {
+                //    gradient: "none"
+                //}
+            }],
+            //chartArea: {
+            //    height:700
+            //},
+            seriesColors: ["#03a9f4", "#ff9800", "#fad84a", "#4caf50", "#FF0000", "#FF00FF", "#000080"],
+            tooltip: {
+                visible: true,
+                template: "#= category #: \n #= value#",
+                //contentLoad: function () {
+                //    alert("content is loaded");
+                //}
+            },
+            seriesClick: TotalOnlineInProcessServicesPieChartSeriesClickEvent,
+            
+        });
+    }
+
+    function TotalOnlineInProcessServicesPieChartSeriesClickEvent(e) {
+        var id = 17;
+        var dept = e.category;
+        var startDate = $('#OnlineServiceStartDate').val();
+        var endDate = $('#OnlineServiceEndDate').val();
+        window.location.href = "/Reports/Report/ManageServices?filterType=Online&id=" + id + "&department=" + e.category+"&startDate="+startDate+"&endDate="+endDate;
+
+       
+        //$.ajax({
+        //    dataType: 'json',
+        //    type: 'Post',
+        //    contentType: 'application/json; charset=utf-8',
+        //    data: JSON.stringify({ Department: e.category, Status: "InProcess" }),
+        //    url: "/Reports/Report/GetMultipleTypeIdToRedirect",
+        //    success: function (result) {
+        //        if (result != null) {
+        //            //window.location.href = "/Reports/Report/RedirectServiceRequestByType?filterType=Online&id=" + id + "&department=" + e.category;
+        //            window.location.href = "/Reports/Report/ManageServices?filterType=Online&id=" + id + "&department=" + e.category;
+        //        }
+        //        else {
+        //            alertify.error("no data found.");
+        //        }
+        //    },
+        //    error: function (ajaxRequest, strError) {
+        //        var respText = ajaxRequest.responseText;
+        //    }
+        //});
+    }
+
+</script>
+
+
+
+
+
+
+

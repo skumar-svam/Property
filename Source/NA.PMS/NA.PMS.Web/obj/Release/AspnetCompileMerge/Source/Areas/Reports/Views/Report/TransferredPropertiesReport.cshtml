@@ -1,0 +1,202 @@
+﻿@model NA.PMS.Model.TransferModel
+@using Kendo.Mvc.UI
+
+@{
+    ViewBag.Title = "Transferred Properties Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="ApplicationForm">
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">GPA Report</h1></div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 mandatory"></div>
+                </div>
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="col-md-12 content-top-spce">
+                <h2 class="blck-heading">Search</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("From", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DatePickerFor(m => m.FromSearch)
+                                          .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" }))
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <div class="col-md-3">@Html.Label("To", htmlAttributes: new { @class = "required" })</div>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DatePickerFor(m => m.ToSearch)
+                                          .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" }))
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Scheme", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(m => m.SchemeId)
+                      .DataTextField("schemeName")
+                      .DataValueField("schemeId")
+                      .OptionLabel("-- Please Select --")
+                      .DataSource(source => source.Read(read => read.Action("SchemeListForAllotment", "Allotment", new { Area = "Property" })))
+                      .Enable(true)
+                      .AutoBind(true)
+                      .Filter("contains")
+                      .HtmlAttributes(new { style = "width:100%;" })
+                            )
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Department", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(model => model.DepttId)
+                      .DataTextField("DepartmentName")
+                      .DataValueField("DepartmentId")
+                      .OptionLabel("-- Please Select --")
+                              .DataSource(source => source.Read(read => read.Action("FilterDepartmentOnScheme", "PropertyAllotment", new { Area = "Property" }).Data("FilterDepartment"))
+                                                          .ServerFiltering(true))
+                      .Enable(false)
+                      .AutoBind(false)
+                              .Filter("contains")
+                        .CascadeFrom("SchemeId")
+                        .HtmlAttributes(new { style = "width:100%;" })
+                            )
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Transfer Type", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(m => m.TransferType)
+                    .Filter("contains")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel("-- Please Select --")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetTransferTypes", "PropertyRegistration", new { Area = "Property" });
+                        });
+                    })
+                //.Events(events => { events.Change("TransChange"); })
+                    .HtmlAttributes(new { style = "width:100%" })
+                            )
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Transfer Sub-type", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(m => m.TransferSubType)
+                    .Filter("contains")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel("-- Please Select --").CascadeFrom("TransferType")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetTransferSubTypes", "PropertyRegistration", new { Area = "Property" }).Data("AdditionalData1");
+                        }).ServerFiltering(true);
+                    })
+                   .HtmlAttributes(new { style = "width:100%" })
+                            )
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <input type="button" value="Search" id="btnGetData" class="btn btn-add" />
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="k-grid-content">
+                @(Html.Kendo().Grid<NA.PMS.Model.TransferModel>()
+                .Name("gridTransferReport").ToolBar(tools => tools.Pdf())
+                                        .Pdf(pdf => pdf
+                                    .AllPages()
+                                    .AvoidLinks()
+                                    .PaperSize("A4")
+                                    .Scale(0.8)
+                                    .Margin("2cm", "1cm", "1cm", "1cm")
+                                    .Landscape()
+                                    .RepeatHeaders()
+                                    .TemplateId("page-template")
+                                    .FileName("TransferReport.pdf")
+                                            .ProxyURL(Url.Action("Pdf_Export_Save", "Report"))
+                                )
+        .Columns(columns =>
+        {
+            //columns.Bound(c => c.ReqNo).Title("Request No").Width(130).ClientTemplate("<a href=\"/Property/PropertyRegistration/GetTransfereeDetailByReqID/#= ReqNo#\" id='v_#=ReqNo#'  style = 'width: 30px;' >#=ReqNo#</a>");
+            columns.Bound(c => c.RId).Title("Registration Id").Width(150).ClientTemplate("<a href=\"/Property/PropertyRegistration/GetTransfereeDetailByReqID/#= ReqNo#\" id='v_#=ReqNo#'  style = 'width: 30px;' >#=RId#</a>");
+            columns.Bound(c => c.DepttName).Title("Department");
+            columns.Bound(c => c.PropNo).Title("Property No");
+            columns.Bound(c => c.ReqDate).Title("Request Date").Format("{0:dd/MM/yyyy}");
+            //columns.Bound(c => c.ApprovedDate).Title("Approved/Rejected Date").Format("{0:dd/MM/yyyy}");//Bug#191 (Note) - Resolved
+            //columns.Bound(c => c.AssignedTo).Title("Assigned To");
+            //columns.Bound(c => c.Status).Title("Status").Width(100);
+        })
+        .Sortable()
+        .Filterable()
+                .Resizable(resize => resize.Columns(true))
+        .Pageable(pageable => pageable
+                                               .Enabled(true)
+                                               .Refresh(true)
+                                               .PageSizes(true)
+                                            )
+                                            .Groupable().AutoBind(false)
+        .DataSource(dataSource => dataSource
+        .Ajax().Model(model => model.Id(c => c.ReqNo))
+        .ServerOperation(true)
+                .Read(read => read.Action("GetTransferReportData", "Report").Data("AdditionalData")).PageSize(20)
+        )
+                )
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#btnGetData").click(function () {
+            $("#gridTransferReport").data("kendoGrid").dataSource.read();
+        });
+    });
+
+    function FilterDepartment() {
+        return { SchemeId: $("#SchemeId").val() };
+    }
+
+    function AdditionalData1() {
+        return {
+            TransferType: $("#TransferType").val()
+        };
+    }
+
+    function AdditionalData() {
+        var fromSearch = $("#FromSearch").val();
+        var toSearch = $("#ToSearch").val();
+        var schemeId = $("#SchemeId").val();
+        var depttId = $("#DepttId").val();
+        var transType = $("#TransferType").val();
+        var transSubType = $("#TransferSubType").val();
+        return {
+            fromSearch: fromSearch, toSearch: toSearch, schemeId: schemeId, depttId: depttId, transType: transType, transSubType: transSubType
+        };
+    }
+</script>

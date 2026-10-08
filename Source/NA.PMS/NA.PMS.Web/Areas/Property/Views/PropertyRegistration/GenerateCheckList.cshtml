@@ -1,0 +1,581 @@
+﻿@using Kendo.Mvc.UI
+@model NA.PMS.Model.CheckList
+
+@{
+    ViewBag.Title = "CheckList";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .k-window-titlebar {
+        background: #299a8b;
+        color: #ffffff;
+    }
+
+    .k-window-content {
+        padding-top: 0px;
+    }
+
+    #checklstWindow {
+        padding-top: 0;
+        margin-bottom: 15px;
+        min-height: 400px;
+    }
+
+    .k-footer {
+        /*margin-bottom:20px;*/
+    }
+</style>
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Checklist</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+
+                <h2 class="blck-heading">Select Registration Id</h2>
+                <input type="hidden" value="0" id="hdnRid" />
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Registration Id", htmlAttributes: new { @class = "required" })</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(po => po.RId)
+                    .Filter("contains")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel("Select")
+                    .DataSource(source =>
+                    {
+                        //source.Read(read =>
+                        //{
+                        //    read.Action("GetRIDsByDeptt", "PropertyRegistration");
+                        //});
+                        source.Custom()
+                       .ServerFiltering(true)
+                       .ServerPaging(true)
+                       .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                       .Transport(transport =>
+                       {
+                           transport.Read(read => read.Action("GetRIDsByDeptt", "PropertyRegistration").Data("GetRid"));
+                       }).Schema(schema =>
+                       {
+                           schema.Data("Data")
+                           .Total("Total");
+                       }).PageSize(100);
+                    })
+                    .Events(events => { events.Change("RIdChange"); })
+             .HtmlAttributes(new { style = "width:100%", @class = "schemeForms" })
+                            )
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.HiddenFor(po => po.ViewName)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        </div>
+                    </div>
+                </div>
+                <h2 class="blck-heading">Allottee Details</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Allottee Name")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                <div id="lblAN">
+                                    @Html.DisplayFor(m => m.AllotteeName)
+                                </div>
+                            </span>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group lblfatherName">
+                            @Html.Label("Father's Name")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group divfatherName">
+                            <span class="lbl-form-control">
+                                <div id="lblFN">
+                                    @Html.DisplayFor(m => m.FatherName)
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Department")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                <div id="lblDeptt">
+                                    @Html.DisplayFor(m => m.DepartmentName)
+                                </div>
+                            </span>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Property Type")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <input type="hidden" id="hdnPropType" />
+                            <span class="lbl-form-control">
+                                <div id="lblPT">
+                                    @Html.DisplayFor(m => m.PropertyTypeName)
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Property Number")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                <div id="lblPN">
+                                    @Html.DisplayFor(m => m.PropertyNumber)
+                                </div>
+                            </span>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Property Cost")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                <div id="lblPC">
+                                    @Html.DisplayFor(m => m.PropertyCost)
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Allotment Money")</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                <div id="lblAllM">
+                                    @Html.DisplayFor(m => m.AllotmentMoney)
+                                </div>
+                            </span>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Allotment Date")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DatePickerFor(m => m.AllotmentDate)
+                                          .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" }))
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Checklist Due Date")</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @*TODO: To be used after Backlog regarding Checklist Due Date is completed*@
+                            @(Html.Kendo().DatePickerFor(m => m.ChecklistDuedate)
+                                          .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" }))
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="blck-heading">Select Checklist</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Checklist Type", htmlAttributes: new { @class = "required" })  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(m => m.CheckListTypeId)
+                                    //.Name("CheckList")
+                                    //.HtmlAttributes(new { style = "width:85%" })
+                                .OptionLabel("Select")
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .DataSource(source => { source.Read(read => { read.Action("GetCheckListType", "PropertyRegistration"); }); })
+                                .Events(events => { events.Change("ChklstType"); })
+                                .HtmlAttributes(new { style = "width:100%" })
+                            )
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Checklist Date", htmlAttributes: new { @class = "required" })  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DatePickerFor(m => m.CheckListDate).Max(DateTime.Now)
+                                          .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" }))
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box-button text-center">
+                <input type="button" value="Generate Checklist" class="btn btn-default" id="btnGenChklst" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@(Html.Kendo().Window().Name("checklstWindow").Title("New Okhla Industrial Development Authority").Modal(true).Visible(false).Content(@<text>
+        <div class="col-md-12">
+            <h2 class="blck-heading">Property Checklist</h2>
+            <div class="form-bx">
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Department") </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <div id="lblWindowDeptt">
+                            @Html.DisplayFor(m => m.DepartmentName)
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Property Type")  </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <div id="lblWindowPT">
+                            @Html.DisplayFor(m => m.PropertyTypeName)
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Checklist Type") </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <div id="lblWindowCT">
+                            @Html.DisplayFor(m => m.PropertyTypeName)
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group"></div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 k-grid-content">
+            @(Html.Kendo().Grid<NA.PMS.Model.ChecklistDocuments>()
+                        .Name("gridDocs")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(c => c.SNo).Title("S.No.").Filterable(false).Sortable(false);
+                            columns.Bound(c => c.DocName).Title("Document Required").Filterable(false).Sortable(false);
+                            columns.Bound(c => c.DocName).ClientTemplate("<input type='checkbox' class='chkbx' onclick='return false'></input>").Title("Attached").Filterable(false).Sortable(false);//.HeaderTemplate("Approve All<br><input type='checkbox' id='chkApproveAll'>");
+                        })
+                        .Sortable()
+                        .Filterable()
+                        .Resizable(resize => resize.Columns(true))
+                    //.Pageable(pageable => pageable
+                    //                                       .Enabled(true)
+                    //                                       .Refresh(true)
+                    //                                       .PageSizes(true)
+                    //                                    )
+                    //.Pageable(false)
+                        .AutoBind(false)
+                        .DataSource(dataSource => dataSource
+                        .Ajax().Model(model => model.Id(c => c.Id))
+                        .ServerOperation(true)
+                        .Read(read => read.Action("GetChcklstDocuments", "PropertyRegistration").Data("AdditionalData")).PageSize(10)
+                        )
+            )
+        </div>
+        <div class="col-md-12 k-footer">
+            <div class="box-button text-center">
+                <input type="button" id="btnPrintChklst" class="btn btn-add" value="Print" />
+            </div>
+        </div>
+</text>)
+.Draggable()
+.Resizable()
+.Width(800)
+.Actions(actions => actions.Close())
+)
+
+<script type="text/javascript">
+
+    function GetRid() {
+        var regId = $("#hdnRid").val();
+        if (regId == "") { regId = 0; }
+        return {
+            Rid: regId
+        };
+    }
+
+    $(document).ready(function () {
+        $('#AllotmentDate').data('kendoDatePicker').enable(false);
+        $('#ChecklistDuedate').data('kendoDatePicker').enable(false);
+        $("#ViewName").val("GenerateCheckList"); //For Audit Trail
+
+        $("#btnGenChklst").click(function () {
+            $("#btnGenChklst").attr('disabled', 'disabled');
+            var rId = $("#RId").val();
+            var chkType = $("#CheckListTypeId").val();
+            var chkDate = $("#CheckListDate").val();
+            var allotmentDate = $("#AllotmentDate").val();
+            var dtChkDate = new Date(chkDate);
+            var dtAllotmentDate = new Date(allotmentDate);
+            var viewName = $("#ViewName").val();
+            if (rId == '') {
+                alertify.error("Please select an RID");
+                $('#btnGenChklst').removeAttr('disabled');
+                return false;
+            }
+            if (chkType == '') {
+                alertify.error("Please select Checklist Type");
+                $('#btnGenChklst').removeAttr('disabled');
+                return false;
+            }
+            if (chkDate == '') {
+                alertify.error("Please enter Checklist Date");
+                $('#btnGenChklst').removeAttr('disabled');
+                return false;
+            }
+            if (dtChkDate <= dtAllotmentDate) {
+                alertify.error("Checklist Date can't be earlier than, or equal to  Allotment Date");
+                $('#btnGenChklst').removeAttr('disabled');
+                return false;
+            }
+            //Saving RId, Checklist Date and Checklist Type in DB
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ rId: rId, chkType: chkType, chkDate: chkDate, viewName: viewName }),
+                url: '/PropertyRegistration/SaveChecklistDetails',
+                success: function (result) {
+                    if (result == true) {
+                        //Reading popup data and opening popup.
+                        $("#gridDocs").data("kendoGrid").dataSource.read();
+                        $("#lblWindowDeptt").html($("#lblDeptt").html());
+                        $("#lblWindowPT").html($("#lblPT").html());
+                        $("#lblWindowCT").html($("#CheckListTypeId").data("kendoDropDownList").text());
+                        $('#btnGenChklst').removeAttr('disabled');
+                        $("#checklstWindow").data("kendoWindow").center();
+                        $("#checklstWindow").data("kendoWindow").open();
+                    }
+                    else {
+                        alertify.error("Some error occured. Please try again after some time");
+                        $('#btnGenChklst').removeAttr('disabled');
+                    }
+                },
+                error: function (obj) {
+                    $('#btnGenChklst').removeAttr('disabled');
+                }
+            });
+        });
+
+        $("#btnPrintChklst").click(function () {
+            setTimeout(function () { PrintPage(); }, 1000);
+        });
+
+        //Code for Check/Uncheck Checboxes STARTS
+
+        //if ($('#chkApproveAll').prop("checked") == true) {
+        //    $(".chkbx").prop("checked", true);
+        //}
+
+        //$('#chkApproveAll').click(function () {
+        //    if ($('#chkApproveAll').prop("checked") == true) {
+        //        $(".chkbx").prop("checked", true);
+        //    }
+        //    else {
+        //        $(".chkbx").prop("checked", false);
+        //    }
+        //});
+
+        //$('.chkbx').click(function () {
+
+        //});
+
+        //Code ENDS
+    });
+
+    //function PrintPage() {
+    //    var printContent = document.getElementById('checklstWindow');
+    //    var printWindow = window.open("All Records", "Print Panel", 'left=50000,top=50000,width=0,height=0');
+    //    printWindow.document.write(printContent.innerHTML);
+    //    printWindow.document.close();
+    //    printWindow.focus();
+    //    printWindow.print();
+    //}
+
+    function printGrid() {
+        var gridElement = $('#gridDocs'),
+            printableContent = '',
+            win = window.open('', '', 'width=800, height=500, resizable=1, scrollbars=1'),
+            doc = win.document.open();
+
+        var htmlStart =
+                '<!DOCTYPE html>' +
+                '<html>' +
+                '<head>' +
+                '<meta charset="utf-8" />' +
+                //'<title>Kendo UI Grid</title>' +
+                '<link href="http://kendo.cdn.telerik.com/' + kendo.version + '/styles/kendo.common.min.css" rel="stylesheet" /> ' +
+                '<style>' +
+                'html { font: 11pt sans-serif; }' +
+                '.k-grid { border-top-width: 0; }' +
+                '.k-grid, .k-grid-content { height: auto !important; }' +
+                '.k-grid-content { overflow: visible !important; }' +
+                'div.k-grid table { table-layout: auto; width: 100% !important; }' +
+                '.k-grid .k-grid-header th { border-top: 1px solid; }' +
+                '.k-grouping-header, .k-grid-toolbar, .k-grid-pager > .k-link { display: none; }' +
+                // '.k-grid-pager { display: none; }' + // optional: hide the whole pager
+                '</style>' +
+                '</head>' +
+                '<body>';
+
+        var htmlEnd =
+                '</body>' +
+                '</html>';
+
+        var gridHeader = gridElement.children('.k-grid-header');
+        if (gridHeader[0]) {
+            var thead = gridHeader.find('thead').clone().addClass('k-grid-header');
+            printableContent = gridElement
+                .clone()
+                    .children('.k-grid-header').remove()
+                .end()
+                    .children('.k-grid-content')
+                        .find('table')
+                            .first()
+                                .children('tbody').before(thead)
+                            .end()
+                        .end()
+                    .end()
+                .end()[0].outerHTML;
+        } else {
+            printableContent = gridElement.clone()[0].outerHTML;
+        }
+
+        doc.write(htmlStart + printableContent + htmlEnd);
+        doc.close();
+        win.print();
+    }
+
+    $('#btnPrintChklst').click(function () {
+        printGrid();
+    });
+
+    function AdditionalData() {
+        var propTypeId = $("#hdnPropType").val();
+        var chkLstType = $("#CheckListTypeId").val();
+        return {
+            propTypeId: propTypeId,
+            chkLstType: chkLstType
+        };
+    }
+
+    function ClearValues() {
+        $("#lblAN").html('');
+        $("#lblFN").html('');
+        $("#lblDeptt").html('');
+        $("#lblPT").html('');
+        $("#lblPN").html('');
+        $("#lblPC").html('');
+        $("#lblAllM").html('');
+        $("#AllotmentDate").data("kendoDatePicker").value('');
+        $("#ChecklistDuedate").data("kendoDatePicker").value('');
+        $("#CheckListDate").data("kendoDatePicker").value('');
+        $("#CheckListTypeId").data('kendoDropDownList').value('');
+    }
+
+    function RIdChange(event) {
+        $('#btnGenChklst').removeAttr('disabled');
+        $("#CheckListDate").data("kendoDatePicker").value('');
+        $("#CheckListTypeId").data('kendoDropDownList').value('');
+        var rId = $("#RId").val();
+        if (rId == '') {
+            ClearValues();
+            alertify.error("Please select an RID");
+            return false;
+        }
+        //GetKYADetails(rId);
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rId: rId }),
+            url: '/PropertyRegistration/GetDetailsByRID',
+            success: function (result) {
+                if (result != null) {
+                    $("#lblAN").html(result.AllotteName);
+                    if (result.Gender.toLowerCase() == "Company".toLowerCase()) {
+                        $(".divfatherName").hide();
+                        $(".lblfatherName").hide();
+                    } else {
+                        $(".divfatherName").show();
+                        $(".lblfatherName").show();
+                        $("#lblFN").html(result.FatherName);
+                    }
+
+                    $("#lblDeptt").html(result.DepttName);
+                    $("#lblPT").html(result.PropType);
+                    $("#lblPN").html(result.PropNo);
+                    $("#lblPC").html(result.PropCost);
+                    $("#lblAllM").html(result.AllotmentMoney);
+                    $("#AllotmentDate").data("kendoDatePicker").value(result.AllotmentDate);
+                    $("#ChecklistDuedate").data("kendoDatePicker").value(result.ChecklistDuedate);
+                    $("#hdnPropType").val(result.PropTypeVal);
+                }
+                else {
+                    ClearValues();
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            },
+            error: function (obj) {
+                ClearValues();
+                alertify.error("Some error occured. Please try again later.");
+            }
+        });
+    }
+
+    function GetKYADetails(rId) {
+        //var rId = $("#RId").val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ RegistrationId: rId }),
+            url: '/Property/PropertyRegistration/GetKYADetailsForRid',
+            success: function (result) {
+                if (result != null) {
+                    if (result.StatusId == "2") {
+                        alertify.error("Your KYA has been Rejected. Please Complete your KYA again.");
+                        $('#btnGenChklst').attr('disabled', 'disabled');
+                        return false;
+                    }
+                    else if (result.StatusId == "" || result.StatusId == null) {
+                        alertify.error("Please Complete your KYA.");
+                        $('#btnGenChklst').prop('disabled', true);
+                        return false;
+                    }
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+
+    function ChklstType() {
+        $('#btnGenChklst').removeAttr('disabled');
+        var rId = $("#RId").val();
+        var type = $("#CheckListTypeId").val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rId: rId, type: type }),
+            url: '/PropertyRegistration/GetChklstDateByChklstType',
+            success: function (result) {
+                if (result != null) {
+                    if (result.date != null) {
+                        $("#CheckListDate").data("kendoDatePicker").value(result.date);
+                        $('#CheckListDate').data('kendoDatePicker').enable(false);
+                    }
+                    else {
+                        $("#CheckListDate").data("kendoDatePicker").value('');
+                        $('#CheckListDate').data('kendoDatePicker').enable(true);
+                    }
+                }
+                else {
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            },
+            error: function (obj) {
+                alertify.error("Some error occured. Please try again later.");
+            }
+        });
+    }
+</script>

@@ -1,0 +1,292 @@
+﻿@using Kendo.Mvc.UI
+@using NA.PMS.Web.Models
+@model NA.PMS.Model.Property.PropertyPossessionModel
+@using NA.PMS.Common;
+
+@{
+    ViewBag.Title = "ViewPossessionRequestApprover";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">View Possession Order</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory"></div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <h2 class="blck-heading"></h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Registration Id")</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.Rid)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Property Number")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.PropertyNumber)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.LabelFor(m => m.ReqRefNo)</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.ReqRefNo)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        </div>
+                    </div>
+                </div>
+                <h2 class="blck-heading">Applicant Details</h2>
+                @Html.HiddenFor(m => m.DepartmentId)
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Scheme Name")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.SchemeName)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Department")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.DepartmentName)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Applicant's Name")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.ApplicantName)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Gender")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.HiddenFor(m => m.Gender)
+                            @Html.DisplayFor(m => m.Gender)
+                        </div>
+                    </div>
+                    <div class="row" id="divSigningAuthority">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Authorized Signatory")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.SigningAuthority)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Registered Office")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                            @Html.DisplayFor(m => m.RegisteredOffice)
+
+                        </div>
+                    </div>
+                    <div class="row" id="divParentsName">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Father's/Husband's Name")</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.FatherName)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Mother's Name")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                            @Html.DisplayFor(m => m.MotherName)
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Property Type")</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.PropertyType)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Area")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.Area)
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("AreaRange/Floor")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.FloorAreaRange)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Lease Deed Due Date")</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.LeaseDeedDueDate)
+                        </div>
+                    </div>
+                    <div class="row">
+
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Lease Deed Execution Date")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <div id="lblLeaseExecDt">
+                                @Html.DisplayFor(m => m.LeaseDeedExecutionDate)
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Possession Due Date")</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.DisplayFor(m => m.PossessionDueDate)
+                        </div>
+                    </div>
+
+
+                    @Html.HiddenFor(m => m.PropertyId)
+                    @Html.HiddenFor(m => m.Rid)
+                    @Html.HiddenFor(m => m.Approver)
+                </div>
+            </div>
+            <div class="box-button text-center">
+                <input type="button" class="btn btn-default" value="Back" id="btnBack" onclick="window.history.back();" />
+
+                @{
+                    var user = Session["CurrentUser"] as CurrentUserDetail;
+                    if (user != null)
+                    {
+                        if (Model.Approver == user.UserID && Model.StatusId==NAStatusId.InProgress)
+                        {
+                            <input type="button" class="btn btn-default" value="Approve/Reject" id="btnApproveReject" />
+                        }
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@using (Html.BeginForm("UpdatePossessionRequest", "Possession", new { area = "Property" }, FormMethod.Post, new { enctype = "multipart/form-data", id = "possessionUpdate" }))
+{
+    <div class="col-md-12 divPopupWindow" id="divStatusMaster" style="min-height:250px;background:url(/Content/Images/boxed-bg.jpg) repeat;">
+        <div class="row form-group" style="padding-top:15px;">
+            @Html.HiddenFor(m=>m.Id)
+            <div class="col-md-3">
+                <label>Status</label>
+            </div>
+            <div class="col-md-6">
+                @(Html.Kendo().DropDownListFor(x =>x.StatusId)
+                //.Name("DDLKYADepartmentId")
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .OptionLabel(" --- Select ---")
+                .BindTo(new List<SelectListItem>() {
+                    new SelectListItem() { Text = "Approve", Value = "1" },
+                    new SelectListItem() { Text = "Reject", Value = "2" },
+                })
+                .HtmlAttributes(new { style = "width: 90%;" })
+                )
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-md-3">
+                <label>Comment</label>
+            </div>
+            <div class="col-md-9">
+                @Html.TextAreaFor(model => model.Comment, htmlAttributes: new { @class = "k-textbox", style = "width:93%;height:70px;" })
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-md-3">
+                <input type="button" class="k-button" id="btnStatusSubmit" value="Submit" style="width:98%;" />
+            </div>
+            <div class="col-md-3" style="text-align:right;">
+                <input type="button" class="k-button" id="btnStatusClose" value="Close" style="width:98%;" />
+            </div>
+
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#divSigningAuthority").css("display", "none");
+        //alert($("#Gender").val().toLowerCase());
+        if ($("#Gender").val().toLowerCase() == "company") {
+            $("#divSigningAuthority").show();
+            $('#divParentsName').hide();
+        }
+        else {
+            $("#divSigningAuthority").hide();
+            $('#divParentsName').show();
+        }
+
+        $("#btnApproveReject").click(function () {
+            $(".divPopupWindow").data("kendoWindow").center();
+            $(".divPopupWindow").data("kendoWindow").open();
+            $(".divPopupWindow").data("kendoWindow").pin();
+        });
+
+        $('.divPopupWindow').kendoWindow({
+            modal: true,
+            title: "Validate Service Request",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "15%"
+            },
+            width: "40%"
+        });
+        $('#btnStatusClose').click(function () {
+            $(".divPopupWindow").data("kendoWindow").close();
+        });
+
+        $('#btnStatusSubmit').click(function () {
+            var Id = $("#Id").val();
+            var StatusId = $("#StatusId").val();
+            var Comment = $("#Comment").val();
+            if (StatusId == "") {
+                alertify.error("Select status");
+                flag = false;
+            }
+            else if (Comment == "") {
+                alertify.error("Enter Comment");
+                flag = false;
+            }
+                //$("#possessionUpdate").submit();
+            else {
+                var formData = new FormData($('#possessionUpdate').get(0));
+                formData.append("StatusId", StatusId);
+                formData.append("Id", Id);
+                formData.append("Comment", Comment);
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: false, // Not to set any content header
+                    processData: false, // Not to process data
+                    data: formData,
+                    url: '/Property/Possession/UpdatePossessionRequest',
+                    success: function (result) {
+                        if (result == '@ReturnType.Approved') {
+                            $('.divPopupWindow').data("kendoWindow").close();
+                            alertify.success("Request Approved Successfully.");
+                            window.location.reload();
+                        }
+                        else if (result == '@ReturnType.Rejected') {
+                            $('.divPopupWindow').data("kendoWindow").close();
+                            alertify.success("Request Rejected Successfully.");
+                            window.location.reload();
+                        }
+                        else {
+                            $('.divPopupWindow').data("kendoWindow").close();
+                            alertify.error("provider failed to update status.");
+                            window.location.reload();
+                        }
+                    },
+                    error: function (ajaxRequest, strError) {
+                        //alert(ajaxRequest.responseText);
+                        alertify.error("Something is wrong, try again later");
+                    }
+                });
+            }
+        });
+    });
+</script>

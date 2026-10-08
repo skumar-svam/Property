@@ -1,0 +1,464 @@
+﻿@model NA.PMS.Model.DetailedPropertyView
+@using NA.PMS.Model
+@using NA.PMS.Common
+@{
+    ViewBag.Title = "PropertyDetails";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .m_20 {
+        margin-top: 20px !important;
+    }
+</style>
+@Html.HiddenFor(p => p.AllotmentModel.RID, new { @id = "hdnRID" })
+@Html.HiddenFor(p => p.AllotmentModel.OldRID, new { @id = "hdnOldRId" })
+@Html.HiddenFor(p => p.AllotmentModel.DepartmentId, new { @id = "hdnDeptId" })
+@Html.HiddenFor(p => p.AllotmentModel.PropertyUpdateId)
+<div class="PropertyDetails col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-4 col-sm-12 col-xs-12"><h1 class="gridTitle">Property Details</h1></div>
+                <div class="col-md-4" style="text-align:right;">
+                    @{
+                        if (Model.AllotmentModel.KYAStatusId == NAStatusId.Initiated || Model.AllotmentModel.KYAStatusId == NAStatusId.Forwarded)
+                        {
+                            <span class="fa fa-circle-o-notch" style="color:#ffac00;font-size:18px;"></span>
+                            <span style="font-size:15px;color:#ffac00;font-style:normal;">KYA Validation Pending</span>
+                        }
+                        else if (Model.AllotmentModel.KYAStatusId == NAStatusId.Approved)
+                        {
+                            <span class="glyphicon glyphicon-ok" style="color:#00ff21;font-size:18px;"></span>
+                            <span style="font-size:15px;color:#00ff21;font-style:normal;">KYA Completed</span>
+                        }
+                        else if (Model.AllotmentModel.KYAStatusId == NAStatusId.Rejected)
+                        {
+                            <span class="glyphicon glyphicon-remove" style="color:red;font-size:18px;"></span>
+                            <span style="font-size:15px;color:red;font-style:normal;">KYA Pending</span>
+                        }
+                        else
+                        {
+                            <span class="glyphicon glyphicon-remove" style="color:red;font-size:18px;"></span>
+                            <span style="font-size:15px;color:red;font-style:normal;">KYA Pending</span>
+                        }
+                    }
+
+                </div>
+                @*<div class="col-md-1 col-sm-12 col-xs-12 " style="text-align:left;"><h1 class="gridTitle">KYA Not Done</h1></div>*@
+                <div class="col-md-4  col-sm-12 col-xs-12 col-btn">
+                    <h1 class="gridTitle">Registration Id: @Model.AllotmentModel.RID</h1>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 allotmentProperty" style="padding-top:20px;">
+            <div class="row">
+                <div class="col-md-12">
+                    <ul class="nav nav-tabs content-tabs" id="ulProperty" role="tablist">
+                        @*<li class="active"><a href="#zero" role="tab" data-toggle="tab">Control Panel</a></li>*@
+                        <li class="active"><a href="#one" role="tab" data-toggle="tab">Property</a></li>
+                        <li><a href="#two" role="tab" data-toggle="tab">Documents</a></li>
+                        <li><a href="#three" id="tabthree" role="tab" data-toggle="tab">Transfer Details</a></li>
+                        <li><a href="#four" role="tab" data-toggle="tab">Payment</a></li>
+                        <li><a href="#nine" id="tabnine" role="tab" data-toggle="tab">Schedule</a></li>
+                        @*<li><a href="#ten" role="tab" data-toggle="tab">Account Ledger</a></li>*@  @*ledger commented as directed by vishal shukla on 05-09-2017*@
+                        <li><a href="#elevan" role="tab" data-toggle="tab">Letters</a></li>
+                        @*<li><a href="#five" role="tab" data-toggle="tab">Other Details</a></li>*@
+                        <li><a href="#twelve" role="tab" data-toggle="tab">Noting</a></li>
+                        <li><a href="#thirteen" id="tabthirteen" role="tab" data-toggle="tab">Other</a></li>
+                        @*<li><a href="#eight" role="tab" data-toggle="tab">Remarks</a></li>*@@*Added on 10 oct 2017*@
+                        <li><a href="#fourteen" role="tab" data-toggle="tab">Sub Lease</a></li>@*added on 28 feb 2018*@
+                        @{
+                            if (Model.AllotmentModel.KYAStatusId == NAStatusId.Initiated || Model.AllotmentModel.KYAStatusId == NAStatusId.Approved || Model.AllotmentModel.KYAStatusId == NAStatusId.Rejected || Model.AllotmentModel.KYAStatusId == NAStatusId.Forwarded)
+                            {
+                                <li><a href="#fifteen" role="tab" data-toggle="tab">KYA</a></li>
+                            }
+                        }
+                        <li><a href="#sixteen" role="tab" data-toggle="tab">Service History</a></li>
+
+                        @{
+                            var vusr = (NA.PMS.Web.Models.CurrentUserDetail)Session["CurrentUser"];
+                            if (vusr.RoleMaster.RoleInDepartment == RoleInDepartment.Assistant || vusr.RoleMaster.RoleInDepartment == RoleInDepartment.OSD || vusr.RoleMaster.RoleInDepartment == null)
+                            {
+                                if (Model.AllotmentModel.IsPropertyValidated == true && Model.AllotmentModel.PropertyUpdateId == 1)
+                                {
+                                    @*<li style="float:right;"><a href="#" role="tab" style="background:blue;cursor:default">Property Updated</a></li>*@
+                                }
+                                else
+                                {
+                                    <li style="float:right;"><a href="#" role="tab" onclick="javascript:CheckPropertyUpdation(1)" style="background:red;">Validate Property</a></li>
+                                }
+
+                            }
+                            if (vusr.RoleMaster.RoleInDepartment == RoleInDepartment.Accountant)
+                            {
+                                if (Model.AllotmentModel.IsPropertyValidated == true && Model.AllotmentModel.PropertyUpdateId == 2)
+                                {
+                                    @*<li style="float:right;"><a href="#" role="tab" style="background:blue;cursor:default">Property Updated</a></li>*@
+                                }
+                                else
+                                {
+                                    <li style="float:right;"><a href="#" role="tab" onclick="javascript: CheckPropertyUpdation(2)" style="background:red;">Validate Property</a></li>
+                                }
+                            }
+                            if (vusr.RoleMaster.RoleInDepartment == RoleInDepartment.Admin)
+                            {
+                                if (Model.AllotmentModel.IsPropertyValidated == true && Model.AllotmentModel.PropertyUpdateId == 3)
+                                {
+                                    @*<li style="float:right;"><a href="#" role="tab" style="background:blue;cursor:default">Property Updated</a></li>*@
+                                }
+                                else
+                                {
+                                    <li style="float:right;"><a href="#" role="tab" onclick="javascript: CheckPropertyUpdation(3)" style="background:red;">Validate Property</a></li>
+                                }
+                            }
+}
+                    </ul>
+                    @Html.HiddenFor(p => p.isReschedule)
+                </div>
+
+                <div class="col-md-12">
+                    <div class="row" style="padding:5px;background:#f5ebeb;">
+                        <div class="col-md-4" style="text-align:left;font-weight:bold">
+                            @{
+                                if (Model.AllotmentModel.IsValidatedByDepartment == true)
+                                {
+                                    <label>Updated By Department : YES</label>
+                                }
+                                else
+                                {
+                                    <label>Updated By Department : NO</label>
+                                }
+                            }
+                        </div>
+                        <div class="col-md-4" style="text-align:center;font-weight:bold">
+                            @{
+                                if (Model.AllotmentModel.IsValidatedByAccounts == true)
+                                {
+                                    <label>Updated By Accountant : YES</label>
+                                }
+                                else
+                                {
+                                    <label>Updated By Accountant : NO</label>
+                                }
+                            }
+                        </div>
+                        <div class="col-md-4" style="text-align:right;font-weight:bold">
+                            @{
+                                if (Model.AllotmentModel.IsValidatedByOrganisation == true)
+                                {
+                                    <label>Updated By Organisation : YES</label>
+                                }
+                                else
+                                {
+                                    <label>Screened : NO</label>
+                                }
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12 tabbable " id="divProperty">
+
+                    <div class="tab-content">
+                        <div class="tab-pane fade in active" id="zero">
+                            @*@{
+                                    Html.RenderPartial("_ControlPanel");
+                                }*@
+                        </div>
+                        <div class="tab-pane fade in active" id="one">
+                            @{
+                                Html.RenderPartial("_PropertyDetails", Model.AllotmentModel);
+                            }
+                        </div>
+                        <div class="tab-pane fade" id="two">
+                            @{
+                                Html.RenderPartial("_PropertyDocument", Model.PropertyDocument);
+                            }
+                        </div>
+                        <div class="tab-pane fade" id="three">
+                            <div id="divPropertyDetailHeader2" class="divHeaderClass">
+                                <h4 class="PropertyDetailHeader alot-prop-header">Transfer Details</h4>
+                                @{
+                                    Html.RenderPartial("_TransferHistory", Model.transferModel);
+                                }
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="four">
+                            @*<div class="col-md-12 divHeaderClass" id="divPropertyDetailHeader2">
+                                <h4 class="PropertyDetailHeader alot-prop-header">Payment Schedule</h4>
+                            </div>*@
+                            @{
+                                //Html.RenderPartial("_PropertyBasciInfo", Model.AlloteeBasicInfo);
+                            }
+
+                            @{
+                                if (Model.NDCVeiwModel.IsPremiumPaid == NA.PMS.Common.NDCOptions.Value_Yes)
+                                {
+                                    if (Model.NDCVeiwModel.IsLeaseRentPaid == NA.PMS.Common.NDCOptions.Value_Yes)
+                                    {
+                                        Html.RenderPartial("_NDCPartial", Model.NDCVeiwModel);
+                                    }
+                                    else
+                                    {
+                                        Html.RenderPartial("_LeaseRentPartial", Model.PaymentSchedule);
+                                        Html.RenderPartial("_LeaseRentTransPartial", Model.PaymentSchedule);
+                                        Html.RenderPartial("_PaymentHistory", Model.PaymentSchedule);
+                                    }
+                                }
+                                else
+                                {
+                                    Html.RenderPartial("_PaymentSchedule", Model.PaymentSchedule);
+                                    Html.RenderPartial("_PaymentHistory", Model.PaymentSchedule);
+                                   
+                                    if (Model.NDCVeiwModel.IsLeaseRentPaid == NA.PMS.Common.NDCOptions.Value_No)
+                                    {
+                                        Html.RenderPartial("_LeaseRentPartial", Model.PaymentSchedule);
+                                        Html.RenderPartial("_LeaseRentTransPartial", Model.PaymentSchedule);
+                                    }
+                                    //Html.RenderPartial("_DuesCalculationHistory");
+                                    Html.RenderPartial("_InstallmentPaymentDues", Model.PaymentModel);
+                                }
+
+                                //if (Model.NDCVeiwModel != null)
+                                //{
+                                //    if (Model.NDCVeiwModel.IsPremiumPaid == NA.PMS.Common.NDCOptions.Value_Yes)
+                                //    {
+                                //        Html.RenderPartial("_NDCPartial", Model.NDCVeiwModel);
+                                //        if (Model.NDCVeiwModel.IsLeaseRentPaid == NA.PMS.Common.NDCOptions.Value_No)
+                                //        {
+                                //            Html.RenderPartial("_LeaseRentTransPartial", Model.PaymentSchedule);
+                                //        }
+                                //    }
+                                //    else
+                                //    {
+                                //        if (Model.InstallmentDuesPayment.InstallmentStartDate != null)
+                                //        {
+                                //            Html.RenderPartial("_InstallmentPaymentDues", Model.InstallmentDuesPayment);
+                                //        }
+                                //        else
+                                //        {
+                                //            Html.RenderPartial("_PaymentSchedule", Model.PaymentSchedule);
+                                //        }
+                                //    }
+                                //}
+                                //else
+                                //{
+                                //    Html.RenderPartial("_PaymentSchedule", Model.PaymentSchedule);
+                                //    Html.RenderPartial("_LeaseRentPartial", Model.PaymentSchedule);
+                                //    Html.RenderPartial("_LeaseRentTransPartial", Model.PaymentSchedule);
+                                //}
+                            }
+                        </div>
+                        @*<div class="tab-pane fade" id="five">
+                                <div id="divPropertyDetailHeader2" class="divHeaderClass">
+                                    <h4 class="PropertyDetailHeader alot-prop-header">Subsitution</h4>
+                                </div>
+                            </div>*@
+                        @*<div class="tab-pane fade" id="eight">
+                            <div id="divPropertyDetailHeader">*@
+                        <div class="tab-pane fade" id="eight">
+                            <div id="divPropertyDetailHeader2" class="divHeaderClass">
+                                <h4 class="PropertyDetailHeader alot-prop-header">Remarks</h4>
+                            </div>
+
+                        </div>
+                        <div class="tab-pane fade" id="nine">
+                            <div id="divPropertyDetailHeader2" class="divHeaderClass">
+                                <h4 class="PropertyDetailHeader alot-prop-header">Scheduled Date @*till Possession*@</h4>
+                            </div>
+
+                            @{AllottedPropertyDetails prop = new AllottedPropertyDetails(); prop.RID = Model.AllotmentModel.RID;}
+                            @{
+                                Html.RenderPartial("_PartialAllotedPropertyDetails", prop);
+                            }
+                        </div>
+                        <div class="tab-pane fade" id="ten">
+                            <div class="col-md-12 divHeaderClass" id="divPropertyDetailHeader2">
+                                <h4 class="PropertyDetailHeader alot-prop-header">Account Ledger Book</h4>
+                            </div>
+                            @{
+                                Html.RenderPartial("_PropertyBasciInfo", Model.AlloteeBasicInfo);
+                            }
+
+                            @{
+                                Html.RenderPartial("_PaymentLedger", Model.PaymentLedger);
+                            }
+                        </div>
+                        <div class="tab-pane fade" id="elevan">
+                            <div id="divPropertyDetailHeader2" class="divHeaderClass">
+                                <h4 class="PropertyDetailHeader alot-prop-header">Letter History</h4>
+                            </div>
+                            @{
+                                Html.RenderPartial("_PropertyBasciInfo", Model.AlloteeBasicInfo);
+                            }
+
+                            @{
+                                Html.RenderPartial("_LetterHistory", Model.letterHistory);
+                            }
+                        </div>
+                        <div class="tab-pane fade" id="twelve">
+                            <div id="divPropertyDetailHeader2" class="divHeaderClass">
+                                <h4 class="PropertyDetailHeader alot-prop-header">Noting</h4>
+                            </div>
+                            @{
+                                Html.RenderPartial("_PropertyBasciInfo", Model.AlloteeBasicInfo);
+                            }
+
+                            @{
+                                Html.RenderPartial("_NotingPartial", Model.Noting);
+                            }
+                        </div>
+                        <div class="tab-pane fade" id="thirteen">
+                            <div id="divPropertyDetailHeader2" class="divHeaderClass">
+                                <h4 class="PropertyDetailHeader alot-prop-header">Other Details</h4>
+                            </div>
+                            @{
+                                Html.RenderPartial("_OtherDetails", Model.OtherDetails);
+                            }
+                        </div>
+                        <div class="tab-pane fade" id="fourteen">
+                            @{
+                                Html.RenderPartial("_propertysublease", Model.SubLeaseViewModel);
+                            }
+                        </div>
+                        <div class="tab-pane fade" id="fifteen">
+                            @{
+                                KYAViewModel KYAModel = new KYAViewModel();
+                                Html.RenderPartial("_PartialKYAForm", Model.KYAViewModel = KYAModel);
+                            }
+                        </div>
+                        <div class="tab-pane fade" id="sixteen">
+                            <div id="divPropertyDetailHeader2" class="divHeaderClass">                                
+                                <h4 class="PropertyDetailHeader alot-prop-header">Service History</h4>
+                            </div>
+                            @{
+                                ServiceViewModel ServiceModel = new ServiceViewModel();
+                                Html.RenderPartial("_ServiceRequestHistory", Model.ServiceModel = ServiceModel);
+                            }
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<div id="divPrintSchemeForm" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="padding-top:40px;">
+    <div class="modal-dialog" style="width: 60%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title"><b>Demand Note</b></h4>
+            </div>
+            <div class="modal-body" style="overflow:auto; height:400px;">
+                <div id="divSchemeForm"></div>
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="submit" id="btnPrintDiv" class="k-button" data-dismiss="modal" onclick="PrintSchemeFormDiv();">Print</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+    $(document).ready(function () {
+        //Reschedule Payment
+        $("#div-rscheduled-installment").hide();
+        if ($("#isReschedule").val() == "True") {
+            $("#div-rscheduled-installment").show();
+        }
+
+        $('.nav-tabs a').click(function (e) {
+            e.preventDefault();
+            // $(this).tab('show');
+        });
+
+        $('#btn-generate-demand').click(function () {
+            var dues = $('#lbl-dues-amuont').html();
+            var penal = $('#lbl-penal-interest').html();
+            var principal = $('#lbl-principal-amuont').html();
+            var rid = $("#RID").val();
+            PrintDemandNote(rid, dues, penal, principal);
+        });
+
+    });
+
+
+    function CheckPropertyUpdation(id) {
+        var flag = confirm("Is this proerty updated");
+        if (flag) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ PropertyUpdateId: id, RegistrationId: $('#hdnRID').val() }),
+                url: '/Property/PropertyAllotment/ValidateUpdatedProperty',
+                success: function (result) {
+                    if (result == '@ReturnType.Updated') {
+                        alertify.success("Property updated successfully.");
+                        location.reload(true);
+                    }
+                    else {
+                        alertify.error("Provider failed to update this property.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    alertify.error("Network error, try again later.");
+                }
+            });
+        }
+    }
+
+    function PrintDemandNote(rid, dues, penal, principal) {
+        var duesDate = $('#hdnCalDueDateTime').val();
+        var leaseModel = { RegistrationId: rid, LeaseRentDues: dues, TotalPenalInterest: penal, PrincipalAmount: principal, ActionDate: duesDate, FilterType: "Leaserent-Installment" };
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ model: leaseModel }),
+            url: '/Revenue/Finance/PrintDemandNote',
+            success: function (result) {
+                $("#divApplicationForm").modal('hide');
+                $("#divSchemeForm").html(result);
+                $("#divPrintSchemeForm").modal('show');
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                alertify.error("Some Error in save database.");
+            }
+        });
+    }
+
+
+    function PrintSchemeFormDiv() {
+        var contents = document.getElementById("divSchemeForm").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+
+</script>

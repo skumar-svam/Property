@@ -1,0 +1,679 @@
+﻿@using Kendo.Mvc.UI
+@model NA.PMS.Model.LeaseDeedProperty
+@{
+    ViewBag.Title = "Add Sublease Deed";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Add Sublease Deed</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+
+                <h2 class="blck-heading">Select Registration Id</h2>
+
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Registration Id", htmlAttributes: new { @class = "required" })</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(po => po.RId)
+                    .Filter("contains")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel("Select")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetRIDsForSubleaseDeed", "PropertyRegistration");
+                        });
+                    })
+                    .Events(events => { events.Change("RIdChange"); })
+             .HtmlAttributes(new { style = "width:100%", @class = "schemeForms" })
+                            )
+                            @Html.HiddenFor(po => po.ViewName)
+                            @Html.HiddenFor(po => po.Type)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Document Charges", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().NumericTextBoxFor(trans => trans.DocCharges)
+                            .Name("DocCharges")
+                    .Min(0)
+                    .Max(9999999999999)
+                            .Spinners(false).Step(0)
+                    .Enable(true)
+                    .HtmlAttributes(new { style = "width: 100%", @maxlength = "13", @class = "k-label schemeForms textBoxValueRightAlign" })
+                            )
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Lease Deed Execution Date", htmlAttributes: new { @class = "required" })</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DatePickerFor(m => m.LeaseDeedExecutionDate).Max(DateTime.Now)
+                                          .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" }))
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Authorized Signatory", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.SignatoryAuthority, htmlAttributes: new { @maxlength = "100", @class = "form-control" })
+                        </div>
+                    </div>
+                </div>
+                <h2 class="blck-heading">Leased Deed Details</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Allottee Name")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                <div id="lblAN">
+                                    @Html.DisplayFor(m => m.AllotteeName)
+                                </div>
+                            </span>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Father's Name", new { id = "lblFatherName" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                <div id="lblFN">
+                                    @Html.DisplayFor(m => m.FatherName)
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Department")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                <div id="lblDeptt">
+                                    @Html.DisplayFor(m => m.DepttName)
+                                </div>
+                            </span>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Property Type")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <input type="hidden" id="hdnPropType" />
+                            <span class="lbl-form-control">
+                                <div id="lblPT">
+                                    @Html.DisplayFor(m => m.PropTypeName)
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Property Number")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                <div id="lblPN">
+                                    @Html.DisplayFor(m => m.PropertyNumber)
+                                </div>
+                            </span>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Property Cost")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                <div id="lblPC">
+                                    @Html.DisplayFor(m => m.PropertyCost)
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Stamp Duty Amount (INR)")</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                <div id="lblSDA">
+                                    @Html.DisplayFor(m => m.StampDutyAmount)
+                                </div>
+                            </span>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Duplicate Stamp Value (INR)")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                <div id="lblDSV">
+                                    @Html.DisplayFor(m => m.DuplicateStampValue)
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Previous Dues (INR)")</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                <div id="lblPD">
+                                    @Html.DisplayFor(m => m.PreviousDues)
+                                </div>
+                            </span>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Balance Due till Date")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                <div id="lblBDD">
+                                    @Html.DisplayFor(m => m.BalanceDues)
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Registry Type")</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="lbl-form-control">
+                                <div id="lblRT">
+                                    @Html.DisplayFor(m => m.RegistryType)
+                                </div>
+                            </span>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Lease Deed Due Date")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DatePickerFor(m => m.LeaseDeedDueDate)
+                                          .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" }))
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="blck-heading">Witnesses</h2>
+                <div class="form-bx">
+                    <h2 class="blck-heading-witness">Witness 1</h2>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Name", htmlAttributes: new { @class = "required" })  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.Witness1Name, htmlAttributes: new { @maxlength = "100", @class = "form-control" })
+                        </div>
+                        @*<div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Address", htmlAttributes: new { @class = "required" })  </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextAreaFor(m => m.Witness1Add, htmlAttributes: new { @maxlength = "200", @class = "form-control" })
+                            </div>*@
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Mobile")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.Witness1Mob, htmlAttributes: new { @maxlength = "10", onkeypress = "return IsNumeric(event);", @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        @*<div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Mobile", htmlAttributes: new { @class = "required" })  </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.Witness1Mob, htmlAttributes: new { @maxlength = "10", onkeypress = "return IsNumeric(event);", @class = "form-control" })
+                            </div>*@
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Address", htmlAttributes: new { @class = "required" })  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextAreaFor(m => m.Witness1Add, htmlAttributes: new { @maxlength = "200", @class = "form-control" })
+                        </div>
+                    </div>
+                    <h2 class="blck-heading-witness">Witness 2</h2>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Name", htmlAttributes: new { @class = "required" })  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.Witness2Name, htmlAttributes: new { @maxlength = "100", @class = "form-control" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Mobile")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.Witness2Mob, htmlAttributes: new { @maxlength = "10", onkeypress = "return IsNumeric(event);", @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Address", htmlAttributes: new { @class = "required" })  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextAreaFor(m => m.Witness2Add, htmlAttributes: new { @maxlength = "200", @class = "form-control" })
+                        </div>
+
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                        </div>
+                    </div>
+
+
+                    <h2 class="blck-heading-witness">Witness 3</h2>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Name")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.Witness3Name, htmlAttributes: new { @maxlength = "100", @class = "form-control" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Mobile")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.Witness3Mob, htmlAttributes: new { @maxlength = "10", onkeypress = "return IsNumeric(event);", @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Address")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextAreaFor(m => m.Witness3Add, htmlAttributes: new { @maxlength = "200", @class = "form-control" })
+                        </div>
+
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                        </div>
+                    </div>
+                    <h2 class="blck-heading-witness">Witness 4</h2>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Name")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.Witness4Name, htmlAttributes: new { @maxlength = "100", @class = "form-control" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Mobile")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.Witness4Mob, htmlAttributes: new { @maxlength = "10", onkeypress = "return IsNumeric(event);", @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"> @Html.Label("Address")  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextAreaFor(m => m.Witness4Add, htmlAttributes: new { @maxlength = "200", @class = "form-control" })
+                        </div>
+
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">  </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                        </div>
+                    </div>
+                    @*@Html.HiddenFor(m => m.AllotmentDate)*@
+                    <div id="hdnDiv">
+                        @(Html.Kendo().DatePickerFor(m => m.AllotmentDate)
+                                          .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" }))
+                        @(Html.Kendo().DatePickerFor(m => m.ChckLstDate)
+                                          .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" }))
+                    </div>
+                </div>
+            </div>
+            <div class="box-button text-center">
+                <input type="button" class="btn btn-default" value="Back" id="btnBack" />
+                <input type="button" class="btn btn-add" value="Add" id="btnAdd" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#LeaseDeedDueDate').data('kendoDatePicker').enable(false);
+        $("#hdnDiv").hide();
+        $("#ViewName").val("AddLeaseDeed");
+
+        ////Hiding Witness div on Page Load
+        //$("#divWitness").hide();
+
+        ////Change event of "Witness" radio buttons
+        //$('input[type=radio][name=witness]').change(function () {
+        //    if (this.value == 'Yes') {
+        //        //$("#divWitness").show();
+        //        $("#divWitness").fadeIn();
+        //    }
+        //    else if (this.value == 'No') {
+        //        //$("#divWitness").hide();
+        //        $("#divWitness").fadeOut();
+        //    }
+        //});
+
+        $("#btnBack").click(function () {
+            window.location.href = '@Url.Action("ManageLeaseDeed", "PropertyRegistration")';
+        });
+
+        $('#LeaseDeedExecutionDate').change(function () {
+            var rId = $("#RId").val();
+            var LDExecDate = $('#LeaseDeedExecutionDate').val();
+            if (rId == '') {
+                ClearValues();
+                alertify.error("Please select an RID");
+                $("#LeaseDeedExecutionDate").data("kendoDatePicker").value('');
+                $("#lblSDA").html('');
+                $("#lblDSV").html('');
+                return false;
+            }
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ rId: rId, LDExecDate: LDExecDate }),
+                url: '/PropertyRegistration/GetStampDetailsByLeaseExcutionDate',
+                success: function (result) {
+                    if (result != null) {
+                        if (result.StampDutyAmount == null) {
+                            $("#lblSDA").html('@NA.PMS.Common.Constants.NA');
+                            alertify.error("Allotment Money has not been paid for this RID.");
+                            $("#btnAdd").attr('disabled', 'disabled');
+                        }
+                        else {
+                            $("#lblSDA").html(result.StampDutyAmount);
+                        }
+                        $("#lblDSV").html(result.DuplicateStampValue);
+                    }
+                    else {
+                        ClearValues();
+                        alertify.error("Some error occurred. Please try again later.");
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    //alert(respText);
+                    //alertify.error("Some error occurred. Please try again later.");
+                }
+            });
+        });
+
+        $("#btnAdd").click(function () {
+            $("#btnAdd").attr('disabled', 'disabled');
+            var rId = $("#RId").val();
+            var LDExecDate = $('#LeaseDeedExecutionDate').val();
+            var chLiDate = $("#ChckLstDate").val();
+            var SA = $("#SignatoryAuthority").val().trim();
+            var w1N = $("#Witness1Name").val().trim();
+            var w1A = $("#Witness1Add").val().trim();
+            var w1M = $("#Witness1Mob").val().trim();
+            var w2N = $("#Witness2Name").val().trim();
+            var w2A = $("#Witness2Add").val().trim();
+            var w2M = $("#Witness2Mob").val().trim();
+            var w3N = $("#Witness3Name").val().trim();
+            var w3A = $("#Witness3Add").val().trim();
+            var w3M = $("#Witness3Mob").val().trim();
+            var w4N = $("#Witness4Name").val().trim();
+            var w4A = $("#Witness4Add").val().trim();
+            var w4M = $("#Witness4Mob").val().trim();
+            var docCharges = $("#DocCharges").val();
+            var LDDueDate = $("#LeaseDeedDueDate").data("kendoDatePicker").value();
+            var allotmentDate = $("#AllotmentDate").data("kendoDatePicker").value();
+            var regType = $("#lblRT").html();
+            var SDAmt = $("#lblSDA").html();
+            var DSDAmt = $("#lblDSV").html();
+            var prevDues = parseFloat($("#lblPD").html());
+            var balDueTD = parseFloat($("#lblBDD").html());
+
+            var dtLDExecDate = new Date(LDExecDate);
+            var dtAllotmentDate = new Date(allotmentDate);
+            if (chLiDate != "") {
+                var dtChLiDate = new Date(chLiDate);
+            }
+
+            var viewName = $("#ViewName").val();
+            var type = $("#Type").val();
+            if (rId == '') {
+                ClearValues();
+                alertify.error("Please select an RID");
+                $('#btnAdd').removeAttr('disabled');
+                return false;
+            }
+            if (LDExecDate == '') {
+                alertify.error("Please enter Lease Deed Execution Date");
+                $('#btnAdd').removeAttr('disabled');
+                return false;
+            }
+            if (docCharges == '') {
+                alertify.error("Please enter Document Charges");
+                $('#btnAdd').removeAttr('disabled');
+                return false;
+            }
+            if (SDAmt == '@NA.PMS.Common.Constants.NA') {
+                alertify.error("Allotment Money has not been paid for this RID.");
+                //$('#btnAdd').removeAttr('disabled');
+                return false;
+            }
+            if (SA == '') {
+                alertify.error("Please enter Signatory Authority");
+                $('#btnAdd').removeAttr('disabled');
+                return false;
+            }
+            if (w1N == '') {
+                alertify.error("Please enter Witness 1 Name");
+                $('#btnAdd').removeAttr('disabled');
+                return false;
+            }
+            if (w1A == '') {
+                alertify.error("Please enter Witness 1 Address");
+                $('#btnAdd').removeAttr('disabled');
+                return false;
+            }
+            //if (w1M == '') {
+            //    alertify.error("Please enter Witness 1 Mobile No.");
+            //    $('#btnAdd').removeAttr('disabled');
+            //    return false;
+            //}
+            if (w1M != '')
+                if (w1M.length < 10) {
+                    alertify.error("Please enter correct Witness 1 Mobile No.");
+                    $('#btnAdd').removeAttr('disabled');
+                    return false;
+                }
+            if (w2N == '') {
+                alertify.error("Please enter Witness 2 Name");
+                $('#btnAdd').removeAttr('disabled');
+                return false;
+            }
+            if (w2A == '') {
+                alertify.error("Please enter Witness 2 Address");
+                $('#btnAdd').removeAttr('disabled');
+                return false;
+            }
+            //if (w2M == '') {
+            //    alertify.error("Please enter Witness 2 Mobile No.");
+            //    $('#btnAdd').removeAttr('disabled');
+            //    return false;
+            //}
+            if (w2M != '')
+                if (w2M.length < 10) {
+                    alertify.error("Please enter correct Witness 2 Mobile No.");
+                    $('#btnAdd').removeAttr('disabled');
+                    return false;
+                }
+            if (w3M != '' && w3M.length < 10) {
+                alertify.error("Please enter correct Witness 3 Mobile No.");
+                $('#btnAdd').removeAttr('disabled');
+                return false;
+            }
+            if (w4M != '' && w4M.length < 10) {
+                alertify.error("Please enter correct Witness 4 Mobile No.");
+                $('#btnAdd').removeAttr('disabled');
+                return false;
+            }
+            //Fixed Bug#173 -> Not required as limited Kendo Datepicker to today's date max.
+            //if (dtLDExecDate > new Date())
+            //{
+            //    alertify.error("Lease Deed Exection Date can't be later than current date");
+            //    $('#btnAdd').removeAttr('disabled');
+            //    return false;
+            //}
+            //Bug#199 - Resolved
+            if (chLiDate != "") {
+                if (dtLDExecDate <= dtChLiDate) {
+                    alertify.error("Lease Deed Execution Date can't be earlier than, or equal to Checklist Date");
+                    $('#btnAdd').removeAttr('disabled');
+                    return false;
+                }
+            }
+            if (prevDues > 0 || balDueTD > 0) {
+                alertify.error("Please clear your dues before executing Lease Deed.");
+                $('#btnAdd').removeAttr('disabled');
+                return false;
+            }
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ rId: rId }),
+                url: '/PropertyRegistration/IsChecklistGenerated',
+                success: function (result) {
+                    if (result == true) {
+                        $.ajax({
+                            dataType: 'json',
+                            type: 'Post',
+                            contentType: 'application/json; charset=utf-8',
+                            data: JSON.stringify({ rId: rId, LDExecDate: LDExecDate, SA: SA, w1N: w1N, w1A: w1A, w1M: w1M, w2N: w2N, w2A: w2A, w2M: w2M, w3N: w3N, w3A: w3A, w3M: w3M, w4N: w4N, w4A: w4A, w4M: w4M, LDDueDate: LDDueDate, regType: regType, SDAmt: SDAmt, DSDAmt: DSDAmt, prevDues: prevDues, balDueTD: balDueTD, viewName: viewName, type: type, docCharges: docCharges }),
+                            url: '/PropertyRegistration/SaveLeaseDeedDetails',
+                            success: function (result1) {
+                                if (result1 == true) {
+                                    alertify.success("Lease Deed details added successfully.");
+                                    window.location.href = '@Url.Action("ManageLeaseDeed", "PropertyRegistration")';
+                                }
+                                else {
+                                    alertify.error("Lease Deed already exists for this RId.");
+                                    $('#btnAdd').removeAttr('disabled');
+                                }
+                            },
+                            error: function (objAjaxRequest, strError) {
+                                var respText = objAjaxRequest.responseText;
+                                $('#btnAdd').removeAttr('disabled');
+                                alert(respText);
+                                //alertify.error("Some error occurred. Please try again later.");
+                            }
+                        });
+                    }
+                    else {
+                        alertify.error("Please generate Checklist before adding Lease Deed.");
+                        $('#btnAdd').removeAttr('disabled');
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    alertify.error("Some error occurred. Please try again later.");
+                    $('#btnAdd').removeAttr('disabled');
+                    //alert(respText);
+                }
+            });
+        });
+    });
+
+    function RIdChange() {
+        $('#btnAdd').removeAttr('disabled');
+        var rId = $("#RId").val();
+        $("#LeaseDeedExecutionDate").data("kendoDatePicker").value('');
+        $("#lblSDA").html('');
+        $("#lblDSV").html('');
+        if (rId == '') {
+            ClearValues();
+            $("#LeaseDeedExecutionDate").data("kendoDatePicker").value('');
+            $("#lblSDA").html('');
+            $("#lblDSV").html('');
+            alertify.error("Please select an RID");
+            return false;
+        }
+        //GetKYADetails(rId);
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rId: rId }),
+            url: '/PropertyRegistration/GetDetailsByRID',
+            success: function (result) {
+                if (result != null) {
+                    if (result.IsParentLeaseDeed == false) {
+                        ClearValues();
+                        alertify.error("Please complete Parent Property's Lease Deed before adding Sub-Lease Deed.");
+                        var dropdownlist = $("#RId").data("kendoDropDownList").value("");
+                        $('#btnAdd').removeAttr('disabled');
+                        return false;
+                    }
+                    else if (result.ChecklistDate == null || result.ChecklistDate == '') {
+                        ClearValues();
+                        alertify.error("Please generate Checklist before adding Sublease Deed.");
+                        var dropdownlist = $("#RId").data("kendoDropDownList").value("");
+                        $('#btnAdd').removeAttr('disabled');
+                        return false;
+                    }
+                    else {
+                        $("#lblAN").html(result.AllotteName);
+                        if (result.Gender != "company") {
+                            $("#lblFatherName").show();
+                            $("#lblFN").html(result.FatherName);
+                        }
+                        else {
+                            //alert($("#lblFN").html());
+                            $("#lblFatherName").hide();
+                            $("#lblFN").html('');
+                        }
+                        $("#lblDeptt").html(result.DepttName);
+                        $("#lblPT").html(result.PropType);
+                        $("#lblPN").html(result.PropNo);
+                        $("#lblPC").html(result.PropCost);
+                        $("#lblPD").html(result.PreviousDues);
+                        $("#lblBDD").html(result.BalanceDues);
+                        $("#lblRT").html(result.RegistryType);
+                        $("#LeaseDeedDueDate").data("kendoDatePicker").value(result.LeaseDeedDueDate);
+                        $("#AllotmentDate").data("kendoDatePicker").value(result.AllotmentDate);
+                        $("#ChckLstDate").data("kendoDatePicker").value(result.ChecklistDate);
+                        //$("#AllotmentDate").val(result.AllotmentDate);
+                        //$("#hdnPropType").val(result.PropTypeVal);
+                    }
+                }
+                else {
+                    ClearValues();
+                    alertify.error("Some error occurred. Please try again later.");
+                }
+            },
+            error: function (obj) {
+                //ClearValues();
+                alertify.error("Some error occurred. Please try again later.");
+            }
+        });
+    }
+
+    function GetKYADetails(rId) {
+        //var rId = $("#RId").val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ RegistrationId: rId }),
+            url: '/Property/PropertyRegistration/GetKYADetailsForRid',
+            success: function (result) {
+                if (result != null) {
+                    if (result.StatusId == "2") {
+                        alertify.error("Your KYA has been Rejected. Please Complete your KYA again.");
+                        $('#btnAdd').attr('disabled', 'disabled');
+                        return false;
+                    }
+                    else if (result.StatusId == "" || result.StatusId == null) {
+                        alertify.error("Please Complete your KYA.");
+                        $('#btnAdd').prop('disabled', true);
+                        return false;
+                    }
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+
+    function ClearValues() {
+        $("#lblAN").html('');
+        $("#lblFN").html('');
+        $("#lblDeptt").html('');
+        $("#lblPT").html('');
+        $("#lblPN").html('');
+        $("#lblPC").html('');
+        $("#lblPD").html('');
+        $("#lblBDD").html('');
+        $("#lblRT").html('');
+        $("#LeaseDeedDueDate").data("kendoDatePicker").value('');
+        $("#AllotmentDate").data("kendoDatePicker").value('');
+        $("#ChckLstDate").data("kendoDatePicker").value('');
+    }
+
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+</script>

@@ -1,0 +1,195 @@
+﻿@model NA.PMS.Model.PropertyModel
+@using Kendo.Mvc.UI;
+@using NA.PMS.Model
+
+@{
+    ViewBag.Title = "Manage";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .bulkDialog {
+        display: none;
+    }
+
+    .disable_a_href {
+        pointer-events: none;
+    }
+
+    .k-grid-content {
+        overflow-y: hidden;
+        overflow-x: hidden;
+    }
+
+    .k-input {
+        margin: 0;
+        padding: 0;
+    }
+
+    .k-widget.k-autocomplete.k-header.k-state-default {
+        margin: 0;
+        padding: 0;
+    }
+</style>
+
+
+<div class="mnge-prop-filter">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-4 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Property</h1></div>
+            <div class="col-md-8 col-sm-12 col-xs-12 col-btn">
+                <a href="/Master/ManageProperty/Document" id="btn-upload-document" target="_blank">Upload Document</a>
+                <a href="#" id="btnAttachProperty" class="" onclick="javascript: AttachProperty(event);">Attach/Detach Property</a>
+                <a href="#" id="btnAddProperty" class="" onclick="javascript: AddProperty(event);">Add Property</a>
+                <a href="#" id="btnAddProperty" class="" onclick="javascript: AddSubLease(event);">Add Sub-Lease Property</a>
+            </div>
+        </div>
+        <div>
+            @(Html.Kendo().DataSource<PropertyModel>()
+                    .Name("dtPropDetail")
+                    .Ajax(dataSource => dataSource
+                        .Read(read => read.Action("GetPropertyDetail", "ManageProperty")).PageSize(20)
+                        .Group(groups => groups.Add(p => p.schemeName))
+                        .ServerOperation(true)
+                    )
+            )
+        </div>
+        <div class="col-md-12 k-grid-content">           
+            <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+
+                @*@(Html.Kendo().DropDownList()
+                    .Name("autoCompleteScheme")
+                    .DataTextField("schemeName")
+                    .DataValueField("Value")
+                    .Filter(FilterType.Contains)
+                    .DataSource("dtPropDetail")
+                )*@
+
+                @(Html.Kendo().AutoComplete()
+                    .Name("autoCompleteScheme")
+                    .DataTextField("schemeName")
+                    .Filter(FilterType.Contains)
+                    .Placeholder("Search Scheme Name...")
+                    .MinLength(1)
+                    .DataSource("dtPropDetail")
+                )
+            </div>
+
+            <div class="col-md-4 col-sm-4 col-xs-12 form-group" style="padding:0 1%;">
+                @(Html.Kendo().AutoComplete()
+                    .Name("autoCompleteDept")
+                    .DataTextField("departmentName")
+                    .Filter(FilterType.Contains)
+                    .Placeholder("Search Department Name...")
+                    .MinLength(1)
+                    .DataSource("dtPropDetail")
+                )
+            </div>
+            <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                @(Html.Kendo().AutoComplete()
+                    .Name("autoCompletePropNo")
+                    .DataTextField("plotProperty")
+                    .Filter(FilterType.Contains)
+                    .Placeholder("Search Plot Number...")
+                    .MinLength(1)
+                    .DataSource("dtPropDetail")
+                )
+            </div>
+        </div>
+
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 k-grid-content">
+            @(Html.Kendo().Grid<PropertyModel>()
+                .Name("gvProperty")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.refId).Visible(false);
+                    columns.Bound(c => c.EncryptedRefId).Visible(false);
+                    //columns.Bound(c => c.PropertyNo).Title("Property ID");
+                    if (@ViewBag.ReadOnlyMenu != null && @ViewBag.ReadOnlyMenu == true)
+                    {
+                        //columns.Bound(c => c.plotProperty).Title("Property/Plot No").ClientTemplate("# if (IsAllotted == 0) {#<a href='/Master/ManageProperty/ViewPropertyDetail/#=EncryptedRefId#'>#=plotProperty#</a>#} else{#<a href='/Property/PropertyAllotment/PropertyDetails/#=IsAllotted#'>#=plotProperty#</a>#}#");
+                        columns.Bound(c => c.PropertyNo).Title("Property Id").ClientTemplate("# if (IsAllotted == 0) {#<a href='/Master/ManageProperty/ViewPropertyDetail/#=EncryptedRefId#'>#=PropertyNo#</a>#} else{#<a href='/Property/PropertyAllotment/PropertyDetails/#=IsAllotted#'>#=PropertyNo#</a>#}#");
+                    }
+                    else
+                    {
+                        columns.Bound(c => c.plotProperty).Title("Property/Plot No");
+                    }
+                    columns.Bound(c => c.schemeName).Title("Scheme Name");
+                    columns.Bound(c => c.departmentName).Title("Department");
+                    columns.Bound(c => c.sectorName).Title("Sector");
+                    columns.Bound(c => c.blockName).Title("Block");
+                    columns.Bound(c => c.plotProperty).Title("Plot");
+                    columns.Bound(c => c.totalArea).Title("Area (Sq.Mtr)");
+                    columns.Bound(c => c.floorAreaRatio).Title("Floor Area Ratio");
+                    // columns.Bound(c => c.PropertyCost).Title("Property Cost");                 
+                    columns.Bound(c => c.propertyType).Title("Property Type");                   
+                    columns.Bound(c => c.refId).HeaderHtmlAttributes(new { style = "text-align:center;" }).HtmlAttributes(new { style = "text-align:center;" }).ClientTemplate("# if (IsAllotted == 0) {#<span>UnAllotted</span>#}else {#<span>Allotted</span>#} #").Title("Status").Filterable(false);
+                    columns.Bound(c => c.refId).HeaderHtmlAttributes(new { style = "text-align:center;" }).HtmlAttributes(new { style = "text-align:center;" }).ClientTemplate("<a class='gridEdit' href='" + "/Master/ManageProperty/EditPropertyDetail/#= EncryptedRefId #'> Edit </a>").Title("Edit").Filterable(false);
+
+                    if (@ViewBag.DeleteMenuVal != null && @ViewBag.DeleteMenuVal == true)
+                    {
+                        columns.Bound(c => c.refId).Title("Remove").HeaderHtmlAttributes(new { style = "text-align:center;" }).HtmlAttributes(new { style = "text-align:center;" }).ClientTemplate("# if (IsAllotted == 0 && SchemeStatus != 26) {#<a onclick='javascript:Remove(#=refId#)' id='RemovePropertyTag' class='gridRemove text-center'>Remove</a>#} else {#<span class='gridNotRem'>Remove</span>#} #").Filterable(false);
+                    }
+                    else
+                    {
+                        columns.Bound(c => c.refId).ClientTemplate("Remove").Title("Remove").Filterable(false);
+                    }
+                })
+                .DataSource("dtPropDetail").Pageable()
+                .Sortable()
+                .Filterable()
+            )
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+    function AttachProperty(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("AddPropertyToScheme", "ManageProperty")';
+    }
+    function AddProperty(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("Add", "ManageProperty")';
+    }
+
+    function AddSubLease(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("AddSubLeaseProperty", "ManageProperty")';
+    }
+
+    function Remove(refId) {
+        var flag = confirm('Are you sure you want to remove Property?');
+        if (flag) {
+            $.ajax({
+                url: '@(Url.Action("Remove", "ManageProperty"))',
+                type: 'POST',
+                data: { propertyId: refId },
+                success: function (result) {
+                    if (result == true) {
+                        alertify.success("Property successfully removed"); //location.reload();
+                        $('#gvProperty').data('kendoGrid').dataSource.read();
+                        $('#gvProperty').data('kendoGrid').refresh();
+                    }
+                    else {
+                        alertify.error("Property not removed");
+                        return false;
+                    }
+                }
+            });
+        }
+        else {
+            return false;
+        }
+    }
+    function onDataBound(e) {
+        var AddMenuVal = '@ViewBag.AddMenuVal'
+        if (AddMenuVal == "False") {
+            $("#btnAddProperty").addClass("disable_a_href");
+        }
+    }
+
+</script>
+

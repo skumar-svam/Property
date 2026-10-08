@@ -1,0 +1,568 @@
+﻿@model NA.PMS.Model.TransferRequestModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@{
+    Layout = null;
+}
+
+<div id="PropertyDetailContainerDiv">
+    <h3 style="align-content:center">Transferee Information</h3>
+    <br />
+    <div class="row">
+        <div class="col-md-6 no-padding">
+            <div class="row nw-kendo-select">
+                <div class="col-md-6">
+                    @*<label class="nw-lbl-lft">Transfer Type</label>*@
+                </div>
+                <div class="col-md-6">
+                    @Html.RadioButtonFor(model => model.TypeOfTransferee, NA.PMS.Common.Constants.genderIndividual, new { @checked = "checked" }) Individual
+                    @Html.RadioButtonFor(model => model.TypeOfTransferee, NA.PMS.Common.Constants.genderCompany) Company
+                </div>
+            </div>
+            <div class="row nw-kendo-select">
+                <div class="col-md-6">
+                    <label class="nw-lbl-lft">Transfer Type</label>
+                </div>
+                <div class="col-md-6">
+                    @(Html.Kendo().DropDownListFor(m => m.TransType)
+                            //.Filter("contains")
+            .DataTextField("text")
+            .DataValueField("id")
+            .OptionLabel("Select")
+            .DataSource(source =>
+            {
+                source.Read(read =>
+                {
+                    read.Action("GetTransferTypes", "Customer");
+                });
+            })
+                            //.Events(events => { events.Change("TransChange"); })
+            .HtmlAttributes(new { style = "width:100%" })
+                    )
+                </div>
+            </div>
+            <div class="row nw-kendo-select">
+                <div class="col-md-6"><label class="nw-lbl-lft">Transfer Sub-type</label></div>
+                <div class="col-md-6">
+
+                    @(Html.Kendo().DropDownListFor(m => m.TransSubType)
+                            //.Filter("contains")
+                .DataTextField("text")
+                .DataValueField("id")
+                .OptionLabel("Select").CascadeFrom("TransType")
+                .DataSource(source =>
+                {
+                    source.Read(read =>
+                    {
+                        read.Action("GetTransferSubTypes", "Customer").Data("AdditionalData1");
+                    }).ServerFiltering(true);
+                })
+                .HtmlAttributes(new { style = "width:100%" })
+                    )
+
+                </div>
+            </div>
+            @*<div class="row">
+                <div class="col-md-6">
+                    <label class="nw-lbl-lft">Transfer Date</label>
+                </div>
+                <div class="col-md-6">
+                    @(Html.Kendo().DatePickerFor(m => m.TransDate).HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" }))
+                </div>
+                        </div>*@
+            <div class="row">
+                <div class="col-md-6">
+                    @Html.Label("Gender", new { @class = "genderClass required nw-lbl-lft" })
+                    @*<label class="nw-lbl-lft">Gender</label>*@
+                </div>
+                <div class="col-md-6">
+                    @(Html.Kendo().DropDownListFor(trans => trans.Gender)//.Filter("contains")
+            .Events(events => { events.Change("GenderChange"); })
+                            //.Name("frequency")
+            .DataTextField("text")
+            .DataValueField("text")
+            .OptionLabel("Select")
+            .DataSource(source =>
+            {
+                source.Read(read =>
+                {
+                    read.Action("GetGender", "Customer");
+                });
+            })
+            .HtmlAttributes(new { style = "width:100%" })
+                    )
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    @Html.Label("Company Name", new { @class = "lblCompany required nw-lbl-lft" })
+                </div>
+                <div class="col-md-6">
+                    @Html.TextBoxFor(trans => trans.TransfereeCompanyName, new { @class = "txtCompany nw-lbl-rht nw-txt-bx", @maxlength = "100" })
+
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="col-md-6">@Html.Label("First Name", new { @class = "lblIndividual required nw-lbl-lft" })</div>
+                <div class="col-md-6">@Html.TextBoxFor(t => t.FirstName, new { @class = "txtIndividual nw-lbl-rht nw-txt-bx", @maxlength = "100" })</div>
+            </div>
+            <div class="row">
+
+                <div class="col-md-6">
+                    @Html.Label("Middle Name", new { @class = "lblIndividual nw-lbl-lft" })
+                </div>
+                <div class="col-md-6">
+                    @Html.TextBoxFor(t => t.MiddleName, new { @class = "txtIndividual nw-lbl-rht nw-txt-bx", @maxlength = "100" })
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    @Html.Label("Last Name", new { @class = "lblIndividual required nw-lbl-lft" })
+                </div>
+                <div class="col-md-6">
+                    @Html.TextBoxFor(t => t.LastName, new { @class = "txtIndividual nw-lbl-rht nw-txt-bx", @maxlength = "100" })
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 no-padding">
+            <div class="row nw-kendo-select">
+                <div class="col-md-6">
+                    @Html.Label("Authorized Signatory", new { @class = "lblCompany required nw-lbl-lft" })
+                </div>
+                <div class="col-md-6">
+                    @Html.TextBoxFor(trans => trans.TransfereeCompanySigningAuth, new { @class = "txtCompany nw-lbl-rht nw-txt-bx", @maxlength = "150" })
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    @Html.Label("Registered Office", new { @class = "lblCompany required nw-lbl-lft" })
+                </div>
+                <div class="col-md-6">
+                    @Html.TextBoxFor(trans => trans.TransfereeCompanyRegOff, new { @class = "txtCompany nw-lbl-rht nw-txt-bx", @maxlength = "500" })
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    @*<label class="nw-lbl-lft">Mother's Name</label>*@
+                    @Html.Label("Father's/Husband's Name", new { @class = "lblIndividual required nw-lbl-lft" })
+                </div>
+                <div class="col-md-6">@Html.TextBoxFor(t => t.RelativeName, new { @class = "txtIndividual nw-lbl-rht nw-txt-bx", @maxlength = "150" })</div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    @*<label class="nw-lbl-lft">Father's/Husband's Name</label>*@
+                    @Html.Label("Mother's Name", new { @class = "lblIndividual required nw-lbl-lft" })
+                </div>
+                <div class="col-md-6">
+                    @Html.TextBoxFor(t => t.MotherName, new { @class = "txtIndividual nw-lbl-rht nw-txt-bx", @maxlength = "150" })
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="col-md-6">
+                    <label class="nw-lbl-lft">Mobile Number</label>
+                </div>
+                <div class="col-md-6">
+                    @Html.TextBoxFor(t => t.MobileNo, new { @class = "nw-lbl-rht nw-txt-bx", @maxlength = "10", onkeypress = "return IsNumeric(event);" })
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6"><label class="nw-lbl-lft">Email</label></div>
+                <div class="col-md-6">@Html.TextBoxFor(t => t.Email, new { @maxlength = "150", @class = "nw-lbl-rht nw-txt-bx" })</div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <label class="nw-lbl-lft">Correspondence Address</label>
+                </div>
+                <div class="col-md-6">
+                    @Html.TextBoxFor(t => t.CorrespondenceAdd, new { @class = "nw-lbl-rht nw-txt-bx", @maxlength = "500" })
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    @*<label class="nw-lbl-lft">Permanent Address</label>*@
+                    @Html.Label("Permanent Address", new { @class = "lblIndividual required nw-lbl-lft" })
+                </div>
+                <div class="col-md-6">@Html.TextBoxFor(t => t.PermanentAdd, new { @class = "txtIndividual nw-lbl-rht nw-txt-bx", @maxlength = "500" })</div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <label class="nw-lbl-lft">PAN</label>
+                </div>
+                <div class="col-md-6">
+                    @Html.TextBoxFor(t => t.PAN, new { @class = "nw-lbl-rht nw-txt-bx", @maxlength = "10" })
+                </div>
+            </div>
+            <div class="row nw-kendo-select">
+                <div class="col-md-6">
+                    @*<label class="nw-lbl-lft">Occupation</label>*@
+                    @Html.Label("Occupation", new { @class = "lblIndividual required nw-lbl-lft" })
+                </div>
+                <div class="col-md-6">
+
+                    @(Html.Kendo().DropDownListFor(trans => trans.Occupation)//.Filter("contains")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel("Select")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetOccupation", "Customer");
+                        });
+                    })
+                    .HtmlAttributes(new { @class = "schemeForms", style = "width:100%" })
+                    )
+
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+
+
+    @*<div class="row">
+        <div class="col-md-6"><label class="nw-lbl-lft">Transfer Sub-type</label></div>*@
+    @*<div class="col-md-6"><label class="nw-lbl-rht">*@@*Dropdown*@@*</label></div>
+        </div>*@
+
+    @*<div class="row">
+            <div class="col-md-6"><label class="nw-lbl-lft">Transfer Charge (per sqmtr)</label></div>
+            <div class="col-md-6">@Html.TextBoxFor(t => t.TransCharge, new { @class = "nw-lbl-rht nw-txt-bx" })</div>
+        </div>*@
+
+    @*<div class="row">
+            <div class="col-md-6">
+                @Html.Label("First Name", new { @class = "lblIndividual required nw-lbl-lft" })
+
+            </div>
+            <div class="col-md-6">
+                @Html.TextBoxFor(t => t.FirstName, new { @class = "lblIndividual", @maxlength = "100" })
+
+        </div>
+        </div>*@
+
+
+
+    @*<div class="row">
+            <div class="col-md-6"><label class="nw-lbl-lft">Last Name</label></div>
+            <div class="col-md-6">@Html.TextBoxFor(t => t.LastName, new { @class = "nw-lbl-rht nw-txt-bx" })</div>
+        </div>*@
+
+
+    @*<div class="row">
+            <div class="col-md-6"><label class="nw-lbl-lft">Occupation</label></div>
+            <div class="col-md-6"><label class="nw-lbl-rht"></label></div>
+        </div>*@
+
+</div>
+@*<div class="row">
+        <div class="col-md-12 text-right btn-add-service" style="padding-top:15px;">
+            <input type="button" value="Next >>" class="btnName" id="btnSubmit" style="padding:10px 20px" />
+        </div>
+    </div>*@
+
+
+
+
+<script type="text/javascript">
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+
+    $(document).ready(function () {
+        $(".lblCompany").hide();
+        $(".companySpan").hide();
+        $(".txtCompany").hide();
+
+        $('input[type=radio][name=TypeOfTransferee]').change(function () {
+            var transfereeType = $("input[name='TypeOfTransferee']:checked").val();
+            var dropdownlist = $("#Gender").data("kendoDropDownList");
+            if (transfereeType == '@NA.PMS.Common.Constants.genderCompany') {
+                $(".genderClass").hide();
+                dropdownlist.wrapper.hide();
+            }
+            else {
+                $(".genderClass").show();
+                dropdownlist.wrapper.show();
+            }
+        });
+
+        $("#btnTransferServiceSubmit").click(function () {
+            var transType = $("#TransType").val();
+            var transSubType = $("#TransSubType").val();
+            //var transDate = $("#TransDate").data("kendoDatePicker").value();
+            var transCharge = $("#TransCharge").val();
+            var gender = $("#Gender").val();
+            var firstName = $("#FirstName").val();
+            var middleName = $("#MiddleName").val();
+            var lastName = $("#LastName").val();
+            var relativeName = $("#RelativeName").val();
+            var motherName = $("#MotherName").val();
+            var mobileNo = $("#MobileNo").val();
+            var email = $("#Email").val();
+            var correspondenceAdd = $("#CorrespondenceAdd").val();
+            var permanentAdd = $("#PermanentAdd").val();
+            var PAN = $("#PAN").val();
+            var occupation = $("#Occupation").val();
+            var rId = $("#Registration_No").val();
+            var serviceId = $("#ServiceRequestId").val();
+            var cmpnyName = $("#TransfereeCompanyName").val();
+            var signAuth = $("#TransfereeCompanySigningAuth").val();
+            var RO = $("#TransfereeCompanyRegOff").val();
+            if (transType == '' || transType == "Select") {
+                alert("Please select a Transfer Type");
+                return false;
+            }
+            if (transSubType == '' || transSubType == "Select") {
+                alert("Please select a Transfer Sub-type");
+                return false;
+            }
+            //if (transDate == '' || transDate == null) {
+            //    alert("Please select a Transfer Date");
+            //    return false;
+            //}
+            var transfereeType = $("input[name='TypeOfTransferee']:checked").val();
+            if (transfereeType == '@NA.PMS.Common.Constants.individual') {
+                if (gender == '' || gender == "Select") {
+                    alert("Please select a Gender");
+                    return false;
+                }
+            }
+            //if (firstName == '') {
+            //    alert("Please enter First Name");
+            //    return false;
+            //}
+            //if (lastName == '') {
+            //    alert("Please enter Last Name");
+            //    return false;
+            //}
+            //if (relativeName == '') {
+            //    alert("Please enter Father's/Husband's Name");
+            //    return false;
+            //}
+            //if (mobileNo == '') {
+            //    alert("Please enter Mobile Number");
+            //    return false;
+            //}
+            //if (email == '') {
+            //    alert("Please enter Email");
+            //    return false;
+            //}
+            //if (correspondenceAdd == '') {
+            //    alert("Please enter Correspondence Address");
+            //    return false;
+            //}
+            //if (permanentAdd == '') {
+            //    alert("Please enter Permanent Address");
+            //    return false;
+            //}
+            //if (PAN == '') {
+            //    alert("Please enter PAN");
+            //    return false;
+            //}
+            //if (occupation == '') {
+            //    alert("Please select Occupation");
+            //    return false;
+            //}
+            //if (mobileNo.length < 10) {
+            //    alert("Please enter correct Mobile Number");
+            //    return false;
+            //}
+            if (gender == '@NA.PMS.Common.Constants.company') {
+                if (cmpnyName == '') {
+                    alert("Please enter Company Name");
+                    return false;
+                }
+                if (signAuth == '') {
+                    alert("Please enter Authorized Signatory");
+                    return false;
+                }
+                if (RO == '') {
+                    alert("Please enter Registered Office");
+                    return false;
+                }
+                if (mobileNo == '') {
+                    alert("Please enter Mobile Number");
+                    return false;
+                }
+                if (email == '') {
+                    alert("Please enter Email");
+                    return false;
+                }
+                if (correspondenceAdd == '') {
+                    alert("Please enter Correspondence Address");
+                    return false;
+                }
+                //if (PAN == '') {
+                //    alert("Please enter PAN");
+                //    return false;
+                //}
+                if (!/^[a-zA-Z ]*$/g.test(signAuth)) {
+                    alert("Authorized Signatory should contain only alphabets and spaces");
+                    return false;
+                }
+                if (mobileNo.length < 10) {
+                    alert("Please enter correct Mobile Number");
+                    return false;
+                }
+                if (/^([a-zA-Z0-9_.+-])+\@@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(email) == false) {
+                    alert("Please enter a valid Email");
+                    return false;
+                }
+                if (/^[a-zA-Z0-9- ]*$/.test(PAN) == false) {
+                    alert("PAN should only be alphanumeric");
+                    return false;
+                }
+            }
+            else {
+                if (firstName == '') {
+                    alert("Please enter First Name");
+                    return false;
+                }
+                if (lastName == '') {
+                    alert("Please enter Last Name");
+                    return false;
+                }
+                if (relativeName == '') {
+                    alert("Please enter Father's/Husband's Name");
+                    return false;
+                }
+                if (mobileNo == '') {
+                    alert("Please enter Mobile Number");
+                    return false;
+                }
+                if (email == '') {
+                    alert("Please enter Email");
+                    return false;
+                }
+                if (correspondenceAdd == '') {
+                    alert("Please enter Correspondence Address");
+                    return false;
+                }
+                if (permanentAdd == '') {
+                    alert("Please enter Permanent Address");
+                    return false;
+                }
+                //if (PAN == '') {
+                //    alert("Please enter PAN");
+                //    return false;
+                //}
+                if (occupation == '') {
+                    alert("Please select Occupation");
+                    return false;
+                }
+                if (!/^[a-zA-Z]*$/g.test(firstName)) {
+                    alert("First Name should contain only alphabets");
+                    return false;
+                }
+                if (!/^[a-zA-Z]*$/g.test(middleName)) {
+                    alert("Middle Name should contain only alphabets");
+                    return false;
+                }
+                if (!/^[a-zA-Z]*$/g.test(lastName)) {
+                    alert("Last Name should contain only alphabets");
+                    return false;
+                }
+                if (!/^[a-zA-Z ]*$/g.test(relativeName)) {
+                    alert("Father's/Husband's Name should contain only alphabets and spaces");
+                    return false;
+                }
+                if (!/^[a-zA-Z ]*$/g.test(motherName)) {
+                    alert("Mother's Name should contain only alphabets and spaces");
+                    return false;
+                }
+                if (mobileNo.length < 10) {
+                    alert("Please enter correct Mobile Number");
+                    return false;
+                }
+                if (/^([a-zA-Z0-9_.+-])+\@@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/.test(email) == false) {
+                    alert("Please enter a valid Email");
+                    return false;
+                }
+                if (/^[a-zA-Z0-9- ]*$/.test(PAN) == false) {
+                    alert("PAN should only be alphanumeric");
+                    return false;
+                }
+            }
+            if (CheckFileUpload() && CheckFileSize()) {
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({
+                        transType: transType, transSubType: transSubType, firstName: firstName, middleName: middleName, lastName: lastName, relativeName: relativeName, motherName: motherName, mobileNo: mobileNo, email: email, correspondenceAdd: correspondenceAdd, permanentAdd: permanentAdd, PAN: PAN, occupation: occupation, rId: rId, serviceId: serviceId, gender: gender, cmpnyName: cmpnyName, signAuth: signAuth, RO: RO
+                    }),
+                    url: '/Customer/SaveTransferRequest',
+                    success: function (result) {
+                        if (result == true) {
+                            //alert("Request added successfully");
+                            $('#userform').submit();
+                            ShowUploadDoc();
+                        }
+                        //else {
+                        //    alertify.error("No new Transfer Request exists for the selected RID.");
+                        //}
+                    },
+                    error: function (objAjaxRequest, strError) {
+                        var respText = objAjaxRequest.responseText;
+                        //alert(respText);
+                    }
+                });
+            }
+
+        });
+    });
+
+    @*function TransChange() {
+        var trans = $("#TransferType").val();
+        if (trans == '@NA.PMS.Common.Constants.GPATransType') {
+            alertify.error("Please fill GPA details.");
+            $("#TransferType").data("kendoDropDownList").value("");
+            $("#TransferSubType").data("kendoDropDownList").value("");
+        }
+    }*@
+
+    function AdditionalData1() {
+        return {
+            TransferType: $("#TransType").val()
+        };
+    }
+
+    function GenderChange() {
+        var dropdownlist = $("#Occupation").data("kendoDropDownList");
+        if ($("#Gender").val() == '@NA.PMS.Common.Gender.Company') {
+            $(".lblIndividual").hide();
+            $(".individualSpan").hide();
+            $(".txtIndividual").hide();
+            dropdownlist.wrapper.hide();
+            $(".lblCompany").show();
+            $(".companySpan").show();
+            $(".txtCompany").show();
+        }
+        else if ($("#Gender").val() == '') {
+        }
+        else {
+            $(".lblCompany").hide();
+            $(".companySpan").hide();
+            $(".txtCompany").hide();
+            $(".lblIndividual").show();
+            $(".individualSpan").show();
+            $(".txtIndividual").show();
+            dropdownlist.wrapper.show();
+        }
+    }
+</script>

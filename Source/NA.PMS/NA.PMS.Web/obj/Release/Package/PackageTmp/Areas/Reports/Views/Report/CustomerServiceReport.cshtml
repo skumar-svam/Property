@@ -1,0 +1,220 @@
+﻿@model NA.PMS.Model.ServiceViewModel
+@using Kendo.Mvc.UI;
+@using NA.PMS.Common;
+
+@{
+    ViewBag.Title = "Customer Service Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .top-margin {
+        margin-top: 6px;
+        width: 80px;
+    }
+
+    .lbl-status-action {
+        cursor: pointer;
+        color: blue;
+    }
+
+    .glyphicon-print {
+        cursor: pointer;
+    }
+</style>
+
+<div class="ManageRequestServices">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Customer Service Report</h1></div>
+            <div class="col-md-6 col-sm-6 col-xs-12 col-btn">
+                @*@Html.ActionLink("Request Service", "Index", new { controller = "ServiceRequest", area = "Member" }, htmlAttributes: new { target = "_blank" })*@
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12" style="border-left:1px solid #abc;border-right:1px solid #abc;">
+        <div class="row form-group">
+            <div class="col-md-2 pad-left">
+                @Html.Label("Department")
+                @(Html.Kendo().DropDownListFor(model => model.DepartmentId)
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel(" -- Select --")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true).ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetDepartmentListAsDataSource", "Report", new { area = "Reports" })))
+                        .Schema(schema => schema.Data("Data").Total("Total")).PageSize(100);
+                    })
+                    .Events(e => e.Change("ChangeDepartmentEvent"))
+                   .HtmlAttributes(new { style = "width:95%;float:right;", @class = "input-disabled" })
+                )
+            </div>
+            <div class="col-md-2 pad-left">
+                @Html.Label("Start Date")
+                @(Html.Kendo().DatePickerFor(model => model.StartDate).Events(e => e.Change("ChangeDepartmentEvent")).HtmlAttributes(new { style = "width:95%;float:right;" }))
+            </div>
+            <div class="col-md-2 pad-left">
+                @Html.Label("End Date")
+                @(Html.Kendo().DatePickerFor(model => model.EndDate).Events(e => e.Change("ChangeDepartmentEvent")).HtmlAttributes(new { style = "width:95%;float:right;" }))
+            </div>
+            <div class="col-md-2 pad-left">
+                <label>Status</label>
+                @(Html.Kendo().DropDownListFor(m => m.ServiceStatusId)
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel(" -- Select --")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetStatusMasterAsDataSource", "Report", new { area = "Reports" })))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(100);
+                    })
+                    .Events(events => { events.Change("ChangeDepartmentEvent"); })
+                    .HtmlAttributes(new { @class = "input-disabled", style = "width:95%;float:right;" })
+                )
+            </div>
+            <div class="col-md-2 pad-left">
+                <label>Service Name</label>
+                @(Html.Kendo().DropDownListFor(model => model.ServiceId)
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel("---select---")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true).ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetServiceListAsDataSource", "Report", new { area = "Reports" })))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(100);
+                    })
+                    .HtmlAttributes(new { style = "width:95%;float:right;" })
+                    .Events(e => e.Change("ChangeDepartmentEvent"))
+                )
+            </div>
+            <div class="col-md-2" style="text-align:center;">
+                <label style="width:100%;"> </label>
+                <button type="button" id="btnSearch" class="k-button top-margin" value="Search">Search</button>
+                <button type="button" id="btnClear" class="k-button top-margin" value="Clear">Clear</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.ServiceViewModel>()
+                .Name("GridServiceRequest")
+                .ToolBar(tools => tools.Excel())
+                .Excel(excel => excel.FileName("ServiceReport.xlsx").AllPages(true).Filterable(true).ProxyURL(Url.Action("Excel_Export_Save", "Report"))
+                )
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.EncryptedId).Hidden();
+                    columns.Bound(c => c.DepartmentId).Hidden();
+                    columns.Bound(c => c.ServiceId).Hidden();
+                    columns.Bound(c => c.RequestId).Title("Ref No").Width(100).ClientTemplate("<a href='" + "/Member/ServiceRequest/RequestDetail/#= Id #" + "' target='_blank'>#=Id#</a>");
+                    columns.Bound(c => c.RegistrationNo).Title("RId").Width(120).Sortable(false);
+                    columns.Bound(c => c.Department).Title("Department").Width(130).Sortable(false);
+                    columns.Bound(c => c.PropertyNo).Title("Property").Width(110).Sortable(false);
+                    columns.Bound(c => c.ServiceName).Title("Service Name");
+                    columns.Bound(c => c.RequestDate).Title("Request Date").Width(140).Format("{0:dd/MM/yyyy}").Sortable(false);
+                    columns.Bound(c => c.Status).Title("Status").Width(100).Sortable(false);
+                    columns.Bound(c => c.Applicant).Hidden();
+                    columns.Bound(c => c.MobileNo).Hidden();
+                    columns.Bound(c => c.SubDepartment).Hidden();
+                    columns.Bound(c => c.Description).Hidden();
+                })
+                .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .ClientDetailTemplateId("template").AutoBind(true)
+                .DataSource(dataSource => dataSource
+                     .Ajax().ServerOperation(true)
+                    .Model(model => model.Id(c => c.Id))
+                    .Read(read => read.Action("GetCustomerServiceRequestList", "Report", new { area = "Reports" }).Data("FilterSearchParameter")).PageSize(10)
+                    .Sort(s => s.Add(r => r.RequestDate).Descending())
+                )
+        )
+    </div>
+
+</div>
+
+<script id="template" type="text/kendo-tmpl">
+    @(Html.Kendo().Grid<NA.PMS.Model.ServiceViewModel>()
+            .Name("grid_#=Id#") // template expression, to be evaluated in the master context
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Hidden(true);
+                columns.Bound(o => o.Applicant).Width(300);//.ClientTemplate("<span>#= ServiceName #<br/><small ><b>Receiving Date:</b>&nbsp;#= CreatedDate#</small></span>");
+                columns.Bound(o => o.Description);
+                columns.Bound(o => o.Comment);//.ClientTemplate("<label>#=Comment#</label>");
+                columns.Bound(o => o.Status).Width(120).Title("Status");//.ClientTemplate("<label class='lbl-status-action' onclick='javascript:OpenStatusWindow(this)'>#=Status#</label>");
+                //columns.Bound(o => o.RequestDate).Format("{0:dd/MM/yyyy}").Width(120);
+            })
+            .DataSource(dataSource => dataSource
+                .Ajax()
+                .PageSize(10)
+                .Read(read => read.Action("GetCustomerServiceRequestList", "Report", new { area="Reports", Id = "#=Id#" }))
+            )
+            .ToClientTemplate()
+    )
+</script>
+<script>
+    function dataBound() {
+        this.expandRow(this.tbody.find("tr.k-master-row").first());
+    }
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('#btnClose').click(function () {
+            $(".popup-window").data("kendoWindow").close();
+            //ClearFields();
+        });
+
+
+        $('#btnSearch').click(function () {
+            ChangeDepartmentEvent();
+        });
+
+        $('#btnClear').click(function () {
+            $('#DepartmentId').data("kendoDropDownList").value("");
+            $('#ServiceId').data("kendoDropDownList").value("");
+            $('#ServiceStatusId').data("kendoDropDownList").value("");
+            $('#StartDate').data("kendoDatePicker").value("");
+            $('#EndDate').data("kendoDatePicker").value("");
+            $("#GridServiceRequest").data("kendoGrid").dataSource.read();
+        });
+
+    })
+
+    function FilterDepartment() {
+        return { departmentId: $('#DepartmentId').val() }
+    }
+
+    function FilterSearchParameter() {
+        return {
+            DepartmentId: $('#DepartmentId').val(),
+            ServiceId: $('#ServiceId').val(),
+            ServiceStatusId: $('#ServiceStatusId').val(),
+            StartDate: $('#StartDate').val(),
+            EndDate: $('#EndDate').val()
+        };
+    }
+    function ChangeDepartmentEvent() {
+        $("#GridServiceRequest").data("kendoGrid").dataSource.read();
+    }
+
+
+
+</script>
+

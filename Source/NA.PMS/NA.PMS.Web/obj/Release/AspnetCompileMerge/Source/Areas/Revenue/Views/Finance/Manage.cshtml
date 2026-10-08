@@ -1,0 +1,371 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@using NA.PMS.Common;
+@model NA.PMS.Model.PaymentViewModel
+
+@{
+    ViewBag.Title = "Manage Revenue";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .ptr-cur {
+        cursor: pointer;
+    }
+
+    /*#ndc-grid {
+        display: none;
+    }*/
+
+    #installment-dues-grid {
+        /*display:none;*/
+    }
+
+    /*#leaserent-dues-grid {
+        display: none;
+    }*/
+
+    .hyperlink {
+        cursor: pointer;
+    }
+
+    .print-row:nth-child(2n+1) {
+        background: #fefefe;
+    }
+
+    #Report .row:nth-child(2n+1) {
+        background: #fefefe;
+    }
+</style>
+
+<div class="ManageLeaseRentList">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Lease Rent / Installment</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                @*<a href="/Revenue/Payment/LeaseRent" id="btnAddLeaseDeed" target="_blank"><i class="fa fa-plus"></i> <span> Add Lease Rent</span></a>*@
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+
+    <div class="col-md-12 content-top-spce">
+        <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            <h2 class="blck-heading" style="margin-bottom:15px;">Search</h2>
+            <div class="form-bx">
+                <div class="row">
+                    <div class="col-md-2 col-sm-2 col-xs-12 form-group">
+                        <b>@Html.Label("Department")</b>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @(Html.Kendo().DropDownListFor(m => m.DepartmentId)
+                            .Filter("contains")
+                            .DataTextField("Text")
+                            .DataValueField("Id")
+                            .OptionLabel(" --- select ---")
+                            .DataSource(source =>
+                            {
+                                source.Custom()
+                                .ServerFiltering(true)
+                                .ServerPaging(true)
+                                .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                .Transport(transport => transport.Read(read => read.Action("GetDepartmentList", "Finance", new { area = "Revenue" })))
+                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                .PageSize(6);
+                            })
+                            .Events(events => { events.Change("ChangeDeptEvent"); })
+                            .HtmlAttributes(new { @class = "input-disabled", style = "width:100%" })
+                        )
+                    </div>
+
+
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                    </div>
+                    <div class="col-md-2 col-sm-2 col-xs-12 form-group">
+                        @*<input type="button" class="k-button" id="update-installment-dues" value="Update Installment Dues" />*@
+                    </div>
+                    <div class="col-md-2 col-sm-2 col-xs-12 form-group">
+                        @*<input type="button" class="k-button" id="update-dues" value="Update Lease Rent Dues" />*@
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="ptr-cur" id="lrcount">LeaseRent dues: <b>@Model.TotalLeaseRentCount</b></label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="ptr-cur" id="ipcount">Installment Not Paid : <b>@Model.TotalIPCount</b></label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="ptr-cur" id="ndccount">Total NDC: <b>@Model.TotalNDCCount</b></label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @*<label class="ptr-cur" id="defaultercount">Total Defaulter : <b>@Model.DefaulterCount</b></label>*@
+                    </div>
+                </div>
+            </div>
+
+            <h2 id="grid-head" class="blck-heading" style="margin-bottom: 0px;">Lease Rent Details</h2>
+            <div class="col-md-12 k-grid-content" id="leaserent-dues-grid">
+                @(Html.Kendo().Grid<NA.PMS.Model.PaymentViewModel>()
+                .Name("GridLeaseRentDues")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.Id).Hidden(true);
+                    //columns.Bound(c => c.leaseRentId).Hidden(true);
+                    columns.Bound(c => c.RegistrationId).Title("Registration Id").ClientTemplate("<a href='" + "/Property/PropertyAllotment/PropertyDetails/#= RegistrationId #'>#= RegistrationId #</a>").Filterable(true);
+                    columns.Bound(c => c.Department).Title("Department");
+                    //columns.Bound(c => c.LeaseRentPremium).Title("Lease Rent (<span class='fa fa-rupee'></span>)");
+                    //columns.Bound(c => c.PaidUptoDate).Title("Paid Upto").Format("{0:dd-MMM-yyyy}");
+                    columns.Bound(c => c.InstallmentAmount).Title("Installment (<span class='fa fa-rupee'></span>)").ClientTemplate("<label class='hyperlink' onclick='ShowLeaseRentDetail(#=Id#)'>#= LeaseRentDues #</label>");//.ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+                    columns.Bound(c => c.LeaseRentDues).Title("LeaseRent (<span class='fa fa-rupee'></span>)").ClientTemplate("<label class='hyperlink' onclick='ShowLeaseRentDetail(#=Id#)'>#= LeaseRentDues #</label>");//.ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+                    columns.Bound(c => c.DuesUptoDate).Title("Dues Upto").Format("{0:dd-MMM-yyyy}");
+                    //columns.Bound(c => c.LeaseRentDues).Title("Lease Rent Dues").ClientTemplate("<label class='hyperlinkcss' onclick='ShowLeaseRentDetail(#=Id#)'>view</label>");
+                })
+                .Sortable()
+                .Filterable()
+                .Resizable(resize => resize.Columns(true))
+                .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .Model(model => model.Id(p => p.Id))
+                        .ServerOperation(true)
+                                .Read(read => read.Action("GetPropertyAccountDetails", "Finance", new { area = "Revenue" }).Data("LeaseRent")).PageSize(10)
+                        //.Aggregates(aggregates => aggregates.Add(p => p.LeaseRentDues).Sum())
+                    )
+                )
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+
+
+<div id="PopupWindow" class="container-fluid">
+    <div class="row">
+        <style>
+            .print-row {
+                padding: 6px 20px 6px 20px;
+            }
+
+            #Report .row.print-row:nth-child(2n+0) {
+                background: #f5faed;
+            }
+        </style>
+        <div id="LeaseRentHtml"></div>
+    </div>
+    <div class="row">
+        <div class="col-sm-12" style="text-align:center;padding-top:10px;">
+            <button id="btnPopupSubmit" class="k-button" style="min-width:100px;" onclick="PrintDiv()">Print</button>
+            <button id="btnPopupCancel" class="k-button" style="min-width:100px;">close</button>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    var displayType = "InstallmentDues";
+    var flag1; var flag2; var flag3; var actionType="InstallmentDues";
+    //$('#grid-head').text("Installment Dues Details");
+
+    $('#PopupWindow').kendoWindow({
+        modal: true,
+        title: "Lease Rent Report",
+        visible: false,
+        width: "70%"
+    });
+
+    $('#btnPopupCancel').click(function () {
+        $("#PopupWindow").data("kendoWindow").close();
+    });
+
+    function ShowLeaseRentDetail(row) {
+        //alert(row);
+        $.ajax({
+            type: "post",
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            data: JSON.stringify({ Id: row }),
+            url: '@Url.Action("GetLeaseRentDetailsById", "Payment", new { area = "Revenue" })',
+            success: function (result) {
+                if (result != null) {
+                    $('#LeaseRentHtml').html(result.HtmlDuesReport);
+                    $("#PopupWindow").data("kendoWindow").center();
+                    $("#PopupWindow").data("kendoWindow").open();
+                }
+                else {
+                    alertify.error("Report is not updated");
+                    return false;
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Something is wrong, try again later");
+            }
+        });
+    }
+
+    function ChangeDeptEvent() {
+        $("#GridLeaseRentDues").data("kendoGrid").dataSource.read();
+    }
+
+    $('#lrcount').click(function () {
+        flag1 = null;
+        flag2 = null;
+        flag3 = false;
+        actionType = "LeaseRent";
+        displayType = "LeaseRentDues";
+        //$('#grid-head').text("Lease Rent Details");
+        //$('#GridLeaseRentDues').data("kendoGrid").dataSource.read();
+        //$('#leaserent-dues-grid').show();
+        //$('#ndc-grid').css("display", "none");
+        //$('#installment-dues-grid').css("display", "none");
+        $('#GridLeaseRentDues').data("kendoGrid").dataSource.read();
+    });
+
+    $('#ipcount').click(function () {
+        flag1 = null;
+        flag2 = false;
+        flag3 = null;
+        actionType = "InstallmentDues";
+        displayType = "InstallmentDues";
+        //$('#grid-head').text("Installment Dues Details");
+        //$('#GridInstallmentDues').data("kendoGrid").dataSource.read();
+        //$('#leaserent-dues-grid').css("display", "none");
+        //$('#ndc-grid').css("display", "none");
+        //$('#installment-dues-grid').show();
+        $('#GridLeaseRentDues').data("kendoGrid").dataSource.read();
+    });
+
+    $('#ndccount').click(function () {
+        flag1 = null;
+        flag2 = true;
+        flag3 = true;
+        actionType = "LeaseRent";
+        displayType = "NDC";
+        //$('#grid-head').text("NDC Details");
+        //$('#GridNDCList').data("kendoGrid").dataSource.read();
+        //$('#leaserent-dues-grid').css("display", "none");
+        //$('#ndc-grid').show();
+        //$('#installment-dues-grid').css("display", "none");
+        $('#GridLeaseRentDues').data("kendoGrid").dataSource.read();
+    });
+
+    $('#defaultercount').click(function () {
+        flag1 = null;
+        flag2 = false;
+        flag3 = false;
+        actionType = "LeaseRent";
+        $('#gridLeaseDeedDdetails').data("kendoGrid").dataSource.read();
+    });
+
+
+    function LeaseRent() {
+        var model = { DepartmentId: $("#DepartmentId").val(), IsOneTimeLeaseRentPaid: flag3, IsTotalInstallmentPaid: flag2, ActionType: actionType };
+        return model;
+    }
+
+    $('#update-dues').click(function () {
+        UpdateLeaseRentDues();
+    });
+
+    $('#update-installment-dues').click(function () {
+        UpdateInstallmentDues();
+    });
+
+
+    function UpdateLeaseRentDues() {
+        if ($("#DepartmentId").val() != "") {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify({ DepartmentId: $("#DepartmentId").val() }),
+                url: '@Url.Action("UpdateLeaseRentDuesPayment", "Payment", new { area="Revenue"})',
+                success: function (result) {
+                    if (result == '@ReturnType.Success') {
+                        alertify.success("Dues updated successfully");
+                        $('#GridLeaseRentDues').data("kendoGrid").dataSource.read();
+                    }
+                    else {
+                        alertify.error("Dues is not updated");
+                        return false;
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Something is wrong, try again later");
+                }
+            });
+        }
+        else {
+            alertify.error("Select Department");
+        }
+
+    }
+
+
+    function UpdateInstallmentDues() {
+        if ($("#DepartmentId").val() != "") {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify({ DepartmentId: $("#DepartmentId").val() }),
+                url: '@Url.Action("UpdateInstallmentDuesPayment", "Payment", new { area = "Revenue" })',
+                success: function (result) {
+                    if (result == '@ReturnType.Success') {
+                        alertify.success("Dues updated successfully");
+                        $('#GridInstallmentDues').data("kendoGrid").dataSource.read();
+                    }
+                    else {
+                        alertify.error("Dues is not updated");
+                        return false;
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Something is wrong, try again later");
+                }
+            });
+        }
+        else {
+            alertify.error("Select Department");
+        }
+    }
+
+
+
+    function PrintDiv() {
+        //generateBarcode();
+        //var contents = document.getElementById("divmodalbody").innerHTML;
+        var contents = document.getElementById("Report").innerHTML;
+        //var contents = document.getElementById("divBarcode").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('<style>#Report{width:100%;} table{width:1000px;}  tr{ width:100%;}  td{width:120px;}</style>');
+        //frameDoc.document.write('<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">');
+        //frameDoc.document.write('<style>#Report .col-md-2{width:15%;float:left;display:inline-block;} #Report col-md-1{width:8%;float:left;display:inline-block;}</style>');
+        ////frameDoc.document.write('');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+</script>

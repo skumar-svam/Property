@@ -1,0 +1,63 @@
+﻿@model NA.PMS.Model.PropertyDocument
+@using Kendo.Mvc.UI;
+
+
+<div class="PropertyDocument">
+    <div class="col-md-12 divHeaderClass" id="divPropertyDetailHeader2">
+        <h4 class="PropertyDetailHeader alot-prop-header">Attachment Details</h4>
+    </div>
+
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.PropertyDocument>()
+              .Name("gridPropertyDocument")
+              .Columns(columns =>
+              {
+                  columns.Bound(c => c.DocumentName).Title("DocumentName").Width(80);
+                  columns.Bound(c => c.DocumentPath).Hidden(true);
+                  columns.Bound(c => c.DocumentPath).Width(150).ClientTemplate("<a style = 'cursor:pointer;' onclick=javascript:OpenFile(this);>Click Here</a>").Width(80).Filterable(false);
+              })
+              .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+              .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+              .DataSource
+              (
+                  dataSource => dataSource
+                      .Ajax().ServerOperation(true)
+                      .Model(model => model.Id(p => p.RID))                      
+                      .Read(read => read.Action("GetDocumentDetails", "PropertyAllotment").Data("AdditionalInfoForDocument"))
+                      .PageSize(10)
+              )
+        )
+       
+        @(Html.Kendo().Window().Visible(false)
+            .Name("IDWindow").Width(920)
+           .Title("Document")
+           .Modal(true)
+           .Content(@<text>
+            <div style="width:100%" id="windowDiv">
+                <iframe id="ifrmViewPdf" style="width:900px; height:500px;"></iframe>
+            </div>
+        </text>)
+           .Actions(actions => actions.Close())
+        )
+    </div>
+    @*@{
+        Html.RenderPartial("_PartialUploadDocuments");
+    }*@
+</div>
+<script type="text/javascript">
+    function AdditionalInfoForDocument() {
+        return {
+            rid: $('#hdnRID').val() > 0 ? $('#hdnRID').val() : 0,
+            oldRid : $("#hdnOldRId").val()
+        }
+    }
+
+    function OpenFile(row) {
+        $("#windowDiv").empty();
+        var tr = $(row).parent().parent();
+        var link = $(tr).children("td:eq(1)").text();
+        $("#windowDiv").append($('<iframe src=' + link + ' style="width:900px; height:500px;"></iframe>'));
+        $("#IDWindow").data("kendoWindow").center();
+        $("#IDWindow").data("kendoWindow").open();
+    }
+</script>

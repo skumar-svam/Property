@@ -1,0 +1,260 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@using NA.PMS.Common;
+@using NA.PMS.Model
+@model NA.PMS.Model.PaymentViewModel
+
+<h2 class="blck-heading" style="margin-bottom:15px;">Compensation Amount</h2>
+<div class="form-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+    <div class="row">
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Total Area</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.TotalArea).Name("comp-total-area")
+                .Min(0).Max(99999999999)
+                .Spinners(false).Step(0).Enable(true)
+               .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right", @placeholder = "Total Area" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Total Property Cost</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.TotalPropertyCost).Name("comp-total-property-cost")
+                .Min(0).Max(99999999999)
+                .Spinners(false).Step(0).Enable(true)
+               .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right", @placeholder = "Total Property Cost" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Total Allotment Rate</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.TotalAllotmentRate).Name("comp-total-allotment-rate")
+                .Min(0).Max(99999999999)
+                .Spinners(false).Step(0).Enable(true)
+               .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right", @placeholder = "Allotment Rate" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Date Of Compensation Letter</label>
+            @(Html.Kendo().DatePickerFor(model => model.CompensationRequestDate).HtmlAttributes(new { @id = "comp-request-date", style = "width:95%;float:right;" }))
+        </div>
+    </div>
+    <div class="row">       
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Effected Area of Compensation</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.AreaForCompensation).Name("comp-area-for-compensation")
+                .Min(0).Max(99999999)
+                .Spinners(false).Step(0).Enable(true)
+               .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right", @placeholder = "Effected Area of Compensation" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Compensation Rate</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.CompensationRate).Name("comp-rate-for-compensation")
+                .Min(0).Max(99999999)
+                .Spinners(false).Step(0).Enable(true)
+                .Events(e=>e.Change("CompensationRateChangeEvent"))
+               .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right", @placeholder = "" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Compensation(%)</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.CompensationInPercent).Name("comp-rate-in-percent")
+                .Min(0).Max(99)
+                .Spinners(false).Step(0).Enable(true)
+                //.Events(e => e.Change("CompensationRateChangeEvent"))
+               .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right", @placeholder = "" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Compensation Amount</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.CompensationAmount).Name("comp-amount-for-compensation")
+                .Min(0).Max(9999999999)
+                .Spinners(false).Step(0).Enable(true)
+               .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right", @placeholder = "" })
+            )
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Compensation Penal Interest(%)</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.PenalInterest).Name("comp-penal-interest")
+                .Min(0).Max(99)
+                .Spinners(false).Step(0).Enable(true)
+               .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right", @placeholder = "" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Penal Interest Amount</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.InterestAmount).Name("comp-penal-interest-amount")
+                .Min(0).Max(9999999999)
+                .Spinners(false).Step(0).Enable(true)
+               .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right", @placeholder = "" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Total Compensation Payable Amount</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.TotalCompensationAmount).Name("comp-total-amount")
+                .Min(0).Max(999999999999)
+                .Spinners(false).Step(0).Enable(true)
+               .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right", @placeholder = "" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            @Html.Hidden("comp-id-compensation")
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12" style="text-align:right;">
+            <input type="button" class="btn btn-default update-compensation" value="Update Compensation" />
+            <input type="button" class="btn btn-default calculate-compensation" value="Compensation Dues Calculation" />
+        </div>
+    </div>
+</div>
+
+<div class="col-md-12 k-grid-content">
+    @(Html.Kendo().Grid<NA.PMS.Model.PaymentViewModel>()
+            .Name("GridCompensationPayment")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.ReceiptId).Title("Receipt Id").Width(140);//.ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+                columns.Bound(c => c.ReceiptHeadName).Title("Receipt Head");
+                columns.Bound(c => c.ReceiptSubHeadName).Title("Receipt Subhead").ClientFooterTemplate("<span>Total:-</span>");
+                //columns.Bound(c => c.DuesAmount).Title("Dues (<span class='fa fa-rupee'></span>)");//.ClientTemplate("<label class='hyperlink' onclick='ShowLeaseRentDetail(#=Id#, #=RegistrationId#, #=DepartmentId#)'>#= CurrentDues #</label>").ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+                columns.Bound(c => c.Amount).Title("Paid Amount (<span class='fa fa-rupee'></span>)").ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>").Width(120);
+                columns.Bound(c => c.ChallanId).Title("Challan Id").Width(120);
+                columns.Bound(c => c.DepositDate).Title("Deposit Date").Format("{0:dd-MMM-yyyy}").Width(120);
+            })
+            .Filterable().Resizable(resize => resize.Columns(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))//.AutoBind(false)
+            .DataSource(dataSource => dataSource
+                   .Ajax().ServerOperation(true)
+                   .Model(model => model.Id(p => p.Id))
+                   .Read(read => read.Action("GetCompensationDuesCalculationDetailAsDataSource", "Finance", new { area = "Revenue" }).Data("FilterRegistrationId")).PageSize(10)
+                   .Aggregates(aggregates => aggregates.Add(p => p.Amount).Sum())
+           )
+    )    
+</div>
+
+
+
+<script>
+    $(document).ready(function () {
+        GetCompensationDetails();
+
+        $('.update-compensation').click(function () {
+            SaveCompensationDetail();
+        });
+    });
+
+    function GetCompensationDetails() {
+        var rid = $('#hdn-registration-id').val();
+        var pid = $('#PropertyId').val();
+        if (pid != "") {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ RegistrationId: rid, PropertyId: pid }),
+                url: "/Revenue/Finance/GetPropertyCompensationCostDetailById",
+                //url: "/Revenue/Finance/GetPropertyExcessAreaCostDetailById",
+                success: function (result) {
+                    if (result != null) {
+                        $("#comp-id-compensation").val(result.Id);
+                        $("#comp-request-date").data("kendoDatePicker").value(result.CompensationRequestDate);
+                        $("#comp-area-for-compensation").data("kendoNumericTextBox").value(result.AreaForCompensation);
+                        $("#comp-rate-for-compensation").data("kendoNumericTextBox").value(result.CompensationRate);
+                        $("#comp-rate-in-percent").data("kendoNumericTextBox").value(result.CompensationInPercent);
+                        $("#comp-amount-for-compensation").data("kendoNumericTextBox").value(result.CompensationAmount);
+                        $("#comp-penal-interest").data("kendoNumericTextBox").value(result.PenalInterest);
+                        $("#comp-penal-interest-amount").data("kendoNumericTextBox").value(result.InterestAmount);
+                        $("#comp-total-amount").data("kendoNumericTextBox").value(result.TotalCompensationAmount);
+                    } else { alertify.error("no data found."); }
+
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                }
+            });
+        }
+    }
+
+    function SaveCompensationDetail(){
+        var compensation = {
+            Id: $("#comp-id-compensation").val(),
+            RegistrationId: $('#hdn-registration-id').val(),
+            PropertyId: $('#PropertyId').val(),
+            DepartmentId : $('#DepartmentId').val(),
+            SectorId : $('#SectorId').val(),
+            BlockId : $('#BlockId').val(),
+            AreaForCompensation : $('#comp-area-for-compensation').val(),
+            CompensationRequestDate : $('#comp-request-date').val(),
+            CompensationRate: $('#comp-rate-for-compensation').val(),
+            CompensationInPercent: $('#comp-rate-in-percent').val(),
+            CompensationAmount : $('#comp-amount-for-compensation').val(),
+            PenalInterest: $('#comp-penal-interest').val(),
+            InterestAmount: $('#comp-penal-interest-amount').val(),
+            TotalCompensationAmount : $('#comp-total-amount').val(),
+        };
+        if (ValidateCompensationFields()) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ model: compensation }),
+                url: "/Revenue/Finance/SaveCompensationDetail",
+                success: function (result) {
+                    if (result == '@ReturnType.Saved') {
+                        alertify.success("Compensation Detail saved successfully.");
+                    }
+                    else {
+                        alertify.error("no data found.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                }
+            });
+        }
+    }
+
+
+    function CompensationRateChangeEvent() {
+        var rate = $("#comp-rate-for-compensation").val().trim() == "" ? 0 : $("#comp-rate-for-compensation").val();
+        var area = $('#comp-area-for-compensation').val().trim() == "" ? 0 : $('#comp-area-for-compensation').val();
+        var interest = $('#comp-penal-interest-amount').val().trim() == "" ? 0 : $('#comp-penal-interest-amount').val();
+        if (rate != 0 && area != 0) {
+            var compensation = parseFloat(parseFloat(area).toFixed(2) * parseFloat(rate).toFixed(2)).toFixed(2);
+            var totalpayable = Number(parseFloat(compensation).toFixed(2)) + Number(parseFloat(interest).toFixed(2));
+            $("#comp-amount-for-compensation").data("kendoNumericTextBox").value(compensation);
+            $("#comp-total-amount").data("kendoNumericTextBox").value(compensation);
+        }
+    }
+
+
+    function ValidateCompensationFields() {
+        var flag = true;
+        if ($('#comp-request-date').val().trim() == "") {
+            alertify.error("Select request date for Compensation");
+            return flag = false;
+        }
+        if ($('#comp-area-for-compensation').val().trim() == "") {
+            alertify.error("Enter Area for Compensation");
+            return flag = false;
+        }
+        if ($('#comp-rate-for-compensation').val().trim() == "") {
+            alertify.error("Enter rate for Compensation");
+            return flag = false;
+        }
+        if ($('#comp-amount-for-compensation').val().trim() == "") {
+            alertify.error("Enter Compensation Amount");
+            return flag = false;
+        }
+        if ($('#comp-penal-interest').val().trim() == "") {
+            alertify.error("Enter penal interest for Compensation");
+            return flag = false;
+        }
+        if ($('#comp-total-amount').val().trim() == "") {
+            alertify.error("Enter Total Amount for Compensation");
+            return flag = false;
+        }
+        return flag;
+    }
+</script>

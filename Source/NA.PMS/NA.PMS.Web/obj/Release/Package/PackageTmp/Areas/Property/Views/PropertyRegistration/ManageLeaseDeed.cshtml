@@ -1,0 +1,69 @@
+﻿@using Kendo.Mvc.UI
+@{
+    ViewBag.Title = "Manage Lease Deed";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div>
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Lease Deed</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                <a href="#" id="btnLeaseDeed" class="" onclick="javascript: AddLeaseDeed(event);">Add Lease Deed</a>
+                <a href="#" id="btnSubleaseDeed" class="" onclick="javascript: AddsubleaseDeed(event);">Add Sublease Deed</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="k-grid-content">
+
+        @(Html.Kendo().Grid<NA.PMS.Model.LeaseDeedProperty>()
+        .Name("gridRefunds")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.RId).Title("Registration Id").ClientTemplate("<a href=\"/Property/PropertyRegistration/ViewLeaseDeed/#= RId#\" id='v_#=RId#'  style = 'width: 30px;' >#=RId#</a>");
+            columns.Bound(c => c.SchemeName).Title("Scheme Name");
+            columns.Bound(c => c.DepttName).Title("Department Name");
+            //columns.Bound(c => c.LeaseDeedStatus).Title("Lease Deed Status").Width(100);
+            //columns.Bound(c => c.AmountDue).Title("Amount Due").Width(100);
+            columns.Bound(c => c.LeaseDeedDueDate).Title("Lease Deed Due").Format("{0:dd/MM/yyyy}");
+            columns.Bound(c => c.LeaseDeedExecutionDate).Title("Lease Deed Execution Date").Format("{0:dd/MM/yyyy}");
+            columns.Bound(c => c.StampDutyAmount).Title("Stamp Duty Amount (INR)");
+            columns.Bound(c => c.strType).Title("Type");
+        })
+        .Sortable()
+        .Groupable()
+        .Filterable()
+                .Resizable(resize => resize.Columns(true))
+                //.ToolBar(toolBar =>
+                //{
+                //    toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Add Lease Deed").HtmlAttributes(new { onclick = "javascript:AddLeaseDeed(event);", @class = "k-button", id = "btnLeaseDeed" });
+                //})
+        .Pageable(pageable => pageable
+                                               .Enabled(true)
+                                               .Refresh(true)
+                                               .PageSizes(true)
+                                            )
+        .DataSource(dataSource => dataSource
+        .Ajax().Model(model => model.Id(c => c.RId))
+        .ServerOperation(true).Sort(sort => sort.Add("ReqNo").Descending())
+        .Read(read => read.Action("GetLeaseDeedData", "PropertyRegistration")).PageSize(20)
+        )
+        )
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+    function AddLeaseDeed(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("AddLeaseDeed", "PropertyRegistration")';
+    }
+
+    function AddsubleaseDeed(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("AddSubleaseDeed", "PropertyRegistration")';
+    }
+</script>

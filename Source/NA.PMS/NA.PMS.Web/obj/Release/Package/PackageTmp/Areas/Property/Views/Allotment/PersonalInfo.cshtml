@@ -1,0 +1,240 @@
+﻿@model NA.PMS.Model.ApplicationFormModel
+@using Kendo.Mvc.UI
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>UpdatePersonalInfo</title>
+</head>
+<body>
+
+    @using (Html.BeginForm("UpdatePersonalInfo", "Allotment", FormMethod.Post, new { enctype = "multipart/form-data", id = "userform" }))
+    {
+        <div style="display:none">
+            @Html.TextBoxFor(m => m.ApplicationId)
+        </div>
+        @Html.AntiForgeryToken()
+        <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="row rw-spce">
+                        <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Update Personal Information</h1></div>
+                        <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+                    </div>
+                </div>
+                <div class="col-md-12 blnk-rw"></div>
+                <div class="col-md-12 content-top-spce">
+                    <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        <h2 class="blck-heading">Personal Information</h2>
+                        <div class="form-bx">
+
+                            <div class="row">
+                                <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Registration Id", htmlAttributes: new { @class = "required" })
+                                </div>
+                                <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                    @(Html.Kendo().DropDownListFor(m => m.RID)
+                    .Filter("contains")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel("Select")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetRIDs", "Allotment");
+                        });
+                    })
+            .Events(events => { events.Change("RIdChange"); })
+            .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+
+                                </div>
+                            </div>
+                            <h2 class="blck-heading">Edit Information</h2>
+                            <div class="row">
+                                <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Corresponding Address", htmlAttributes: new { @class = "required" })
+                                </div>
+                                <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                    @Html.TextAreaFor(model => model.CorrespondingAddress, new { @class = "form-control", @maxlength = "500" })
+                                </div>
+                                <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Permanent Address", htmlAttributes: new { @class = "required" })
+                                </div>
+                                <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                    @Html.TextAreaFor(model => model.PermanentAddress, new { @class = "form-control", @maxlength = "500" })
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Phone Number")
+                                </div>
+                                <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                    @Html.TextBoxFor(model => model.PhoneNumberP1, new { @class = "form-control ph-input-sml pull-left", @maxlength = "8", @onchange = "CheckZeroInSTD();", onkeypress = "return IsNumeric(event);" })
+                                    @Html.TextBoxFor(model => model.PhoneNumber, new { @class = "form-control ph-input-lg pull-right", @maxlength = "12", @onchange = "CheckZeroInSTD();", onkeypress = "return IsNumeric(event);" })
+                                </div>
+                                @*<div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                        @Html.Label("Phone Number")
+                                        </div>
+                                    <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                        @Html.TextBoxFor(model => model.PhoneNumber, new { @class = "form-control", @maxlength = "12", @onchange = "CheckZeroInSTD();", onkeypress = "return IsNumeric(event);" })
+                                    </div>*@
+                                @*<div class="col-sm-1">
+                                        @Html.Label("CNC")
+                                        @Html.TextBoxFor(model => model.MobileNumberP1, new { @class = "form-control", @maxlength = "6" })
+                                    </div>*@
+                                <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Mobile Number", htmlAttributes: new { @class = "required" })
+                                </div>
+                                <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                    @Html.TextBoxFor(model => model.MobileNumber, new { @class = "form-control", @maxlength = "12", @onchange = "CheckZeroInSTD();", onkeypress = "return IsNumeric(event);" })
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Fax Number")
+                                </div>
+                                <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                    @Html.TextBoxFor(model => model.FaxNumberP1, new { @class = "form-control ph-input-sml pull-left", @maxlength = "8", @onchange = "CheckZeroInSTD();", onkeypress = "return IsNumeric(event);" })
+                                    @Html.TextBoxFor(model => model.FaxNumber, new { @class = "form-control ph-input-lg pull-right", @maxlength = "12", @onchange = "CheckZeroInSTD();", onkeypress = "return IsNumeric(event);" })
+                                </div>
+                                @*<div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                        @Html.Label("Fax Number")
+                                        </div>
+                                    <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                        @Html.TextBoxFor(model => model.FaxNumber, new { @class = "form-control", @maxlength = "12", @onchange = "CheckZeroInSTD();", onkeypress = "return IsNumeric(event);" })
+                                    </div>*@
+                                <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Email")
+                                </div>
+                                <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                    @Html.TextBoxFor(model => model.Email, new { @class = "form-control" })
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="box-button text-center">
+                        <input type="button" id="btnCancel" value="Cancel" class="btn btn-default" />
+                        <input type="submit" value="Update" id="btnUpdate" class="btn btn-add" />
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    }
+</body>
+</html>
+<script>
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+    function CheckZeroInSTD() {
+        if ($("#PhoneNumberP1").val() != '' && $("#PhoneNumberP1").val() == 0) {
+            alertify.error("STD should not be 0.");
+            $("#PhoneNumberP1").val('');
+        }
+        if ($("#FaxNumberP1").val() != '' && $("#FaxNumberP1").val() == 0) {
+            alertify.error("STD should not be 0.");
+            $("#FaxNumberP1").val('');
+        }
+        if ($("#PhoneNumber").val() != '' && $("#PhoneNumber").val() == 0) {
+            alertify.error("Phone Number should not be 0.");
+            $("#PhoneNumber").val('');
+        }
+        if ($("#FaxNumber").val() != '' && $("#FaxNumber").val() == 0) {
+            alertify.error("Fax Number should not be 0.");
+            $("#FaxNumber").val('');
+        }
+        if ($("#MobileNumber").val() != '' && $("#MobileNumber").val() == 0) {
+            alertify.error("Mobile Number should not be 0.");
+            $("#MobileNumber").val('');
+        }
+    }
+    $(document).ready(function () {
+        DisableFields();
+    });
+    $(function () {
+        $("form").kendoValidator();
+    });
+    $("#btnUpdate").click(function () {
+        if ($("#PhoneNumber").val() != "" && $("#PhoneNumberP1").val() == "") {
+            alert("Please enter Phone Number STD");
+            return false;
+        }
+        if ($("#FaxNumber").val() != "" && $("#FaxNumberP1").val() == "") {
+            alert("Please enter Fax Number STD");
+            return false;
+        }
+    });
+    function EnableFields() {
+        $('#CorrespondingAddress').removeAttr("disabled");
+        $('#PermanentAddress').removeAttr("disabled");
+        $('#PhoneNumberP1').removeAttr("disabled");
+        $('#PhoneNumber').removeAttr("disabled");
+        $('#MobileNumberP1').removeAttr("disabled");
+        $('#MobileNumber').removeAttr("disabled");
+        $('#FaxNumberP1').removeAttr("disabled");
+        $('#FaxNumber').removeAttr("disabled");
+        $('#Email').removeAttr("disabled");
+    }
+    function DisableFields() {
+        $('#CorrespondingAddress').attr("disabled", true);
+        $('#PermanentAddress').attr("disabled", true);
+        $('#PhoneNumberP1').attr("disabled", true);
+        $('#PhoneNumber').attr("disabled", true);
+        $('#MobileNumberP1').attr("disabled", true);
+        $('#MobileNumber').attr("disabled", true);
+        $('#FaxNumberP1').attr("disabled", true);
+        $('#FaxNumber').attr("disabled", true);
+        $('#Email').attr("disabled", true);
+        $('#CorrespondingAddress').val('');
+        $('#PermanentAddress').val('');
+        $('#PhoneNumberP1').val('');
+        $('#PhoneNumber').val('');
+        $('#MobileNumberP1').val('');
+        $('#MobileNumber').val('');
+        $('#FaxNumberP1').val('');
+        $('#FaxNumber').val('');
+        $('#Email').val('');
+    }
+    function RIdChange(event) {
+        var rId = $("#RID").val();
+        if (rId == '')
+        { DisableFields(); }
+        else {
+            EnableFields();
+        }
+        $.ajax({
+            url: '/Allotment/GetPersonalInfo',
+            data: { rId: rId },
+            cache: false,
+            success: function (result) {
+                $('#CorrespondingAddress').val(result.CorrespondingAddress);
+                $('#PermanentAddress').val(result.PermanentAddress);
+                $('#PhoneNumberP1').val(result.PhoneNumberP1);
+                $('#PhoneNumber').val(result.PhoneNumber);
+                $('#MobileNumberP1').val(result.MobileNumberP1);
+                $('#MobileNumber').val(result.MobileNumber);
+                $('#FaxNumberP1').val(result.FaxNumberP1);
+                $('#FaxNumber').val(result.FaxNumber);
+                $('#Email').val(result.Email);
+                $('#ApplicationId').val(result.ApplicationId);
+            }
+        });
+    }
+    $("#btnCancel").click(function () {
+        window.location.href = '@Url.Action("ManageApplication", "Allotment")';
+    });
+</script>

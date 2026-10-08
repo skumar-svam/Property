@@ -1,0 +1,128 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@using NA.PMS.Common
+
+@{
+    ViewBag.Title = "Update Property";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .more-less {
+        float: right;
+        color: #212121;
+    }
+    .panel-title a{
+        text-decoration:none;
+    }  
+</style>
+
+<div class="col-lg-12 col-md-12 col-sm-12">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Update Property</h1></div>
+            <div class="col-md-6 col-sm-6 col-xs-12 mandatory"></div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 content-top-spce">
+        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+          
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingOne">
+                    <h4 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                            <i class="more-less glyphicon glyphicon-plus"></i>
+                            Property Detail
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                    @{Html.RenderPartial("_PartialProperty");}
+                </div>
+            </div>
+
+            @*<div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingTwo">
+                    <h4 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+                            <i class="more-less glyphicon glyphicon-plus"></i>
+                            Property Cost
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+                    @{Html.RenderPartial("_PartialPropertyCost");}
+                </div>
+            </div>*@
+
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    $('#btnSubmit').click(function () {
+        var MasterTypeId = $("#MasterTypeId").val();
+        var MasterTypeValue = $("#MasterTypeValue").val();
+
+        if (MasterTypeId == "") {
+            alertify.error("Please select Master Type ID.");
+            return false;
+        }
+
+        if (MasterTypeValue == "") {
+            alertify.error("Please select Master Type Value.");
+            return false;
+        }
+    });
+
+    $(document).ready(function () {
+
+        $('.panel-group').on('hidden.bs.collapse', toggleIcon);
+        $('.panel-group').on('shown.bs.collapse', toggleIcon);
+
+        $('#MasterTypeValue').change("click", function () {
+            var MasterTypeId = $("#MasterTypeId").val();
+            var MasterTypeValue = $("#MasterTypeValue").val();
+            if (MasterTypeId == 1) {
+                if (MasterTypeValue.length > 100) {
+                    alertify.error("Master type value length should not exceed 100 characters.");
+                    $("#MasterTypeValue").val('');
+                    return false;
+                }
+            }
+
+            if (MasterTypeId == 2) {
+                if (MasterTypeValue.length > 10) {
+                    alertify.error("Master type value length should not exceed 10 characters.");
+                    $("#MasterTypeValue").val('');
+                    return false;
+                }
+            }
+        });
+
+        @{if (TempData["MesgAdd"] != null && TempData["MesgAdd"] != "")
+        {
+              if(TempData["MesgAdd"].ToString()=="True")
+              {
+                @:alertify.success('data saved successfully.');
+                                              }
+              else
+              {
+                  @:alertify.error('already exist.');
+                                              }
+        }}
+    });
+
+    function SectorBlockSelection() {
+        var MasterTypeValue = $("#MasterTypeValue").val();
+        if (MasterTypeValue != "") {
+            $("#MasterTypeValue").val('');
+        }
+    }
+
+    function toggleIcon(e) {
+        $(e.target).prev('.panel-heading').find(".more-less").toggleClass('glyphicon-plus glyphicon-minus');
+    }
+</script>

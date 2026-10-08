@@ -1,0 +1,616 @@
+﻿@model NA.PMS.Model.PropertyModel
+@using Kendo.Mvc.UI
+@using NA.PMS.Model
+
+@{
+    ViewBag.Title = "Attach Properties to Scheme";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using (Html.BeginForm("SavePropertyBankDetail", "ManageProperty", FormMethod.Post, new { enctype = "multipart/form-data", id = "propertyform" }))
+{
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Add Property Bank</h1></div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+                </div>
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="col-md-12 content-top-spce">
+                <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                    <h2 class="blck-heading">Property Bank - Attach Properties to Scheme</h2>
+                    <div class="form-bx">
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Scheme Name", htmlAttributes: new { @class = "required" })</div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(m => m.schemeId)
+                            .Filter("contains")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .BindTo(Model.schemeCollection)
+                            .HtmlAttributes(new { style = "width: 100%", TabIndex = 1 })
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Department", htmlAttributes: new { @class = "required" })</div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(m => m.departmentId)
+                                .Filter("contains")
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .OptionLabel("-Select-")
+                                .Events(events => { events.Change("DeptSelection"); })
+                                .DataSource(source =>
+                                    {
+                                        source.Read(read =>
+                                        {
+                                            read.Action("GetDepartment", "ManageProperty")
+                                                .Data("filterSchemes");
+                                        })
+                                        .ServerFiltering(true);
+                                    })
+                                        .Enable(true)
+                                        .AutoBind(false)
+                                        .CascadeFrom("schemeId")
+                                .HtmlAttributes(new { style = "width: 100%" })
+                                )
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Property Type", htmlAttributes: new { @class = "required" })</div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(m => m.propertyTypeId)
+                                .Filter("contains")
+                                  .DataTextField("Text")
+                                  .DataValueField("Value")
+                                  .OptionLabel("-Select-")
+                          //.Events(events => { events.Change("SchemeSelection"); })
+                                  .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("GetPropertyTypeBySchemeAndDeptId", "ManageProperty")
+                                                    .Data("filterSectorValues");
+                                            })
+                                            .ServerFiltering(true);
+                                        })
+.HtmlAttributes(new { style = "width: 100%", TabIndex = 3 })
+                                .CascadeFrom("departmentId")
+                                .Enable(true)
+                                .AutoBind(false)
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Sector", htmlAttributes: new { @class = "required" })</div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(m => m.sectorId)
+                                .Filter("contains")
+                                  .DataTextField("Text")
+                                  .DataValueField("Value")
+                                  .OptionLabel("-Select-")
+                          //.Events(events => { events.Change("SchemeSelection"); })
+                                  .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("GetSectorBySchemeAndDeptId", "ManageProperty")
+                                                    .Data("filterSectorValuesByPropId");
+                                            })
+                                            .ServerFiltering(true);
+                                        })
+.HtmlAttributes(new { style = "width: 100%" })
+                        .CascadeFrom("propertyTypeId")
+                                .Enable(true)
+                                .AutoBind(false)
+                                )
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Block", htmlAttributes: new { @class = "required" })</div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(m => m.blockId)
+                                .Filter("contains")
+                                  .DataTextField("Text")
+                                  .DataValueField("Value")
+                                  .OptionLabel("-Select-")
+                          //.Events(events => { events.Change("SchemeSelection"); })
+                                  .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("GetBlockBySchemeAndDeptId", "ManageProperty")
+                                                    .Data("filterBlockBySector");
+                                            })
+                                            .ServerFiltering(true);
+                                        })
+.HtmlAttributes(new { style = "width: 100%" })
+                        .CascadeFrom("sectorId")
+                                .Enable(true)
+                                .AutoBind(false)
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Floor", new { @id = "lblFloor", @class = "required" })</div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(m => m.floorId)
+                                .Filter("contains")
+                                  .DataTextField("Text")
+                                  .DataValueField("Value")
+                                  .OptionLabel("-Select-")
+        // .Events(events => { events.Change("CheckTotalAreaRange"); })
+                                  .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("GetFloorBySchemeAndDeptId", "ManageProperty")
+                                                    .Data("filterFloor");
+                                            })
+                                            .ServerFiltering(true);
+                                        })
+                                   .HtmlAttributes(new { style = "width: 100%" })
+                                    .CascadeFrom("blockId")
+                                   .Enable(true)
+                                   .AutoBind(false)
+                                )
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div class="box-button text-center">
+                    <input type="button" id="btnClear" value="Clear" class="btn btn-default" />
+                    <input value="Search" type="button" id="btnSearch" class="btn btn-add" />
+                </div>
+                <br />
+                <br />
+                <br />
+                <div class="col-md-12 blnk-rw"></div>
+                <div class="col-md-12 k-grid-content">
+                    <br />
+                    <input value="Attach Properties" type="button" id="btnAttachProperty" class="btn btn-add" />
+                    <br />
+                    <br />
+                    @*@(Html.Kendo().DataSource<PropertyModel>()
+            .Name("dtPropDetail")
+            .Ajax(dataSource => dataSource
+               .Read(read => read.Action("GetPropertyBankDetail", "ManageProperty").Data("SearchedProperties")).PageSize(20)
+               .ServerOperation(false)
+            )
+                        )*@
+                    @(Html.Kendo().Grid<PropertyModel>()
+.Name("gvAttachedPropertyBank")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.IsSelected).Width(30).ClientTemplate("<input type='checkbox' #= IsSelected ? checked='checked':'' # class='inpchk' ></input>").HeaderTemplate(" <input type='checkbox' id='chkSelectAll' onchange='SelectAll(this)'/>").Filterable(false).Sortable(false).Title("");
+            columns.Bound(c => c.departmentName).Title("Department Name");
+            columns.Bound(c => c.propertyType).Title("Property Type");
+            columns.Bound(c => c.sectorName).Title("Sector");
+            columns.Bound(c => c.blockName).Title("Block");
+            columns.Bound(c => c.floorName).Title("Floor/Area Range");
+            if (@ViewBag.ReadOnlyMenu != null && @ViewBag.ReadOnlyMenu == true)
+            {
+                columns.Bound(c => c.plotProperty).Title("Property/Plot No").ClientTemplate("<a href='/Master/ManageProperty/ViewPropertyDetail/#=refId#'>#=plotProperty#</a>");
+            }
+            else
+            {
+                columns.Bound(c => c.plotProperty).Title("Property/Plot No");
+            }
+
+            columns.Bound(c => c.refId).Visible(false);
+        })
+
+                      .Groupable()
+                      .Sortable()
+                .Filterable()
+                        .Resizable(resize => resize.Columns(true))
+                      .Pageable(pageable => pageable
+                                                       .Enabled(true)
+                                                       .Refresh(true)
+                                                       .PageSizes(true)
+                                                    )
+                      .DataSource(dataSource => dataSource
+                            .Ajax().Model(model => model.Id(p => p.refId))
+                     .ServerOperation(true)
+                                             .Read(read => read.Action("GetPropertyBankDetail", "ManageProperty").Data("SearchedProperties")).PageSize(20)
+              )
+                    )
+
+
+                </div>
+                <div class="col-md-12 blnk-rw"></div>
+                <div class="col-md-12 k-grid-content">
+                    <br />
+                    <input value="Detach Properties" type="button" id="btnDetachedProperty" class="btn btn-add" />
+                    <br />
+                    <br />
+                    @(Html.Kendo().Grid<PropertyModel>()
+        .Name("gvDetatchedPropertyBank")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.IsSelected).Width(30).ClientTemplate("# if ((isActiveAllotment == 1 && isStatusAllotment == 'Approved')|| (isActiveAllotment == 0 && isStatusAllotment != 'Approved') ) {#<input type='checkbox'  disabled='disabled' #= IsSelected ? checked='checked':'' # class='inpchkDetached' ></input>#}else{#<input type='checkbox' #= IsSelected ? checked='checked':'' # class='inpchkDetached' ></input>#}#").HeaderTemplate(" <input type='checkbox' id='chkSelectAllDetached' onchange='SelectAllDetached(this)'/>").Filterable(false).Sortable(false).Title("");
+            columns.Bound(c => c.departmentName).Title("Department Name");
+            columns.Bound(c => c.propertyType).Title("Property Type");
+            columns.Bound(c => c.sectorName).Title("Sector");
+            columns.Bound(c => c.blockName).Title("Block");
+            columns.Bound(c => c.floorName).Title("Floor/Area Range");
+            if (@ViewBag.ReadOnlyMenu != null && @ViewBag.ReadOnlyMenu == true)
+            {
+                columns.Bound(c => c.plotProperty).Title("Property/Plot No").ClientTemplate("<a href='/Master/ManageProperty/ViewPropertyDetail/#=refId#'>#=plotProperty#</a>");
+            }
+            else
+            {
+                columns.Bound(c => c.plotProperty).Title("Property/Plot No");
+            }
+
+            columns.Bound(c => c.refId).Visible(false);
+
+        })
+
+          .Groupable()
+                      .Sortable()
+                .Filterable()
+                        .Resizable(resize => resize.Columns(true))
+                      .Pageable(pageable => pageable
+                                                       .Enabled(true)
+                                                       .Refresh(true)
+                                                       .PageSizes(true)
+                                                    )
+                      .DataSource(dataSource => dataSource
+                            .Ajax().Model(model => model.Id(p => p.refId))
+                     .ServerOperation(true)
+                             .Read(read => read.Action("GetDetachedPropertyDetail", "ManageProperty").Data("SearchedProperties")).PageSize(20)
+              )
+                    )
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id='dvRegistryOrLease' class='adminfeediv'>
+        <div>
+            <div>
+                <div class="col-md-4 col-sm-4 col-xs-12 form-group">@Html.Label("Registry", htmlAttributes: new { @class = "required" })</div>
+                <div class="col-md-7 col-sm-7 col-xs-12 form-group">
+                    @(Html.Kendo().DropDownListFor(m => m.RegistryName)
+                                .Filter("contains")
+                    .DataTextField("text")
+                    .DataValueField("text")
+                    .OptionLabel("Select")
+                    .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetRegistry", "ManageProperty");
+                                });
+                            })
+                    .HtmlAttributes(new { style = "width: 100%" })
+                    )
+                </div>
+            </div>
+        </div>
+        <div style="text-align:center;">
+            <button type='submit' id="btnRegistrySubmit" class='btn btn-default' value='Save'>Submit</button>
+            <button type='button' class='btn btn-default' value='Cancel' onclick="CloseRegistryPopUp();">Close</button>
+        </div>
+    </div>
+}
+<script type="text/javascript">
+    function ValidateField() {
+        var bool = true;
+        if ($("#schemeId").val() == "") {
+            alertify.error("Please select Scheme.");
+            return false;
+            var bool = false;
+        }
+        if ($("#departmentId").val() == "") {
+            alertify.error("Please select Department.");
+            return false;
+            var bool = false;
+        }
+        if ($("#propertyTypeId").val() == "") {
+            alertify.error("Please select Property Type.");
+            return false;
+            var bool = false;
+        }
+        if ($("#sectorId").val() == "") {
+            alertify.error("Please select Sector.");
+            return false;
+            var bool = false;
+        }
+        if ($("#blockId").val() == "") {
+            alertify.error("Please select Block.");
+            return false;
+            var bool = false;
+        }
+        if ($("#floorId").val() == "") {
+            alertify.error("Please select Floor/Area Range.");
+            return false;
+            var bool = false;
+        }
+        return bool;
+    }
+    function SearchedProperties() {
+        return {
+            schemeId: $('#schemeId').val(),
+            deptId: $('#departmentId').val(),
+            propertyTypeId: $('#propertyTypeId').val(),
+            sectorId: $('#sectorId').val(),
+            blockId: $('#blockId').val(),
+            floorId: $('#floorId').val()
+        };
+    }
+    $('#btnSearch').click(function () {
+        var isvalidate = ValidateField();
+        if (isvalidate == true) {
+            $("#gvAttachedPropertyBank").data("kendoGrid").dataSource.read();
+            $("#gvDetatchedPropertyBank").data("kendoGrid").dataSource.read();
+        }
+    });
+    function ClearValues()
+    {
+        var schemeId = $("#schemeId").data("kendoDropDownList");
+        schemeId.value("");
+        var departmentId = $("#departmentId").data("kendoDropDownList");
+        departmentId.value("0");
+        var propertyTypeId = $("#propertyTypeId").data("kendoDropDownList");
+        propertyTypeId.value("0");
+        var sectorId = $("#sectorId").data("kendoDropDownList");
+        sectorId.value("0");
+        var blockId = $("#blockId").data("kendoDropDownList");
+        blockId.value("0");
+        var floorId = $("#floorId").data("kendoDropDownList");
+        floorId.value("0");
+        $("#gvAttachedPropertyBank").data("kendoGrid").dataSource.read();
+    }
+    $('#btnClear').click(function () {
+        ClearValues();
+    });
+    $("div[id='dvRegistryOrLease']").kendoWindow({
+        modal: true,
+        title: "Add Registry to Properties",
+        visible: false,
+        width: "30%"
+    });
+
+    $("#btnRegistrySubmit").click(function () {
+        if ($("#RegistryName").val() == "") {
+            alertify.error("Please select Registry.");
+            return false;
+        }
+        var items = $("#gvAttachedPropertyBank").data("kendoGrid").dataSource.data();
+        var rIds = [];
+        var propertyIds = [];
+        var refIds = "";
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            if (item.IsSelected == true) {
+                refIds += item.refId + ",";
+                 rIds.push(item.refId);
+                //propertyIds.push(item.PropertyId);
+            }
+        }
+        if (refIds != "") {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ rIds: rIds, refIds: refIds, schemeId: $("#schemeId").val(), registry: $("#RegistryName").val() }),
+                url: '/ManageProperty/AttachProperties',
+                success: function (result) {
+                    $("#gvAttachedPropertyBank").data("kendoGrid").dataSource.read();
+                    $("#gvDetatchedPropertyBank").data("kendoGrid").dataSource.read();
+                    CloseRegistryPopUp();
+                    alertify.success("Properties attached successfully.");
+                    SelectAll(this);
+                    $("#chkSelectAll").prop('checked', false);
+                    //ClearValues();
+                },
+                error: function (obj) {
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            });
+        } else {
+            alertify.error("Please select atleast one property from attached grid.");
+            return false;
+        }
+    });
+    $("#btnAttachProperty").click(function () {
+        var isvalidate = ValidateField();
+        if (isvalidate == true) {
+            var items = $("#gvAttachedPropertyBank").data("kendoGrid").dataSource.data();
+            var rIds = [];
+            var refIds = "";
+            var propertyIds = [];
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                if (item.IsSelected == true) {
+                    refIds += item.refId + ",";
+                    //rIds.push(item.refId);
+                    //propertyIds.push(item.PropertyId);
+                }
+            }
+            if (refIds != "") {
+                OpenRegistryOrLeasePopUp()
+            } else {
+                alertify.error("Please select atleast one property from attached grid.");
+                return false;
+            }
+        }
+    });
+    function OpenRegistryOrLeasePopUp() {
+        var win = $("#dvRegistryOrLease").data("kendoWindow");
+        win.center();
+        win.open();
+    }
+    function CloseRegistryPopUp() {
+        var win = $("#dvRegistryOrLease").data("kendoWindow");
+        win.close();
+    }
+    var checkedPropertyIds = [];
+    var checkedRIds = [];
+    function SelectAll(e) {
+        var state = $(e).is(':checked');
+        if (state == true) {
+            var grid = $('#gvAttachedPropertyBank').data("kendoGrid");
+            $.each(grid.dataSource.view(), function () {
+                $(".inpchk").prop('checked', 'checked');
+                if (this['IsSelected'] != state)
+                    this['IsSelected'] = state;
+                checkedRIds.push(this.refId);
+                checkedPropertyIds.push(this.PropertyId);
+            });
+        } else {
+            $(".inpchk").removeAttr('checked');
+            var grid = $('#gvAttachedPropertyBank').data("kendoGrid");
+            $.each(grid.dataSource.view(), function () {
+                this['IsSelected'] = false;
+            });
+        }
+    }
+    $(function () {
+        $('#gvAttachedPropertyBank').on('change', '.inpchk', function () {
+
+            var checked = $(this).is(':checked');
+            $("#chkSelectAll").removeAttr('checked');
+            if ($('.inpchk:checked').length == $('.inpchk').length) {
+                $("#chkSelectAll").prop('checked', 'checked');
+            }
+            var grid = $('#gvAttachedPropertyBank').data().kendoGrid;
+            var dataItem = grid.dataItem($(this).closest('tr'));
+            dataItem.set('IsSelected', checked);
+            checkedRIds.push(dataItem.refId);
+            checkedPropertyIds.push(this.PropertyId);
+        });
+
+    });
+
+
+    // Detached Grid Checkbox Select
+
+    $("#btnDetachedProperty").click(function () {
+       
+            var items = $("#gvDetatchedPropertyBank").data("kendoGrid").dataSource.data();
+            var rIds = [];
+            var propertyIds = [];
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                if (item.IsSelected == true) {
+                    rIds.push(item.refId);
+                    //propertyIds.push(item.PropertyId);
+                }
+            }
+            if (rIds.length > 0) {
+                var detachProperty = confirm('Are you sure you want Detach this Property?');
+                if (detachProperty) {
+                    $.ajax({
+                        dataType: 'json',
+                        type: 'Post',
+                        contentType: 'application/json; charset=utf-8',
+                        data: JSON.stringify({ refIds: rIds }),
+                        url: '/ManageProperty/DetachProperties',
+                        success: function (result) {
+                            $("#gvAttachedPropertyBank").data("kendoGrid").dataSource.read();
+                            $("#gvDetatchedPropertyBank").data("kendoGrid").dataSource.read();
+                            alertify.success("Properties detached successfully.");
+                        },
+                        error: function (obj) {
+                            alertify.error("Some error occured. Please try again later.");
+                        }
+                    });
+                }
+            } else {
+                alertify.error("Please select atleast one property from detached grid.");
+                return false;
+            }
+    });
+
+    var checkedDetachedPropertyIds = [];
+    var checkedDetachedRIds = [];
+    function SelectAllDetached(e) {
+        var state = $(e).is(':checked');
+        if (state == true) {
+            var grid = $('#gvDetatchedPropertyBank').data("kendoGrid");
+            $.each(grid.dataSource.view(), function () {
+                $(".inpchkDetached").prop('checked', 'checked');
+                if (this['IsSelected'] != state)
+                    this['IsSelected'] = state;
+                checkedDetachedRIds.push(this.refId);
+                checkedDetachedPropertyIds.push(this.PropertyId);
+            });
+        } else {
+            $(".inpchkDetached").removeAttr('checked');
+            var grid = $('#gvDetatchedPropertyBank').data("kendoGrid");
+            $.each(grid.dataSource.view(), function () {
+                this['IsSelected'] = false;
+            });
+        }
+    }
+    $(function () {
+        $('#gvDetatchedPropertyBank').on('change', '.inpchkDetached', function () {
+
+            var checked = $(this).is(':checked');
+            $("#chkSelectAllDetached").removeAttr('checked');
+            if ($('.inpchkDetached:checked').length == $('.inpchkDetached').length) {
+                $("#chkSelectAllDetached").prop('checked', 'checked');
+            }
+            var grid = $('#gvDetatchedPropertyBank').data().kendoGrid;
+            var dataItem = grid.dataItem($(this).closest('tr'));
+            dataItem.set('IsSelected', checked);
+            checkedDetachedRIds.push(dataItem.refId);
+            checkedDetachedPropertyIds.push(this.PropertyId);
+        });
+
+    });
+
+    function PropertyTypeChange(event) {
+        var schemeId = $("#schemeId").val();
+        var departmentId = $("#departmentId").val();
+        var propTypeId = $("#propertyTypeId").val();
+    }
+    function filterSchemes() {
+        return {
+            schemeId: $("#schemeId").val()
+        };
+    }
+    function filterSectorValues() {
+        return {
+            schemeId: $("#schemeId").val(),
+            departmentId: $("#departmentId").val()
+        };
+    }
+    function filterSectorValuesByPropId() {
+        return {
+            schemeId: $("#schemeId").val(),
+            departmentId: $("#departmentId").val(),
+            propTypeId: $("#propertyTypeId").val()
+        };
+    }
+    function filterBlockBySector() {
+        return {
+            schemeId: $("#schemeId").val(),
+            departmentId: $("#departmentId").val(),
+            propTypeId: $("#propertyTypeId").val(),
+            sectorId: $("#sectorId").val()
+        };
+    }
+    function filterFloor() {
+        return {
+            schemeId: $("#schemeId").val(),
+            departmentId: $("#departmentId").val(),
+            propTypeId: $("#propertyTypeId").val(),
+            sectorId: $("#sectorId").val(),
+            blockId: $("#blockId").val()
+        };
+    }
+    function DeptSelection(event) {
+        var departmentId = $("#departmentId").val();
+           if (departmentId == 5) {
+                $('#lblFloor').text('Floor');
+            }
+           else {
+               $('#lblFloor').text('Area Range');
+           }
+    }
+
+
+</script>

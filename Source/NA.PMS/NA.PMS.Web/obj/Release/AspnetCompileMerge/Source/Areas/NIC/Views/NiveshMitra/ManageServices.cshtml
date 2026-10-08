@@ -1,0 +1,155 @@
+﻿@model NA.PMS.NICServices.SWPServicesViewModel
+@using Kendo.Mvc.UI;
+
+@{
+    ViewBag.Title = "Manage Services";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .k-pager-wrap .k-dropdown {
+        width: 5.5em;
+    }
+     div.k-grid-content{
+        overflow-x: visible;
+        overflow-y: hidden;
+    }
+    .k-grid{
+        overflow-x:auto;
+    }
+     .k-filter-row th, .k-grid-header th.k-header {
+        white-space: pre-wrap !important;
+    }
+    div.k-grid-footer, div.k-grid-header {
+        padding-right:0 !important;
+    }
+    div.k-grid-content, div.k-grid-content-locked{
+        height:auto !important;
+    }
+</style>
+
+<div class="ManageRequestServices">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Manage Nivesh Mitra Requests</h1></div>
+            <div class="col-md-6 col-sm-6 col-xs-12 mandatory">
+                @*<a target="_blank" class="btn btn-add" href="/NIC/NiveshMitra/NiveshMitraRequests">Manage Nivesh Mitra Requests</a>*@
+                <a target="_blank" class="btn btn-add" href="/NIC/NiveshMitra/SWPServices" style="border-radius:0;">NIC Services</a>
+                <a target="_blank" class="btn btn-add" href="/NIC/NiveshMitra/SWPServiceStatus" style="border-radius:0;">NIC Status</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.NICServices.SWPServiceViewModel>()
+            .Name("GridServiceRequest")
+            .ToolBar(tools => tools.Excel())
+            .Excel(excel => excel.FileName("NICServiceRequestList.xlsx").AllPages(true).Filterable(true).ProxyURL(Url.Action("Excel_Export_Save", "Report")))
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.EncryptedId).Hidden();
+                columns.Bound(c => c.DepartmentId).Hidden();
+                columns.Bound(c => c.ServiceId).Hidden();
+                columns.Bound(c => c.DispatchedDocument).Hidden();
+                columns.Bound(c => c.NICUnitId).Title("Unit Id").Sortable(false).Locked(true).Lockable(false);
+                columns.Bound(c => c.RequestId).Title("RefNo").Locked(true).Lockable(false).ClientTemplate("<a href='" + "/NIC/NiveshMitra/ServiceDetail/#= Id #" + "' target='_blank'>#=Id#</a>");//.Width(100)
+                columns.Bound(c => c.RegistrationNo).Title("RId").Lockable(false).ClientTemplate("<a target='_blank' href='/Property/PropertyAllotment/PropertyDetails/#=RegistrationNo#'>#=RegistrationNo#</a>").Sortable(false);//.Width(120)
+                columns.Bound(c => c.Applicant).Title("Applicant").Lockable(false).Sortable(false);
+                columns.Bound(c => c.PropertyNo).Title("Property").Lockable(false).Sortable(false);//.Width(110)
+                columns.Bound(c => c.ServiceName).Title("Service Name").Lockable(false);
+                columns.Bound(c => c.RequestDate).Title("Request Date").Lockable(false).Format("{0:dd/MM/yyyy}").Sortable(false);//.Width(140)
+                columns.Bound(c => c.ResubmitDate).Title("Resubmit Date").Lockable(false).Format("{0:dd/MM/yyyy}").Sortable(false);//.Width(140)
+                columns.Bound(c => c.Status).Title("Status").Lockable(false).Sortable(false);//.Width(100)
+                columns.Bound(c => c.PaymentStatus).Title("Payment").Lockable(false).ClientTemplate("#if(PaymentStatus==0){# <a onclick='javascript:UpdatePaymentStatus(#=RequestId#);'><center class='hyperlink'>Not Paid</center></a> #}else if(PaymentStatus==1){# <center>Paid</center> #}else{# --- #}#").Filterable(false).Sortable(false);//.Width(100)
+                //columns.Bound(c => c.RequestDate).Title("Print").Lockable(false).ClientTemplate("<a  onclick='javascript:OpenFile(this);'><center><span class='glyphicon glyphicon-print'></span></center></a>").Filterable(false).Sortable(false);//.Width(100)
+                columns.Bound(c => c.Applicant).Hidden();
+                columns.Bound(c => c.MobileNo).Hidden();
+                columns.Bound(c => c.SubDepartment).Hidden();
+                columns.Bound(c => c.Description).Hidden();
+                columns.Bound(c => c.Approver).Title("Forwarded").Lockable(false).Sortable(false);//.Width(140);
+                columns.Bound(c => c.StatusId).Title("Letter").Lockable(false).ClientTemplate("#if(StatusId == 9 && IsUploaded == true){# <center><a onclick='javascript:ViewNICLetter(this);'style='font-weight:bold;cursor:pointer;'>view</a></center> #}#");// -- ViewLetter(#=Id#,#=RegistrationNo#) .Width(120)
+            })
+             .Sortable().Filterable().Resizable(resize => resize.Columns(true)).Scrollable(s => s.Enabled(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(new[] { 10, 50, 100, 500 }).Input(true).PreviousNext(true).ButtonCount(5).Info(true))
+            .AutoBind(true)
+            .Events(e => e.DataBound("kendoGridColumnWidth"))
+            .Reorderable(r => r.Columns(true)).ColumnMenu()
+            .DataSource(dataSource => dataSource
+                .Ajax()
+                .Model(model => model.Id(c => c.Id))
+                .ServerOperation(true)
+                .Read(read => read.Action("GetCustomerServiceRequestGrid", "NiveshMitra", new { area = "NIC" })).PageSize(10)
+                .Sort(s => s.Add(r => r.RequestDate).Descending())
+            )
+        )
+       
+    </div>
+</div>
+<script type="text/javascript">
+   
+    function kendoGridColumnWidth() {
+        var grid = $("#GridServiceRequest").data("kendoGrid");
+        for (var i = 0; i < grid.columns.length; i++) {
+            grid.autoFitColumn(i);
+        }
+    }
+
+    function UpdatePaymentStatus(_RequestId) {
+        //var tr = $(row).parent().parent();
+        //var _RequestId = $(tr).children("td:eq(5)").text();
+
+        if (_RequestId > 0) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                data: { RequestId: _RequestId },
+                url: '/NIC/NiveshMitra/UpdatePaymentStatusByRequestId',
+                success: function (result) {
+                    if (result != null) {
+                        if (result == true) {
+                            alertify.success("Payment validated successfully.")
+                            $("#GridServiceRequest").data("kendoGrid").dataSource.read();
+                        } else {
+                            alertify.error("Payment not validated.");
+                        }
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    alertify.error("Something is wrong, try again later");
+                }
+            });
+
+        }
+    }
+    function ViewLetter(row, rid) {
+        var actionType = "NIC";
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ Id: row, Rid: rid, ActionType: actionType }),
+            url: '/Member/ServiceRequest/GetUploadedDocumentByServiceId',
+            success: function (result) {
+                if (result != "" || result != null) {
+                    window.location.href = result;
+                }
+                else {
+                    alertify.error("File Not Found.");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+            }
+        });
+    }
+    function ViewNICLetter(row) {
+        var tr = $(row).parent().parent().parent();
+        var dodument = $(tr).children("td:eq(3)").text();
+        if (dodument != "" || dodument != null)
+        {
+            window.open( dodument, '_blank');
+            //window.location.href = dodument + '_blank';
+        }
+    }
+</script>
+
+

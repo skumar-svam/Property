@@ -1,0 +1,75 @@
+﻿@using Kendo.Mvc.UI;
+@using NA.PMS.Model
+<br />
+<div class="col-md-12 col-sm-12 col-xs-12 form-bx">
+    @*<div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="_FormID">Transfer Type </label> </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="TlblTType" class="form-control"></label></div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="_ApplicantName">Transfer Sub-type </label>  </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="TlblTSubType" class="form-control"></label></div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="_FormID">Gender </label> </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="TlblGender" class="form-control"></label></div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="_FormID">Name </label> </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="TlblName" class="form-control"></label></div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="_FormID">Father's/Husband's Name </label> </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="TlblRelName" class="form-control"></label></div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="_FormID">Mother's Name </label> </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="TlblMother" class="form-control"></label></div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="_FormID">Mobile No. </label> </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="TlblMob" class="form-control"></label></div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="_FormID">Email </label> </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="TlblMail" class="form-control"></label></div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="_FormID">Correspondence Address </label> </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="TlblCorrAdd" class="form-control"></label></div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="_FormID">Permanent Address </label> </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="TlblPermAdd" class="form-control"></label></div>
+    </div>*@
+    @*<div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="_FormID">Description </label> </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="TlblDesc"></label></div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"></div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"></div>
+    </div>*@
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<TransferServiceRequestModel>()
+                .Name("gvTransferServiceRequest")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.StrTransType).Title("Transfer Type");
+                    columns.Bound(c => c.StrTransSybType).Title("Transfer Sub Type");
+                    columns.Bound(c => c.StrGender).Title("Gender");
+                    columns.Bound(c => c.Name).Title("Name");
+                    columns.Bound(c => c.RelativeName).Title("Husband Name");
+                    columns.Bound(c => c.MotherName).Title("Mother Name");
+                    columns.Bound(c => c.MobileNo).Title("Mobile No.");
+                    columns.Bound(c => c.Email).Title("Email");
+                    columns.Bound(c => c.CorrespondenceAdd).Title("Correspondence Add.");
+                    columns.Bound(c => c.PermanentAdd).Title("Permanent Add.");                   
+                })
+                .Sortable()
+                .Filterable()
+                .Pageable
+                    (
+                        pageable => pageable
+                        .Enabled(true)
+                        .PageSizes(true)
+                     )
+                .DataSource
+                (
+                     dataSource => dataSource
+                            .Ajax()//.Model(model => model.Id(p => p.StrTrans))
+                    .ServerOperation(true)
+                            .Read(read => read.Action("GetTransferServiceReqByRid", "CitizenRequests", new { area = "Member" }).Data("GetRid")).PageSize(20)
+                 ).AutoBind(false)
+        )
+    </div>
+</div>
+

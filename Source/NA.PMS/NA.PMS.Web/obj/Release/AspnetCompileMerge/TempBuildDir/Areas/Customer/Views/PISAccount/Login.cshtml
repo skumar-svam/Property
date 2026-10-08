@@ -1,0 +1,157 @@
+﻿@model NA.PMS.Model.UserViewModel
+
+@{
+    ViewBag.Title = "Login";
+    Layout = "~/Views/Shared/_Blank.cshtml";
+}
+
+<link href="~/Content/CSS/PMSTemplate.css" rel="stylesheet" />
+
+<style type="text/css">
+    .form-control{
+        height: 35px;
+    }
+    .btn{
+        border-radius: 0;
+    }
+    .login-page {
+        width: 660px;
+        padding: 8% 0 0;
+        margin: auto;
+    }
+    .login-form{
+        padding:0 12px 15px 12px;
+    }
+    .action-link{
+        padding-left:20px;
+    }
+    body {
+        background: #fff; /* fallback for old browsers */
+        background: -webkit-linear-gradient(right, #00A182, #00A182);
+        background: -moz-linear-gradient(right, #00A182, #00A182);
+        background: -o-linear-gradient(right, #00A182, #00A182);
+        background: linear-gradient(to left, #00A182, #00A182);
+        font-family: "Roboto", sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    input:-webkit-autofill {
+        -webkit-box-shadow: 0 0 0 1000px white inset !important;
+    }
+    footer{
+        height: 90px;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        line-height: 40px;
+    }
+</style>
+
+@using (Html.BeginForm("Login", "PISAccount", new { area = "Customer", ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { enctype = "multipart/form-data", id = "loginForm" }))
+{
+    <div class="login-page" id="loginPad">
+        <div class="row">
+            <div class="col-lg-12 text-center" style="margin-bottom:5%">
+                <img src="~/Content/Images/logo-noida-small.png" />
+            </div>
+        </div>
+        <div class="row" style="background:#fff; border-radius: 8px;">
+            @Html.AntiForgeryToken()
+            <div class="col-md-12" style="padding:12px 0 0 15px;">
+                <label id="errormessage">@Html.ValidationMessageFor(m => m.ErrorMessage, "", new { @class = "red" })</label>
+            </div>
+            <div class="col-md-6 login-form">
+                <div class="row">
+                    
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div style="margin-bottom: 25px" class="input-group">
+                            <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                            @Html.TextBoxFor(m => m.UserName, new { @class = "form-control", placeholder = "Username", Id = "UserNameId", maxlength = "25" })                           
+                        </div>
+                        @Html.ValidationMessageFor(m => m.UserName, "", new { @class = "red" })
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div style="margin-bottom: 25px" class="input-group">
+                            <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+                            @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Password", Id = "PasswordId", maxlength = "50", minlength = "8" })                           
+                        </div>
+                        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "red" })
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <button type="submit" id="btnSignin" class="btn btn-primary btn-block">Login</button>                      
+                    </div>
+                </div>
+                <div class="row text-center" style="padding-top:15px;">
+                    <div class="col-md-12">
+                        <p class="message"><a href="#" data-toggle="modal" data-target="#PasswordModal">Forgot Your Password?</a></p>
+                    </div>
+                </div>
+                <div class="row text-center">
+                    <div class="col-md-12">
+                        <p class="height-txt">New user <a href="/Customer/Property/RegisterCustomer" target="_blank">Register here</a>.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 login-form">
+                <div class="row">
+                    <div class="col-md-12 text-left">                       
+                        <p><strong>For new registration you need:</strong></p>
+                        <ol class="login-list">
+                            <li class="height-txt">Property Registration Id</li>
+                            <li class="height-txt">Email Id to receive password upon Account Activation</li>
+                            <li class="height-txt">Mobile No. to receive OTP and password upon Account Activation</li>
+                            <li class="height-txt">An Id Proof (Aadhar Card/PAN Card)</li>
+                            <li class="height-txt">An Allotment/Transfer Letter</li>
+                        </ol>
+                        
+                        @*<p class="action-link"><a href="@Url.Action("ServiceDetail", "Property", new { area = "Customer" })">Check service request</a></p>*@
+                        <p class="action-link"><a href="#">Verify your letter</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row" style="padding-top:20px;">
+            <div class="col-md-12 text-center">
+                Copyright © @DateTime.Now.Year <b>NOIDA</b>.
+            </div>
+        </div>
+    </div>
+}
+
+
+<div id="PasswordModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <b>Please contact your system administrator.</b>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('#UserNameId').bind("cut copy paste drop", function (e) {
+            e.preventDefault();
+        });
+        $('#PasswordId').bind("cut copy paste drop", function (e) {
+            e.preventDefault();
+        });
+
+        $("#btnSignin").click(function () {
+            $('#loginForm').submit();
+        });
+
+    });
+</script>

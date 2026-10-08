@@ -1,0 +1,347 @@
+﻿
+@model NA.PMS.Model.CitizenServiceRequest
+@using Kendo.Mvc.UI;
+@using NoidaAuthority.PMS.Entities;
+@using NoidaAuthority.PMS.Entity;
+@using NoidaAuthority.PMS.Common;
+@{
+    ViewBag.Title = "Citizen Service";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@*<link href="@Url.Content("~/Content/kendo/2014.2.716/kendo.common.min.css")" rel="stylesheet" />
+    <link href="@Url.Content("~/Content/kendo/2014.2.716/kendo.default.min.css")" rel="stylesheet" />
+    <script src="~/Scripts/kendo/2014.2.716/kendo.web.min.js"></script>
+    <script src="~/Scripts/jquery.ba-hashchange.js"></script>*@
+
+@using (Html.BeginForm("UploadFiles", "Customer", FormMethod.Post, new { id = "userform", name = "userform", enctype = "multipart/form-data" }))
+{
+    @Html.HiddenFor(m => m.ServiceRequestId);
+    @Html.HiddenFor(m => m.Registration_No);
+
+    <div class="row" id="PropertyDetailContainerDiv" data-registrationid="@Model.Registration_No">
+        @*<div class="row" id="PropertyDetailContainerDiv">*@
+        <div class="col-md-12">
+            <div class="row" style="padding: 0 10px 20px;">
+                <div class="col-md-12 divPropertyDetailHeader">
+                    <h4 class="inline">Citizen Services Request</h4>
+                    <span class="pull-right RID-txt">(Registration No: @Model.Registration_No)</span>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12 leftDiv">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="nw-lbl-lft">Request Id:</label>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="nw-lbl-rht">@Model.ServiceRequestId</label>
+                        </div>
+                        <div class="col-md-3"><label class="nw-lbl-lft">Service Name:</label></div>
+                        <div class="col-md-3"><label class="nw-lbl-rht">@Model.ServiceName</label></div>
+                    </div>
+                    @*@if (Model.ServiceId == Contants.trans)
+                    {*@
+                        <div class="row" style="padding: 30px 0 20px;">
+                            <div class="col-md-12 divPartialViews no-padding">
+
+                                @{ Html.RenderPartial("_TransferRequest", Model.transDetails); }
+
+                            </div>
+                        </div>
+                    @*}*@
+                    @*@if (@Model.ServiceId == Contants.MortgageID)
+                    {
+                        <div class="row" style="padding: 30px 0 20px;">
+                            <div class="col-md-12 divPartialViews no-padding">
+
+                                @{ Html.RenderPartial("_CitizenMortgage", Model.MortgageDetails); }
+
+                            </div>
+                        </div>
+                    }
+                    @if (@Model.ServiceId == Contants.mutation)
+                    {
+                        <div class="row" style="padding: 30px 0 20px;">
+                            <div class="col-md-12 divPartialViews no-padding">
+
+                                @{ Html.RenderPartial("_MutationRequest", Model.mutationDetails); }
+
+                            </div>
+                        </div>
+                    }
+                    @if (@Model.ServiceId == Contants.CICD)
+                    {
+                        <div class="row">
+                            <div class="col-md-12 no-padding">
+
+                                @{ Html.RenderPartial("_CitizenCIC", Model.CICmodel); }
+
+                            </div>
+                        </div>
+                    }
+                    @if (Model.ServiceId == Contants.GPAModel)
+                    {
+                        <div class="row">
+                            <div class="col-md-12 no-padding">
+
+                                @{ Html.RenderPartial("_CitizenGPAForm", Model.gdaModel); }
+
+                            </div>
+                        </div>
+                    }
+                    @if (Model.ServiceId == RentService.ServiceType1)
+                    {
+                        <div class="row" style="">
+                            <div class="col-md-12 no-padding">
+                                @{ Html.RenderPartial("_RentService", Model.RentingModel); }
+                            </div>
+                        </div>
+                    }*@
+                </div>
+
+            </div>
+            <div class="row" style="padding: 0 10px 20px;">
+                @if (ViewBag.uploadhtml != string.Empty)
+                {
+                    <div class="col-md-12 nw-upload-wrap UploadDocuments">
+                        <div class="row" style="padding: 0 10px;">
+                            @*<div class="col-md-12 divPropertyDetailHeader">
+                                    <h4 class="inline">Upload Documents</h4>
+                                </div>*@
+                        </div>
+                        <p style="padding:10px 10px 20px; color:#000">Please attach relevant documents for required Services. All documents are mandatory. If attached documents are not relevant, your service request will be rejected. </p>
+                        <div class="row">
+                            <div class="col-md-12">
+
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div id="single">
+                            <div class="grid-service-tbl">
+                                <div class="gServiceTableRow">
+                                    <div class="gServiceTableHead"><strong>Serial #</strong></div>
+                                    <div class="gServiceTableHead"><strong>ID</strong></div>
+                                    <div class="gServiceTableHead"><strong>Choose File</strong></div>
+
+                                </div>
+                                @Html.Raw(ViewBag.uploadhtml)
+                            </div>
+
+                        </div>
+                    </div>
+                }
+            </div>
+            <div class="row" style="padding: 0 10px 20px;">
+                @*@{
+    if (Model.ServiceId == RentService.ServiceType1)
+    {
+        <div class="col-md-12" style="text-align:right;">
+            <input type="button" id="btnRentServiceSubmit" class="btn btn-upload-doc btnName btnRequestFormSubmit" style="padding:10px 20px" value="Submit" />
+            @*<input type="button" class="btn btn-upload-doc btnName btnRequestFormSubmit" style="padding:10px 20px" value="Submit" />
+       </div> 
+    }*@
+    @*@if (Model.ServiceId == Contants.trans)
+    {*@
+        <div class="col-md-12" style="text-align:right;">
+            <input type="button" id="btnTransferServiceSubmit" class="btn btn-upload-doc btnName" style="padding:10px 20px" value="Submit" />
+        </div>
+    @*}*@
+    @*if (Model.ServiceId == Contants.MortgageID)
+    {
+        <div class="col-md-12" style="text-align:right;">
+            <input type="button" id="btnMortgageServiceSubmit" class="btn btn-upload-doc btnName" style="padding:10px 20px" value="Submit" />
+        </div>
+    }
+    if (Model.ServiceId == Contants.mutation)
+    {
+        <div class="col-md-12" style="text-align:right;">
+            <input type="button" id="btnMutationServiceSubmit" class="btn btn-upload-doc btnName" style="padding:10px 20px" value="Submit" />
+        </div>
+    }
+    if (Model.ServiceId == Contants.CICD)
+    {
+        <div class="col-md-12" style="text-align:right;">
+            <input type="button" id="btnCICDServiceSubmit" class="btn btn-upload-doc btnName" style="padding:10px 20px" value="Submit" />
+        </div>
+    }
+    if (Model.ServiceId == Contants.GPAModel)
+    {
+        <div class="col-md-12" style="text-align:right;">
+            <input type="button" id="btnGPAServiceSubmit" class="btn btn-upload-doc btnName" style="padding:10px 20px" value="Submit" />
+        </div>
+    }*@
+                }
+
+            </div>
+
+        </div>
+    </div>
+
+
+}
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        if ('@ViewBag.uploadhtml' == "") {
+            $(".btnName").attr("value", "Submit");
+        }
+
+        //$(".UploadDocuments").css("display", "none");
+        $("#upload").click(function () {
+            var files = $(".single");
+            if ($(".single").length > 0) {
+                var IsError = false;
+                var strErrorMsg = "";
+
+                var vtable = "<table style='text-align:left;padding:5px;width:100%;' ><thead><th style='text-align:left'>S No.</th><th style='text-align:left'>File Name</th><th style='text-align:left'>Description</th></thead><tbody>[trdata]<tr><td></td><td></td></tr></tbody></table>";
+
+                for (i = 0; i < $(".single").length; i++) {
+                    var FileNoCount = i + 1;
+                    if ($(".single")[i].value.trim() != "") {
+
+                        var size = ($(".single")[i].files[0].size / 1024);
+                        var FileName = $(".single")[i].files[0].name;
+                        var extension = $(".single")[i].value.substr(($(".single")[i].value.lastIndexOf('.') + 1));
+                        if (extension.toLowerCase() == "pdf" || extension.toLowerCase() == "jpg" || extension.toLowerCase() == "jpeg") {
+
+                        }
+                        else {
+                            IsError = true;
+                            strErrorMsg += "<tr><td><label>" + FileNoCount + "</label></td><td><label>" + FileName + "</label></td><td><label>Unsupported format</label></td></tr>";
+                        }
+
+                        if (size < 10) {
+                            IsError = true;
+                            strErrorMsg += "<tr><td><label>" + FileNoCount + "</label></td><td><label>" + FileName + "</label></td><td><label>Min 10kb file size is allowed</label></td></tr>";
+                        }
+
+                        if (size / 1024 > 5) {
+                            IsError = true;
+                            strErrorMsg += "<tr><td><label>" + FileNoCount + "</label></td><td><label>" + FileName + "</label></td><td><label>Max 5Mb file size is allowed</label></td></tr>";
+                        }
+                    }
+                    else {
+                        IsError = true;
+                        strErrorMsg += "<tr><td><label>" + FileNoCount + "</label></td><td><label>No File Found</label></td><td><label>Please Upload the Document</label></td></tr>";
+                    }
+                }
+                if (IsError) {
+                    var tdata = vtable.replace('[trdata]', strErrorMsg);
+                    alertify.alert("Upload Documents", tdata);
+                    return false;
+                }
+            }
+            else {
+                alertify.alert("Upload Documents", "No file found to upload.");
+                return false;
+            }
+        });
+
+    });
+
+    var IsError = false;
+    function CheckFileSize() {
+        //$("#upload").click(function () {
+            var files = $(".single");
+            if ($(".single").length > 0) {
+                //var IsError = false;
+                var strErrorMsg = "";
+
+               // var vtable = "<table style='text-align:left;padding:5px;width:100%;' ><thead><th style='text-align:left'>S No.</th><th style='text-align:left'>File Name</th><th style='text-align:left'>Description</th></thead><tbody>[trdata]<tr><td></td><td></td></tr></tbody></table>";
+
+                for (i = 0; i < $(".single").length; i++) {
+                    var FileNoCount = i + 1;
+                    if ($(".single")[i].value.trim() != "") {
+
+                        var size = ($(".single")[i].files[0].size / 1024);
+                        var FileName = $(".single")[i].files[0].name;
+                        var extension = $(".single")[i].value.substr(($(".single")[i].value.lastIndexOf('.') + 1));
+                        if (extension.toLowerCase() == "pdf" || extension.toLowerCase() == "jpg" || extension.toLowerCase() == "jpeg") {
+                            IsError = true;
+                        }
+                        else {
+                            IsError = false;
+                           // strErrorMsg += "<tr><td><label>" + FileNoCount + "</label></td><td><label>" + FileName + "</label></td><td><label>Unsupported format</label></td></tr>";
+                            alertify.error(FileNoCount + " " + FileName+" not allowed.");
+                            return IsError;
+                        }
+
+                        if (size < 10) {
+                            IsError = false;
+                            //strErrorMsg += "<tr><td><label>" + FileNoCount + "</label></td><td><label>" + FileName + "</label></td><td><label>Min 10kb file size is allowed</label></td></tr>";
+                            alertify.error(FileNoCount + " " + FileName + " Min 10kb file size is allowed");
+                            return IsError;
+                        }
+
+                        if (size / 1024 > 5) {
+                            IsError = false;
+                            //strErrorMsg += "<tr><td><label>" + FileNoCount + "</label></td><td><label>" + FileName + "</label></td><td><label>Max 5Mb file size is allowed</label></td></tr>";
+                            alertify.error(FileNoCount + " " + FileName + " Max 5Mb file size is allowed");
+                            return IsError;
+                        }
+                        //return IsError;
+                    }
+                    else {
+                        IsError = false;
+                        //strErrorMsg += "<tr><td><label>" + FileNoCount + "</label></td><td><label>No File Found</label></td><td><label>Please Upload the Document</label></td></tr>";
+                        alertify.error("Please upload documents.");
+                        return IsError;
+                    }
+                }
+                //if (IsError) {
+                //    var tdata = vtable.replace('[trdata]', strErrorMsg);
+                //    alertify.alert("Upload Documents", tdata);
+                //    return false;
+                //}
+            }
+            else {
+                alertify.alert("Upload Documents", "No file found to upload.");
+                return IsError;
+            }
+            return IsError;
+        //});
+}
+
+    function ShowUploadDoc() {
+        if ('@ViewBag.uploadhtml' != "") {
+            $(".UploadDocuments").css("display", "block");
+            $(".leftDiv").css("display", "none");
+        }
+        else {
+            var registrationNo = $("#Registration_No").val();
+            if (registrationNo != '') {
+                window.location.href = "/Customer/ServiceRequest/" + registrationNo; @*'@Url.Action("ServiceRequest/", "Customer", new { id = @ })'*@;
+            }
+        }
+    }
+
+    var flag = false;
+    function CheckFileUpload() {
+        var files = $(".single");
+        if ($(".single").length > 0) {
+            for (i = 0; i < $(".single").length; i++) {
+                if ($(".single")[i].value.trim() == "") {
+                    alertify.alert("Upload Documents", "Please Upload All the Documents");
+                    return flag = false;
+                }
+                else {
+                    flag = true;
+                }
+            }
+            return flag;
+        }
+        else {
+            alertify.alert("Upload Documents", "No file found to upload.");
+            return flag = false;
+        }
+    }
+
+
+
+</script>
+

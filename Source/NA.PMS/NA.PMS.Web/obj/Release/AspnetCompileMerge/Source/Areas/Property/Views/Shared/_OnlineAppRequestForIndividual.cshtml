@@ -1,0 +1,230 @@
+﻿@model NA.PMS.Model.OnlineApplicationFormModel
+@using Kendo.Mvc.UI;
+@using NA.PMS.Common
+
+<div id="OnlineAppRequestForIndividual">
+    <div class="row" id="divFirstAndMiddleName">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            @Html.Label("First Name", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(model => model.FirstName, new { @class = "form-control", @maxlength = "100", @onchange = "GetCompleteName();" })
+
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Middle Name")
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(model => model.MiddleName, new { @class = "form-control", @maxlength = "100", @onchange = "GetCompleteName();" })
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Last Name", new { @class = "required", id = "lblLastName" })
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(model => model.LastName, new { @class = "form-control", @maxlength = "100", @onchange = "GetCompleteName();" })
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Gender", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <div id="ddlGenderName">
+                @(Html.Kendo().DropDownListFor(m => m.GenderName).Filter("contains")
+                        //.Events(events => { events.Change("GenderChange"); })
+                                    .DataTextField("text")
+                                    .DataValueField("text")
+                                    .OptionLabel("Select")
+                                    .DataSource(source =>
+                                    {
+                                        source.Read(read =>
+                                        {
+                                            read.Action("GetGenderOnly", "Allotment");
+                                        });
+                                    })
+                                    .HtmlAttributes(new { @class = "schemeForms", style = "width: 100%" })
+                )
+            </div>
+        </div>
+    </div>
+    <div class="row" id="divParentsName">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Father's Name", new { @class = "required", @id = "lblFatherName" })
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(model => model.FatherName, new { @class = "form-control", @maxlength = "150" })
+            @Html.ValidationMessageFor(model => model.FatherName)
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Mother's Name", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(model => model.MotherName, new { @class = "form-control", @maxlength = "150" })
+            @Html.ValidationMessageFor(model => model.MotherName)
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Date Of Birth", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DatePickerFor(model => model.DOB)
+                            .Events(e =>
+                                      {
+                                          e.Change("change");
+                                      })
+                    .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" })
+            )
+            @Html.ValidationMessageFor(model => model.DOB, "", new { @class = "text-danger" })
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Marital Status", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DropDownListFor(m => m.MaritialStatusName).Filter("contains")
+                            .DataTextField("text")
+                            .DataValueField("text")
+                            .OptionLabel("Select")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetMaritialStatus", "Allotment");
+                                });
+                            })
+                            .HtmlAttributes(new { @class = "schemeForms", style = "width: 100%" })
+            )
+            @Html.ValidationMessageFor(model => model.MaritialStatusName, "", new { @class = "text-danger" })
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Category", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DropDownListFor(m => m.CategoryId).Filter("contains")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel("Select")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetCategory", "Allotment");
+                        });
+                    })
+                    .HtmlAttributes(new { @class = "schemeForms", style = "width: 100%" })
+            )
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Occupation", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DropDownListFor(m => m.OccupationId).Filter("contains")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel("Select")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetOccupation", "Allotment");
+                        });
+                    })
+                    .HtmlAttributes(new { @class = "schemeForms", style = "width: 100%" })
+            )
+            @Html.ValidationMessageFor(model => model.OccupationId, "", new { @class = "text-danger" })
+        </div>
+    </div>   
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function CascadeData() {
+        var SchemeId = $("#SchemeId").val();
+        var deptID = $("#DepartmentId").val();
+        return {
+            schemeid: SchemeId,
+            depttID: deptID
+        };
+    }
+    
+    $('#FatherName').change("click", function () {
+        var fname = $('#FatherName').val();
+        $('#FatherName').val(fname.trim());
+    });
+
+    $('#MotherName').change("click", function () {
+        var mname = $('#MotherName').val();
+        $('#MotherName').val(mname.trim());
+    });
+
+    $('#FirstName').change("click", function () {
+        var fname = $('#FirstName').val();
+        $('#FirstName').val(fname.trim());
+    });
+
+    $('#LastName').change("click", function () {
+        var mname = $('#LastName').val();
+        $('#LastName').val(mname.trim());
+    });
+
+    //function OnAreaChange() {
+    //    if ($("#Area").val() == "") {
+    //        $('#ApplicationFee').val("");
+    //        $('#ProcessingFee').val("");
+    //        $('#earnestMoney').val("");
+    //        $('#Amount').val("");
+    //    }
+    //    else {
+    //        var id = $("#SchemeId").val();
+    //        $.ajax({
+    //            dataType: 'json',
+    //            type: 'Post',
+    //            contentType: 'application/json; charset=utf-8',
+    //            data: JSON.stringify({ id: id }),
+    //            url: "/Allotment/GetAreaDetails",
+    //            success: function (data) {
+    //                if (data != null) {
+    //                    $('#ApplicationFee').val(data.ApplicationFee);
+    //                    $('#ProcessingFee').val(data.ProcessingFee);
+    //                    CalculateAmount();
+    //                    GetEarneshMoney();
+    //                }
+    //                else {
+    //                    $('#ApplicationFee').val("");
+    //                    $('#ProcessingFee').val("");
+    //                    CalculateAmount();
+    //                }
+    //            },
+    //            error: function (objAjaxRequest, strError) {
+    //                var respText = objAjaxRequest.responseText;
+    //                //alert("error");
+    //            }
+    //        });
+    //    }
+    //}
+
+    function ClearIndividualField() {
+        $('#FirstName').val('');
+        $('#MiddleName').val('');
+        $('#LastName').val('');
+        $('#FatherName').val('');
+        $('#MotherName').val('');
+        $('#GenderName').data("kendoDropDownList").value('');
+        $('#MaritialStatusName').data("kendoDropDownList").value('');
+        $('#CategoryId').data("kendoDropDownList").value('');
+        $('#OccupationId').data("kendoDropDownList").value('');
+        $('#DOB').data("kendoDatePicker").value('');
+    }
+
+</script>

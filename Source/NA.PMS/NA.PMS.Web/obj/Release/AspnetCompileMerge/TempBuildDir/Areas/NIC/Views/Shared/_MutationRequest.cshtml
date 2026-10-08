@@ -1,0 +1,91 @@
+﻿@model  NA.PMS.Model.NIC.ServiceRequestVM
+@using Kendo.Mvc.UI;
+
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        <label>Transfer Deed Date</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @(Html.Kendo().DatePickerFor(model => model.MutationModel.TransferdeedDate).HtmlAttributes(new { @class = "input-disabled", style = "width:100%" }))
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        <label>Bahi Number</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.TextBoxFor(model => model.MutationModel.BahiNo, new { @maxlength = "10", @class = "k-textbox", style = "width:100%" })
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        <label>Bahi Zild Number</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.TextBoxFor(model => model.MutationModel.BahiZildNo, new { @maxlength = "10", @class = "k-textbox", style = "width:100%" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        <label>Bahi Page Number</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.TextBoxFor(model => model.MutationModel.BahiPageNo, new { @maxlength = "10", @class = "k-textbox", style = "width:100%" })
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        <label>Bahi Series No</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.TextBoxFor(model => model.MutationModel.BahiSeriesNo, new { @maxlength = "10", @class = "k-textbox" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group"></div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group"></div>
+</div>
+
+
+<script type="text/javascript">
+    function SaveMutationRequest() {
+        var transferDate = $("input[name='MutationModel.TransferdeedDate']").val();
+        var bahiNo = $("input[name='MutationModel.BahiNo']").val();
+        var zildNo = $("input[name='MutationModel.BahiZildNo']").val();
+        var pageNo = $("input[name='MutationModel.BahiPageNo']").val();
+        var seriesNo = $("input[name='MutationModel.BahiSeriesNo']").val();
+        var description = $("#ServiceModel_Description").val();
+
+        if (transferDate == "" || transferDate == null) {
+            alertify.error("Please enter Transfer Deed Date.");
+            return false;
+        }
+        if (bahiNo == "") {
+            alertify.error("Please enter Bahi Number.");
+            return false;
+        }
+        if (zildNo == "") {
+            alertify.error("Please enter Bahi Zild Number.");
+            return false;
+        }
+        if (pageNo == "") {
+            alertify.error("Please enter Bahi Page Number.");
+            return false;
+        }
+        if (seriesNo == "") {
+            alertify.error("Please enter Bahi Series Number.");
+            return false;
+        }
+        if (description == "") {
+            alertify.error("Please write description.");
+            return false;
+        }
+        else {
+            SubmitServiceRequestForm();
+        }
+    }
+
+    function ClearMutationFields() {
+        $('#MutationModel_TransferdeedDate').data("kendoDatePicker").value('');
+        $("input[name='MutationModel.BahiNo']").val('');
+        $("input[name='MutationModel.BahiZildNo']").val('');
+        $("input[name='MutationModel.BahiPageNo']").val('');
+        $("input[name='MutationModel.BahiSeriesNo']").val('');
+    }
+
+</script>
+

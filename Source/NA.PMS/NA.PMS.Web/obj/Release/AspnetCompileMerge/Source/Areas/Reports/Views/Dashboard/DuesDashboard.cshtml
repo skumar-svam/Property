@@ -1,0 +1,220 @@
+﻿@using Kendo.Mvc.UI
+@using NA.PMS.Common
+@using System.Linq
+@{
+    <link href="~/Content/MvcGrid/mvc-grid.css" rel="stylesheet" />
+}
+@{
+    ViewBag.Title = "Account Service Request";
+    Layout = "~/Areas/Reports/Views/Dashboard/_DashboardLayout.cshtml";
+}
+<br />
+<h3>Dues DashBoard</h3>
+<hr />
+<div>
+    <div style="padding-top:2em" class="row">
+
+        <div class="col-md-6 content-top">
+            <div class="row">
+                <canvas id="all_dept_dues_chart"></canvas>
+            </div>
+            <div class="clearfix"> </div>
+        </div>
+
+
+        <div class="col-md-6">
+            <div class="clearfix"> </div>
+            <div class="row">
+
+                <canvas id="all_dept_dues_total_chart"></canvas>
+                <div class="clearfix"> </div>
+            </div>
+        </div>
+    </div>
+    <div class="clearfix"> </div>
+    <div class="clearfix"> </div>
+    <div style="padding-top:2em" class="row">
+        <div class="col-md-6">
+            <div class="clearfix"> </div>
+            <div class="row">
+
+                <canvas id="deptwise_defaulter_chart_install_lease"></canvas>
+            </div>
+            <div class="clearfix"> </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="clearfix"> </div>
+            <div class="row">
+
+                <canvas id="deptwise_defaulter_chart_lease"></canvas>
+            </div>
+            <div class="clearfix"> </div>
+        </div>
+    </div>
+    <div class="clearfix"> </div>
+    <div class="clearfix"> </div>
+    <div style="padding-top:2em">
+        <div class="col-md-6">
+            <div class="clearfix"> </div>
+            <div class="row">
+
+                <canvas id="deptwise_defaulter_chart_install"></canvas>
+            </div>
+            <div class="clearfix"> </div>
+        </div>
+
+    </div>
+    <div class="clearfix"> </div>
+    @section scripts {
+        <script src="~/Scripts/DuesDashboard/Chart.js"></script>
+        <script src="~/Scripts/DuesDashboard/Common.js"></script>
+        <script>
+            var c = document.getElementById("all_dept_dues_chart");
+            var ctx = c.getContext("2d");
+            var tData = $.getValues("/Reports/Dashboard/all_dept_dues_chart");
+            var mylinechart = new Chart(ctx, {
+                type: 'line',
+                data: tData,
+
+                options: {
+                    responsive: true,
+                    title: {
+                        display: true,
+                        text: 'Defaulter Count by  Dues Type - Department Wise',
+
+                    },
+                    tooltips: {
+                        mode: 'index',
+                    },
+                    hover: {
+                        mode: 'index'
+                    },
+                    scales: {
+                        x: {
+                            scaleLabel: {
+                                display: true,
+
+                            }
+                        },
+                        y: {
+                            stacked: true,
+                            scaleLabel: {
+                                display: true,
+
+                            }
+                        }
+                    }
+                }
+
+            });
+            //var c = document.getElementById("sales_Daily_Chart");
+            //var ctx = c.getContext("2d");
+            //var tData = $.getValues("/Home/sales_Daily_ChartData");
+            //var myLineChart = new Chart(ctx, {
+            //    type: 'line',
+            //    data: tData
+            //});
+
+            var c = document.getElementById("all_dept_dues_total_chart");
+            var ctx = c.getContext("2d");
+            var tData = $.getValues("/Reports/Dashboard/all_dept_dues_total_chart");
+            var mylinechart = new Chart(ctx, {
+                type: 'line',
+                data: tData,
+
+                options: {
+                    responsive: true,
+                    title: {
+                        display: true,
+                        text: 'Dues Amount(total) by dues type  -  Department Wise',
+
+                    },
+                    tooltips: {
+                        mode: 'index',
+                    },
+                    hover: {
+                        mode: 'index'
+                    },
+                    scales: {
+                        x: {
+                            scaleLabel: {
+                                display: true
+
+                            }
+                        },
+                        y: {
+                            stacked: true,
+                            scaleLabel: {
+                                display: true
+
+                            }
+                        }
+                    }
+                }
+            });
+
+
+            var c = document.getElementById("deptwise_defaulter_chart_install_lease");
+            var ctx = c.getContext("2d");
+            var tData = $.getValues("/Reports/Dashboard/deptwise_defaulter_chart_install_lease");
+            var myLineChart = new Chart(ctx, {
+                type: 'line',
+                data: tData,
+                options: {
+                    responsive: true,
+                    hoverMode: 'index',
+                    stacked: false,
+                    title: {
+                        display: true,
+                        text: 'Dues Amount(total)  Installment and lease -  Department Wise ',
+
+                    }
+                }
+            });
+
+            var c = document.getElementById("deptwise_defaulter_chart_lease");
+            var ctx = c.getContext("2d");
+            var tData = $.getValues("/Reports/Dashboard/deptwise_defaulter_chart_lease");
+            var myLineChart = new Chart(ctx, {
+                type: 'line',
+                data: tData,
+                options: {
+                    responsive: true,
+                    hoverMode: 'index',
+                    stacked: false,
+                    title: {
+                        display: true,
+                        text: 'Dues Amount(total)  Lease -  Department Wise',
+
+                    }
+                }
+            });
+
+            var c = document.getElementById("deptwise_defaulter_chart_install");
+            var ctx = c.getContext("2d");
+            var tData = $.getValues("/Reports/Dashboard/deptwise_defaulter_chart_install");
+            var myLineChart = new Chart(ctx, {
+                type: 'line',
+                data: tData,
+                options: {
+                    responsive: true,
+                    hoverMode: 'index',
+                    stacked: false,
+                    title: {
+                        display: true,
+                        text: 'Dues Amount(total)  Installment and lease  - Department Wise',
+
+                    }
+                }
+            });
+
+
+        </script>
+
+
+
+
+    }
+
+</div>

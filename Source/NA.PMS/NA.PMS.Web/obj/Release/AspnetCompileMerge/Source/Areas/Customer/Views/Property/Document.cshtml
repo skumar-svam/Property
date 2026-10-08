@@ -1,0 +1,203 @@
+﻿@using Kendo.Mvc.UI;
+@model NA.PMS.Model.CustomerDetailViewModel
+
+@{
+    ViewBag.Title = "Document";
+    Layout = "~/Views/Shared/_LayoutCustomer.cshtml";
+}
+
+<style>
+    .container-content h2 {
+        padding: 0;
+        margin: 0;
+    }
+</style>
+
+<div class="container-content">
+    <div>
+        @Html.HiddenFor(model => model.CustomerModel.RegistrationId)
+    </div>
+    <div class="col-md-12">
+        <div class="row row-heading">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="h1-title">Documents</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn"> <h1 class="h1-title text-right">Registration Id:@Model.CustomerModel.RegistrationId </h1> </div>
+        </div>
+    </div>
+    <div class="col-md-12 hr-div"></div>
+
+    <div class="col-md-12 content-border">
+        <div class="col-md-12">
+            <ul class="nav nav-tabs content-tabs" id="ulProperty" role="tablist">
+                <li class="active"><a href="#one" role="tab" data-toggle="tab">Scanned</a></li>
+                <li><a href="#two" role="tab" data-toggle="tab">Generated</a></li>
+            </ul>
+        </div>
+
+        <div class="col-md-12 tabbable tab-content" id="divProperty">
+            <div class="row tab-pane fade in active" id="one">
+                <div class="col-md-12 k-grid-content">
+                    @(Html.Kendo().Grid<NA.PMS.Model.DocumentViewModel>()
+                        .Name("gridDocumentScanned")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(c => c.SerialNo).Title("Serial No").Width(120);
+                            //columns.Bound(c => c.RegistrationId).Title("Registration Id").Width(150);
+                            columns.Bound(c => c.DocumentName).Title("Document");//.Width(80);
+                            columns.Bound(c => c.DocumentPath).Title("Action").Width(150).ClientTemplate("<a style = 'cursor:pointer;' onclick=javascript:OpenFile(this);>Click Here</a>").Filterable(false);
+                            columns.Bound(c => c.DocumentPath).Hidden(true);
+                            //columns.Bound(c => c.DepositDate).Title("Deposit Date").Format("{0:dd/MM/yyyy}").Width(120);
+                            
+                        })
+                        .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                        .DataSource
+                        (
+                            dataSource => dataSource
+                            .Ajax().ServerOperation(true)
+                            .Model(model => model.Id(p => p.Id))
+                            .Read(read => read.Action("GetScannedDocumentListById", "Property", new { area = "Customer" }).Data("AdditionalInfo")).PageSize(10)
+                        )
+                    )
+                </div>
+            </div>
+
+            <div class="row tab-pane fade" id="two">
+                <div class="col-md-12 k-grid-content">
+                    @(Html.Kendo().Grid<NA.PMS.Model.DocumentViewModel>()
+                        .Name("gridDocumentGenerated")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(c => c.Id).Hidden(true);
+                            //columns.Bound(c => c.SerialNo).Title("Serial No").Width(120);
+                            columns.Bound(c => c.RegistrationId).Title("Registration Id").Width(150);
+                            //columns.Bound(c => c.DocumentName).Title("Receipt Head");//.Width(80);
+                            columns.Bound(c => c.Template).Title("Document");//.Width(80);
+                            //columns.Bound(c => c.DepositDate).Title("Deposit Date").Format("{0:dd/MM/yyyy}").Width(120);
+                            columns.Bound(o => o.Barcode).Width(210).Title("Barcode").ClientTemplate("<label class='hyperlink' onclick='javascript:OpenLetterWindow(this)'>#= Barcode #</label>");
+                            columns.Bound(o => o.DocumentContent).Hidden(true);  
+                        })
+                        .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                        .DataSource
+                        (
+                            dataSource => dataSource
+                            .Ajax().ServerOperation(true)
+                            .Model(model => model.Id(p => p.Id))
+                            .Read(read => read.Action("GetGeneratedDocumentListById", "Property", new { area = "Customer" }).Data("AdditionalInfo1")).PageSize(10)                            
+                        )
+                    )
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="col-md-12 popup-window" id="DocumentWindow" style="min-height:500px;background:url(/Content/Images/boxed-bg.jpg) repeat;">
+    <div class="row form-group" id="divLetterContent" style="height:500px; overflow:auto;">
+      
+    </div>
+    <div class="row">
+        <div class="col-md-12" style="text-align:center">
+            <button type="button" class="k-button" onclick="PrintLetter();" style="width:100px;">Print</button>
+            <button type="button" class="k-button" onclick="CloseLetter();" style="width:100px;">Close</button>
+        </div>
+    </div>
+</div>
+
+@*<div class="col-md-12 popup-window" id="DocumentWindow" style="min-height:500px;background:url(/Content/Images/boxed-bg.jpg) repeat;">
+    <div class="row form-group" id="divDocumentBody" style="min-height:500px; overflow:auto;">
+        <div></div>
+    </div>
+    <div class="row">
+        <div class="col-md-12" style="text-align:center">
+            <button type="button" class="k-button" onclick="PrintChallan();" style="width:100px;">Print</button>
+            <button type="button" class="k-button" onclick="CloseChallan();" style="width:100px;">Close</button>
+        </div>
+    </div>
+</div>*@
+
+@*@(Html.Kendo().Window().Visible(false)
+    .Name("IDWindow").Width(920)
+    .Title("Document")
+    .Modal(true)
+    .Content(@<text><div style="width:100%" id="windowDiv"><iframe id="ifrmViewPdf" style="width:900px; height:500px;"></iframe></div></text>)
+    .Actions(actions => actions.Close())
+)*@
+
+<script>
+    $('.popup-window').kendoWindow({
+        modal: true,
+        title: "Noida Authority Letter",
+        //actions: false, 
+        actions: ["Pin", "Minimize", "Maximize", "Close"],
+        visible: false,
+        width: "75%"
+    });
+
+    //$('#DocumentWindow').kendoWindow({
+    //    modal: true,
+    //    title: "Noida Authority Letter",
+    //    //actions: false, 
+    //    actions: ["Pin", "Minimize", "Maximize", "Close"],
+    //    visible: false,
+    //    width: "75%"
+    //});
+
+    function AdditionalInfo() {
+        return { RegistrationId: $('#CustomerModel_RegistrationId').val() }
+    }
+
+    function AdditionalInfo1() {
+        return { RegistrationId: $('#CustomerModel_RegistrationId').val() }
+    }
+
+    function OpenFile(row) {
+        $("#divLetterContent").empty();
+        var tr = $(row).parent().parent();
+        var link = $(tr).children("td:eq(3)").text();
+        $("#divLetterContent").append($('<iframe src=' + link + ' style="width:100%;min-height:500px;"></iframe>'));
+        $("#DocumentWindow").data("kendoWindow").center();
+        $("#DocumentWindow").data("kendoWindow").open();
+    }
+
+    function OpenLetterWindow(row) {
+        $("#divLetterContent").empty();
+        var tr = $(row).parent().parent();
+        var content = $(tr).children("td:eq(4)").text();
+        $("#divLetterContent").html(content);
+        //$("#divPrintChallan").modal('show');
+
+        $(".popup-window").data("kendoWindow").open();
+        $(".popup-window").data("kendoWindow").center();
+    }
+
+    function CloseLetter() {
+        $(".popup-window").data("kendoWindow").close();
+    }
+
+    function PrintLetter() {
+        var contents = document.getElementById("divLetterContent").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('<style>.row-btn{display:none;}</style>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+</script>
+

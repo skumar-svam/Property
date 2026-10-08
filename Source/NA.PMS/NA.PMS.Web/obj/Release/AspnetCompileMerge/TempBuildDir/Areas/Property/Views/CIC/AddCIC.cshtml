@@ -1,0 +1,652 @@
+﻿@model NA.PMS.Model.CICModel
+@using Kendo.Mvc.UI;
+@{
+    ViewBag.Title = "AddCIC";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="AddCIC">
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Add CIC</h1></div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+                </div>
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="col-md-12 content-top-spce">
+                <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                    <h2 class="blck-heading">Allottee Information</h2>
+                    <div class="form-bx">
+                        <input type="hidden" value="0" id="hdnRid" />
+                        @{Html.RenderPartial("_AloteeBasicDetails", Model);}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 content-top-spce">
+                <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                    <h2 class="blck-heading">Enter CIC Details</h2>
+                    <div>
+                        @{ Html.RenderPartial("_AddViewCICRequest", Model);}
+                    </div>
+                </div>
+                <div class="box-button text-center">
+                    <input type="button" id="btnCancel" value="Cancel" class="btn btn-default" onclick="javascript: window.location = '@Url.Action("ManageCIC", "CIC")';" />
+                    <input type="button" id="btnSubmit" value="Submit for Approval" class="btn btn-add" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-12" id='divAssineRequetApproval'>
+    <div class="row" style="margin-top:30px; margin-bottom:20px;">
+        <div class="col-md-3 col-md-offset-1">
+            @Html.Label("Assign To:")
+        </div>
+        <div class="col-md-6">
+            @(Html.Kendo().DropDownListFor(model => model.User)
+                            .Name("User")
+                            .DataTextField("text")
+                            .DataValueField("id")
+                            .Filter("contains")
+                            .OptionLabel("Select")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetAssineTo", "Allotment", new { area="Property"});
+                                });
+                            })
+             )
+            @Html.ValidationMessageFor(model => model.User)
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4"></div>
+        <div class="col-md-8">
+            <button type='submit' id="btnRequetForApproval" class='btn btn-default' value='Save'>Submit</button>
+            <button type='button' class='btn btn-default' value='Cancel' onclick="CloseCommnetPopUpForApproval();">Close</button>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#divAssineRequetApproval").kendoWindow({
+            modal: true,
+            title: "Assign Request to Approver",
+            visible: false,
+            width: "40%"
+        });
+        $('#changeInDirector').hide();
+        $('#changeInFirmName').hide();
+        $('#changeInProduct').hide();
+        $('#Change_Type').change(function () {
+            var changeType = $('#Change_Type').val();
+            HideShowSection(changeType);
+        });
+        $('#btnAdd').click(function(){
+            if(ValidateDirectors())
+                SaveCIC();
+        });
+        $('#btnSubmit').click(function(){
+            var changetype=$('#Change_Type').val();
+            if(ValidateCIC()){
+                if( (changetype==@NA.PMS.Common.Constants.ChangeInProduct)){  //(changetype==@NA.PMS.Common.Constants.ChangeInFirmName) ||
+                    SubmitForApproval();
+                }else{
+                    OpenAssineRequetApprovalPopUp();
+                }
+            }
+        });
+        $("#btnRequetForApproval").click(function (){
+            SubmitForApproval();
+        });
+
+        $("#txtShareType").hide();
+    });
+
+    function AdditionalData() {
+        return {
+            depttId: $("#hdnDepttId").val()
+        };
+    }
+
+    function HideShowSection(cType)
+    {
+        if((cType==@NA.PMS.Common.Constants.ChangeInDirector))
+        {
+            $('#changeInDirector').show();
+            $('#changeInFirmName').hide();
+            $('#changeInProduct').hide();
+            $('#changeInProductHideCharge').show();
+            $("#gridCIC").data("kendoGrid").dataSource.read();
+            $("#btnSubmit").attr('value', 'Submit for Approval');
+
+            var grid = $("#gridCIC").data("kendoGrid");
+            grid.bind("dataBound", function () {
+                var _shareType = '';
+
+                var data = grid.dataSource._data;
+                var count = (data.length);
+
+                if (count > 0) {
+
+                    $.each(data, function (p, row) {
+                        if (row.Share_Type != '') {
+                            _shareType = (row.Share_Type);
+                            return false;
+                        }
+                    });
+
+                    $("#ddShareType").hide();
+                    $("#txtShareType").show();
+                    _shareType= (_shareType != "" && _shareType != null ? (_shareType) : ('@NA.PMS.Common.CICDirectorShareType.Percentage'));
+                    $("#txtShare").val(_shareType);
+                    $("#Share_Type").data("kendoDropDownList").value(_shareType);
+
+                    return false;
+                } else {
+                    $("#ddShareType").show();
+                    $("#txtShareType").hide();
+                    $("#txtShare").val('');
+                }
+            });
+
+
+        }
+        else if((cType==@NA.PMS.Common.Constants.ChangeInFirmName))
+        {
+            $('#changeInDirector').hide();
+            $('#changeInFirmName').show();
+            $('#changeInProduct').hide();
+            $('#changeInProductHideCharge').show();
+            GetOldDetails(cType);
+            $("#btnSubmit").attr('value', 'Submit for Approval');
+        }
+        else if((cType==@NA.PMS.Common.Constants.ChangeInProduct))
+        {
+            $('#changeInDirector').hide();
+            $('#changeInFirmName').hide();
+            $('#changeInProduct').show();
+            $('#changeInProductHideCharge').hide();
+            GetOldDetails(cType);
+            $("#btnSubmit").attr('value', 'Add');
+        }
+        else{
+            $("#Change_Type").data("kendoDropDownList").value(0);
+            $('#changeInDirector').hide();
+            $('#changeInFirmName').hide();
+            $('#changeInProduct').hide();
+            $('#changeInProductHideCharge').hide();
+            $("#btnSubmit").attr('value', 'Submit for Approval');
+        }
+    }
+
+    function SaveCIC()
+    {
+        var directorShare = $('#Director_Share').val();
+        var shareType = $('#Share_Type').val();
+        if (shareType == '@NA.PMS.Common.CICDirectorShareType.Percentage') {
+            var grid = $("#gridCIC").data("kendoGrid");
+
+            var data = grid.dataSource._data;
+            if (parseFloat(directorShare) > 100) {
+                alertify.error("Sum of Shares can't exceed 100%.");
+                return false;
+            }
+            var sum = 0.0000;
+            $.each(data, function (p, row) {
+                sum = sum + (row.Director_Share);
+            });
+            sum = parseFloat(sum) + parseFloat(directorShare);
+
+            if (parseFloat(sum).toFixed(4) > 100) {
+                alertify.error("Sum of Shares can't exceed 100%.");
+                return false;
+            }
+
+            if (parseFloat(sum).toFixed(4) <= 100) {
+                SaveCICMethod(directorShare, shareType);
+            } else {
+                alertify.error("Sum of Shares can't exceed 100%.");
+                return false;
+            }
+
+        } else if(shareType == '@NA.PMS.Common.CICDirectorShareType.Nos') {
+            if (parseFloat(directorShare).toFixed(4) > 0) {
+                SaveCICMethod(directorShare, shareType);
+            } else {
+                alertify.error("Director Share should be greater than zero.");
+                return false;
+            }
+        }
+
+    }
+
+    function SaveCICMethod(directorShare, shareType) {
+        var directorShare = directorShare;
+        var changetype = $('#Change_Type').val();
+        var ciccharge = $('#CIC_Charge').val();
+        var directorName = $('#Director_Name').val();
+        var type = $('#Type').val();
+        var shareType = shareType;
+        var rid = $('#Rid').val();
+
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ Rid: rid, Director_Share: directorShare, Change_Type: changetype, CIC_Charge: ciccharge, Director_Name: directorName, Type: type, Share_Type: shareType }),
+            url: '/CIC/SaveCIC',
+            success: function (result) {
+                if (result == true) {
+                    $('#Director_Name').val("");
+                    $('#Director_Share').val("");
+                    $('#hdnCICCharges').val($('#CIC_Charge').val());
+                    $("#Type").data("kendoDropDownList").value(0);
+                    $("#gridCIC").data("kendoGrid").dataSource.read();
+
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+            }
+        });
+    }
+
+    function SubmitForApproval()
+    {
+        var changetype=$('#Change_Type').val();
+        //var ciccharge=$('#CIC_Charge').val();
+        var ciccharge=$('#hdnCICCharges').val();
+        var rid=$('#Rid').val();
+        var reqRefNo = $("#ReqRefNo").val();
+        var approver=$('#User').val();
+        if((changetype==@NA.PMS.Common.Constants.ChangeInDirector))
+        {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({rid:rid,approver:approver, reqRefNo: reqRefNo, ciccharge:ciccharge }),
+                url: '/CIC/SubmitForDirectors',
+                success: function (result) {
+                    if (result == true) {
+                        window.location.href = '@Url.Action("ManageCIC", "CIC")';
+                        return false;
+                    }
+                    else {
+                        return true;
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+        else if((changetype==@NA.PMS.Common.Constants.ChangeInFirmName))
+        {
+            var oldFirmName = $('#OldFirmName').val();
+            var newFirmStatus=$('#NewFirmStatus').val();
+            var newFirmName=$('#NewFirmName').val();
+            var ciccharge=$('#CIC_Charge').val();
+            //var approver=0;//$('#User').val();
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({rid:rid,approver:approver, newFirmStatus:newFirmStatus,oldFirmName:oldFirmName, newFirmName:newFirmName, reqRefNo: reqRefNo, ciccharge:ciccharge }),
+                url: '/CIC/SubmitForFirmName',
+                success: function (result) {
+                    if (result == 1) {
+                        window.location.href = '@Url.Action("ManageCIC", "CIC")';
+                        return false;
+                    }
+                    else if(result == 2) {
+                        alertify.error("A reqeust already in progress for this Registration ID.");
+                        return true;
+                    }
+                    else {
+                        return true;
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+        else if((changetype==@NA.PMS.Common.Constants.ChangeInProduct))
+        {
+            var newFirmProduct=$('#NewFirmProduct').val();
+            var oldFirmProduct =$('#OldFirmProduct').val();
+            var ciccharge=0;
+            //$('#CIC_Charge').val();
+            var approver=0;//$('#User').val();
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({rid:rid,approver:approver,oldFirmProduct:oldFirmProduct, newFirmProduct:newFirmProduct, reqRefNo: reqRefNo,ciccharge:ciccharge }),
+                url: '/CIC/SubmitForFirmProduct',
+                success: function (result) {
+                    if (result == 1) {
+                        window.location.href = '@Url.Action("ManageCIC", "CIC")';;
+                        return false;
+                    }
+                        //else if(result == 2) {
+                        //    alertify.error("A reqeust already in progress for this Registration ID.");
+                        //    return true;
+                        //}
+                    else {
+                        return true;
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+
+    }
+
+    function OpenAssineRequetApprovalPopUp() {
+        var win = $("#divAssineRequetApproval").data("kendoWindow");
+        win.center();
+        win.open();
+    }
+
+    function CloseCommnetPopUpForApproval() {
+        var win = $("#divAssineRequetApproval").data("kendoWindow");
+        win.close();
+    }
+
+    function additionalInfo() {
+        return { rid: $('#Rid').val() };
+    }
+
+    function GetOldDetails(cType)
+    {
+        var rid=$('#Rid').val();
+        if((cType==@NA.PMS.Common.Constants.ChangeInFirmName))
+        {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({rid:rid }),
+                url: '/CIC/GetOldFirmName',
+                success: function (result) {
+                    if (result != null) {
+                        $('#OldFirmName').attr("readonly",true);
+                        $('#OldFirmStatusName').attr("readonly",true);
+                        if(result.OldFirmName!=null){
+                            $('#OldFirmName').val(result.OldFirmName);
+                            $('#OldFirmStatusName').val(result.OldFirmStatusName);
+                        } else{
+                            $('#OldFirmName').val('');
+                            $('#OldFirmName').attr("readonly",false);
+                            // $('#OldFirmStatusName').val('');
+                            // $('#OldFirmStatusName').attr("readonly",false);
+                        }
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+        else if((cType==@NA.PMS.Common.Constants.ChangeInProduct))
+        {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({rid:rid }),
+                url: '/CIC/GetOldFirmProduct',
+                success: function (result) {
+                    if (result != null) {
+                        $('#OldFirmProduct').attr("readonly",true);
+                        if(result.OldFirmProduct!=null){
+                            $('#OldFirmProduct').val(result.OldFirmProduct);
+                        } else{
+                            $('#OldFirmProduct').val('');
+                            $('#OldFirmProduct').attr("readonly",false);
+                        }
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+    }
+
+    function ValidateCIC()
+    {
+        var bflag=false;
+        var rid=$('#Rid').val();
+        var reqRefNo = $("#ReqRefNo").val();
+        var changetype=$('#Change_Type').val().trim();
+        var ck_name =  /^[a-zA-Z0-9 .&-/]*$/g;
+        var CIC_Charge=$('#CIC_Charge').val();
+        var gridCIC = $("#gridCIC").data("kendoGrid").dataSource.data();
+        if(CIC_Charge!="")
+        {
+            if(!isNaN(CIC_Charge))
+            {
+                if (CIC_Charge >= 0 && CIC_Charge <= 9999999999999999) {
+                    $('#CIC_Charge').val(parseFloat($('#CIC_Charge').val()).toFixed(2));
+                }
+                else {
+                    alertify.error("CIC Charge should be of digits [16,2]");
+                    $('#CIC_Charge').focus();
+                    bflag= false;
+                }
+            }
+            else{
+                alertify.error("Please enter a number in CIC Charge.");
+                bflag= false;
+            }
+        }
+
+        if(rid=="")
+        {
+            alertify.error("Please select Registration ID");
+            bflag=false;
+        }
+        else if(reqRefNo == '')
+        {
+            alertify.error("Please enter Request Ref. No.");
+            bflag=false;
+        }
+        else if(reqRefNo.length < 3)
+        {
+            alertify.error("Request Ref. No. length must be 3 characters");
+            bflag=false;
+        }
+        else if(changetype=="")
+        {
+            alertify.error("Please select Change In Constitution");
+            bflag=false;
+        }
+        else if((changetype==@NA.PMS.Common.Constants.ChangeInDirector))
+        {
+            if($("#hdnIsFirmExists").val().trim()=="")
+            {
+                alertify.error("A Firm should exists before CIC.");
+                bflag=false;
+            }
+            else if(gridCIC.length==0)
+            {
+                alertify.error("Please enter atleast one record.");
+                bflag=false;
+            }
+            else{
+                bflag=true;
+            }
+        }
+        else if((changetype==@NA.PMS.Common.Constants.ChangeInFirmName))
+        {
+            var newFirmStatus=$('#NewFirmStatus').val();
+            var newFirmName=$('#NewFirmName').val().trim();
+            if(newFirmStatus=="")
+            {
+                alertify.error("Please select New Firm Status");
+                bflag=false;
+            }
+            else if(newFirmName=="")
+            {
+                alertify.error("Please enter New Firm Name");
+                bflag=false;
+            }
+                //else if (!ck_name.test(newFirmName)) {
+                //    alertify.error("Plese enter char in Firm Name.");
+                //    bflag=false;
+                //}
+            else{
+                bflag=true;
+            }
+        }
+        else if((changetype==@NA.PMS.Common.Constants.ChangeInProduct))
+        {
+            var newFirmProduct=$('#NewFirmProduct').val().trim();
+
+            //if($("#hdnIsFirmExists").val().trim()=="")
+            //{
+            //    alertify.error("A Firm should exists before CIC.");
+            //    bflag=false;
+            //}
+            //else
+            if(newFirmProduct=="")
+            {
+                alertify.error("Please enter New Firm Product");
+                bflag=false;
+            }
+                //else if (!ck_name.test(newFirmProduct)) {
+                //    alertify.error("Plese enter char in New Firm Product.");
+                //    bflag=false;
+                //}
+            else{
+                bflag=true;
+            }
+        }
+        else{
+            //bflag=true;
+            if(gridCIC.length==0)
+            {
+                alertify.error("Please select Change In Constitution");
+                bflag=false;
+            }
+            else{
+                bflag=true;
+            }
+        }
+        return bflag;
+    }
+
+    function ValidateDirectors()
+    {
+        var bflag=false;
+        var changetype=$('#Change_Type').val();
+        var ck_name =  /^[a-zA-Z .&-/]*$/g;
+        var changetype=$('#Change_Type').val();
+
+        if(changetype=="")
+        {
+            alertify.error("Please select Change In Constitution");
+            bflag=false;
+        }
+        if((changetype==@NA.PMS.Common.Constants.ChangeInDirector))
+        {
+            var type=$('#Type').val();
+            var directorName=$('#Director_Name').val().trim();
+            var director_Share = $('#Director_Share').val().trim();
+            var shareType = $('#Share_Type').val();
+            if($("#hdnIsFirmExists").val().trim()=="")
+            {
+                alertify.error("A Firm should exists before CIC.");
+                bflag=false;
+            }
+            else if(directorName=="")
+            {
+                alertify.error("Please enter Director Name");
+                bflag=false;
+            }
+            else if (!ck_name.test(directorName)) {
+                alertify.error("Plese enter char in the Director Name.");
+                bflag=false;
+            }
+            else if (shareType=="")
+            {
+                alertify.error("Please select Share Type.");
+                bflag=false;
+            }
+            else if (director_Share == "") {
+                alertify.error("Please enter Director/Shareholder Share.");
+                bflag = false;
+            }
+            else if(isNaN(director_Share))
+            {
+                alertify.error("Please enter a number.");
+                bflag=false;
+            }
+            else if(type=="")
+            {
+                alertify.error("Please select Type");
+                bflag=false;
+            }
+            else{
+                if (director_Share >= 0 && director_Share <= 99999) {
+                    $('#Director_Share').val(parseFloat($('#Director_Share').val()).toFixed(4));
+                    bflag=true;
+                }
+                else {
+                    alertify.error("Share should be of digits [5,4]");
+                    $('#Director_Share').focus();
+                    bflag= false;
+                }
+            }
+            return bflag;
+        }
+    }
+
+    function RemoveRecord(row) {
+        var tr = $(row).parent().parent();
+        var dirID = $(tr).children("td:eq(4)").text();
+        var bflag = false;
+        if (confirm("Are you sure? You want to remove this record.")) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ dirID: dirID }),
+                url: '/CIC/RemoveRecord',
+                success: function (result) {
+                    if (result == true) {
+                        bflag = true;
+                        $("#gridCIC").data("kendoGrid").dataSource.read();
+                        alertify.success("Record deleted successfully.");
+                    }
+                    else {
+                        bflag = false;
+                        alertify.error("Some error occured. Please try again later.");
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    bflag = false;
+                    //alertify.error("Some error occured. Please try again later.");
+                    //alert(respText);
+                }
+            });
+        }
+        return bflag;
+    }
+</script>

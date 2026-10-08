@@ -1,0 +1,753 @@
+﻿@model NA.PMS.NICServices.SWPFormViewModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@using NA.PMS.NICServices
+@{
+    ViewBag.Title = "Manage Scheme Form";
+    var userInfo = (NA.PMS.Web.Models.CurrentUserDetail)HttpContext.Current.Session["CurrentUser"];
+    if (Session["CurrentUser"] != null)
+    {
+        var usr = (NA.PMS.Web.Models.CurrentUserDetail)HttpContext.Current.Session["CurrentUser"];
+        var role = usr.RoleMaster.RoleName;
+        if (role.ToLower() == NA.PMS.Common.Constants.Consultant.ToLower())
+        {
+            Layout = "~/Views/Shared/_LayoutOnline.cshtml";
+        }
+        else
+        {
+            Layout = "~/Views/Shared/_Layout.cshtml";
+        }
+        //Layout = "~/Views/Shared/_LayoutNIC.cshtml";
+    }
+}
+<style type="text/css">
+    [class*="col-"] {
+        /*padding-left: 15px;
+        padding-right: 15px;*/
+    }
+
+    .form-bx {
+        padding-left: 30px;
+    }
+    div.k-grid-content{
+        overflow-x: visible;
+        overflow-y: hidden;
+    }
+    .form-group .pad-left-0{
+        padding-left:0;
+    }
+    /*div #SchemeId-list .k-animation-container {
+        height: auto !important;
+        min-height: 240px !important;
+        width: 300px;
+    }*/
+    .k-filter-row th, .k-grid-header th.k-header {
+        white-space: pre-wrap !important;
+    }
+    div.k-grid-footer, div.k-grid-header {
+        padding-right:0 !important;
+    }
+    div.k-grid-content, div.k-grid-content-locked{
+        height:auto !important;
+    }
+    #btn-validate-all{
+        display:none;
+    }
+</style>
+<div class="ManageAllotment">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Online Applications (NIC)</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <h2 class="blck-heading" style="margin-bottom:5px;">Search Application</h2>
+                <div class="form-bx">
+                    <div class="hidden">
+                        @Html.HiddenFor(m => m.ApplicationIdList)
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            @Html.Label("Scheme Name", htmlAttributes: new { @class="pad-left-0"})
+                            @(Html.Kendo().DropDownListFor(model => model.SchemeId)
+                                .DataTextField("Text")
+                                .DataValueField("Id")
+                                .OptionLabel(" -- Please Select --")
+                                .Filter("contains")
+                                .Enable(true)
+                                .AutoBind(true)
+                                //.DataSource(source => source.Read(read => read.Action("GetSchemeList", "Application", new { area="Online"})))
+                                .DataSource(source =>
+                                {
+                                    source.Custom()
+                                    .ServerFiltering(true)
+                                    .ServerPaging(true)
+                                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                    .Transport(transport => transport.Read(read => read.Action("GetDropDownListByTypeAsDataSource", "NoidaAuthority", new { area = "NIC" }).Data("FilterSchemeForScrutiny")))
+                                    .Schema(schema => schema.Data("Data").Total("Total"))
+                                    .PageSize(100);
+                                })
+                                .HtmlAttributes(new { style = "width:90%", @class = "input-disabled" })
+                                .Events(e => e.Change("SchemeAndDepartmentChangeEvent"))
+                            )
+                        </div>
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            @Html.Label("Department", htmlAttributes: new { @class = "pad-left-0" })
+                            @(Html.Kendo().DropDownListFor(m => m.DepartmentId)
+                                .Filter("contains")
+                                .DataTextField("Text")
+                                .DataValueField("Id")
+                                .OptionLabel(" -- Please Select --")
+                                .CascadeFrom("SchemeId")
+                                .CascadeFromField("SchemeId")
+                                .DataSource(source =>
+                                {
+                                    source.Custom()
+                                   .ServerFiltering(true)
+                                   .ServerPaging(true)
+                                   .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                   //.Transport(transport => transport.Read(read => read.Action("GetDepartmentListBySchemeSearch", "Application", new { area="Online"}).Data("FilterDepartment")))
+                                   .Transport(transport => transport.Read(read => read.Action("GetDropDownListByTypeAsDataSource", "NoidaAuthority", new { area = "NIC" }).Data("FilterDepartment")))
+                                   .Schema(schema => schema.Data("Data").Total("Total"))
+                                   .PageSize(100);
+                                })
+                                .Events(events => { events.Change("SchemeAndDepartmentChangeEvent"); })
+                                .HtmlAttributes(new { @class = "input-disabled", style = "width:90%" })
+                            )
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group" style="">
+
+                        </div>
+
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group" style="">
+                            @Html.Label("")<br />
+                            <input type="button" id="btn-search" class="btn btn-add" value="Search" style="min-width:100px;"/>
+                            <input type="button" id="btn-clear" class="btn btn-default pull-right" value="Clear" style="text-align:center;min-width:100px;"/>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row k-grid-content">
+        <div class="col-md-12">
+            @( Html.Kendo().Grid<NA.PMS.NICServices.SWPFormViewModel>()
+                    .Name("gridOnlineApplicationDetail")
+                    .Excel(excel => excel.AllPages(true).Filterable(true).FileName("OnlineApplications.xlsx"))
+                    .ToolBar(toolsExcel => toolsExcel.Excel())
+                    .Columns(columns =>
+                    {
+                        //columns.Bound(c => c.Id).Width(40).Title("").Locked(true).Lockable(false).ClientTemplate("#if(ChallanStatus=='Paid'){#<input  type='checkbox' class='IsAppProcess' id='c_#= ApplicationFormId #' />#}else{# #}#").Filterable(false).Sortable(false);
+                        columns.Bound(c => c.Id).Width(40).Title("").Locked(true).Lockable(false).ClientTemplate("#if(IsRegistrationFeePaid==true){#<input  type='checkbox' class='IsAppProcess' id='c_#= ApplicationFormId #' />#}else{# #}#").Filterable(false).Sortable(false);
+                        columns.Bound(c => c.ApplicationFormId).Width(100).Title("Form Id").Locked(true).Lockable(false).ClientTemplate("<a target='_blank' href='" + "/NIC/NoidaAuthority/ScrutinizeSchemeForm/#= EncryptedFormId #'>#= ApplicationFormId #</a>").ClientFooterTemplate("Total: #=count#").Sortable(false);
+                        //columns.Bound(c => c.NICControlId).Width(160).Title("Control Id").Locked(true).Lockable(false);
+                        //columns.Bound(c => c.NICUnitId).Width(160).Title("Unit Id").Locked(true).Lockable(false);
+                        columns.Bound(c => c.FirstName).Width(160).Title("Applicant").Lockable(false);
+                        columns.Bound(c => c.AreaRange).Width(80).Title("Area(sqm)").Locked(true).Lockable(false);
+                        columns.Bound(c => c.TotalAmount).Width(100).Title("Amount").Lockable(false).ClientTemplate("#if(TotalAmount!=null){# #=TotalAmount# #}else{# 0 #}#");//.ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+                        columns.Bound(c => c.ApplicationFormType).Width(120).Title("Form Type").Lockable(false);
+                        columns.Bound(c => c.ExpansionType).Width(120).Title(" Form SubType").Lockable(false);
+                        columns.Bound(c => c.SubmitDate).Width(120).Title("Submission Date").Format("{0:dd-MMM-yyyy}").Lockable(false);
+                        //columns.Bound(c => c.AmountPaidDate).Width(120).Title("Payment Date").Lockable(false).ClientTemplate("#if(AmountPaidDate!=null){# #=kendo.toString(AmountPaidDate, 'dd MMM yyyy')# #}else{# -- #}#");
+                        columns.Bound(c => c.IsApplicationFeePaid).Width(110).Title("Form Fee").Lockable(false).ClientTemplate("#if(IsApplicationFeePaid == true){# <label style='color:blue;'>PAID</label> #}else{# <label class='hyperlink' onclick='javascript:ValidateFormFee(#=ApplicationFormId#)' style='color:red;'> NOT PAID</label> #}#");
+                        columns.Bound(c => c.IsRegistrationFeePaid).Width(110).Title("EMD Payment").Lockable(false).ClientTemplate("#if(IsRegistrationFeePaid == true){# PAID #}else{# NOT PAID #}#");
+                        columns.Bound(c => c.EMDFeePayMode).Width(120).Title("EMD Pay Mode").Lockable(false);
+                        //columns.Bound(c => c.PayType).Width(120).Title("Payment Mode").Lockable(false);
+                        columns.Bound(c => c.ProcessType).Width(120).Title("App Process").Lockable(false);
+                        columns.Bound(c => c.AccountNo).Width(120).Title("Client Code").Lockable(false);
+                        columns.Bound(c => c.ChallanStatus).Width(120).Title("RTGS Challan").Lockable(false).ClientTemplate("#if(ChallanStatus=='Updated'){# <a class='hyperlink' onclick='javascript:UpdateChallanStatus(#=ApplicationFormId#);'><center><span value='Validate Challan' class='glyphicon glyphicon-edit text-danger'>Updated</span></center></a> #} else{# <span>#=ChallanStatus#</span> #}#").Filterable(true);
+                        //columns.Bound(c => c.IsFormRejected).Width(100).Title("Reject").Lockable(false).ClientTemplate("#if(IsFormRejected == false){# <a onclick='javascript:RejectApplication(#=ApplicationFormId#);'><center><span class='glyphicon glyphicon-remove text-danger'></span></center></a> #}else{# Rejected #}#").Filterable(false);
+                        //columns.Bound(c => c.StatusId).Width(120).Title("Status").Lockable(false).ClientTemplate("#if(StatusId==10){# <center>Objection</center> #}else if(StatusId==11){# <center>Validated</center> #}else{# -- #}#");
+                        columns.Bound(c => c.ProcessStatus).Width(120).Title("Status").Lockable(false);//.ClientTemplate("#if(StatusId==10){# <center>Objection</center> #}else if(StatusId==11){# <center>Validated</center> #}else{# -- #}#");
+                        //columns.Bound(c => c.IsPropertyAllotted).Width(170).Title("Allotment").Lockable(false).ClientTemplate("#if(IsPropertyAllotted == false && IsDrawSucceeded == true){#<a onclick='javascript:UpdateApplicationDetails(#=ApplicationFormId#);'><center><span value='Allotment Process' class='glyphicon glyphicon-edit text-danger'>Allotment Process</span></center></a>#}else if(IsDrawSucceeded == true){# Not Allotted #}else{# Wait For Draw #}#");
+                    })
+                    .Sortable().Filterable().Resizable(resize => resize.Columns(true)).Scrollable(s => s.Enabled(true)).AutoBind(false)
+                    .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(new[] { 10, 50, 100, 500 }).Input(true).ButtonCount(5))
+                    .Reorderable(r => r.Columns(true)).ColumnMenu()
+                    .Events(e => e.DataBound("AutoFitGridColumn"))
+                    .DataSource
+                    (
+                        dataSource => dataSource
+                        .Ajax().ServerOperation(true)
+                        .Model(model => model.Id(p => p.ApplicationFormId))
+                                .Read(read => read.Action("GetSchemeFormListForScrutinyAsDataSource", "NoidaAuthority", new { area = "NIC" }).Data("FilterData"))
+                        .Sort(s => s.Add("ApplicationFormId").Descending()).PageSize(10)
+                     .Aggregates(aggregates =>
+                     {
+                         aggregates.Add(p => p.ApplicationFormId).Count();
+                         //aggregates.Add(p => p.TotalAmount).Sum();
+                     })
+                    ))
+        </div>
+    </div>
+</div>
+
+<div id="div-challan-validation" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="padding-top:40px;">
+    <div class="modal-dialog" style="width: 60%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title"><b>Challan Transaction Details - [ <label id="lbl-applicationid" class=""></label> ]</b></h4>
+            </div>
+            <div class="modal-body" style="overflow:auto; height:auto;">
+                <input type="hidden" id="hdn-applicationid" />
+                <input type="hidden" id="hdn-challan-amount" />
+                <input type="hidden" id="hdn-challan-filepath" />
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                            @Html.Label("Challan Bank Name:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                            <label id="lbl-challan-bankname" class="form-control"></label>
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                            @Html.Label("Transaction Id:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                            <label id="lbl-transaction-id" class="form-control"></label>
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                            @Html.Label("Submitted Date:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                            <label id="lbl-submit-date" class="form-control"></label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                            @Html.Label("UTR No:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                            <label id="lbl-utr-no" class="form-control"></label>
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                            <a class="hyperlink" id="a-challan-view" onclick="javascript:ShowChallanDocument()">View Uploaded Document</a>
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="submit" id="btn-validate-challan" class="k-button" data-dismiss="modal">Update Status</button>
+                <button type="button" id="btn-close-challan-window" class="k-button">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="divDocumentView" style="overflow:hidden">
+    <div class="row">
+        <div class="col-md-12 no-margin no-padding" id="divPageView" style="overflow:hidden">
+            <iframe id="ifrmViewPdf"></iframe>
+        </div>
+    </div>
+</div>
+
+<div id='div-approver-popup-window' class='adminfeediv'>
+    <div class="container-fluid">
+        <div class="row topSpace">
+            <div class="col-md-3 col-md-offset-1">
+                @Html.Label("Assign To: ")
+            </div>
+            <div class="col-md-6">
+                @(Html.Kendo().DropDownListFor(model => model.User)
+                .DataTextField("text")
+                .DataValueField("id")
+                .Filter("contains")
+                .OptionLabel("Select")
+                .DataSource(source =>source.Read(read =>read.Action("GetAssineTo", "Allotment", new { area = "Property" })))
+                .HtmlAttributes(new { style = "width:100%" })
+                )
+                @Html.ValidationMessageFor(model => model.User)
+            </div>
+        </div>
+        <div class="row topSpace bottomSpace">
+            <div class="col-md-6 col-md-offset-4">
+                <button type='submit' id="btn-approver-request" class='btn btn-default' value='Save'>Submit</button>
+                <button type='button' class='btn btn-default' value='Cancel' onclick="CloseApprovalPopupWindow();">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<br />
+<br />
+<div id='div-remark-window' class='adminfeediv'>
+    <div class="container-fluid">
+        <div class="row topSpace">
+            <div class="col-md-3 col-sm-12 col-xs-12 form-group">
+                <label>Reason </label>
+            </div>
+            <div class="col-md-6 col-sm-12 col-xs-12 form-group">
+                @(Html.Kendo().DropDownListFor(model => model.NICReasonId)
+                .Filter("contains")
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .OptionLabel(" -- Select --")
+                .DataSource(source =>
+                {
+                    source.Custom()
+                    .ServerFiltering(true)
+                    .ServerPaging(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    .Transport(transport => transport.Read(read => read.Action("GetDropDownListAsDataSource", "NiveshMitra", new { area = "NIC" }).Data("FilterNicServiceCode")))
+                    .Schema(schema => schema.Data("Data").Total("Total"))
+                    .PageSize(100);
+                })
+                .HtmlAttributes(new { @class = "input-disabled", style = "width:100%; float:right;" })
+                )
+            </div>
+        </div>
+        <div class="row topSpace">
+            <div class="col-md-3 col-sm-12 col-xs-12 form-group">
+                <label>Remarks:-</label>
+            </div>
+            <div class="col-md-8">
+                <textarea id="txt-area-remark" class="form-control" maxlength="299"></textarea>
+            </div>
+        </div>
+        <div class="row topSpace bottomSpace" style="padding-bottom:0;">
+            <div class="col-md-6 col-md-offset-4">
+                <button type='button' id="btn-submit-remark" class='btn btn-default' value='Save'>Submit</button>
+                <button type='button' id="btn-close-remark" class='btn btn-default' value='Cancel'>Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function AutoFitGridColumn(e) {
+        for (var i = 0; i < this.columns.length -1; i++) {
+            this.autoFitColumn(i);
+        }
+    }
+
+    var checkedIDs = [];
+    $(document).ready(function () {
+        $('#StatusDDL').prop("disabled", true);
+        $('#DpApplicationProcess').prop("disabled", true);
+
+        $('#divDocumentView').kendoWindow({
+            modal: true,
+            title: "Document",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "15%"
+            },
+            width: "70%", height: "80%"
+        });
+
+        $('#div-remark-window').kendoWindow({
+            modal: true,
+            title: "Remarks Window",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "25%"
+            },
+            width: "50%", height: "320"
+        });
+
+        $("#div-approver-popup-window").kendoWindow({
+            modal: true,
+            title: "Assign Request to Approver",
+            visible: false,
+            //width: "30%"
+        });
+
+        //$("#btn-proceed").click(function () {
+        //    if ($('#ProcessDDL').val() == "Process") {
+        //        OpenAssineRequetApprovalPopUp();
+        //    }
+        //    else {
+        //        alertify.error("Please select Application Process");
+        //    }
+        //});
+
+        $('#btn-close-remark').click(function () {
+            $("#div-remark-window").data("kendoWindow").close();
+        });
+
+        $("#btn-proceed").click(function () {
+            if ($('#ProcessDDL').val() == "Process") {
+                OpenAssineRequetApprovalPopUp();
+            }
+            else if ($('#ProcessDDL').val() == "Status") {
+                $("#div-remark-window").data("kendoWindow").center().open();
+            }
+            else {
+                alertify.error("Please select Process/Status");
+            }
+        });
+
+        $("#btn-submit-remark").click(function () {
+            var process = $('#ProcessDDL').val();
+            var statusId = $('#StatusDDL').val();
+            if (statusId != "0" && statusId != undefined && process == "Status") {
+                if ($('#txt-area-remark').val().trim() != "" && $('#txt-area-remark').val().trim() != undefined) {
+                    UpdateApplicationProcess(statusId);
+                }
+                else {
+                    alertify.error("Please enter remarks.");
+                }
+            } else {
+                $("#div-remark-window").data("kendoWindow").close();
+                alertify.error("Please select status.");
+            }
+        });
+
+        $("#btn-approver-request").click(function () {
+            var DpVal = $('#DpApplicationProcess').val();
+            if (DpVal != "" && DpVal != null) {
+                UpdateApplicationProcess(DpVal);
+            } else {
+                CloseApprovalPopupWindow();
+                alertify.error("Please select application process.");
+            }
+        });
+
+        $('input:radio[name=PayType]').on('change', function () {
+            $("#gridOnlineApplicationDetail").data("kendoGrid").dataSource.read();
+        });
+
+        $("#btn-close-challan-window").click(function () {
+            $("#div-challan-validation").modal('hide');
+        });
+
+
+        $("#btn-search").click(function () {
+            $("#gridOnlineApplicationDetail").data("kendoGrid").dataSource.read();
+        });
+
+        $('#btn-clear').click(function () {
+            $('#SchemeId').data('kendoDropDownList').value('');
+            $('#DepartmentId').data('kendoDropDownList').value('');
+            $('#PayType_all').prop("checked", true);
+            $("#gridOnlineApplicationDetail").data("kendoGrid").dataSource.read();
+        });
+
+        $('#btn-validate-challan').click(function () {
+            var ApplicationId = $("#hdn-applicationid").val();
+            var Amount = $("#hdn-challan-amount").val();
+            var PaymentType = '@SWPConstant.offlineApplicationPayment';
+            if (confirm("Are you sure? You want to update challan status of this application.")) {
+                AjaxRequestForStatusUpdate(ApplicationId, PaymentType, Amount);
+            } else {
+                event.preventDefault();
+            }
+        });
+
+        if ($('#SchemeId').val() == "" || $('#SchemeId').val() == undefined) {
+            $('#SchemeId').data("kendoDropDownList").value(164164);
+            $("#gridOnlineApplicationDetail").data("kendoGrid").dataSource.read();
+        }
+
+
+        $(function () {
+            $('#gridOnlineApplicationDetail').on('change', '.IsAppProcess', function () {
+                var checked = $(this).is(':checked');
+                var grid = $('#gridOnlineApplicationDetail').data().kendoGrid;
+                var dataItem = grid.dataItem($(this).closest('tr'));
+                if (checked == true) {
+                    checkedIDs.push({ 'text': dataItem.ApplicationFormId, 'id': dataItem.ApplicationFormId.toString() });
+                }
+                else {
+                    var arr = checkedIDs.map(function (o) { return o.id; });
+                    var i = arr.indexOf(dataItem.ApplicationFormId);
+                    checkedIDs.splice(i, 1);
+                }
+                var arr = checkedIDs.map(function (o) { return parseInt(o.id); });
+                $('#ApplicationIdList').val(arr);
+            });
+        });
+
+
+        $('#btn-validate-all').click(function () {
+            var schemeId = 165165;
+            var actiontype = "ValidateAll";
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ Id: schemeId, ActionType: actiontype }),
+                url: '/NIC/NoidaAuthority/ValidateSchemeFormChallan',
+                success: function (result) {
+                    if (result.ReturnTypeId == '@SWPReturnTypeId.Updated') {
+                        alertify.success("Application updated successfully.");
+                    } else { alertify.error("Application not updated."); }
+                    $("#gridOnlineApplicationDetail").data("kendoGrid").dataSource.read();
+                },
+                error: function (obj) {
+                }
+            });
+        });
+
+        $('#ProcessDDL').change(function () {
+            if ($('#ProcessDDL').val() == "Status") {
+                $('#StatusDDL').prop("disabled", false);
+                $('#DpApplicationProcess').val("0");
+                $('#DpApplicationProcess').prop("disabled", true);
+            }
+            else if ($('#ProcessDDL').val() == "Process") {
+                $('#StatusDDL').val("0");
+                $('#StatusDDL').prop("disabled", true);
+                $('#DpApplicationProcess').prop("disabled", false);
+            }
+            else {
+                $('#StatusDDL').val("0");
+                $('#DpApplicationProcess').val("0");
+                $('#StatusDDL').prop("disabled", true);
+                $('#DpApplicationProcess').prop("disabled", true);
+            }
+        });
+
+
+    });
+
+    function UpdateApplicationProcess(Type) {
+        var optionTexts = checkedIDs.map(function (o) { return parseInt(o.id); });;
+        var processStage = Type;
+        var userVal = $("#User").val();
+        var message = "";
+        var rezonid = $('#NICReasonId').val();
+        var reazon = $('#NICReasonId').data("kendoDropDownList").text();
+        var actionType = $('#ProcessDDL').val() == "Process" ? "Process" : ($('#ProcessDDL').val() == "Status" ? "Status" : "NoAction");
+        if ($('#ProcessDDL').val() == "Process") {
+            if (userVal == '' || userVal == null) {
+                CloseApprovalPopupWindow();
+                alertify.error("Please select a User.");
+                return false;
+            }
+        }
+        if ($('#ProcessDDL').val() == "Status") {
+            message = $('#txt-area-remark').val().trim();
+            if (message == "" || message == undefined) {                
+                alertify.error("Please enter remarks.");
+                return false;
+            }
+        }
+
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ ProcessType: processStage, ApplicationIdList: optionTexts, User: userVal, ActionType: actionType, Message: message, NICReasonId: rezonid, NICReasonText: reazon }),
+            //url: '/Online/Application/UpdateApplicationProcess',
+            url: '/NIC/NoidaAuthority/SaveOnlineSchemeFormProcessRequest',
+            success: function (result) {
+                if (result != null && actionType == "Process") {
+                    //if (result.ResultMessage.ReturnType = 200) {
+                        CloseApprovalPopupWindow();
+                        alertify.success(result.ResultMessage.Message);
+                        alertify.success("Online application send for approval.");
+                    //}
+                    //CloseApprovalPopupWindow();
+                }
+                if (result != null && actionType == "Status") {
+                    $("#div-remark-window").data("kendoWindow").close();
+                    alertify.success("Status updated successfully.");
+                }
+                $("#gridOnlineApplicationDetail").data("kendoGrid").dataSource.read();
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Network error, Please try again later.");
+            }
+        });
+    }
+
+    function OpenAssineRequetApprovalPopUp() {
+        var win = $("#div-approver-popup-window").data("kendoWindow");
+        win.center();
+        win.open();
+    }
+
+    function CloseApprovalPopupWindow() {
+        var win = $("#div-approver-popup-window").data("kendoWindow");
+        win.close();
+    }
+
+    function FilterSchemeForScrutiny() {
+        return { FilterType: "SchemeScrutiny" };
+    }
+
+    function FilterDepartment() {
+        return {
+            FilterType: "Department",
+            SchemeId: $("#SchemeId").val()
+        };
+    }
+
+    function FilterData() {
+        var ApplicationModal = {
+            SchemeId: $("#SchemeId").val() == "" ? 184184 : parseInt($("#SchemeId").val()),
+            DepartmentId: parseInt($("#DepartmentId").val())
+        };
+        return ApplicationModal;
+    }
+
+    function RejectApplication(row) {
+        //var tr = $(row).parent().parent();
+        var ApplicationId = row; //$(tr).children("td:eq(1)").text();
+        if (confirm("Are you sure? You want to reject this application.")) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                //data: JSON.stringify({ AppId: ApplicationId }),
+                //url: '/Online/Application/RejectApplication',
+                data: JSON.stringify({ ApplicationFormId: ApplicationId, ActionType: "Reject" }),
+                url: '/NIC/NoidaAuthority/ValidateOnlineSchemeForm',
+                success: function (result) {
+                    if (result.ReturnTypeId == '@SWPReturnTypeId.Rejected') {
+                        alertify.success("Application rejected successfully.");
+                    } else { alertify.error("Application not rejected."); }
+                    $("#gridOnlineApplicationDetail").data("kendoGrid").dataSource.read();
+                },
+                error: function (obj) {
+                }
+            });
+        }
+    }
+
+    function UpdateApplicationDetails(row) {
+        //var tr = $(row).parent().parent();
+        var ApplicationId = row; //$(tr).children("td:eq(1)").text();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            //data: JSON.stringify({ FormId: ApplicationId }),
+            //url: '/Online/Application/AddToAllotment',
+            data: JSON.stringify({ ApplicationFormId: ApplicationId }),
+            url: 'NIC/NoidaAuthority/SaveAllotmentDetailByOnlineSchemeFormId',
+            success: function (result) {
+                if (result.ReturnTypeId == '@SWPReturnTypeId.Saved') {
+                    alertify.success("Online application saved for allotment.");
+                }
+                else if (result.ReturnTypeId == '@SWPReturnTypeId.NotPaid') {
+                    alertify.error("Application Detail updated but payment not.");
+                }
+                else if (result.ReturnTypeId == '@SWPReturnTypeId.Exist') {
+                    alertify.error("Application Form Detail already saved.");
+                }
+                else {
+                    alertify.error("Provider failed to save form data.");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Network error, Please try again later.");
+            }
+        });
+    }
+
+    function UpdateChallanStatus(row) {
+        $("#hdn-applicationid").val('');
+        $("#hdn-challan-amount").val('');
+        $("#hdn-challan-filepath").val('');
+        //var tr = $(row).parent().parent();
+        var ApplicationId = row; //$(tr).children("td:eq(1)").text();
+        //var Amount = $(tr).children("td:eq(2)").text();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ ApplicationFormId: ApplicationId }),
+            //url: '/Online/Payment/GetChallanDetailsTrans',
+            url: '/NIC/NoidaAuthority/GetSchemeFormPaymentTransaction',
+            success: function (result) {
+                $("#lbl-challan-bankname").html(result.BankName);
+                $("#lbl-transaction-id").html(result.TransactionId);
+                var ModDate = (new Date(parseInt(result.modifiydate.replace("/Date(", "").replace(")/", ""), 10))).toString("dd/MM/yyyy");
+                $("#lbl-submit-date").html(ModDate);
+                $("#lbl-applicationid").html(ApplicationId);
+                $("#lbl-utr-no").html(result.TransactionKey);
+                $("#hdn-applicationid").val(ApplicationId);
+                $("#hdn-challan-amount").val(result.Amount);
+                $("#hdn-challan-filepath").val(result.docPath);
+
+                $("#div-challan-validation").modal('show');
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Network error, Please try later.");
+            }
+        });
+    }
+
+
+    function ShowChallanDocument() {
+        $("#divDocumentView").empty();
+        var link = $("#hdn-challan-filepath").val();
+        $("#divDocumentView").append($('<iframe src=' + link + ' style="width:100%; height:100%;"></iframe>'));
+        $("#divDocumentView").data("kendoWindow").center();
+        $("#divDocumentView").data("kendoWindow").open();
+    }
+
+    function SchemeAndDepartmentChangeEvent() {
+        $("#gridOnlineApplicationDetail").data("kendoGrid").dataSource.read();
+    }
+
+    function AjaxRequestForStatusUpdate(ApplicationId, PaymentType, Amount) {
+        var paymentType = PaymentType;
+        var applicationId = ApplicationId;
+        var amount = Amount;
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            //data: JSON.stringify({ AppId: applicationId, PaymentType: paymentType, Amount: amount }),
+            //url: '/Online/Payment/UpdateChallanStatus',
+            data: JSON.stringify({ ApplicationFormId: applicationId, PaymentTypeId: paymentType, Amount: amount }),
+            url: '/NIC/NoidaAuthority/ValidateSchemeFormChallan',
+            success: function (result) {
+                if (result.ReturnTypeId == '@SWPReturnTypeId.Updated') {
+                    alertify.success("Application updated successfully.");
+                } else { alertify.error("Application not updated."); }
+                $("#gridOnlineApplicationDetail").data("kendoGrid").dataSource.read();
+            },
+            error: function (obj) {
+            }
+        });
+    }
+
+    function FilterNicServiceCode() {
+        return {
+            FilterType: "NICReason",
+            ReturnType: "SC22002" //$("input[name='SWPPostModel.TxtServiceID']").val()
+        }
+    }
+
+    function ValidateFormFee(formid) {
+        alertify.alert("Hello" + formid);
+    }
+
+</script>

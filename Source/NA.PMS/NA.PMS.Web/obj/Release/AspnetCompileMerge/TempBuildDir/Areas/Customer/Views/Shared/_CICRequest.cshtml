@@ -1,0 +1,384 @@
+﻿
+@model NA.PMS.Model.ServiceRequestViewModel
+@using Kendo.Mvc.UI;
+
+
+<div class="">
+    @Html.HiddenFor(m => m.CICModel.CICCharge)
+</div>
+
+<div class="row nw-kendo-select">
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        <label class="required">Change In Constitution</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @(Html.Kendo().DropDownListFor(model => model.CICModel.ChangeTypeId)
+            .DataTextField("Text")
+            .DataValueField("Id")
+            .OptionLabel("--Select--")
+            .DataSource(source => source.Read(read => read.Action("GetCICRequestTypeList", "Property", new { area="Customer"})))
+            .HtmlAttributes(new { style = "width:100%;" })
+        )
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group col-prod">
+        <label class="required">New Firm Product</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group col-prod">
+        @Html.TextBoxFor(m => m.CICModel.NewFirmProduct, htmlAttributes: new { @class = "k-textbox", style = "width:100%;" })
+    </div>
+
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group col-director-type">
+        <label class="required">Director Type</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group col-director-type">
+        @(Html.Kendo().DropDownListFor(model => model.CICModel.TypeId)
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .OptionLabel("---Select---")
+                .DataSource(source => source.Read(read => read.Action("GetCompanyMemberTypeList", "Property", new { area = "Customer" })))
+                .HtmlAttributes(new { style = "width:100%;" })
+        )
+    </div>
+</div>
+
+<div id="changeInDirector">
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="required">Name Of Director</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(m => m.CICModel.DirectorName, htmlAttributes: new { @class = "k-textbox", @maxlength = "100" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="required">Share (In %)</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(m => m.CICModel.DirectorShare, htmlAttributes: new { @class = "k-textbox", @maxlength = "5" })
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12 form-group text-right">
+            <button type="button" class="k-button" id="btnAdd" style="width:100px;margin:0 15px 10px 0;border-radius:0;">Add</button>
+        </div>
+    </div>
+
+    <div class="row shareholderGrid">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label>Director/Shareholder</label>
+        </div>
+        <div class="col-md-9 col-sm-9 col-xs-12 form-group">
+            <div class="k-grid-content">
+                @(Html.Kendo().Grid<NA.PMS.Model.DirectorShareholderModel>()
+                  .Name("gridCIC")
+                  .Columns(columns =>
+                  {
+                      columns.Bound(c => c.Id).Title("SNo").Width(50);
+                      columns.Bound(c => c.ShareholderName).Title("Shareholder").Width(80);
+                      columns.Bound(c => c.ShareType).Hidden().Width(50);
+                      columns.Bound(c => c.ShareTypeName).Title("Driector/Shareholder").Width(150);
+                      columns.Bound(c => c.ShareValue).Title("Share (In %)").Width(80);
+                      columns.Bound(c => c.Id).Title("Action").ClientTemplate("<a href='##' onclick='javascript: return RemoveRecord(this);' id='RemoveTag'>Remove</a>").Width(50).Filterable(false).Sortable(false);
+                      //columns.Bound(c => c.Id).Title("Action").ClientTemplate("<a href='##' onclick='javascript: return RemoveRecord(this);' id='RemoveTag'>Remove</a>").Width(50).Filterable(false).Sortable(false);
+                  })
+                  .Sortable()
+                  .Filterable()
+                  .Resizable(resize => resize.Columns(true))
+                  .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                  .DataSource
+                  (
+                     dataSource => dataSource
+                    .Ajax().Model(model => model.Id(p => p.Id))
+                    .ServerOperation(true)
+                    .Read(read => read.Action("GetDirectorShareholderDataList", "Property", new { area = "Customer" })).Sort(s => s.Add("Id").Descending())
+                    .PageSize(5)
+                  )
+                )
+            </div>           
+        </div>
+    </div>
+
+</div>
+
+<div id="changeInFirmName">
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="required">New Firm Status</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DropDownListFor(model => model.CICModel.NewFirmStatus)
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .OptionLabel("--Select--")
+                .DataSource(source => source.Read(read => read.Action("GetFirmStatusList", "Property", new { area="Customer"})))
+                .HtmlAttributes(new { style = "width:100%;" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="required">New Firm Name</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(m => m.CICModel.NewFirmName, htmlAttributes: new { @class = "k-textbox", style = "width:100%;" })
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#changeInDirector').hide();
+        $('#changeInFirmName').hide();
+        $('#changeInProduct').hide();
+        $('.col-prod').hide();
+        $('.col-director-type').hide();
+
+        $('#CICModel_ChangeTypeId').change(function () {
+            var changeType = $('#CICModel_ChangeTypeId').val();
+            HideShowSection(changeType);
+        });
+
+        $('#CICModel_TypeId').change(function () {
+            $("#gridCIC").data("kendoGrid").dataSource.read();
+            var grid_data = $('#gridCIC').data("kendoGrid").dataSource.total();
+            if (grid_data == 0) {
+                $('.shareholderGrid').css("display", "none");
+            }
+            else {
+                $('.shareholderGrid').show();
+                $("#gridCIC").data("kendoGrid").dataSource.read();
+            }
+        });
+
+        $('#btnAdd').click(function () {
+            if (ValidateDirectors()) {
+                SaveDirectorsOrShareholders();
+            }
+        });
+
+    });
+
+    function HideShowSection(cType) {
+        if ((cType == '@NA.PMS.Common.Constants.ChangeInDirector')) {
+            $('#changeInDirector').show();
+            $('#changeInFirmName').hide();
+            $('.col-director-type').show();
+            $('.col-prod').hide();
+
+            var grid_data = $('#gridCIC').data("kendoGrid").dataSource.total();
+            if (grid_data == 0) {
+                $('.shareholderGrid').css("display", "none");
+            }
+            else {
+                $("#gridCIC").data("kendoGrid").dataSource.read();
+            }
+
+        }
+        else if ((cType == '@NA.PMS.Common.Constants.ChangeInFirmName')) {
+            $('#changeInDirector').hide();
+            $('#changeInFirmName').show();
+            $('.col-prod').hide();
+            $('.col-director-type').hide();
+        }
+        else if ((cType == '@NA.PMS.Common.Constants.ChangeInProduct')) {
+            $('#changeInDirector').hide();
+            $('#changeInFirmName').hide();
+            $('.col-prod').show();
+            $('.col-director-type').hide();
+        }
+        else {
+            $("#CICModel_ChangeTypeId").data("kendoDropDownList").value(0);
+            $('#changeInDirector').hide();
+            $('#changeInFirmName').hide();
+            $('.col-prod').hide();
+            $('.col-director-type').hide();
+        }
+    }
+
+    function SaveDirectorsOrShareholders() {
+        var directorname = $("input[type=text][name='CICModel.DirectorName']").val();
+        var directorshare = $('#CICModel_DirectorShare').val();
+        var dstype = $('#CICModel_TypeId').val();
+
+        var grid = $("#gridCIC").data("kendoGrid");
+        var data = grid.dataSource._data;
+        if (parseFloat(directorshare) > 100) {
+            alertify.error("Shares can't exceed 100%");
+            return false;
+        }
+        var sum = 0;
+        $.each(data, function (p, row) {
+            sum = sum + parseFloat(row.DirectorShare);
+        });
+        sum = sum + parseFloat(directorshare);
+        if (sum > 100) {
+            alertify.error("Sum of Shares can't exceed 100%");
+            return false;
+        }
+        else {
+            //alert("save");
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ directorName: directorname, share: directorshare, shareType: dstype }),
+                url: '/Customer/Property/SaveDirectorOrShareholders',
+                success: function (result) {
+                    if (result != null) {
+                        alertify.success("Directors added Successfully");
+                        $('#CICModel_DirectorName').val("");
+                        $('#CICModel_DirectorShare').val("");
+                        $("#CICModel_TypeId").data("kendoDropDownList").value(0);
+                        $("#gridCIC").data("kendoGrid").dataSource.read();
+                        $('.shareholderGrid').show();
+                    }
+                    else {
+                        alertify.error("Share value can't exceed more than 100%");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                       //alert(ajaxRequest.responseText);
+                }
+            });
+        }
+
+    }
+
+    function ValidateDirectors() {
+        var bflag = false;
+        var changetype = $('#CICModel_ChangeTypeId').val();
+        var ck_name = /^[a-zA-Z ]*$/;
+
+        if ((changetype == '@NA.PMS.Common.Constants.ChangeInDirector')) {
+            var type = $('#CICModel_TypeId').val();
+            var directorName = $('#CICModel_DirectorName').val().trim();
+            var director_Share = $('#CICModel_DirectorShare').val().trim();
+            if (directorName == "") {
+                alertify.error("Please enter Director Name");
+                bflag = false;
+            }
+            else if (!ck_name.test(directorName)) {
+                alertify.error("Plese enter char in the Director Name.");
+                bflag = false;
+            }
+            else if (director_Share == "") {
+                alertify.error("Please enter Director Share");
+                bflag = false;
+            }
+            else if (isNaN(director_Share)) {
+                alertify.error("Please enter a number.");
+                bflag = false;
+            }
+            else if (type == "") {
+                alertify.error("Please select Type");
+                bflag = false;
+            }
+            else {
+                if (director_Share >= 0 && director_Share <= 99999) {
+                    $('#CICModel_DirectorShare').val(parseFloat($('#CICModel_DirectorShare').val()).toFixed(2));
+                    bflag = true;
+                }
+                else {
+                    alertify.error("Share should be of digits [5,2]");
+                    $('#CICModel_DirectorShare').Focus();
+                    bflag = false;
+                }
+
+            }
+            return bflag;
+        }
+    }
+
+    function RemoveRecord(row) {
+        var tr = $(row).parent().parent();
+        var id = $(tr).children("td:eq(0)").text();
+        //alert(id);
+        var bflag = false;
+        if (confirm("Are you sure? You want to remove this record.")) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: id }),
+                url: '/Customer/Property/RemoveDirectorShareholderFromList',
+                success: function (result) {
+                    if (result == true) {
+                        bflag = true;
+                        $("#gridCIC").data("kendoGrid").dataSource.read();
+                        alertify.success("Record deleted successfully.");
+                    }
+                    else {
+                        bflag = false;
+                        alertify.error("Some error occured. Please try again later.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    bflag = false;
+                }
+            });
+        }
+        return bflag;
+    }
+
+    function SaveCICRequest() {
+        var ctype = $('#CICModel_ChangeTypeId').val();
+        if (ctype == '@NA.PMS.Common.Constants.ChangeInDirector') {
+            var grid = $('#gridCIC').data("kendoGrid");
+            var totalRecords = grid.dataSource.total();
+            if (totalRecords == 0) {
+                alertify.error("Please enter atleast one record in directors/shareholders.");
+                return false;
+            }
+            else {
+                //$('#ServiceRequestForm').submit();
+                SubmitServiceRequestForm();
+            }
+        }
+        if (ctype == '@NA.PMS.Common.Constants.ChangeInFirmName') {
+            var newFirmStatus = $('#CICModel_NewFirmStatus').val();
+            var newFirmName = $('#CICModel_NewFirmName').val().trim();
+            if (newFirmStatus == "") {
+                alertify.error("Please select New Firm Status");
+                return false;
+            }
+            if (newFirmName == "") {
+                alertify.error("Please enter New Firm Name");
+                return false;
+            }
+            else {
+                //$('#ServiceRequestForm').submit();
+                SubmitServiceRequestForm();
+            }
+        }
+        if (ctype == '@NA.PMS.Common.Constants.ChangeInProduct') {
+            var newFirmProduct = $('#CICModel_NewFirmProduct').val();
+            var desc = $("#ServiceModel_Description").val();
+            if (newFirmProduct == "") {
+                alertify.error("Please enter new product name.");
+                return false;
+            }
+            if (desc == "") {
+                alertify.error("Please enter description.");
+                return false;
+            }
+            else {
+                //$('#ServiceRequestForm').submit();
+                SubmitServiceRequestForm();
+            }
+        }
+        else {
+            alertify.error("Please select Change in constitution");
+            return false;
+        }
+    }
+
+
+    function ClearCICFields() {
+        $('#CICModel_ChangeTypeId').data("kendoDropDownList").value('');
+        $('#CICModel_TypeId').data("kendoDropDownList").value('');
+        $('#CICModel_NewFirmProduct').val('');
+        $('#CICModel_DirectorName').val('');
+        $('#CICModel_DirectorShare').val('');
+    }
+
+</script>

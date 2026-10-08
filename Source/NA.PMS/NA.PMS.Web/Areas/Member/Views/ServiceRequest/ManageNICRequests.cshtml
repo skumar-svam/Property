@@ -1,0 +1,775 @@
+﻿@model NA.PMS.Model.NIC.ServiceVM
+@using Kendo.Mvc.UI;
+@using NA.PMS.Common;
+
+@{
+    ViewBag.Title = "Manage Service Request - NIC";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .top-margin {
+        margin-top: 6px;
+        width: 80px;
+    }
+
+    .lbl-status-action {
+        cursor: pointer;
+        color: blue;
+    }
+
+    .glyphicon-print {
+        cursor: pointer;
+    }
+
+    #divStatusMaster {
+        display: none;
+    }
+
+    #AcknowledgementContent {
+        display: none;
+    }
+
+    #div-registrationid-window {
+        display: none;
+    }
+
+    .row-approver {
+        display: none;
+    }
+
+    .doc {
+        display: none;
+    }
+</style>
+
+<div class="ManageRequestServices">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Manage Service Requests - NIC</h1></div>
+        </div>
+    </div>
+
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12" style="border-left:1px solid #abc;border-right:1px solid #abc;">
+        <div class="row form-group">
+            <div class="col-md-2 pad-left">
+                @Html.Label("Department")
+                @(Html.Kendo().DropDownListFor(model => model.DepartmentId)
+                                                                            .Filter("contains")
+                                                                            .DataTextField("Text")
+                                                                            .DataValueField("Id")
+                                                                            .OptionLabel(" -- Select --")
+                                                                            .DataSource(source => source.Read(read => read.Action("GetDepartmentList", "ServiceRequest")))
+                                                                            .Events(e => e.Change("ChangeDepartmentEvent"))
+                                                                           .HtmlAttributes(new { style = "width:95%;float:right;", @class = "input-disabled" })
+                )
+            </div>
+            <div class="col-md-2 pad-left">
+                @Html.Label("Start Date")
+                @(Html.Kendo().DatePickerFor(model => model.StartDate).Events(e => e.Change("ChangeDepartmentEvent")).HtmlAttributes(new { style = "width:95%;float:right;" }))
+            </div>
+            <div class="col-md-2 pad-left">
+                @Html.Label("End Date")
+                @(Html.Kendo().DatePickerFor(model => model.EndDate).Events(e => e.Change("ChangeDepartmentEvent")).HtmlAttributes(new { style = "width:95%;float:right;" }))
+            </div>
+            <div class="col-md-2 pad-left">
+                <label>Status</label>
+                @(Html.Kendo().DropDownListFor(m => m.ServiceStatusId)
+                                                                            .Filter("contains")
+                                                                            .DataTextField("Text")
+                                                                            .DataValueField("Id")
+                                                                            .OptionLabel(" -- Select --")
+                                                                            .DataSource(source =>
+                                                                            {
+                                                                                source.Custom()
+                                                                                .ServerFiltering(true)
+                                                                                .ServerPaging(true)
+                                                                                .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                                                                .Transport(transport => transport.Read(read => read.Action("GetStatusMasterAsDataSource", "ServiceRequest", new { area = "Member" })))
+                                                                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                                                                .PageSize(100);
+                                                                            })
+                                                                            .Events(events => { events.Change("ChangeDepartmentEvent"); })
+                                                                            .HtmlAttributes(new { @class = "input-disabled", style = "width:95%;float:right;" })
+                )
+            </div>
+            <div class="col-md-2 pad-left">
+                <label>Service Name</label>
+                @(Html.Kendo().DropDownListFor(model => model.ServiceId)
+                                                                            .DataTextField("Text")
+                                                                            .DataValueField("Id")
+                                                                            .OptionLabel("---select---")
+                                                                            .DataSource(source =>
+                                                                            {
+                                                                                source.Custom()
+                                                                                .ServerFiltering(true)
+                                                                                .ServerPaging(true)
+                                                                                .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                                                                .Transport(transport => transport.Read(read => read.Action("GetServiceListAsDataSource", "ServiceRequest", new { area = "Member" })))
+                                                                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                                                                .PageSize(100);
+                                                                            })
+                                                                            .HtmlAttributes(new { style = "width:95%;float:right;" })
+                                                                            .Events(e => e.Change("ChangeDepartmentEvent"))
+                )
+            </div>
+            <div class="col-md-2" style="text-align:center;">
+                <label style="width:100%;"> </label>
+                <button type="button" id="btnSearch" class="k-button top-margin" value="Search">Search</button>
+                <button type="button" id="btnClear" class="k-button top-margin" value="Clear">Clear</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.NIC.ServiceVM>()
+                                                                        .Name("GridServiceRequest")
+                                                                        .ToolBar(tools => tools.Excel())
+                                                                        .Excel(excel => excel
+                                                                            .FileName("ServiceRequestList.xlsx")
+                                                                            .AllPages(true)
+                                                                            .Filterable(true)
+                                                                            .ProxyURL(Url.Action("Excel_Export_Save", "Report"))
+                                                                        )
+                                                                        .Columns(columns =>
+                                                                        {
+                                                                            columns.Bound(c => c.EncryptedId).Hidden();
+                                                                            columns.Bound(c => c.DepartmentId).Hidden();
+                                                                            columns.Bound(c => c.ServiceId).Hidden();
+                                                                            columns.Bound(c => c.RequestId).Title("Ref No").Width(100).ClientTemplate("<a href='" + "/Member/ServiceRequest/RequestDetailNIC/#= Id #" + "' target='_blank'>#=Id#</a>");
+                                                                            columns.Bound(c => c.RegistrationNo).Title("RID").Width(120).Sortable(false);
+                                                                            columns.Bound(c => c.Department).Title("Department").Width(130).Sortable(false);
+                                                                            columns.Bound(c => c.PropertyNo).Title("Property").Width(110).Sortable(false);
+                                                                            columns.Bound(c => c.ServiceName).Title("Service Name");
+                                                                            columns.Bound(c => c.RequestDate).Title("Request Date").Width(140).Format("{0:dd/MM/yyyy}").Sortable(false);
+                                                                            columns.Bound(c => c.Status).Title("Status").Width(100).Sortable(false);
+                                                                            columns.Bound(c => c.PaymentStatus).Title("Payment Status").ClientTemplate("#if(PaymentStatus!=null){# #if(PaymentStatus==0){# <a  onclick='javascript:UpdatePaymentStatus(this);'><center>Not Paid</center></a> #}else{# <center>Paid</center> #}#  #}else{# <center>NA</center> #}#").Width(100).Filterable(false).Sortable(false);
+
+                                                                            columns.Bound(c => c.RequestDate).Title("Print").ClientTemplate("<a  onclick='javascript:OpenFile(this);'><center><span class='glyphicon glyphicon-print'></span></center></a>").Width(100).Filterable(false).Sortable(false);
+                                                                            columns.Bound(c => c.Applicant).Hidden();
+                                                                            columns.Bound(c => c.MobileNo).Hidden();
+                                                                            columns.Bound(c => c.SubDepartment).Hidden();
+                                                                            columns.Bound(c => c.Description).Hidden();
+                                                                        })
+                                                                        .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                                                                        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                                                                        .ClientDetailTemplateId("template")
+                                                                        .AutoBind(true)
+                                                                        .DataSource(dataSource => dataSource
+                                                                            .Ajax()
+                                                                            .Model(model => model.Id(c => c.Id))
+                                                                            .ServerOperation(true)
+                                                                            .Read(read => read.Action("GetCustomerServiceRequestList_NIC", "ServiceRequest", new { area = "Member" }).Data("FilterSearchParameter")).PageSize(10)
+                                                                            .Sort(s => s.Add(r => r.RequestDate).Descending())
+                                                                        )
+        )
+    </div>
+
+</div>
+@using (Html.BeginForm("UpdateCustomerServiceRequestStatus", "ServiceRequest", new { area = "Member" }, FormMethod.Post, new { enctype = "multipart/form-data", id = "userform2" }))
+{
+    <div class="col-md-12 status-window" id="divStatusMaster" style="min-height:250px;background:url(/Content/Images/boxed-bg.jpg) repeat;">
+        <div class="row form-group" style="padding-top:15px;">
+            <div class="col-md-3">
+                <label>Service Status</label>
+            </div>
+            <div class="col-md-6">
+                @(Html.Kendo().DropDownListFor(model => model.StatusId)
+                                                                        .Filter("contains")
+                                                                        .DataTextField("Text")
+                                                                        .DataValueField("Id")
+                                                                        .OptionLabel(" -- Select --")
+                                                                        .DataSource(source =>
+                                                                        {
+                                                                            source.Custom()
+                                                                            .ServerFiltering(true)
+                                                                            .ServerPaging(true)
+                                                                            .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                                                            .Transport(transport => transport.Read(read => read.Action("GetStatusMasterAsDataSource", "ServiceRequest", new { area = "Member" })))
+                                                                            .Schema(schema => schema.Data("Data").Total("Total"))
+                                                                            .PageSize(100);
+                                                                        })
+                                                                        .Events(events => { events.Change("ChangeStatusIdEvent"); })
+                                                                        .HtmlAttributes(new { @class = "input-disabled", style = "width:100%; float:right;" })
+                )
+            </div>
+        </div>
+        <div class="row form-group row-approver">
+            <div class="col-md-3 col-sm-12 col-xs-12 form-group">
+                <label>Forward To</label>
+            </div>
+            <div class="col-md-6">
+                @(Html.Kendo().DropDownListFor(model => model.ApproverId)
+                                                                        .Filter("contains")
+                                                                        .DataTextField("Text")
+                                                                        .DataValueField("Id")
+                                                                        .OptionLabel(" -- Select --")
+                                                                        .DataSource(source =>
+                                                                        {
+                                                                            source.Custom()
+                                                                            .ServerFiltering(true)
+                                                                            .ServerPaging(true)
+                                                                            .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                                                            .Transport(transport => transport.Read(read => read.Action("GetApproverIdList", "Authority", new { area = "Member" })))
+                                                                            .Schema(schema => schema.Data("Data").Total("Total"))
+                                                                            .PageSize(100);
+                                                                        })
+                                                                        //.Events(events => { events.Change("ChangeDepartmentEvent"); })
+                                                                        .HtmlAttributes(new { @class = "input-disabled", style = "width:100%; float:right;" })
+                )
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-md-3">
+                <label>Comment</label>
+            </div>
+            <div class="col-md-9">
+                @Html.TextAreaFor(model => model.Comment, htmlAttributes: new { @class = "k-textbox", style = "width:93%;height:70px;" })
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-md-5 doc">
+                <input type="file" class="lettersingle k-upload" name="letterfiles" id="letterfiles" />
+                @Html.HiddenFor(model => model.RequestId)
+            </div>
+            <div class="col-md-3">
+                <input type="button" class="k-button" id="btnStatusSubmit" value="Submit" style="width:98%;" />
+            </div>
+            <div class="col-md-3" style="text-align:right;">
+                <input type="button" class="k-button" id="btnStatusClose" value="Close" style="width:98%;" />
+            </div>
+        </div>
+    </div>
+}
+
+
+<div class="col-md-12 popup-window" id="AcknowledgementContent" style="min-height:300px;background:url(/Content/Images/boxed-bg.jpg) repeat;">
+    <div class="" id="divAcknowledgementReceiptBody">
+        <div class="row">
+            <div class="col-md-12">
+                <h2 style="text-align:center;padding:0;margin-bottom:4px;">NEW OKHLA INDUSTRIAL DEVELOPMENT AUTHORITY</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <h4 style="text-align:center;padding:0;margin-bottom:4px;">Sector-6 Administrator Office, NOIDA</h4>
+            </div>
+        </div>
+        <div class="row ">
+            <div class="col-md-12">
+                <h5 style="text-align:center;padding:0;margin-top:4px;">Nivesh Mitra - Acknowledgement Receipt </h5>
+            </div>
+        </div>
+        <div class="row row-pad">
+            <div class="col-md-12">
+                <span style="width:50%;text-align:right;float:right"> <b>Date: <span id="CreatedDate">["CreatedDate"]</span></b></span>
+            </div>
+        </div>
+        <div class="row row-pad">
+            <div class="col-md-12">
+                <span style="width:50%;float:left"><b> Acknowledgement No: &nbsp;<span id="RequestId">["RequestId"]</span></b></span>
+                <span style="width:50%;text-align:right;float:right"><b>Registration Id: &nbsp;<span id="RegistrationNo">["RegistrationId"]</span></b></span>
+            </div>
+        </div>
+        <div class="row row-pad">
+            <div class="col-md-12">
+                <span style="width:70%;float:left"><b> Applicant Name: &nbsp;<span id="Name">["Name"]</span></b></span>
+                <span style="width:30%;text-align:right;float:right"><b>Property No: &nbsp;<span id="PropertyNo">["PropertyNo"]</span></b></span>
+            </div>
+        </div>
+        <div class="row row-pad">
+            <div class="col-md-12">
+                <span style="width:50%;float:left"><b> Department: &nbsp;<span id="Department">["Department"]</span></b> &nbsp;&nbsp;( <span id="SubDepartment">["SubDepartment"]</span> )</span>
+                <span style="width:50%;text-align:right;float:right"><b>Mobile No.: &nbsp;<span id="Mobile">["Mobile"]</span></b></span>
+            </div>
+        </div>
+        <div class="row row-pad">
+            <div class="col-md-12">
+                <b> Request Type: &nbsp;<span id="ServiceName">["ServiceName"]</span></b>
+            </div>
+        </div>
+        <div class="row row-pad">
+            <div class="col-md-12">
+                <b> Subject: &nbsp; <label id="Description">["Description"]</label></b>
+            </div>
+        </div>
+        <div class="row row-pad">
+            <div class="col-md-12" style="text-align:justify;text-justify:inter-word">
+                <p>
+                    <b> Note:</b> The information provided in application shall be validated against the available information with the department.
+                    In case where addition information like payment info addition supporting document etc.is required, the same shall be communicated on registered
+                    mobile number and mail You can also track the status of service request on <b> http://www.mynoida.in </b>,Please quote this service request number for any
+                    communication regarding the application.
+                </p>
+            </div>
+        </div>
+        <div class="row row-pad">
+            <div class="col-md-12">
+                <b>
+                    Thanks for using services online.<br />
+                    Your Thankfully<br />
+                    NOIDA
+                </b>
+            </div>
+        </div>
+        <div class="row row-pad row-btn">
+            <div class="col-md-12" style="text-align: center; padding:15px 0 15px 0;">
+                <button type="button" id="btnPrintDiv" class="btn btn-success" onclick=" PrintAcknowledgementReciept();">Print</button>
+                <button type="submit" id="btnClose" class="btn btn-danger">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="col-md-12 status-window" id="div-registrationid-window" style="min-height:250px;background:url(/Content/Images/boxed-bg.jpg) repeat;">
+    <div class="row" style="padding-top:15px;">
+        <div class="col-md-5 form-group">
+            <label>Service Request Id</label>
+        </div>
+        <div class="col-md-6 form-group">
+            <input type="text" id="txtrequestid" class="k-textbox" readonly="readonly" style="width:100%" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-5 form-group">
+            <label>Registration Id</label>
+        </div>
+        <div class="col-md-6 form-group">
+            <input type="text" id="txtregistrationid" class="k-textbox" maxlength="8" min="8" style="width:100%;" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-5 form-group">
+
+        </div>
+        <div class="col-md-3 form-group">
+            <input type="button" class="k-button" id="btn-update-rid" value="Update" style="width:98%;" />
+        </div>
+        <div class="col-md-3 form-group" style="text-align:right;">
+            <input type="button" class="k-button" id="btn-update-close" value="Close" style="width:98%;" />
+        </div>
+    </div>
+</div>
+
+<script id="template" type="text/kendo-tmpl">
+    @(Html.Kendo().Grid<NA.PMS.Model.ServiceViewModel>()
+                                                                    .Name("grid_#=Id#") // template expression, to be evaluated in the master context
+                                                                    .Columns(columns =>
+                                                                    {
+                                                                        columns.Bound(c => c.Id).Hidden(true);
+                                                                        columns.Bound(o => o.Applicant).Width(300);//.ClientTemplate("<span>#= ServiceName #<br/><small ><b>Receiving Date:</b>&nbsp;#= CreatedDate#</small></span>");
+                                                            columns.Bound(o => o.Description);
+                                                                        columns.Bound(o => o.Comment);//.ClientTemplate("<label>#=Comment#</label>");
+                                                                                                      //columns.Bound(o => o.Status).Width(120).Title("Update Status").ClientTemplate("<label class='lbl-status-action' onclick='javascript:OpenStatusWindow(this)'>#=Status#</label>");
+                                                                                                      //columns.Bound(o => o.Status).Width(120).Title("Status").ClientTemplate("<label>#=Status#</label>");
+                                                                                                      //columns.Bound(o => o.RequestDate).Format("{0:dd/MM/yyyy}").Width(120);
+                                                        })
+                                                                    .DataSource(dataSource => dataSource
+                                                                        .Ajax()
+                                                                        .PageSize(10)
+                                                                        .Read(read => read.Action("GetCustomerServiceRequestListById", "ServiceRequest", new { Id = "#=Id#" }))
+                                                                    )
+                                                                    .ToClientTemplate()
+    )
+</script>
+<script>
+    function dataBound() {
+        this.expandRow(this.tbody.find("tr.k-master-row").first());
+    }
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.popup-window').kendoWindow({
+            modal: true,
+            title: "Service Acknowledgement",
+            actions: false, // [ "Minimize", "Maximize"],
+            visible: false,
+            width: "70%",
+            //height: "60%",
+        });
+
+        $('#btnClose').click(function () {
+            $(".popup-window").data("kendoWindow").close();
+            //ClearFields();
+        });
+
+        $('.status-window').kendoWindow({
+            modal: true,
+            title: "Validate Service Request",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "15%"
+            },
+            width: "40%"
+        });
+
+        $('#btnStatusSubmit').click(function () {
+            UpdateServiceStatus();
+            //if (ValidateActionField()) {
+            //    $('#btnStatusSubmit').submit();
+            //}
+        });
+        $("#btnStatusClose").click(function () {
+            $("#divStatusMaster").data("kendoWindow").close();
+        });
+
+        $('#btn-update-rid').click(function () {
+            UpdateRegistrationId();
+        });
+
+        $("#btn-update-close").click(function () {
+            $('#div-registrationid-window').data("kendoWindow").close();
+        });
+
+        $('#btnSearch').click(function () {
+            ChangeDepartmentEvent();
+        });
+
+        $('#btnClear').click(function () {
+            $('#DepartmentId').data("kendoDropDownList").value("");
+            $('#ServiceId').data("kendoDropDownList").value("");
+            $('#ServiceStatusId').data("kendoDropDownList").value("");
+            $('#StartDate').data("kendoDatePicker").value("");
+            $('#EndDate').data("kendoDatePicker").value("");
+            $("#GridServiceRequest").data("kendoGrid").dataSource.read();
+        });
+
+    })
+
+    function FilterDepartment() {
+        return { departmentId: $('#DepartmentId').val() }
+    }
+
+    function FilterSearchParameter() {
+        return {
+            DepartmentId: $('#DepartmentId').val(),
+            ServiceId: $('#ServiceId').val(),
+            ServiceStatusId: $('#ServiceStatusId').val(),
+            StartDate: $('#StartDate').val(),
+            EndDate: $('#EndDate').val()
+        };
+    }
+    function ChangeDepartmentEvent() {
+        $("#GridServiceRequest").data("kendoGrid").dataSource.read();
+    }
+
+    function RedirectForServices(serviceid, rid) {
+        if (serviceid == 1) {
+            // window.location.href = "/Property/PropertyRegistration/AddRentRequest" + "?id=" + rid;
+        }
+        if (serviceid == 2) {
+            window.location.href = "/Property/PropertyRegistration/AddRentRequest" + "?id=" + rid;
+        }
+        if (serviceid == 3) {
+
+        }
+    }
+
+    function OpenStatusWindow(row) {
+        var tr = $(row).parent().parent();
+        var id = $(tr).children("td:eq(0)").text();
+        $('#RequestId').val(id);
+        $('#divStatusMaster').data("kendoWindow").center();
+        $('#divStatusMaster').data("kendoWindow").open();
+    }
+
+    function OpenUpdateWindow(id) {
+        $('#RequestId').val(id);
+        $('#txtrequestid').val(id);
+        $('#div-registrationid-window').data("kendoWindow").center();
+        $('#div-registrationid-window').data("kendoWindow").open();
+    }
+
+    function UpdateRegistrationId() {
+        var id = $('#RequestId').val();
+        var rid = $('#txtregistrationid').val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ Id: id, RegistrationId: rid }),
+            url: '/Member/ServiceRequest/UpdateRegistrationIdToServiceRequestById',
+            success: function (result) {
+                if (result == '@ReturnType.Updated') {
+                    alertify.success("Registration Id updated successfully.");
+                }
+                $("#GridServiceRequest").data("kendoGrid").dataSource.read();
+                $('#div-registrationid-window').data("kendoWindow").close();
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Something is wrong, try again later");
+            }
+        });
+    }
+
+    function ValidateActionField() {
+        var flag = true;
+        if ($('#letterfiles').val() != "") {
+            if (CheckOtherFileType() == false) {
+                return flag = false;
+            }
+        }
+
+        if ($('#StatusId').val() == "") {
+            alertify.error("Select service status");
+            flag = false;
+        }
+        else if (($('#StatusId').val() == '@NAStatusId.Cancelled') || ($('#StatusId').val() == '@NAStatusId.Pending')) {
+            if ($('#Comment').val() == "") {
+                alertify.error("Enter remarks for Cancellation/pending");
+                flag = false;
+            }
+        }
+        else if ($('#StatusId').val() == '@NAStatusId.Forwarded') {
+            if ($('#ApproverId').val() == "") {
+                alertify.error("Select Approver");
+                flag = false;
+            }
+        }
+        return flag;
+    }
+
+    function ChangeStatusIdEvent() {
+        if ($('#StatusId').val() == '@NAStatusId.Forwarded') {
+            $('.row-approver').show();
+            $('.doc').css("display", "none");
+        }
+        else if ($('#StatusId').val() == '@NAStatusId.Completed') {
+            $('.doc').show();
+            $('.row-approver').css("display", "none");
+        }
+        else {
+            $('.row-approver').css("display", "none");
+            $('.doc').css("display", "none");
+        }
+        @*if ($('#StatusId').val() == '') {
+            $('.row-approver').css("display", "none");
+        }
+        else if ($('#StatusId').val() == '@NAStatusId.Completed') {
+            $('.row-approver').css("display", "none");
+        }
+        else if (($('#StatusId').val() == '@NAStatusId.Cancelled') || ($('#StatusId').val() == '@NAStatusId.Pending')) {
+            $('.row-approver').css("display", "none");
+        }
+        else if ($('#StatusId').val() == '@NAStatusId.Forwarded') {
+            $('.row-approver').show();
+        }*@
+    }
+
+    function UpdateServiceStatus() {
+        if (ValidateActionField()) {
+            //var model = {
+            //    Id: $('#RequestId').val(),
+            //    StatusId: $('#StatusId').val(),
+            //    ApproverId: $('#ApproverId').val(),
+            //    Comment: $('#Comment').val()
+            //};
+            var Id = $('#RequestId').val();
+            var StatusId = $('#StatusId').val();
+            var ApproverId = $('#ApproverId').val();
+            var Comment = $('#Comment').val();
+
+            var formData = new FormData($('#userform2').get(0));
+            formData.append("StatusId", StatusId);
+            formData.append("RequestId", Id);
+            formData.append("ApproverId", ApproverId);
+            formData.append("Id", Id);
+            formData.append("Comment", Comment);
+            formData.append("letterfiles", $('#letterfiles')[0].files[0]);
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: false, // Not to set any content header
+                processData: false, // Not to process data
+                data: formData,
+                url: '/Member/ServiceRequest/UpdateCustomerServiceRequestStatus',
+                success: function (result) {
+                    if (result == '@ReturnType.None') {
+                        $('#divStatusMaster').data("kendoWindow").close();
+                        alertify.error("provider failed to update status.");
+                    }
+                    else if (result == '@ReturnType.Initiated') {
+                        $('#divStatusMaster').data("kendoWindow").close();
+                        alertify.error("Form can't be Complete/Cancel but forward.");
+                    }
+                    else if (result == '@ReturnType.Updated') {
+                        $('#divStatusMaster').data("kendoWindow").close();
+                        alertify.error("Service Request Closed.");
+                    }
+                    else if (result == '@ReturnType.Completed') {
+                        $('#divStatusMaster').data("kendoWindow").close();
+                        alertify.success("Request Completed successfully.");
+                        $("#GridServiceRequest").data("kendoGrid").dataSource.read();
+                    }
+                    else if (result == '@ReturnType.Cancelled') {
+                        $('#divStatusMaster').data("kendoWindow").close();
+                        alertify.success("Request Cancelled successfully.");
+                        $("#GridServiceRequest").data("kendoGrid").dataSource.read();
+                    }
+                    else if (result == '@ReturnType.Forwarded') {
+                        $('#divStatusMaster').data("kendoWindow").close();
+                        alertify.error("Request has already forwarded.");
+                    }
+                    else if (result == '@ReturnType.Pending') {
+                        $('#divStatusMaster').data("kendoWindow").close();
+                        alertify.error("Service Request put on hold.");
+                        $("#GridServiceRequest").data("kendoGrid").dataSource.read();
+                    }
+                    else if (result == '@ReturnType.Exist') {
+                        $('#divStatusMaster').data("kendoWindow").close();
+                        alertify.error("Service Request is already on hold.");
+                    }
+                    else if (result == '@ReturnType.Validated') {
+                        $('#divStatusMaster').data("kendoWindow").close();
+                        alertify.success("Request forwarded successfully.");
+                        $("#GridServiceRequest").data("kendoGrid").dataSource.read();
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Something is wrong, try again later");
+                }
+            });
+        }
+    }
+
+    function UpdatePaymentStatus(row) {
+        var tr = $(row).parent().parent();
+        var _RequestId = $(tr).children("td:eq(4)").text();
+
+        if (_RequestId > 0) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                data: { RequestId: _RequestId},
+                url: '/Member/ServiceRequest/UpdatePaymentStatusByRequestId',
+                success: function (result) {
+                    if (result != null) {
+                        if (result == true) {
+                            window.locationbar.href = "/Member/ServiceRequest/ManageNICRequests";
+                        }
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    alertify.error("Something is wrong, try again later");
+                }
+            });
+
+        }
+    }
+
+    function OpenFile(row) {
+        //$("#windowDiv").empty();
+        var tr = $(row).parent().parent();
+        var RequestId = $(tr).children("td:eq(4)").text();
+        var RegistrationNo = $(tr).children("td:eq(5)").text();
+        var Department = $(tr).children("td:eq(6)").text();
+        var PropertyNo = $(tr).children("td:eq(7)").text();
+        var ServiceName = $(tr).children("td:eq(8)").text();
+        var CreatedDate = $(tr).children("td:eq(9)").text();
+        var Applicant = $(tr).children("td:eq(12)").text();
+        var MobileNo = $(tr).children("td:eq(13)").text();
+        var SubDepartment = $(tr).children("td:eq(14)").text();
+        var Description = $(tr).children("td:eq(15)").text();
+        RegistrationNo = RegistrationNo != "" ? RegistrationNo : "NA";
+        $('#CreatedDate').text(CreatedDate);
+        $('#RequestId').text(RequestId);
+        $('#RegistrationNo').text(RegistrationNo);
+        $('#Name').text(Applicant);
+        $('#PropertyNo').text(PropertyNo);
+        $('#Department').text(Department);
+        $('#SubDepartment').text(SubDepartment);
+        $('#Mobile').text(MobileNo);
+        $('#ServiceName').text(ServiceName);
+        $('#Description').text(Description);
+
+        $('.popup-window').data("kendoWindow").center();
+        $('.popup-window').data("kendoWindow").open();
+    }
+
+    function PrintAcknowledgementReciept() {
+        var contents = document.getElementById("AcknowledgementContent").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('<style>.row-btn{display:none;}</style>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+    function CheckOtherFileType() {
+        var flag = true;
+        var File = document.getElementById('letterfiles');
+        // VALIDATE OR CHECK IF ANY FILE IS SELECTED.
+        if (File.files.length > 0) {
+
+            // THE TOTAL FILE COUNT.
+            var SumOfTotalFileSize = 0;
+            // RUN A LOOP TO CHECK EACH SELECTED FILE.
+            for (var i = 0; i <= File.files.length - 1; i++) {
+                var FileName = File.files.item(i).name;      // THE NAME OF THE FILE.
+                var FileSize = File.files.item(i).size / 1024;      // THE SIZE OF THE FILE.
+                //var extension = File.files.item(i).value.substr((File.files.item(i).value.lastIndexOf('.') + 1)); //Extension
+                var extension = FileName.split('.').pop();
+                if (extension.toLowerCase() == "pdf" || extension.toLowerCase() == "jpg" || extension.toLowerCase() == "jpeg") {
+                    flag = true;
+                }
+                else {
+                    alertify.error(FileNoCount + " " + FileName + " not allowed.");
+                    return flag = false;;
+                }
+                if (SumOfTotalFileSize == 0) {
+                    SumOfTotalFileSize = (FileSize);
+                }
+                else {
+                    SumOfTotalFileSize = SumOfTotalFileSize + (FileSize);
+                }
+
+                //if (FileSize > 5000000) {
+                //    toastr.error('File Uploaded having name ' + FileName + ' is greater than 5 mb.');
+                //    e.preventDefault();
+                //    return false;
+                //}
+                if (FileSize < 10) {
+                    alertify.error(" Min 10kb file size is allowed");
+                    $("#letterfiles").val('');
+                    return flag = false;;
+                }
+                if (FileSize > 500) {
+                    alertify.error(" Max 5Mb file size is allowed");
+                    $("#letterfiles").val('');
+                    return flag = false;;
+                }
+            }
+
+            //if (SumOfTotalFileSize > 20000000) {
+            //    toastr.error('Total Uploaded File having is greater than 15 mb.');
+            //    e.preventDefault();
+            //    return false;
+            //}
+        }
+        else {
+            alertify.error('Please select a file.')
+            return flag = false;
+        }
+        return flag;
+    }
+
+</script>

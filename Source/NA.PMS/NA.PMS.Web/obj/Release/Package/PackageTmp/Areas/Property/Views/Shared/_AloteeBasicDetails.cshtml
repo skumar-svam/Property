@@ -1,0 +1,219 @@
+﻿@model NA.PMS.Model.CICModel
+@using Kendo.Mvc.UI;
+@using NA.PMS.Common;
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @*<label id="_Rid">Registration ID: </label><span class="text-danger">*</span>*@
+            @Html.Label("Registration ID", htmlAttributes: new { @class = "required" })
+            <input type="hidden" id="hdnIsFirmExists" />
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DropDownListFor(model => model.Rid)
+                      .DataTextField("text")
+                      .DataValueField("id")
+                      .OptionLabel("Select")
+                      .Filter("contains")
+                      .DataSource(source =>
+                      {
+                          source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport =>
+                        {
+                            transport.Read(read => read.Action("GetRIDsByDeptt", "CIC").Data("GetRid"));
+                        })
+                        .Schema(schema =>
+                        {
+                            schema.Data("Data").Total("Total");
+                        })
+                        .PageSize(100);
+                      })
+                    .HtmlAttributes(new { style = "width:100%;" })
+                    .Events(m => m.Change("GetPropertyDetails"))
+            )
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.LabelFor(model => model.ReqRefNo, htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(model => model.ReqRefNo, new { @class = "form-control", onkeypress = "return IsNumeric(event);", maxlength = "8", @onchange = "RequestIdCheck();" })
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label id="_ApplicantName">Applicant's Name:</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span id="ApplicantName"></span>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label id="_Gender">Gender:</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span id="Gender"></span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label id="_FatherHusbandName">Father/Husband Name:</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span id="FatherHusbandName"></span>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label id="_PropertyType">Property Type:</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span id="PropertyType"></span>
+        </div>
+    </div>
+
+}
+
+<script type="text/javascript">
+
+    function GetRid() {
+        var regId = $("#hdnRid").val();
+        if (regId == "") { regId = 0; }
+        return {
+            Rid: regId
+        };
+    }
+
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+
+    function GetPropertyDetails() {
+        //GetKYADetails();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rID: $('#Rid').val() }),
+            url: "/CIC/GetPropertyDetailByRid",
+            success: function (data) {
+                if (data != null) {
+                    $('#ApplicantName').html(data.ApplicantName);
+                    //if (data.Gender == "company")
+                    if (data.Gender != null && (data.Gender == "company" || data.Gender == "Company")) {
+                        //$('#_FatherHusbandName').Text("Signing Authority");
+                        //$('#FatherHusbandName').html(data.SigningAuthority);
+                        $('#_FatherHusbandName').hide();
+                        $('#FatherHusbandName').empty();
+                        $('#Gender').html(data.Gender);
+                        $('#hdnIsFirmExists').val(data.IsFirmExists);
+                    }
+                    else {
+                        $('#_FatherHusbandName').show();
+                        $('#FatherHusbandName').html(data.FatherName);
+                        $('#Gender').html(data.Gender);
+                        $('#hdnIsFirmExists').val(data.IsFirmExists);
+                    }
+                    //$('#PropertyType').html(data.PropertyNumber);
+                    $('#PropertyType').html(data.PropertyTypeName);
+                    HideShowSection(0);
+                    //$("#gridCIC").data("kendoGrid").dataSource.read();
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert("Error: " + respText);
+            }
+        });
+    }
+
+    function GetKYADetails() {
+        var rId = $("#Rid").val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ RegistrationId: rId }),
+            url: '/Property/PropertyRegistration/GetKYADetailsForRid',
+            success: function (result) {
+                if (result != null) {
+                    if (result.StatusId == "2") {
+                        alertify.error("Your KYA has been Rejected. Please Complete your KYA again.");
+                        $('#btnSubmit').attr('disabled', 'disabled');
+                        $('#btnGenerateCICLetter').attr('disabled', 'disabled');
+                        $('#btnReSubmit').attr('disabled', 'disabled');
+                        $('#btnCancelRequest').attr('disabled', 'disabled');
+                        return false;
+                    }
+                    else if (result.StatusId == "" || result.StatusId == null) {
+                        alertify.error("Please Complete your KYA.");
+                        $('#btnSubmit').prop('disabled', true);
+                        $('#btnGenerateCICLetter').prop('disabled', true);
+                        $('#btnReSubmit').prop('disabled', true);
+                        $('#btnCancelRequest').prop('disabled', true);
+                        return false;
+                    }
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+
+    function RequestIdCheck() {
+        var request = $("#ReqRefNo").val();
+        rModel = {
+            RequestId: $("#ReqRefNo").val(),
+            RegistrationId: $("#Rid").val(),
+            ServiceId: "3"
+        }
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ model: rModel }),
+            url: '/Property/PropertyRegistration/IsRequestIdIsExist',
+            success: function (result) {
+                if (result != '@ReturnType.Exist') {
+                    if (result == '@NAStatusId.Completed') {
+                        alertify.error("This Request is Completed");
+                    }
+                    else if (result == '@NAStatusId.Initiated') {
+                        alertify.error("This Request is in Initiated State. Please Forward this request first.");
+                    }
+                    else if (result == '@NAStatusId.Objection') {
+                        alertify.error("This Request in Objection State.");
+                    }
+                    else if (result == '@NAStatusId.Rejected') {
+                        alertify.error("This Request is Rejected");
+                    }
+                    else if (result == '@NAStatusId.Cancelled') {
+                        alertify.error("This Request is cancelled");
+                    }
+                    else if (result == '@NAStatusId.Withdrawn') {
+                        alertify.error("This Request is Withdrawn by Allottee.");
+                    }
+                    else {
+                        alertify.error("Request no. mismatch. Please enter a valid Request No.");
+                        //$('#btnNxt').attr('disabled', 'disabled');
+                    }
+                    $("#ReqRefNo").val('');
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+</script>

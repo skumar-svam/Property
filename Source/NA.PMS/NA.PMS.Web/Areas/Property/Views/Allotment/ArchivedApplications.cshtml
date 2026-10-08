@@ -1,0 +1,61 @@
+﻿@model NA.PMS.Model.ApplicationFormModel
+
+@using Kendo.Mvc.UI;
+@using NA.PMS.Model
+@{
+    ViewBag.Title = "Archived Applications";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="ApplicationForm">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-3 col-sm-12 col-xs-12"><h1 class="gridTitle">Archived Applications</h1></div>
+            <div class="col-md-9 col-sm-12 col-xs-12 col-btn">
+
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<ApplicationFormModel>()
+                .Name("gvArchivedApplications")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.ApplicationId).Visible(false);
+                    columns.Bound(c => c.EncryptedAppId).Visible(false);
+                    columns.Bound(c => c.FormNo).Title("Form Number").ClientTemplate("<a href='/Property/Allotment/ViewApplicationForm/#=EncryptedAppId#'>#=FormNo#</a>");
+                    columns.Bound(c => c.SchemeName).Title("Scheme Name");
+                    columns.Bound(c => c.DepartmentName).Title("Department Name");
+                    columns.Bound(c => c.FirstName).Title("Applicant/Company Name");
+                    columns.Bound(c => c.MobileNumber).Title("Mobile Number");
+                    columns.Bound(c => c.Status).Title("Status");
+
+                })
+                .Sortable()
+                .Filterable()
+                //.Events(e => e.DataBound("onDataBound"))
+                .Pageable
+                    (
+                         pageable => pageable
+                        .Enabled(true)
+                        .Refresh(true)
+                        .PageSizes(true)
+                            )
+                            .Groupable()
+                .DataSource
+                (
+                     dataSource => dataSource
+                    .Ajax().Model(model => model.Id(p => p.FormNo))
+                    .ServerOperation(true)
+                            .Read(read => read.Action("GetArchivedApplications", "Allotment")).PageSize(20)
+                 ).AutoBind(false)
+        )
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#gvArchivedApplications").data("kendoGrid").dataSource.read();
+    });</script>

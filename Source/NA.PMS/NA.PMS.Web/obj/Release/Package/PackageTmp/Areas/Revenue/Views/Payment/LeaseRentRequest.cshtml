@@ -1,0 +1,41 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+
+@{
+    ViewBag.Title = "Lease Rent Request";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="ManageLeaseRentRequests">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Lease Rent Request</h1></div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.LeaseRentViewModel>()
+        .Name("gridLeaseRentRequest")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.Id).Title("ID").Width(50);
+            columns.Bound(c => c.RegistrationId).Title("RID");
+            columns.Bound(c => c.CurrentDues).Title("Dues");
+            columns.Bound(c => c.CurrentDuesDate).Title("Created Date").Format("{0:dd-MMM-yyyy}");
+            columns.Bound(c => c.CreatedDate).Title("Created Date").Format("{0:dd-MMM-yyyy}");
+            columns.Bound(c => c.UserCreatedBy).Title("Created By");
+            columns.Bound(c => c.Approver).Title("Approved By");
+            columns.Bound(c => c.ApprovalDate).Title("Approved Date").Format("{0:dd-MMM-yyyy}");
+            columns.Bound(c => c.Status).Title("Status");
+            columns.Bound(c => c.IsActive).Title("Action");//.ClientTemplate("<a href=\"/Revenue/Finance/ViewLeaseDeedDetails/#= Id#\" id='e_#=LeaseDeedId#'><span class='glyphicon glyphicon-eye-open'></span></a>").Filterable(false).Sortable(false).Width(100);
+        })
+        .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+        .DataSource(dataSource => dataSource
+            .Ajax().ServerOperation(true)
+            .Model(model => model.Id(p => p.Id))
+            .Read(read => read.Action("GetLeaseRentRequestList", "Payment", new { area="Revenue"})).PageSize(10)
+            )
+        )
+    </div>
+</div>

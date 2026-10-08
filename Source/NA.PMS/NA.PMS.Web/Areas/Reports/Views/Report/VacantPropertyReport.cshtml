@@ -1,0 +1,99 @@
+﻿@model NA.PMS.Model.ReportModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@{
+    ViewBag.Title = "Vacant Property Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div>
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Vacant Properties</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Department")
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @(Html.Kendo().DropDownListFor(m => m.departmentId)
+                    .Filter("contains")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                            .OptionLabel(" -- Please Select --")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetDepartmentsByUser", "Report");
+                        });
+                    })
+             .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" })
+                )
+
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                <input type="button" id="btnSearch" class="btn btn-add" value="Search" />
+                <input type="button" id="btnClear" class="btn btn-default" value="Clear" />
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw">
+        </div>
+        <div class="col-md-12 k-grid-content" style="">
+
+            @(Html.Kendo().Grid<NA.PMS.Model.VacantPropertyViewModel>()
+                .Name("gridVacantPropertyReport")
+                .Excel(excel => excel.FileName("VacantPropertyReport.xlsx").AllPages(true).Filterable(true))
+                .ToolBar(toolsExcel => toolsExcel.Excel())
+
+                .ToolBar(tools => tools.Pdf())
+                .Pdf(pdf => pdf.FileName("VacantPropertyReport.pdf").TemplateId("page-template")
+                           .AllPages().AvoidLinks().PaperSize("A4").Scale(0.8).Margin("2cm", "1cm", "1cm", "1cm")
+                           .Landscape().RepeatHeaders().ProxyURL(Url.Action("Pdf_Export_Save", "Report")))
+                .Columns(columns =>
+                {
+                    //columns.Bound(c => c.schemeName).Title("Scheme Name");
+                    columns.Bound(c => c.DepartmentName).Title("Department");
+                    //columns.Bound(c => c.propertyType).Title("Property Type");
+                    columns.Bound(c => c.SectorName).Title("Sector");
+                    columns.Bound(c => c.BlockName).Title("Block");
+                    columns.Bound(c => c.PlotProperty).Title("Property No");
+                    columns.Bound(c => c.TotalArea).Title("Total Area");
+                    //columns.Bound(c => c.RegistryName).Title("Registry");
+                    // columns.Bound(c => c.refId).Hidden(true);
+                })
+                      .HtmlAttributes(new { style = "" })
+                        .Scrollable().Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                        .Groupable()
+                        .DataSource(dataSource => dataSource
+                        .Ajax()//.Model(model => model.Id(c => c.refId))
+                        .ServerOperation(true)
+                        .Read(read => read.Action("VancantPropertyReport", "Report").Data("PropertySearch")).PageSize(10)
+                )
+            )
+        </div>
+
+    </div>
+</div>
+<script>
+
+    function PropertySearch() {
+        return {
+            deptId: $('#departmentId').val()
+        };
+    }
+
+    $("#btnSearch").click(function () {
+        $("#gridVacantPropertyReport").data("kendoGrid").dataSource.read();
+    });
+
+    $('#btnClear').click(function () {
+        $('#departmentId').data('kendoDropDownList').value('');
+        $("#gridVacantPropertyReport").data("kendoGrid").dataSource.read();
+    });
+</script>

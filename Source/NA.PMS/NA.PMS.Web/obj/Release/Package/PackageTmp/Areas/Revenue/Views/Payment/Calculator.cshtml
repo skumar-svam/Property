@@ -1,0 +1,229 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@using NA.PMS.Common;
+
+@{
+    ViewBag.Title = "Calculator";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    #Report{
+        /*padding-left:30px;*/
+    }
+    #Report .row{
+        padding: 0px 20px;
+    }
+    #Report .col-md-2,.col-md-12,.col-md-4 {
+        padding: 6px 0 6px 0;
+    }
+    #Report .col-md-1{
+        padding: 6px 0 6px 0;
+    }
+     #Report .print-row:nth-child(2n+1){
+         /*background:#f5f5f5;*/
+         background:#f5faed;
+     }
+     #Report .print-col:nth-child(2n+1){
+          /*background:#f5f5f5;*/
+     }
+</style>
+
+<div class="col-lg-10 col-md-12 col-sm-12">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Accounts Calculator</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+
+    <div class="col-md-12 content-top-spce" style="padding-top:0;">
+        <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            <h2 class="blck-heading" style="margin-bottom:15px;">Registration Id</h2>
+            <div class="form-bx">
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label><b>Registration Id</b></label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @(Html.Kendo().DropDownList()
+                            .Name("DDLRegistrationId")
+                            .Filter("contains")
+                            .DataTextField("Text")
+                            .DataValueField("Id")
+                            .OptionLabel(" --- Select ---")
+                            .DataSource(source =>
+                            {
+                                source.Custom()
+                                .ServerFiltering(true)
+                                .ServerPaging(true)
+                                .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                .Transport(transport => transport.Read(read => read.Action("GetRegistrationIdList", "Payment", new { area = "Revenue" })))
+                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                .PageSize(100);
+                            })
+                            .HtmlAttributes(new { style = "width: 100%" })
+                            .Events(e => e.Change("GetPaymentDuesReport"))
+                        )
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label><b>Action Type</b></label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @(Html.Kendo().DropDownList()
+                            .Name("DDLActionType")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel(" --- Select ---")
+                            .BindTo(new List<SelectListItem>() {
+                                new SelectListItem() { Text = "Lease Rent", Value = "LeaseRent" },
+                                new SelectListItem() { Text = "Installment", Value = "Installment" }
+                            })
+                            .HtmlAttributes(new { style = "width: 100%" })
+                            .Events(e => e.Change("GetPaymentDuesReport"))
+                        )
+                    </div>
+                </div>
+
+                <div id="dues-payment-report" style="background:#fefefe;margin-left:30px;"></div>
+
+            </div>
+        </div>
+
+        <div class="box-button text-center">
+            <button type="button" value="Cancel" class="btn btn-default btn-clear">Clear</button>
+            <button type="button" value="Submit" class="btn btn-add btn-update" >Update</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('.btn-update').click(function () {
+            if ($('#DDLActionType').val() == "LeaseRent") UpdateLeaseRentDues();
+            if ($('#DDLActionType').val() == "Installment") UpdateInstallmentDues();
+        });
+    });
+
+
+
+    function UpdateLeaseRentDues() {
+        if ($("#DDLRegistrationId").val() == "") {
+            alertify.error("Select Registration Id");
+            return false;
+        }
+        else if ($('#DDLActionType').val() == "") {
+            alertify.error("Select Action Type");
+            return false;
+        }
+        else {
+            var model = { RegistrationId: $("#DDLRegistrationId").val(), ActionType: $('#DDLActionType').val() };
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify({ model: model }),
+                url: '@Url.Action("UpdateLeaseRentDuesPaymentById", "Payment", new { area="Revenue"})',
+                success: function (result) {
+                    if (result.ActionTypeId == '@ReturnType.Success') {
+                        alertify.success("Dues updated successfuly");
+                        $('#dues-payment-report').html(result.HtmlDuesReport);
+                    }
+                    else {
+                        alertify.error("Dues report is not generated");
+                        $('#dues-payment-report').html("");
+                        return false;
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Something is wrong, try again later");
+                }
+            });
+        }
+
+    }
+
+
+    function UpdateInstallmentDues() {
+        if ($("#DDLRegistrationId").val() == "") {
+            alertify.error("Select Registration id");
+            return false;
+        }
+        else if ($('#DDLActionType').val() == "") {
+            alertify.error("Select Action Type");
+            return false;
+        }
+        else {
+            var model = { RegistrationId: $("#DDLRegistrationId").val(), ActionType: $('#DDLActionType').val() };
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify({ model: model }),
+                url: '@Url.Action("UpdateLeaseRentDuesPaymentById", "Payment", new { area="Revenue"})',
+                @*url: '@Url.Action("UpdateInstallmentDuesPaymentById", "Payment", new { area = "Revenue" })',*@
+                success: function (result) {
+                    if (result == '@ReturnType.Success') {
+                        $('#dues-payment-report').html(result.HtmlDuesReport);
+                    }
+                    else {
+                        alertify.error("Dues report is not generated");
+                        $('#dues-payment-report').html("");
+                        return false;
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Something is wrong, try again later");
+                }
+            });
+        }
+    }
+
+    function GetPaymentDuesReport() {
+        if ($("#DDLRegistrationId").val() == "") {
+            alertify.error("Select Registration Id");
+            return false;
+        }
+        else if ($("#DDLActionType").val() == "") {
+            alertify.error("Select Action Type");
+            return false;
+        }
+        else {
+            var model = { RegistrationId: $("#DDLRegistrationId").val(), ActionType: $('#DDLActionType').val() };
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify({ model: model }),
+                url: '@Url.Action("GetPaymentDuesByRegistrationId", "Payment", new { area = "Revenue" })',
+                success: function (result) {
+                    if (result != null) {
+                        if (result.HtmlDuesReport != null) {
+                            $('#dues-payment-report').html(result.HtmlDuesReport);
+                        }
+                        else {
+                            alertify.error("Dues report is not generated");
+                            $('#dues-payment-report').html("");
+                        }
+                    }
+                    else {
+                        alertify.error("Dues report is not generated");
+                        $('#dues-payment-report').html("");
+                        return false;
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Something is wrong, try again later");
+                }
+            });
+        }
+    }
+
+</script>

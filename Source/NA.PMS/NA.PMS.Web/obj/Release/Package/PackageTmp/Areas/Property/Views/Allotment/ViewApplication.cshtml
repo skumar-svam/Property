@@ -1,0 +1,381 @@
+﻿@model NA.PMS.Model.ApplicationFormModel
+@using Kendo.Mvc.UI
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@Html.HiddenFor(m => m.ApplicationId)
+@Html.HiddenFor(m => m.PaymentType, new { @id = "hdnPaymentType" })
+@Html.HiddenFor(m => m.GenderName, new { @id = "hdnGenderName" })
+@Html.HiddenFor(m => m.SchemeStatus, new { @id = "hdnSchemeStatus" })
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12 rw-spce">
+
+            <h1 class="gridTitle">Application Form: @Html.DisplayFor(model => model.FormNo)</h1>
+
+
+
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <h2 class="blck-heading">Applicant Information</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group rdio-bx">
+                            <div class="row">
+                                <div class="col-md-6 col-sm-12 col-xs-12"><input type="radio" id="rbtnIndividual" name="companyType" value="individual" checked="checked" disabled="disabled">&nbsp;Individual &nbsp;&nbsp;</div>
+                                <div class="col-md-6 col-sm-12 col-xs-12"><input type="radio" id="rbtnCompany" name="companyType" value="company" disabled="disabled" />&nbsp;Company</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Scheme Name")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label class="form-control">@Html.DisplayFor(model => model.SchemeName)</label>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Department")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label class="form-control">@Html.DisplayFor(model => model.DepartmentName)</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Form Number")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label class="form-control">@Html.DisplayFor(model => model.FormNo)</label>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Gender")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <div id="ddlGenderName">
+                                <label class="form-control">@Html.DisplayFor(model => model.GenderName)</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" id="divFirstAndMiddleName">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("First Name")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label class="form-control">@Html.DisplayFor(model => model.FirstName)</label>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Middle Name")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label class="form-control">@Html.DisplayFor(model => model.MiddleName)</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Last Name", new { @id = "lblLastName" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @{
+                                if (Model.GenderName.ToLower() == "company")
+                                {
+                                    <label class="form-control">@Html.DisplayFor(model => model.FirstName)</label>
+                                }
+                                else
+                                {
+                                    <label class="form-control" id="lblLastNameValue">@Html.DisplayFor(model => model.LastName)</label>
+                                }
+                            }
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Email")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label class="form-control">@Html.DisplayFor(model => model.Email)</label>
+                        </div>
+                    </div>
+                    <div class="row" id="divParentsName">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Father's Name", new { @id = "lblFatherName" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.FatherName, new { @class = "form-control", @onchange = "FatherNameChange();", @maxlength = "150" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Mother's Name")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.MotherName, new { @class = "form-control", @onchange = "MotherNameChange();", @maxlength = "150" })
+                        </div>
+                    </div>
+                    <div class="row" id="divSigningAuthority">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Authorized Signatory")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label class="form-control">@Html.DisplayFor(model => model.SigningAuthority)</label>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Registered Office")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label class="form-control">@Html.DisplayFor(model => model.RegisteredOffice)</label>
+                        </div>
+                    </div>
+                    <div class="row" id="dvDOB">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Date Of Birth")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <div class="col-md-6 col-sm-6 col-xs-6">
+                                <label class="form-control">@Html.DisplayFor(model => model.DOB)</label>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-3">
+                                @Html.Label("Age")
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-3">
+                                <label class="form-control">@Html.DisplayFor(model => model.Age)</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Marital Status")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label class="form-control">@Html.DisplayFor(model => model.MaritialStatusName)</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Correspondence")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label class="lbl-form-control">@Html.DisplayFor(model => model.CorrespondingAddress)</label>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Permanent Address")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label class="lbl-form-control">@Html.DisplayFor(model => model.PermanentAddress)</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Phone Number")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @*<label class="form-control">@Html.DisplayFor(model => model.PhoneNumberP1)</label>*@
+                            <label class="form-control">@Html.DisplayFor(model => model.PhoneNumber)</label>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Mobile Number")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label class="form-control">@Html.DisplayFor(model => model.MobileNumber)</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Fax Number")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @*<label class="form-control">@Html.DisplayFor(model => model.FaxNumberP1)</label>*@
+                            <label class="form-control">@Html.DisplayFor(model => model.FaxNumber)</label>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group" id="divOccupation">
+                            @Html.Label("Occupation")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group" id="divOccupationTxt">
+                            <label class="form-control">@Html.DisplayFor(model => model.OccupationName)</label>
+                        </div>
+
+                    </div>
+                    <div class="row" id="divReligion">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Religion")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label class="form-control">@Html.DisplayFor(model => model.ReligionName)</label>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Category")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group" id="divOccupation">
+                            <label class="form-control">@Html.DisplayFor(model => model.CategoryName)</label>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Pan Number", new { @id = "lblPanNumber" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label class="form-control">@Html.DisplayFor(model => model.PanNumber)</label>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Annual Income", new { @id="lblAnnualIncome"})
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label class="form-control">@Html.DisplayFor(model => model.AnnualIncome)</label>
+                        </div>
+                    </div>
+                </div>
+                <h2 class="blck-heading">Payment Information</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Payment Type")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group rdio-bx">
+                            <div class="row">
+                                <div class="col-md-6 col-sm-12 col-xs-12">
+                                    <label>@Html.RadioButtonFor(m => m.PaymentType, "DD", new { @class = "ChangePaymentType", @disabled = "disabled", @checked = true }) Demand Draft</label>
+                                </div>
+                                <div class="col-md-6 col-sm-12 col-xs-12">
+                                    <label>@Html.RadioButtonFor(m => m.PaymentType, "RTGS", new { @class = "ChangePaymentType", @disabled = "disabled" }) RTGS</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Amount Deposited")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label class="form-control">@Html.DisplayFor(model => model.AmountDepositedId)</label>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Bank Name")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label class="form-control">@Html.DisplayFor(model => model.BankName)</label>
+                        </div>
+                    </div>
+                    <div class="row" id="divDemandDraft">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Branch Address")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label class="form-control">@Html.DisplayFor(model => model.BranchName)</label>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Demand Draft Number")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label class="form-control">@Html.DisplayFor(model => model.DemandDraftNumber)</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Issuing Bank", htmlAttributes: new { @id = "lblIssueBank" })
+                            @Html.Label("UTR Number", htmlAttributes: new { @id = "lblUTRnumber" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @*<label id="_lblIssueBank" class="form-control">@Html.DisplayFor(model => model.IssueBank)</label>
+                                <label id="_lblUTRnumber" class="form-control">@Html.DisplayFor(model => model.UTRNumber)</label>*@
+                            <label id="_lblIssueBank" class="form-control">@Html.DisplayFor(model => model.IssueBank)</label>
+                            @Html.TextBoxFor(m => m.UTRNumber, htmlAttributes: new { @class = "lbl-form-control", @id = "_lblUTRnumber", @readonly = "readonly" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Issue Date")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label class="form-control">@Html.DisplayFor(model => model.IssueDate)</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box-button text-center">
+                <input type="button" id="btnClose" value="Back" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $("#btnClose").click(function () {
+        if ($("#hdnSchemeStatus").val() == '@NA.PMS.Common.Constants.SchemeClosed')
+            window.location.href = '@Url.Action("ArchivedApplications", "Allotment")';
+        else
+            window.location.href = '@Url.Action("ManageApplication", "Allotment")';
+    });
+
+
+    $(document).ready(function () {
+        var genderId = $("#hdnGenderName").val();
+        if (genderId == "Company" || genderId == "company") {
+            $("#divFirstAndMiddleName").hide();
+            $('#divParentsName').hide();
+            $('#divSigningAuthority').show();
+            $("#divReligion").hide();
+            $("#divOccupation").hide();
+            $("#divOccupationTxt").hide();
+            $("#lblAnnualIncome").text('Yearly Turnover');
+            $('#lblLastName').text("Name of Company");
+            $('#dvDOB').hide();
+            $('label[for="Gender"]').hide();
+            $("#ddlGenderName").hide();
+            $('#rbtnCompany').attr('checked', 'true');
+            $("#lblPanNumber").text("Company PAN");
+        }
+        if (genderId == "Female" || genderId == "female") {
+            $("#lblFatherName").text("Father's Name/ Husband's Name");
+            $("#divFirstAndMiddleName").show();
+            $("#lblLastName").text('Last Name');
+            $('#divParentsName').show();
+            $('#divSigningAuthority').hide();
+            $("#dvDOB").show();
+            $("#divReligion").show();
+            $("#divOccupation").show();
+            $('label[for="Gender"]').show();
+            $("#ddlGenderName").show();
+            $('#rbtnIndividual').attr('checked', 'true');
+            $("#lblPanNumber").text("PAN Number");
+        }
+        if (genderId == "Male" || genderId == "male") {
+            $("#lblFatherName").text("Father's Name");
+            $("#divFirstAndMiddleName").show();
+            $("#lblLastName").text('Last Name');
+            $('#divParentsName').show();
+            $('#divSigningAuthority').hide();
+            $("#dvDOB").show();
+            $("#divReligion").show();
+            $("#divOccupation").show();
+            $('label[for="Gender"]').show();
+            $("#ddlGenderName").show();
+            $('#rbtnIndividual').attr('checked', 'true');
+            $("#lblPanNumber").text("PAN Number");
+        }
+        if ($('#hdnPaymentType').val().toUpperCase() == "DD") {
+            $('#lblUTRnumber').hide();
+            $('#_lblUTRnumber').hide();
+            $('#lblIssueBank').show();
+            $('#_lblIssueBank').show();
+            $("#divDemandDraft").show();
+        }
+        else if ($('#hdnPaymentType').val().toUpperCase() == "RTGS") {
+            $('#divDemandDraft').hide();
+            $('#lblUTRnumber').show();
+            $('#_lblUTRnumber').show();
+            $('#lblIssueBank').hide();
+            $('#_lblIssueBank').hide();
+        }
+
+    });
+
+    function EnableDisableFields() {
+        $("#divFirstAndMiddleName").show();
+        $("#lblLastName").text('Last Name');
+        $('#divParentsName').show();
+        $('#divSigningAuthority').hide();
+        $("#dvDOB").show();
+        $("#divReligion").show();
+        $("#divOccupation").show();
+    }
+
+</script>

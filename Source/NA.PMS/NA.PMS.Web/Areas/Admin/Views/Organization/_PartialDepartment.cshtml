@@ -1,0 +1,188 @@
+﻿@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions
+
+
+<div class="panel-body">
+    <div class="row form-group">
+        <div class="col-md-12" id="Application" style="text-align:center">
+            <input type="radio" name="department-action" value="AddDepartment" />Add &nbsp;&nbsp;
+            <input type="radio" name="department-action" value="UpdateDepartment" />Update
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-12 form-group col-20">
+            <label>Ex Department:</label>
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-30">
+            @(Html.Kendo().DropDownList()
+                .Name("ddlDepartment")
+                .OptionLabel("---select---")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .Filter("contains")
+                .DataSource(source =>
+                {
+                    source.Custom()
+                    .ServerFiltering(true)
+                    .ServerPaging(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    .Transport(transport => transport.Read(read => read.Action("GetMasterDataDropDownListAsDataSource", "Organization", new { area = "Admin" }).Data("FilterDepartment")))
+                    .Schema(schema => schema.Data("Data").Total("Total"))
+                    .PageSize(100);
+                })
+                .HtmlAttributes(new { style = "width:100%;" })
+                .Events(e=>e.Change("ddlDepartmentChangeEvent"))
+            )
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-20">
+            <label class="lbl-department">New Department:</label>
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-30">
+            <input type="text" maxlength="30" id="txtDepartment" class="k-textbox" style="width:100%;"/>
+        </div>
+        
+    </div>
+    <div class="row">
+        <div class="col-md-12 col-sm-12 form-group" style="text-align:right;">
+            <input type="button" id="btn-save-department" class="k-button" value="Update" style="min-width:80px;" />
+            <input type="button" id="btn-clear-department" class="k-button" value="Clear" style="min-width:80px;" />
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        $('input[type="radio"][name="department-action"]').on("change", function () {
+            var action = $('input[type="radio"][name="department-action"]:checked').val();
+            if (action == "AddDepartment") {
+                $('#btn-save-department').val("Add");
+                $('#ddlDepartment').data("kendoDropDownList").value('');
+                $('#ddlDepartment').data("kendoDropDownList").enable(false);
+                $('.lbl-department').html("New Department");
+            }
+            else {
+                $('#btn-save-department').val("Update");
+                $('#ddlDepartment').data("kendoDropDownList").enable(true);
+                $('.lbl-department').html("Department");
+            }
+        });
+
+        $('#btn-save-department').click(function () {
+            SubmitDepartmentForm();
+        });
+
+        $('#btn-clear-department').click(function () {
+            ClearDepartmentFields();
+        });
+    });
+
+    function FilterDepartment() {
+        return {
+            FilterType: "Department",
+            MasterData: "Department"
+        }
+    }
+
+
+    function ddlDepartmentChangeEvent() {
+        var deptId = $('#ddlDepartment').data("kendoDropDownList").value();
+        if (deptId != undefined && deptId != "") {
+            var dmodel = {
+                MasterData: "Department",
+                FilterType: "Department",
+                DepartmentId: deptId
+            };
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ model: dmodel }),
+                url: '/Admin/Organization/GetMasterDataInfoByType',
+                success: function (result) {
+                    if (result.ReturnTypeId == '@ReturnType.Success') {
+                        $('#txtDepartment').val(result.Department);
+                    }
+                    else if (result == '@ReturnType.None') {
+                        ClearSchemeInputFields();
+                        alertify.error("Scheme doesn't exist.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again");
+                }
+            });
+        }
+        else {
+            ClearSchemeInputFields();
+        }
+    }
+
+    function SubmitDepartmentForm() {
+        var flag = true;
+        var actiontype = $('input[type="radio"][name="department-action"]:checked').val();
+        var departmentId = $('#ddlDepartment').data("kendoDropDownList").value();
+        var department = $('#txtDepartment').val();
+        if (actiontype == "" || actiontype == undefined) {
+            flag = false;
+            alertify.error("Select Action type.");
+            return false;
+        }
+        if (actiontype == "AddDepartment") {
+            if (department == "") {
+                alertify.error("Enter Department name");
+                flag = false;
+            }
+            actiontype = "Save";
+        }
+        if (actiontype == "UpdateDepartment") {
+            if (departmentId == "") {
+                alertify.error("Select Department");
+                flag = false;
+            }
+            if (department == "") {
+                alertify.error("Enter Department name");
+                flag = false;
+            }
+            actiontype = "Update";
+        }
+        if (flag) {
+            var DepartmentModel = {
+                MasterData: "Department",
+                FilterType: "Department",
+                ActionType: actiontype,
+                DepartmentId: $('#ddlDepartment').data("kendoDropDownList").value(),
+                Department: $('#txtDepartment').val()
+            };
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ model: DepartmentModel }),
+                url: '/Admin/Organization/SaveMasterDataInfoByType',
+                success: function (result) {
+                    if (result.ReturnTypeId == '@ReturnType.Success') {
+                        alertify.success("Department saved successfully.");
+                        ClearDepartmentFields();
+                        $('#ddlDepartment').data("kendoDropDownList").dataSource.read();
+                    }
+                    else if (result == '@ReturnType.None') {
+                        alertify.error("Department already exist.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again");
+                }
+            });
+        }
+    }
+
+    function ClearDepartmentFields() {
+        $('#ddlDepartment').data("kendoDropDownList").value('');
+        $('#txtDepartment').val('')
+    }
+
+</script>

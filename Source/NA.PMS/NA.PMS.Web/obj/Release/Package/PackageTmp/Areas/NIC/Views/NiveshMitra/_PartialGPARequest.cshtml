@@ -1,0 +1,183 @@
+﻿@model  NA.PMS.NICServices.SWPServicesViewModel
+@using Kendo.Mvc.UI;
+
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 col-20 form-group">
+        <label>GPA Registration Number</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 col-30 form-group">
+        @Html.TextBoxFor(gpa => gpa.GPAModel.GPARegisteredNo, new { @maxlength = "29", style = "width:100%", @class = "k-textbox" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 col-20 form-group">
+        <label class="required">GPA Holder Name</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 col-30 form-group">
+        @Html.TextBoxFor(gpa => gpa.GPAModel.GPAHolderName, new { @maxlength = "99", style = "width:100%", @class = "k-textbox" })
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 col-20 form-group">
+        <label class="required">GPA Registered</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 col-30 form-group">
+        @(Html.Kendo().DropDownListFor(m => m.GPAModel.IsGPARegistered)
+            .DataTextField("Text")
+            .DataValueField("Id")
+            .OptionLabel("---Select---")
+            .DataSource(source => source.Read(read => read.Action("GetGPAStatusList", "NiveshMitra")))
+            .Events(events => { events.Change("RegisteredChange"); })
+            .HtmlAttributes(new { @class = "schemeForms", style = "width:100%" })
+        )
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 col-20 form-group">
+        <label class="required">Application Date</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 col-30 form-group">
+        @(Html.Kendo().DatePickerFor(gpa => gpa.GPAModel.ApplicationDate).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 col-20 form-group">
+        <label class="required">Relation</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 col-30 form-group">
+        @Html.TextBoxFor(gpa => gpa.GPAModel.RelationName, new { @maxlength = "29", style = "width:100%", @class = "k-textbox" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 col-20 form-group">
+        <label class="required">GPA Effective From</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 col-30 form-group">
+        @(Html.Kendo().DatePickerFor(gpa => gpa.GPAModel.EffectiveFrom).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 col-20 form-group">
+        <label class="required">GPA Effective To</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 col-30 form-group">
+        @(Html.Kendo().DatePickerFor(gpa => gpa.GPAModel.EffectiveTo).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 col-20 form-group">
+        <label class="required">GPA Holder Address</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 col-30 form-group">
+        @Html.TextAreaFor(gpa => gpa.GPAModel.GPAHolderAdd, new { @maxlength = "499", style = "width:100%", @class = "k-textbox" })
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+    function RegisteredChange() {
+        var registeredVal = $("#GPAModel_IsGPARegistered").val();
+        if (registeredVal == '') {
+            $("#GPAModel_GPARegisteredNo").val('');
+            $("#GPAModel_GPARegisteredNo").prop("disabled", true);
+            alertify.error("Please select GPA Registered");
+            return false;
+        }
+        if (registeredVal == '@NA.PMS.Common.ActiveStatus.No') {
+            $("#GPAModel_GPARegisteredNo").val('');
+            $("#GPAModel_GPARegisteredNo").prop("disabled", true);
+        }
+        else {
+            $("#GPAModel_GPARegisteredNo").prop("disabled", false);
+        }
+    }
+
+    function SaveGPARequest() {
+        if (Validation()) {
+            $('#ServiceRequestForm').submit();
+        }
+    }
+
+    function SaveGPARequest() {        
+        if (Validation()) {
+            SubmitServiceRequestForm();
+        }
+    }
+
+
+    function Validation() {
+        var bflag = false;
+        var GPAHolderName = $("#GPAHolderName").val();
+        var GPAHolderAdd = $("#GPAHolderAdd").val();
+        var GPARelationName = $("#RelationName").val();
+        var applicationDate = $("#ApplicationDate").val();
+        var effectiveFrom = $("#EffectiveFrom").val();
+        var effectiveTo = $("#EffectiveTo").val();
+        var GPARegistered = $("#IsGPARegistered").val();
+        var GPARegistrationNo = $("#GPARegisteredNo").val();
+        var allotmentDate = $("#AllotmentDate").val();
+        var dtEffectiveFrom = new Date(effectiveFrom);
+        var dtEffectiveTo = new Date(effectiveTo);
+        var dtApplicationDate = new Date(applicationDate);
+        var dtAllotmentDate = new Date(allotmentDate);
+
+        if (GPAHolderName == '') {
+            alertify.error("Please enter GPA Holder Name");
+            bflag = false;
+        }
+        else if (GPAHolderAdd == '') {
+            alertify.error("Please enter GPA Holder Address");
+            bflag = false;
+        }
+        else if (GPARelationName == '') {
+            alertify.error("Please enter Relation");
+            bflag = false;
+        }
+        else if (applicationDate == '') {
+            alertify.error("Please enter Application Date");
+            bflag = false;
+        }
+        else if (effectiveFrom == '') {
+            alertify.error("Please enter Effective From Date");
+            bflag = false;
+        }
+        else if (effectiveTo == '') {
+            alertify.error("Please enter Effective To Date");
+            bflag = false;
+        }
+        else if (GPARegistered == '') {
+            alertify.error("Please select GPA Registered");
+            bflag = false;
+        }
+        else if (dtEffectiveFrom > dtEffectiveTo) {
+            alertify.error("Effective From can't be later than Effective To");
+            bflag = false;
+        }
+        else if (dtApplicationDate <= dtAllotmentDate) {
+            alertify.error("Application Date can't be earlier than, or equal to Allotment Date");
+            bflag = false;
+        }
+        else if (dtEffectiveFrom <= dtAllotmentDate) {
+            alertify.error("GPA Effective From can't be earlier than, or equal to Allotment Date");
+            bflag = false;
+        }
+        else {
+            bflag = true;
+        }
+
+        if (GPARegistered == '@NA.PMS.Common.ActiveStatus.Yes') {
+            if (GPARegistrationNo == '') {
+                alertify.error("Please enter GPA Registration Number");
+                bflag = false;
+            }
+        }
+        return bflag;
+    }
+
+    function ClearGPAFields() {
+        $('#GPAModel_GPARegisteredNo').val('');
+        $('#GPAModel_GPAHolderName').val('');
+        $('#GPAModel_RelationName').val('');
+        $('#GPAModel_GPAHolderAdd').val('');
+        $('#GPAModel_IsGPARegistered').data("kendoDropDownList").value('');
+        $('#GPAModel_ApplicationDate').data("kendoDatePicker").value('');
+        $('#GPAModel_EffectiveFrom').data("kendoDatePicker").value('');
+        $('#GPAModel_EffectiveTo').data("kendoDatePicker").value('');
+    }
+</script>
+
+
+

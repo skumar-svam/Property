@@ -1,0 +1,549 @@
+﻿@model NA.PMS.Model.PropertyViewModel
+@using Kendo.Mvc.UI
+@using NA.PMS.Common
+@{
+    ViewBag.Title = "Manage Request";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .col-md-3.form-group span.k-dropdown{
+        width:90%;
+        float:right;
+    }
+    .col-md-9.form-group textarea.form-control{
+        width:97%;
+        float:right;
+    }
+    .col-md-3.form-group .form-control{
+        width:90%;
+        float:right;
+    }
+     .col-md-6.form-group .form-control{
+        width:95%;
+        float:right;
+    }
+     .col-md-3.form-group span.k-datepicker{
+        width:90%;
+        float:right;
+    }
+      .col-md-3.form-group span.k-numerictextbox{
+        width:90%;
+        float:right;
+    }
+       .col-md-3.form-group .lbl-form-control{
+        width:90%;
+        float:right;
+    }
+</style>
+
+@using (Html.BeginForm())
+{
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Add Request</h1></div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 mandatory"></div>
+                </div>
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="col-md-12 content-top-spce">
+                <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                    <h2 class="blck-heading">Allottee Details</h2>
+                    <div class="form-bx">
+                        <div class="row">
+                            @Html.HiddenFor(model => model.Id)
+                            @Html.HiddenFor(model => model.ApproverId)
+                            @Html.HiddenFor(model => model.DepartmentId)
+                            @Html.HiddenFor(model => model.SchemeId)
+                            @Html.HiddenFor(model => model.SchemeRefundId)
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Type of Cancellation")
+                            </div>
+                            <div class="col-md-6 col-sm-3 col-xs-12 form-group">
+                                @Html.RadioButtonFor(model => model.DefaulterId, NA.PMS.Common.Constants.PropertyCancellationId) Cancellation
+                                @Html.RadioButtonFor(model => model.DefaulterId, NA.PMS.Common.Constants.PropertySurrenderId) Surrender
+                                @Html.RadioButtonFor(model => model.DefaulterId, NA.PMS.Common.Constants.PropertyRestorationId) Restoration
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Registration Id")
+                                @(Html.Kendo().DropDownListFor(m => m.RegistrationId)
+                                .Filter("contains")
+                                .DataTextField("Text")
+                                .DataValueField("Id")
+                                .OptionLabel("---Select---")
+                                .AutoBind(false)
+                                .DataSource(source =>
+                                {
+                                    source.Custom()
+                                    .ServerFiltering(true)
+                                    .ServerPaging(true)
+                                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                    .Transport(transport => transport.Read(read => read.Action("GetRegistrationIdListByType", "Default").Data("FilterDefaulterType")))
+                                    .Schema(schema => schema.Data("Data").Total("Total"))
+                                    .PageSize(100);
+                                })
+                                .Events(events => { events.Change("RegistrationIdChangeEvent"); })
+                                .HtmlAttributes(new { @class = "schemeForms", style = "" })
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label>Department</label>
+                                @Html.TextBoxFor(model => model.Department, htmlAttributes: new { @class = "form-control" })
+                            </div>
+                            <div class="col-md-6 col-sm-12 col-xs-12 form-group">
+                                <label>Scheme Name</label>
+                                @Html.TextBoxFor(model => model.SchemeName, htmlAttributes: new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 col-sm-12 col-xs-12 form-group">
+                                <label>Allottee Name</label>
+                                @Html.TextBoxFor(model => model.Applicant, htmlAttributes: new { @class = "form-control" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label>Allottee Type</label>
+                                @Html.TextBoxFor(model => model.ApplicantType, htmlAttributes: new { @class = "form-control" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label>Property No</label>
+                                @Html.TextBoxFor(model => model.PropertyNo, htmlAttributes: new { @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="row"> 
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label>Property Type</label>
+                                @Html.TextBoxFor(model => model.PropertyType, htmlAttributes: new { @class = "form-control" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label>Area Range</label>
+                                @Html.TextBoxFor(model => model.AreaRange, htmlAttributes: new { @class = "form-control" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label>Total Area</label>
+                                @Html.TextBoxFor(model => model.TotalArea, htmlAttributes: new { @class = "form-control" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label>Total Property Cost</label>
+                                @Html.TextBoxFor(model => model.TotalPropertyCost, htmlAttributes: new { @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label>Is Mortgaged</label>
+                                @Html.TextBoxFor(model => model.IsMortgaged, htmlAttributes: new { @class = "form-control" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label>Is Functional</label>
+                                @Html.TextBoxFor(model => model.IsPropertyFunctional, htmlAttributes: new { @class = "form-control" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label>Is One time Lease Paid</label>
+                                @Html.TextBoxFor(model => model.IsOneTimeLeasePaid, htmlAttributes: new { @class = "form-control" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label>Is Total Premium Paid</label>
+                                @Html.TextBoxFor(model => model.IsTotalPremiumPaid, htmlAttributes: new { @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 col-sm-12 col-xs-12 form-group">
+                                <label>Permanent Address</label>
+                                @Html.TextBoxFor(model => model.ApplicantAddressI, htmlAttributes: new { @class = "form-control" })
+                            </div>
+                            <div class="col-md-6 col-sm-12 col-xs-12 form-group">
+                                <label>Corresspond Address</label>
+                                @Html.TextBoxFor(model => model.ApplicantAddressII, htmlAttributes: new { @class = "form-control" })
+                            </div>
+                        </div>
+                    </div>
+
+                    <h2 class="blck-heading h2-default-title">Cancellation/Refund Details</h2>
+                    <div class="form-bx">
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label class="lbl-default-date">Cancellation Date</label>
+                                @(Html.Kendo().DatePickerFor(model => model.ActionDate).HtmlAttributes(new { @class = "input-disabled", style = "" }))
+                            </div>
+                            
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group col-sm-3 col-xs-12 form-group">
+                                <label>Refund Amount</label>
+                                @(Html.Kendo().NumericTextBoxFor(model => model.RefundAmount)
+                                .Min(0).Max(9999999999999)
+                                .Spinners(false).Step(0)
+                                .Enable(true)
+                                .HtmlAttributes(new { style = "", @maxlength = "13", @class = "text-right" })
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-12 col-xs-12 form-group">
+                                <label class="lbl-refund-type">Refund Type</label>
+                                @(Html.Kendo().DropDownListFor(m => m.RefundTypeId)
+                                .Filter("contains")
+                                .DataTextField("Text")
+                                .DataValueField("Id")
+                                .OptionLabel("---Select---")
+                                .AutoBind(false)
+                                .DataSource(source =>
+                                {
+                                    source.Custom()
+                                    .ServerFiltering(true)
+                                    .ServerPaging(true)
+                                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                    .Transport(transport => transport.Read(read => read.Action("GetSchemeRefundTypeListAsDataSource", "Default").Data("FilterBySchemeAndDepartment")))
+                                    .Schema(schema => schema.Data("Data").Total("Total"))
+                                    .PageSize(100);
+                                })
+                                .Events(events => { events.Change("RefundTypeIdChangeEvent"); })
+                                .HtmlAttributes(new { @class = "schemeForms", style = "" })
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label>Refund Lock Period</label>
+                                <label id="lbl-lock-period" class="lbl-form-control text-right"></label>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label>Deduction Apply On</label>
+                                <label id="lbl-deduction-apply-on" class="lbl-form-control"></label>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label>Deduction Amount</label>
+                                <label id="lbl-deduction-amount" class="lbl-form-control text-right"></label>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label>Unit</label>
+                                <label id="lbl-unit" class="lbl-form-control"></label>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label>Interest rate</label>
+                                <label id="lbl-interest-rate" class="lbl-form-control text-right"></label>
+                            </div>                            
+                        </div>
+
+                        <div class="row">                          
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label>Days After Interest</label>
+                                <label id="lbl-days-after-interest" class="lbl-form-control text-right"></label>
+                            </div>
+                            <div class="col-md-9 col-sm-12 col-xs-12 form-group">
+                                <label class="lbl-default-reason">Reason</label>
+                                @Html.TextAreaFor(can => can.Comment, htmlAttributes: new { @class = "form-control", style = "height:30px;" })
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="box-button text-center">
+                    <input type="button" class="btn btn-add" id="btn-back" value="Back" />
+                    <input type="button" class="btn btn-add" id="btn-submit" value="Submit for Approval" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+<div id="div-approver-popup-window" class="container-fluid" style="min-height:200px;">
+    <div class="row" style="margin-top:20px;">
+        <div class="col-md-4 form-group" style="text-align:right"><label class="font-bold">@Html.Label("Assign To: ")</label></div>
+        <div class="col-md-5 form-group">
+            @(Html.Kendo().DropDownList()
+                .Name("DDLApproverId")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .OptionLabel("---Select--").Filter("contains").AutoBind(false)
+                .DataSource(source =>
+                {
+                    source.Custom()
+                    .ServerFiltering(true)
+                    .ServerPaging(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    .Transport(transport => transport.Read(read => read.Action("GetApproverIdListByDepartment", "Default").Data("FilterDepartmentId")))
+                    .Schema(schema => schema.Data("Data").Total("Total"))
+                    .PageSize(100);
+                })
+                .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4"> </div>
+        <div class="col-md-8">
+            <input type="button" class="btn btn-default" id="btn-popup-window-submit" value="Submit" />
+            <input type="button" class="btn btn-default close-popup-window" value="Close" />
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#div-approver-popup-window').kendoWindow({
+            modal: true,
+            title: "Approver",
+            visible: false,
+            width: "40%"
+        });
+
+        $('input[type=radio][name=DefaulterId]').change(function () {
+            ToggleDefaulterType();
+        });
+
+        $(".close-popup-window").click(function () {
+            $("#div-approver-popup-window").data("kendoWindow").close();
+        });
+
+        $("#btn-submit").click(function () {
+            $("#DDLApproverId").data("kendoDropDownList").dataSource.read();
+            $("#div-approver-popup-window").data("kendoWindow").center();
+            $("#div-approver-popup-window").data("kendoWindow").open();
+        });
+
+        $("#btn-popup-window-submit").click(function () {
+            SubmitCancellationForm();
+        });
+
+        $("#btn-back").click(function () {
+            window.location.href = '@Url.Action("Manage", "Default", new { area="Property"})';
+        });
+    });
+
+    function FilterDepartmentId() {
+        return {
+            DepartmentId: $('#DepartmentId').val()
+        }
+    }
+
+    function FilterDefaulterType() {
+        return {
+            FilterType: $("input[name='DefaulterId']:checked").val() == '@NA.PMS.Common.Constants.PropertyRestorationId' ? "Restoration" : "Allotted"
+        }
+    }
+
+    function FilterBySchemeAndDepartment() {
+        return {
+            SchemeId: $("#SchemeId").val(),
+            DepartmentId: $("#DepartmentId").val(),
+        }
+    }
+
+    function ToggleDefaulterType() {
+        var cancelType = $("input[name='DefaulterId']:checked").val();
+        if (cancelType != undefined) {
+            if (cancelType == '@NA.PMS.Common.Constants.PropertyCancellationId') {
+                $('.h2-default-title').html("Cancellation/Refund Detail");
+                $('.lbl-default-date').html("Cancellation Date");
+                $('.lbl-default-reason').html("Reason For Cancellation");
+            }
+            else if (cancelType == '@NA.PMS.Common.Constants.PropertySurrenderId') {
+                $('.h2-default-title').html("Surrender/Refund Detail");
+                $('.lbl-default-date').html("Surrender Date");
+                $('.lbl-default-reason').html("Reason For Surrender");
+            }
+            else if (cancelType == '@NA.PMS.Common.Constants.PropertyRestorationId') {
+                $('.h2-default-title').html("Restoration/Refund Detail");
+                $('.lbl-default-date').html("Restoration Date");
+                $('.lbl-default-reason').html("Reason For Restoration");
+            }
+
+            $('#RegistrationId').data("kendoDropDownList").enable(true);
+            $('#RegistrationId').data("kendoDropDownList").dataSource.read();
+        }
+        else {
+            $('#RegistrationId').data("kendoDropDownList").enable(false)
+        }
+    }
+
+    function RegistrationIdChangeEvent() {
+        var rId = $("#RegistrationId").val();
+        var cancelType = $("input[name='DefaulterId']:checked").val();
+        if (cancelType == undefined) {
+            alertify.error("Please select Cancellation Type");
+            return false;
+        }
+        if (rId == "") {
+            alertify.error("Please select Registration Id");
+            return false;
+        }
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ RegistrationId: rId, ActionType: "Registered" }),
+            url: '/Property/Default/GetPropertyDetailByRegistrationId',
+            success: function (result) {
+                if (result != null) {
+                    $("#SchemeId").val(result.SchemeId);
+                    $("#DepartmentId").val(result.DepartmentId);
+                    $("#Department").val(result.Department);
+                    $("#SchemeName").val(result.SchemeName);
+                    $("#Applicant").val(result.Applicant);
+                    $("#ApplicantType").val(result.ApplicantType);
+                    $("#PropertyType").val(result.PropertyType);
+                    $("#TotalArea").val(result.TotalArea);
+                    $("#AreaRange").val(result.FloorArea);//change to floor name
+                    $("#TotalPropertyCost").val(result.TotalPropertyCost);
+                    $("#PropertyNo").val(result.PropertyNo);
+                    $("#ApplicantAddressI").val(result.ApplicantAddressI);
+                    $("#ApplicantAddressII").val(result.ApplicantAddressII);
+                    $("#IsMortgaged").val(result.IsMortgaged);
+                    $("#IsPropertyFunctional").val(result.IsPropertyFunctional);
+                    $("#IsOneTimeLeasePaid").val(result.IsOneTimeLeasePaid);
+                    $("#IsTotalPremiumPaid").val(result.IsTotalPremiumPaid);
+
+                    $('#RefundTypeId').data("kendoDropDownList").dataSource.read();
+                }
+                else {
+                    alertify.error("Provider failed to load data, Please try again later.");
+                }
+            },
+            error: function (obj) {
+                alertify.error("Network Error. Please try again later.");
+            }
+        });
+    }
+
+    function RefundTypeIdChangeEvent() {
+        if ($('#RefundTypeId').val() != "") {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ RefundTypeId: $('#RefundTypeId').val() }),
+                url: '/Property/Default/GetSchemeRefundDetailById',
+                success: function (result) {
+                    if (result != null) {
+                        $("#SchemeRefundId").val(result.RefundId);
+                        $("#lbl-lock-period").html(result.RefundLockPeriod);
+                        $("#lbl-deduction-apply-on").html(result.DeductionApplyOn);
+                        $("#lbl-deduction-amount").html(result.Deduction);
+                        $("#lbl-unit").html(result.Unit);
+                        $("#lbl-interest-rate").html(result.InterestRate);
+                        $("#lbl-days-after-interest").html(result.DaysAfterInterest);
+                    }
+                    else {
+                        alertify.error("Network Error, Please try again later.");
+                    }
+                },
+                error: function (obj) {
+                    alertify.error("Network Error. Please try again later.");
+                }
+            });
+        }
+        else {
+            ClearRefundDetails();
+        }
+    }
+
+    function SubmitCancellationForm() {
+        var kendoWidget = $('#div-approver-popup-window').data("kendoWindow");
+        kendo.ui.progress(kendoWidget.element, true);
+
+        if (ValidateCancellationDetail() == true && $('#DDLApproverId').val() != "") {
+            $('#ApproverId').val($('#DDLApproverId').val())
+            var formData = new FormData($('form').get(0));
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: false, // Not to set any content header
+                processData: false, // Not to process data
+                data: formData,
+                url: '/Property/Default/SaveCancellationDetail',
+                success: function (result) {
+                    kendo.ui.progress(kendoWidget.element, false);
+                    if (result == '@ReturnType.Saved') {
+                        alertify.success("Cancellation detail saved successfully.");
+                        ClearAllotteeDetails();
+                        ClearRefundDetails();
+                    }
+                    else {
+                        alertify.error("Network Error, Please try again later.");
+                        return false;
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    kendo.ui.progress(kendoWidget.element, false);
+                    alertify.error("Network error, try again later");
+                }
+            });
+        }
+        else {
+            alertify.error("Please select Assign To");
+        }
+    }
+
+    function ValidateCancellationDetail() {
+        var flag = true;
+        var cancelType = $("input[name='DefaulterId']:checked").val();
+        if (cancelType == undefined) {
+            alertify.error("Please select Cancellation Type");
+            return flag = false;
+        }
+        if ($('#RegistrationId').val() == "") {
+            alertify.error("Please select Registration Id");
+            return flag = false;
+        }
+        if ($('#ActionDate').val() == "") {
+            alertify.error("Please select Submission date");
+            return flag = false;
+        }
+        if ($('#RefundAmount').val() == "") {
+            alertify.error("Please enter Refund Amount");
+            return flag = false;
+        }
+        if ($('#Comment').val() == "") {
+            alertify.error("Please enter Comment");
+            return flag = false;
+        }
+        return flag;
+    }
+
+
+    function ClearRefundDetails() {
+        $('#RefundTypeId').data("kendoDropDownList").value('');
+        $('#ActionDate').data("kendoDatePicker").value('');
+        $('#RefundAmount').val('');
+        $('textarea#Comment').val('');
+        $("#lbl-lock-period").html('');
+        $("#lbl-deduction-apply-on").html('');
+        $("#lbl-deduction-amount").html('');
+        $("#lbl-unit").html('');
+        $("#lbl-interest-rate").html('');
+        $("#lbl-days-after-interest").html('');
+    }
+
+    function ClearAllotteeDetails() {
+        $('#RegistrationId').data("kendoDropDownList").value('');
+        $("#SchemeId").val('');
+        $("#DepartmentId").val('');
+        $("#Department").val('');
+        $("#SchemeName").val('');
+        $("#Applicant").val('');
+        $("#ApplicantType").val('');
+        $("#PropertyType").val('');
+        $("#TotalArea").val('');
+        $("#AreaRange").val('');//change to floor name
+        $("#TotalPropertyCost").val('');
+        $("#PropertyNo").val('');
+        $("#ApplicantAddressI").val('');
+        $("#ApplicantAddressII").val('');
+        $("#IsMortgaged").val('');
+        $("#IsPropertyFunctional").val('');
+        $("#IsOneTimeLeasePaid").val('');
+        $("#IsTotalPremiumPaid").val('');
+    }
+</script>
+
+

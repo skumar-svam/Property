@@ -1,0 +1,349 @@
+﻿@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions
+
+@{
+    ViewBag.Title = "Update Data";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .left-pad-15{
+        padding-left:15px;
+    }
+    .panel-title a{
+        text-decoration:none;
+    }
+    .k-textbox{
+        width:100%;
+    }
+    .form-control{
+        border-radius:0;
+    }
+    .more-less {
+        float: right;
+        color: #212121;
+    }
+    .panel-body{
+        padding-bottom:0;
+    }
+</style>
+<script src="~/Scripts/common-validation.js"></script>
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Update Data</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 col-btn"><a href="#" onclick="javascript:DisplayWindow()">Add Sector/Block</a></div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                @*<div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="headingOne">
+                        <h4 class="panel-title">
+                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                <i class="more-less glyphicon glyphicon-plus"></i>
+                                Service Request
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                        <div class="panel-body">
+                            <div class="row form-group">
+                                <div class="col-md-2">
+                                    <label>Request No:</label>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" maxlength="10" id="txtRequestNo" class="k-textbox numeric-box" />
+                                </div>
+                                <div class="col-md-2">
+                                    <label>Registration Id:</label>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="text" maxlength="8" id="txtRegistrationId" class="k-textbox" />
+                                </div>
+                                <div class="col-md-2" style="text-align:right;">
+                                    <input type="button" id="btnUpdateRequest" class="k-button" value="Update" />
+                                    <input type="button" id="btnClearRequest" class="k-button" value="Clear" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>*@
+
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="headingOne">
+                        <h4 class="panel-title">
+                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                <i class="more-less glyphicon glyphicon-plus"></i>
+                                Service Request
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                        @{Html.RenderPartial("_UpdateServiceRequest");}
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="headingTwo">
+                        <h4 class="panel-title">
+                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+                                <i class="more-less glyphicon glyphicon-plus"></i>
+                                Allottee Detail
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+                        @{Html.RenderPartial("_UpdateAllotteeDetail");}
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="heading3">
+                        <h4 class="panel-title">
+                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse3" aria-expanded="true" aria-controls="collapse3">
+                               <i class="more-less glyphicon glyphicon-plus"></i>
+                                Transfer Detail
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapse3" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading3">
+                       @{Html.RenderPartial("_UpdateTransferDetail");}
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="heading6">
+                        <h4 class="panel-title">
+                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse6" aria-expanded="true" aria-controls="collapse6">
+                                <i class="more-less glyphicon glyphicon-plus"></i>
+                                Mortgage Detail
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapse6" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading6">
+                        @{Html.RenderPartial("_UpdateMortgage");}
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="heading4">
+                        <h4 class="panel-title">
+                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse4" aria-expanded="true" aria-controls="collapse4">
+                                <i class="more-less glyphicon glyphicon-plus"></i>
+                                Property Detail
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapse4" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading4">
+                        @{Html.RenderPartial("_UpdateProperty");}
+                    </div>
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading" role="tab" id="heading5">
+                        <h4 class="panel-title">
+                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse5" aria-expanded="true" aria-controls="collapse5">
+                                <i class="more-less glyphicon glyphicon-plus"></i>
+                                Multiple Detail
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapse5" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading4">
+                        @{Html.RenderPartial("_UpdateMultiple");}
+                    </div>
+                </div>
+
+            </div>
+
+            
+        </div>
+    </div>
+</div>
+
+
+<div class="col-md-12 kendo-popup-window" id="divSectorBlock" style="background:url(/Content/Images/boxed-bg.jpg) repeat">
+    <div class="row" style="margin:25px 0 25px 0;">
+        <div class="col-md-4 col-sm-4 col-xs-12 col-md-offset-2 form-group" style="text-align:center">
+            @(Html.Kendo().DropDownList()
+                .Name("SectorBlock")
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .OptionLabel(" -- Select --")
+                .DataSource(source => source.Read(read => read.Action("GetSectorBlock", "Report")))
+                .HtmlAttributes(new { style = "width: 100%;" })
+                //.Events(events => { events.Change("SectorBlockSelection"); })
+            )
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+            <input type="text" class="k-textbox" id="txtSectorBlock" maxlength="8" placeholder="sector/block name" style="width:100%; margin-left:4px;" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 col-sm-4 col-xs-12 form-group"></div>
+        <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+            <input type="button" class="k-button" id="btnAddSectorBlock" value="submit" style="width:100%" />
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-12 form-group"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function toggleIcon(e) {
+        $(e.target).prev('.panel-heading').find(".more-less").toggleClass('glyphicon-plus glyphicon-minus');
+    }
+
+    function DisplayWindow() {
+        $('#divSectorBlock').data("kendoWindow").open();
+        $('#divSectorBlock').data("kendoWindow").center();
+    }
+
+
+
+    $(document).ready(function () {
+        $('.kendo-popup-window').kendoWindow({
+            modal: true,
+            title: "Add Sector/Block",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "30%"
+            },
+            width: "40%", height: "35%"
+        });
+
+
+        $('.panel-group').on('hidden.bs.collapse', toggleIcon);
+        $('.panel-group').on('shown.bs.collapse', toggleIcon);
+
+        $(".numeric-box").keydown(function (e) {
+            // Allow: backspace, delete, tab, escape, enter and .
+            if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
+                // Allow: Ctrl+A, Command+A
+                (e.keyCode === 65 && (e.ctrlKey === true || e.metaKey === true)) ||
+                // Allow: home, end, left, right, down, up
+                (e.keyCode >= 35 && e.keyCode <= 40)) {
+                // let it happen, don't do anything
+                return;
+            }
+            // Ensure that it is a number and stop the keypress
+            if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                e.preventDefault();
+            }
+        });
+
+        $('#btnUpdateRequest').click(function () {
+            var id = $('#txtRequestNo').val();
+            var rid = $('#txtRegistrationId').val();
+            if (id == "") {
+                alertify.error("Please enter Request no.");
+                return false;
+            }
+            if (rid == "" || rid.length != 8) {
+                alertify.error("Please enter Registration Id.");
+                return false;
+            }
+            else {
+                $.ajax({
+                    type: "post",
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({ requestNo: id, registrationId: rid }),
+                    url: '@Url.Action("UpdateRegistrationIdByRequestNo", "Report")',
+                    success: function (result) {
+                        if (result == '@ReturnType.Success') {
+                            alertify.success("Registration Id updated successfully.");
+                        }
+                        if (result == '@ReturnType.Exist') {
+                            alertify.error("Request No already has Registration Id.");
+                        }
+                        if (result == '@ReturnType.NotExist') {
+                            alertify.error("Service Request doesn't exist");
+                        }
+                    },
+                    error: function (ajaxRequest, strError) {
+                        //alert(ajaxRequest.responseText);
+                        alertify.error("Please try again.");
+                    }
+                });
+            }
+        });
+
+        $('#txtRequestNo').blur(function () {
+            var id = $('#txtRequestNo').val();
+            //alert(id);
+            if (id != "") {
+                $.ajax({
+                    type: "post",
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({ requestNo: id }),
+                    url: '@Url.Action("GetRegistrationIdByRequestNo", "Report")',
+                    success: function (result) {
+                        if (result != null || result != 0) {
+                            $('#txtRegistrationId').val(result);
+                        }
+                    },
+                    error: function (ajaxRequest, strError) {
+                        //alert(ajaxRequest.responseText);
+                        alertify.error("Please try again.");
+                    }
+                });
+            }
+        });
+
+        $('#btnClearRequest').click(function () {
+            $('#txtRequestNo').val('');
+            $('#txtRegistrationId').val('');
+        });
+
+    });
+
+
+    $('#btnAddSectorBlock').click(function () {
+        var sb = $('#SectorBlock').val();
+        var txtname = $('#txtSectorBlock').val();
+        if (sb.trim() == "") {
+            alertify.error("Please select sector or block.");
+            return false;
+        }
+        if (txtname.trim() == "") {
+            alertify.error("Please enter sector or block name.");
+            return false;
+        }
+        else {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ type: sb, typeName: txtname }),
+                url: '@Url.Action("SaveSectorBlockName", "Report")',
+                success: function (result) {
+                    if (result == '@ReturnType.Saved') {
+                        $('#txtSectorBlock').val('');
+                        alertify.success("Data saved successfully.");
+                        return false;
+                    }
+                    else if (result == '@ReturnType.Exist') {
+                        $('#txtSectorBlock').val('');
+                        alertify.error("Sector/Block already exist.");
+                        return false;
+                    }
+                    else {
+                        alertify.error("Please try again.");
+                        return false;
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Please try again.");
+                }
+            });
+        }
+    });
+
+</script>

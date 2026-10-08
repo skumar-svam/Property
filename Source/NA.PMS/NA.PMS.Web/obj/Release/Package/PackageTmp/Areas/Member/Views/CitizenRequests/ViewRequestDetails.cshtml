@@ -1,0 +1,362 @@
+﻿@using Kendo.Mvc.UI
+@model NA.PMS.Model.RequestDetails
+
+@{
+    ViewBag.Title = "View RequestDetails";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="col-lg-12 col-md-12 col-sm-12" style="padding-bottom:30px;">
+    <div class="row rw-spce">
+        <div class="col-sm-8"><h1 class="gridTitle">View Request Details</h1></div>
+
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+        <h2 class="blck-heading">Service Request Details</h2>
+        <div class="form-bx">
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+                    @Html.Label("Request Number")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(rd => rd.Id, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+                    @Html.Label("Registration ID")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(rd => rd.RId, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+                    @Html.Label("Service Name")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(rd => rd.ServiceName, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+                    @Html.Label("Request Status")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @(Html.Kendo().DropDownListFor(rd => rd.StatusId)
+                            //.Filter("contains")
+                            .DataTextField("text")
+                            .DataValueField("id")
+                            .OptionLabel("--Select--")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetServiceRequestStatus", "CitizenRequests", new { area = "Member" });
+                                });
+                            })
+                            .Enable(true)
+                            //.Events(events => { events.Change("RIdChange"); })
+                            .HtmlAttributes(new { @class = "schemeForms", style = "width:100%" })
+                    )
+                    @*@Html.TextBoxFor(rd => rd.ReqStatus, new { @class = "form-control", @readonly = "readonly" })*@
+                    @Html.HiddenFor(rd => rd.ReqStatus)
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+                    @Html.Label("Allottee Name")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(rd => rd.AllotteeName, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+                    @Html.Label("Address")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextAreaFor(rd => rd.Address, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+                    @Html.Label("Requestor Name")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(rd => rd.RequestorName, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+                    @Html.Label("Mobile Number")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(rd => rd.MobileNo, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+                    @Html.Label("Description")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextAreaFor(rd => rd.Description, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+                    @Html.Label("Old Comment")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextAreaFor(rd => rd.OldComment, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+                    @Html.Label("Dues Amount")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(rd => rd.DuesAmnt, new { @class = "form-control" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+                    @Html.Label("Service Fee")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(rd => rd.ServiceFee, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+                    @Html.Label("Payment Status")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(rd => rd.PaymentStatus, new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+                    @Html.Label("Comment")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextAreaFor(rd => rd.Comment, new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+                    @Html.Label("Dispatch Number")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(rd => rd.DispatchNo, new { @class = "form-control", maxlength = "19" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+                    @Html.Label("Dispatch Date")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @(Html.Kendo().DatePickerFor(rd => rd.DispatchDate)
+                                          .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" }))
+                </div>
+            </div>
+            <div class="row uploadDiv">
+                <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+                    @Html.Label("Upload File")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <input type="file" onchange="FileSelection()" name="fileDoc" id="fileDoc" />
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                </div>
+            </div>
+        </div>
+    </div>
+    @*<input type="file" onchange="FileSelection()" name="fileDoc" id="fileDoc" />*@
+    @*<input type="button" id="btnSaveFiles" value="Submit" />*@
+    <div class="box-button nw-bx-button text-center">
+        <input type="reset" id="btnSave" value="Save" class="btn btn-add" style="margin-left:25px;" />
+        @*<input type="submit" id="btnReject" value="Reject" class="btn btn-default" style="margin-right:25px;" />*@
+        <input type="button" class="btn btn-default" value="Back" id="btnBack" onclick="window.history.back();" />
+    </div>
+</div>
+
+
+
+<div class="col-md-12 blnk-rw"></div>
+<div class="k-grid-content">
+    @(Html.Kendo().Grid<NA.PMS.Model.PropertyDocument>()
+              .Name("gridDocuments")
+              .Columns(columns =>
+              {
+                  columns.Bound(c => c.DocumentName).Title("Document Name").Width(80);
+                  columns.Bound(c => c.DocumentPath).Hidden(true);
+                  columns.Bound(c => c.DocumentPath).Width(150).ClientTemplate("<a style = 'cursor:pointer;' onclick=javascript:OpenFile(this);>View</a>").Width(80).Filterable(false);
+              })
+              .Sortable()
+              .Filterable()
+              .Resizable(resize => resize.Columns(true))
+              .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+              .DataSource
+              (
+                  dataSource => dataSource
+                      .Ajax()
+                      .Model(model => model.Id(p => p.RID))
+                      .ServerOperation(true)
+                      .Read(read => read.Action("GetDocumentDetails", "CitizenRequests").Data("AdditionalData"))
+                      .PageSize(10)
+              )
+    )
+</div>
+
+@(Html.Kendo().Window().Visible(false)
+                   .Name("IDWindow").Width(920)
+           .Title("Document")
+           .Modal(true)
+           .Content(@<text>
+            <div style="width:100%" id="windowDiv">
+                <iframe id="ifrmViewPdf" style="width:900px; height:500px;"></iframe>
+            </div>
+        </text>)
+                                                                                                                            .Actions(actions => actions.Close())
+)
+
+<script type="text/javascript">
+    function AdditionalData() {
+        return {
+            rid: $('#RId').val(),
+            id: $("#Id").val()
+        };
+    }
+
+    function OpenFile(row) {
+        $("#windowDiv").empty();
+        var tr = $(row).parent().parent();
+        var link = $(tr).children("td:eq(1)").text();
+        $("#windowDiv").append($('<iframe src=' + link + ' style="width:900px; height:500px;"></iframe>'));
+        $("#IDWindow").data("kendoWindow").center();
+        $("#IDWindow").data("kendoWindow").open();
+    }
+
+    function MakeFieldsReadOnly() {
+        $("#StatusId").data("kendoDropDownList").enable(false);
+        $('#OldComment').attr("disabled", true);
+        $('#DuesAmnt').attr("disabled", true);
+        $('#ServiceFee').attr("disabled", true);
+        $('#Comment').attr("disabled", true);
+        $('#DispatchNo').attr("disabled", true);
+        $('#DispatchDate').data('kendoDatePicker').enable(false);
+        $(".uploadDiv").hide();
+    }
+
+    function FileSelection() {
+        //var fileDoc = $("#fileDoc").val();
+        var allowedFiles = ['pdf'];//, 'png', 'jpg', 'jpeg'];
+        var regex = new RegExp("([a-zA-Z0-9\s_\\.\-:])+(" + allowedFiles.join('|') + ")$");
+        //if (!regex.test($("#fileDoc").val().toLowerCase())) {
+        //    alertify.error('Invalid file type. Please select a valid .pdf file.');
+        //    $("#fileDoc").val('');
+        //    return false;
+        //}
+        //if (!regex.test($("#fileDoc").val().toLowerCase())) {
+        //    alertify.error('Invalid file type. Please select a valid .pdf file.');
+        //    $("#fileDoc").val('');
+        //    return false;
+        //}
+        var fileSize = $("#fileDoc").get(0).files[0].size;
+        if (fileSize > 10240000) {
+            alertify.error('File size should not be greater than 1MB.');
+            $("#fileDoc").val('');
+            return false;
+        }
+    }
+
+    $(document).ready(function () {
+        //Make all fields readonly if Status = "Completed"
+        var st = $('#StatusId').val();
+        if (st == '@NA.PMS.Common.Constants.CompletionId') {
+            MakeFieldsReadOnly();
+            $("#btnSave").hide();
+        }
+
+        $("#btnSave").click(function () {
+            var tempVar = $('#StatusId').val();
+            var dispatchNo = $("#DispatchNo").val();
+            var dispatchDate = $("#DispatchDate").val();
+            //If status is "Completion", only then mandatory fields will be checked -> As discussed with Vishal Shukla
+            if (tempVar == '@NA.PMS.Common.Constants.CompletionId') {
+                //if ($("#DispatchNo").val() == '') {
+                //    alertify.error("Please enter Dispatch Number");
+                //    return false;
+                //}
+                //if ($("#DispatchDate").data("kendoDatePicker").value() == '' || $("#DispatchDate").data("kendoDatePicker").value() == null) {
+                //    alertify.error("Please enter Dispatch Date");
+                //    return false;
+                //}
+                //if ($("#fileDoc").val() == '') {
+                //    alertify.error("Please upload file");
+                //    return false;
+                //}
+            }
+
+            var serviceFee = $("#ServiceFee").val();
+            var duesAmnt = $("#DuesAmnt").val();
+            var comment = $("#Comment").val();
+            var id = $("#Id").val();
+            var rID = $("#RId").val();
+            //var tempVar = 1;
+            //var tempVar = $('#StatusId').val();
+
+            var formData = new FormData();
+            var file = $('#fileDoc')[0];
+            formData.append("fileTransDeed", file.files[0]);
+            formData.append("id", id);
+            formData.append("serviceFee", serviceFee);
+            formData.append("duesAmnt", duesAmnt);
+            formData.append("comment", comment);
+            formData.append("temp", tempVar);
+            formData.append("dispatchNo", dispatchNo);
+            formData.append("dispatchDate", dispatchDate);
+            formData.append("rID", rID);
+
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: false,
+                //data: JSON.stringify({ id: id, serviceFee: serviceFee, duesAmnt: duesAmnt, comment: comment, temp: tempVar }),
+                data: formData,
+                cache: false,
+                processData: false,
+                url: '/CitizenRequests/SaveRequestDetails',
+                @*url: @Url.Action("SaveRequestDetails", "PropertyRegistration"),*@
+                success: function (result) {
+                    if (result == true) {
+                        alertify.success("Data saved successfully!");
+                        window.location.href = '@Url.Action("ManageCitizenRequests", "CitizenRequests", new { area="member"})';
+                    }
+                    else {
+                        alertify.error("Some error occured. Please try again after some time");
+                    }
+                },
+                error: function (obj) {
+                    alertify.error("Some error occured. Please try again after some time");
+                }
+            });
+        });
+
+        $("#btnReject").click(function () {
+            var id = $("#Id").val();
+            var tempVar = 0;
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: id, temp: tempVar }),
+                url: '/CitizenRequests/SaveRequestDetails',
+                @*url: @Url.Action("SaveRequestDetails", "PropertyRegistration"),*@
+                success: function (result) {
+                    if (result == true) {
+                        alertify.success("Data saved successfully!");
+                        window.location.href = '@Url.Action("ManageCitizenRequests", "CitizenRequests", new { area="member"})';
+                    }
+                    else {
+                        alertify.error("Some error occured. Please try again after some time");
+                    }
+                },
+                error: function (obj) {
+                    alertify.error("Some error occured. Please try again after some time");
+                }
+            });
+        });
+    });
+</script>

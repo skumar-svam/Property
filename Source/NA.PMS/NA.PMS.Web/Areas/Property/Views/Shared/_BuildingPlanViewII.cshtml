@@ -1,0 +1,118 @@
+﻿@model NA.PMS.Model.BuildingPlanModel
+@using Kendo.Mvc.UI
+
+<div class="col-md-12 content-top-spce">
+    <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+        <h2 class="blck-heading-grid">Building Details</h2>
+        <div class="k-grid-content">
+            @Html.HiddenFor(c => c.RId)
+            @(Html.Kendo().Grid<NA.PMS.Model.BuildingPlanModel>()
+                .Name("gridBuildingDetails")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.NameOfBuilding).Width(100).Title("Name Of Building");
+            columns.Bound(c => c.TotalCoveredAreaAllFloor).Width(100).Title("Total Covered Area");
+            columns.Bound(c => c.BuildingHeight).Width(100).Title("Building Height");
+            columns.Bound(c => c.TotalCoveredAreaGroundFloor).Width(100).Title("Covered Area");
+            columns.Bound(c => c.NoOfStories).Width(100).Title("No Of Stories");
+        })
+        .Sortable()
+        .Filterable()
+                .Resizable(resize => resize.Columns(true))
+                    //.ToolBar(toolBar =>
+                    //{
+                    //    toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Add Request").HtmlAttributes(new { onclick = "javascript:AddCompletionReq(event);", @class = "k-button", id = "btnRequest" });
+                    //})
+        .Pageable(pageable => pageable
+                                               .Enabled(true)
+                                               .Refresh(true)
+                                               .PageSizes(true)
+                                            )
+        .DataSource(dataSource => dataSource
+        .Ajax().Model(model => model.Id(c => c.RId))
+        .ServerOperation(true)
+                                        .Read(read => read.Action("GetBuildingDetail", "PropertyRegistration").Data("AdditionalInfo")).PageSize(20)
+        )
+            )
+        </div>
+    </div>
+</div>
+
+<div class="col-md-12 content-top-spce">
+    <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+        <h2 class="blck-heading-grid">Charges Demanded</h2>
+        <div class="k-grid-content">
+
+            @(Html.Kendo().Grid<NA.PMS.Model.BuildingPlanModel>()
+            .Name("gridChargesDemanded")
+    .Columns(columns =>
+    {
+        columns.Bound(c => c.ChargesName).Title("Charges");
+        columns.Bound(c => c.FeeAmount).Title("Fee Amount");
+        columns.Bound(c => c.Status).Title("Status");
+    })
+    .Sortable()
+    .Filterable()
+            .Resizable(resize => resize.Columns(true))
+                    //.ToolBar(toolBar =>
+                    //{
+                    //    toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Add Request").HtmlAttributes(new { onclick = "javascript:AddCompletionReq(event);", @class = "k-button", id = "btnRequest" });
+                    //})
+    .Pageable(pageable => pageable
+                                           .Enabled(true)
+                                           .Refresh(true)
+                                           .PageSizes(true)
+                                        )
+    .DataSource(dataSource => dataSource
+    .Ajax().Model(model => model.Id(c => c.RId))
+    .ServerOperation(true)
+                    .Read(read => read.Action("GetChargesDemanded", "PropertyRegistration").Data("AdditionalInfo")).PageSize(20)
+    )
+            )
+        </div>
+    </div>
+</div>
+
+<div class="col-md-12">
+    <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+        <h2 class="blck-heading-grid">NOC Details</h2>
+        <div class="k-grid-content">
+
+            @(Html.Kendo().Grid<NA.PMS.Model.BuildingPlanModel>()
+            .Name("gridNOCDetail")
+    .Columns(columns =>
+    {
+        columns.Bound(c => c.NOC).Width(10).Title("NOC");
+        columns.Bound(c => c.SubmitStatus).Width(10).Title("Submit Status");
+    })
+    .Sortable()
+    .Filterable()
+            .Resizable(resize => resize.Columns(true))
+                    //.ToolBar(toolBar =>
+                    //{
+                    //    toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Add Request").HtmlAttributes(new { onclick = "javascript:AddCompletionReq(event);", @class = "k-button", id = "btnRequest" });
+                    //})
+    .Pageable(pageable => pageable
+                                           .Enabled(true)
+                                           .Refresh(true)
+                                           .PageSizes(true)
+                                        )
+    .DataSource(dataSource => dataSource
+    .Ajax().Model(model => model.Id(c => c.RId))
+    .ServerOperation(true)
+                    .Read(read => read.Action("GetNOCDetail", "PropertyRegistration").Data("AdditionalInfo")).PageSize(20)
+    )
+            )
+        </div>
+
+
+    </div>
+</div>
+
+<script>
+    function AdditionalInfo() {
+        return {
+            rid: $('#RId').val()
+        }
+    }
+</script>

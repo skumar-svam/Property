@@ -1,0 +1,150 @@
+﻿@model NA.PMS.Model.MortgageModel
+@using Kendo.Mvc.UI;
+@{
+    ViewBag.Title = "AddMortgage";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Add Mortgage</h1></div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+                </div>
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="col-md-12 content-top-spce">
+                <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                    <h2 class="blck-heading">Mortgage Information</h2>
+                    <div class="form-bx">
+                        <input type="hidden" id="hdnRid" value="0" />
+                        @{Html.RenderPartial("_AddEditMortgage", Model);}
+        
+                    </div>
+                </div>
+                <div class="box-button text-center">
+                    <input type="button" id="btnCancel" value="Back" class="btn btn-default" onclick="javascript: window.location = '@Url.Action("ManageMortgage", "PropertyRegistration")';" />
+                    @*<input type="button" id="btnSubmitScheme" value="Submit Request for Approval" class="btn btn-add" />*@
+                    <input type="button" id="btnSubmitScheme" value="Submit for Approval" class="btn btn-add" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+<div id='divAssineRequetApproval' class='col-md-12'>
+    <div class="row" style="margin-top:30px;">
+        <div class="col-md-3 col-md-offset-1">
+            @Html.Label("Assign To:")           
+        </div>
+        <div class="col-md-6">
+            @(Html.Kendo().DropDownListFor(model => model.User)
+                .DataTextField("text")
+                .DataValueField("id")
+                .Filter("contains")
+                .OptionLabel("Select")
+                .DataSource(source =>
+                {
+                    source.Read(read =>
+                    {
+                        read.Action("GetAssineTo", "Allotment");
+                    });
+                })
+                        .HtmlAttributes(new { style="width:100%"})
+            )
+            @Html.ValidationMessageFor(model => model.User)
+        </div>
+    </div>
+    <div class="row" style="padding-top:50px;">
+        <div class="col-md-3 col-md-offset-1">
+
+        </div>
+        <div class="col-md-6">
+            <button type='submit' id="btnRequetForApproval" class='btn btn-default' value='Save'>Submit</button>
+            <button type='button' class='btn btn-default' value='Cancel' onclick="CloseCommnetPopUpForApproval();">Close</button>
+        </div>       
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var datepicker = $("#ApproveDate").data("kendoDatePicker");
+        datepicker.readonly();        
+        $("#btnSubmitScheme").click(function () {
+            if (ValidateMortgage())
+                OpenAssineRequetApprovalPopUp();
+        });
+
+        $("#divAssineRequetApproval").kendoWindow({
+            modal: true,
+            title: "Assign Request to Approver",
+            visible: false,
+            width: "40%"
+        });
+        $("div[id='divCommentPost']").kendoWindow({
+            modal: true,
+            visible: false,
+            width: "40%"
+        });
+    });
+
+    function OpenAssineRequetApprovalPopUp() {
+        var win = $("#divAssineRequetApproval").data("kendoWindow");
+        win.center();
+        win.open();
+    }
+
+    function CloseCommnetPopUpForApproval() {
+        var win = $("#divAssineRequetApproval").data("kendoWindow");
+        win.close();
+    }
+
+
+    $("#btnRequetForApproval").click(function () {
+        var mortgageDate = $("#MortgageDate").val();
+        var bankName = $("#BankName").val();
+        var mortgageType = $("#MortgageType").val();
+        var branchAddress = $("#BranchAddress").val();
+        var processingFee = $("#ProcessingFee").val();
+        var rid = $("#RID").val();
+        var user = $("#User").val();
+        var previousLoanNoc = $("#PreviousLoanNoc").val();
+        var validUpto = $('#ValidUpto').val();
+        var sanctionedAmount = "0";
+        if ($('#SanctionedAmount').val() != "") { sanctionedAmount = $('#SanctionedAmount').val(); }
+        var serviceReq = $('#OnlineRequestNo').val();
+        if (user != "") {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ mortgageDate: mortgageDate, bankName: bankName, mortgageType: mortgageType, previousLoanNoc: previousLoanNoc, branchAddress: branchAddress, processingFee: processingFee, sanctionedAmount:sanctionedAmount, user: user, rid: rid, validUpto: validUpto, reqRefNo:serviceReq }),
+                url: '/PropertyRegistration/SaveMortgage',
+                success: function (result) {
+                    if (result == true) {
+                        window.location.href = '@Url.Action("ManageMortgage", "PropertyRegistration")';
+                        return false;
+                    }
+                    else {
+                        return true;
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    alert(respText);
+                }
+            });
+        }
+        else {
+            alert("Please Select Assine To.");
+        }
+    });                 
+</script>

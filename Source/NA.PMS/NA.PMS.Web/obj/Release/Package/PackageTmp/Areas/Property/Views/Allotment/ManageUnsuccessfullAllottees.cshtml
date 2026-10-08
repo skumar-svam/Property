@@ -1,0 +1,375 @@
+﻿@model NA.PMS.Model.ManageRequestModel
+@using Kendo.Mvc.UI
+@using NA.PMS.Common
+@{
+    ViewBag.Title = "Manage Unsuccessful Allottees";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@Html.HiddenFor(model => model.DepartmentId)
+@Html.HiddenFor(model => model.SchemeId)
+@Html.HiddenFor(model => model.Status)
+@Html.HiddenFor(model => model.AllotmentDate)
+@*@Html.HiddenFor(model => model.Status)*@
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>ManageAllotteeRequest</title>
+    <style>
+        .hide {
+            display: none !important;
+        }
+
+        .show {
+            display: block !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-horizontal">        
+        <div id='DivCommentView'>
+
+            <div>
+                <div>
+                    @Html.Label("From :      ")
+                    @Html.DisplayFor(model => model.From)
+                </div>
+                <div>
+                    @Html.Label("Date :      ")
+                    @Html.DisplayFor(model => model.ApprovedOn)
+                </div>
+                <div>
+                    @Html.TextAreaFor(model => model.Comment, new { style = "width: 370px; height:70px;", disabled = "disabled", @maxlength = "500" })
+
+                </div>
+            </div>
+            @*<button type='submit' id="btnComments" class='btn btn-default' value='Save'>Save</button>*@
+            <button type='button' class='btn btn-default' style="align-items :center; " value='Cancel' onclick="CloseCommnetPopUp();">Close</button>
+
+        </div>
+        <div id='divCommentPost' class='adminfeediv'>
+            <div>
+                <div>
+                    @Html.Label("Enter Comment :      ")
+                </div><div>
+
+                    <textarea type="text" rows="4" cols="50" id="txtCommentApprove" maxlength="500" height="70" width="370"></textarea>
+                    @*@Html.TextAreaFor(model => model.Comment, new { style = "width: 200px; height:30px;", @id = "txtCommentApprove", @maxlength = "500" })*@
+                </div>
+            </div>
+            <button type='submit' id="btnCommentPostApprove" class='btn btn-default' value='Save'>Post</button>
+            <button type='button' class='btn btn-default' value='Cancel' onclick="CloseCommnetPostPopUp();">Close</button>
+
+        </div>
+        <div id='divCommentPostReject' class='adminfeediv'>
+            <div>
+                <div>
+                    @Html.Label("Enter Comment :      ")
+                </div><div>
+                    <textarea type="text" rows="4" cols="50" id="txtCommentReject" maxlength="500" height="70" width="370"></textarea>
+                </div>
+            </div>
+            <button type='submit' id="btnCommentPostReject" class='btn btn-default' value='Save'>Post</button>
+            <button type='button' class='btn btn-default' value='Cancel' onclick="CloseCommnetPostPopUpReject();">Close</button>
+
+        </div>
+        <div>
+            <div style="text-align :right ; padding-bottom  :4px;" class="hide" id="divComment">
+                @if (Model.Status == "Approved")
+            {
+            <i style="font-size: 18px; " class=" glyphicon glyphicon-ok-sign" aria-hidden="true"></i>
+            <strong style="color: lightgreen;font-size: 18px; padding-right: 10px; ">  @Html.DisplayFor(model => model.Status)</strong>
+            }
+                @if (Model.Status == "Rejected")
+            {
+            <strong style="color: red;font-size: 16px; padding-right: 10px; "><i class="glyphicon glyphicon-remove-sign" aria-hidden="true"></i>  @Html.DisplayFor(model => model.Status)</strong>
+            }
+                <a href='javascript:void(0);' alt="click to open Check List popup" class="btn btn-default" id="frcontractreviewchklstlink">View Comments</a>
+            </div>
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Unsuccessful Applicant List</h1></div>
+                    <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                        <h1 class="gridTitle"> Scheme:- @Html.DisplayFor(model => model.SchemeName)</h1>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="k-grid-content">
+                @(Html.Kendo().Grid<NA.PMS.Model.ManageRequestModel>()
+    .Name("gvAllottee")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.FormNo).Title("Form No.");
+            columns.Bound(c => c.Department).Title("Department Name");
+            columns.Bound(c => c.ApplicantName).Title("Applicant's Name");
+            columns.Bound(c => c.MobileNo).Title("Mobile");
+            columns.Bound(c => c.BankName).Title("Bank Name");
+            columns.Bound(c => c.AmountDeposited).Title("Amount Deposited");
+            columns.Bound(c => c.PermanentAddress).Title("Address");
+        })
+        .Sortable()
+        .Filterable()
+                 .Events(c => c.DataBound("onDataBound"))
+          .Pageable
+        (
+             pageable => pageable
+            .Enabled(true)
+            .Refresh(true)
+            .PageSizes(true)
+        )
+        .Groupable()
+        .DataSource
+        (
+             dataSource => dataSource
+    .Ajax().Model(model => model.Id(p => p.SchemeId))
+            .ServerOperation(true)
+                                                    .Read(read => read.Action("GetUnsuccessfullApplicantsForApproval", "Allotment").Data("AdditionalData")).PageSize(10)
+         )
+                )
+            </div>
+            <div class="box-button text-center">               
+                <input type="button" id="btnClose" onclick="CloseCommnetPopUp();" value="Back" class="btn btn-default" />
+                <input type="submit" id="btnPrint" value="Print" class="btn btn-add" />
+                @*<a href='javascript:void(0);' alt="click to open Check List popup" style="align-items :center; " class="btn btn-default" id="btnApproval">Approve</a>
+                <a href='javascript:void(0);' alt="click to open Check List popup" style="align-items :center; " class="btn btn-default" id="btnReject">Reject</a>*@
+            </div>
+        </div>
+        </div>
+        <script type="text/javascript">
+            //function PrintPage() {
+            //    var printContent = document.getElementById('gvAllottee');
+            //    var printWindow = window.open("All Records", "Print Panel", 'left=50000,top=50000,width=0,height=0');
+            //    printWindow.document.write(printContent.innerHTML);
+            //    printWindow.document.close();
+            //    printWindow.focus();
+            //    printWindow.print();
+            //    var dataSource = $("#gvAllottee").data("kendoGrid").dataSource;
+            //    dataSource.pageSize(20);
+            //}
+            function printGrid() {
+                var GridDestination = $("#gvAllottee").data("kendoGrid");
+                var dataSource = $("#gvAllottee").data("kendoGrid").dataSource;
+                dataSource.pageSize(dataSource.total());
+                var gridElement = $('#gvAllottee'),
+                    printableContent = '',
+                    win = window.open('', '', 'width=800, height=500, resizable=1, scrollbars=1'),
+                    doc = win.document.open();
+                GridDestination.pager.element.hide();
+                var htmlStart =
+                        '<!DOCTYPE html>' +
+                        '<html>' +
+                        '<head>' +
+                        '<meta charset="utf-8" />' +
+                        //'<title>Kendo UI Grid</title>' +
+                        '<link href="http://kendo.cdn.telerik.com/' + kendo.version + '/styles/kendo.common.min.css" rel="stylesheet" /> ' +
+                        '<style>' +
+                        'html { font: 11pt sans-serif; }' +
+                        '.k-grid { border-top-width: 0; }' +
+                        '.k-grid, .k-grid-content { height: auto !important; }' +
+                        '.k-grid-content { overflow: visible !important; }' +
+                        'div.k-grid table { table-layout: auto; width: 100% !important; }' +
+                        '.k-grid .k-grid-header th { border-top: 1px solid; }' +
+                        '.k-grouping-header, .k-grid-toolbar, .k-grid-pager > .k-link { display: none; }' +
+                        // '.k-grid-pager { display: none; }' + // optional: hide the whole pager
+                        '</style>' +
+                        '</head>' +
+                        '<body>';
+
+                var htmlEnd =
+                        '</body>' +
+                        '</html>';
+
+                var gridHeader = gridElement.children('.k-grid-header');
+                if (gridHeader[0]) {
+                    var thead = gridHeader.find('thead').clone().addClass('k-grid-header');
+                    printableContent = gridElement
+                        .clone()
+                            .children('.k-grid-header').remove()
+                        .end()
+                            .children('.k-grid-content')
+                                .find('table')
+                                    .first()
+                                        .children('tbody').before(thead)
+                                    .end()
+                                .end()
+                            .end()
+                        .end()[0].outerHTML;
+                } else {
+                    printableContent = gridElement.clone()[0].outerHTML;
+                }
+
+                doc.write(htmlStart + printableContent + htmlEnd);
+                doc.close();
+                win.print();
+                dataSource.pageSize(20);
+                GridDestination.pager.element.show();
+            }
+            $(document).ready(function () {
+                $("#btnPrint").click(function () {
+                    printGrid();
+                    //var dataSource = $("#gvAllottee").data("kendoGrid").dataSource;
+                    //dataSource.pageSize(dataSource.total());
+                    //setTimeout(function () { PrintPage(); }, 1000);
+                });
+                var Status = $("#Status").val();
+                if (Status == "Approved" || Status == "Rejected" || Status == "RefundInitiated") {
+                    $("#btnApproval").hide();
+                    $("#btnReject").hide();
+                    $("#divComment").addClass("show");
+                }
+                else {
+                    $("#btnApproval").show();
+                    $("#btnReject").show();
+                    $("#divComment").addClass("hide");
+                }
+                $("div[id='DivCommentView']").kendoWindow({
+                    title: "Comment",
+                    modal: true,
+                    visible: false,
+                    width: "30%"
+                });
+                $("div[id='divCommentPost']").kendoWindow({
+                    modal: true,
+                    visible: false,
+                    width: "30%"
+                });
+                $("div[id='divCommentPostReject']").kendoWindow({
+                    modal: true,
+                    visible: false,
+                    width: "30%"
+                });
+                $("a#btnApproval").click(function () {
+                    $("comment").val('');
+                    OpenCommentPostPopUp()
+                });
+                $("a#btnReject").click(function () {
+                    OpenCommentPostPopUpReject()
+                });
+            });
+            function OpenCommentPostPopUp() {
+                var win = $("#divCommentPost").data("kendoWindow");
+                win.center();
+                win.open();
+            }
+            function OpenCommentPostPopUpReject() {
+                var win = $("#divCommentPostReject").data("kendoWindow");
+                win.center();
+                win.open();
+            }
+            function CloseCommnetPopUp() {
+                var win = $("#DivCommentView").data("kendoWindow");
+                win.close();
+            }
+            function CloseCommnetPostPopUp() {
+                var win = $("#divCommentPost").data("kendoWindow");
+                win.close();
+            }
+            function CloseCommnetPostPopUpReject() {
+                var win = $("#divCommentPostReject").data("kendoWindow");
+                win.close();
+            }
+            function onDataBound(e) {
+                var total = e.sender.dataSource.total()
+                if (total == 0) {
+                    $("#btnSubmitForApprovallink").addClass("disable_a_href");
+                    $("#btnPrint").attr("disabled", "disabled");
+                }
+            }
+            function AdditionalData() {
+                var idVal = $("#SchemeId").val();
+                var depid = $("#DepartmentId").val();
+                return { idVal: idVal, depid: depid };
+            }
+
+            $("a#frcontractreviewchklstlink").click(function () {
+                OpenFRContractReviewChkLstPopUp()
+            });
+            function OpenFRContractReviewChkLstPopUp() {
+                var win = $("#DivCommentView").data("kendoWindow");
+                win.center();
+                win.open();
+            }
+
+            $("#btnCommentPostApprove").click(function () {
+                document.getElementById("btnCommentPostApprove").disabled = true;
+                var schemeId = $("#SchemeId").val();
+                var depid = $("#DepartmentId").val();
+                var comment = $("#txtCommentApprove").val();
+                var allotmentDate = $("#AllotmentDate").val();
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ schemeId: schemeId, depid: depid, comment: comment, status: "Approved", isUnSuccessfullAplicants: true, allotmentDate: allotmentDate }),
+                    url: '/Allotment/SaveForPost',
+                    success: function (result) {
+                        if (result == true) {
+                            CloseCommnetPostPopUp();
+                            //alertify.error("Approve successfully");
+                            window.location.href = '@Url.Action("UnSuccessfullAllotteList", "Allotment")';
+                        }
+                        else {
+                            document.getElementById("btnCommentPostApprove").disabled = false;
+                            return true;
+                        }
+                    },
+                    error: function (objAjaxRequest, strError) {
+                        document.getElementById("btnCommentPostApprove").disabled = false;
+                        alertify.error("There is some error. Please contact to administrator.");
+                        $("#txtCommentApprove").val('');
+                        //var respText = objAjaxRequest.responseText;
+                        //alert(respText);
+                    }
+
+                });
+
+            });
+            $("#btnCommentPostReject").click(function () {
+                document.getElementById("btnCommentPostReject").disabled = true;
+                var schemeId = $("#SchemeId").val();
+                var depid = $("#DepartmentId").val();
+                var comment = $("#txtCommentReject").val();
+                var allotmentDate = $("#AllotmentDate").val();
+                if (comment != "") {
+
+                    $.ajax({
+                        dataType: 'json',
+                        type: 'Post',
+                        contentType: 'application/json; charset=utf-8',
+                        data: JSON.stringify({ schemeId: schemeId, depid: depid, comment: comment, status: "Rejected", isUnSuccessfullAplicants: true, allotmentDate: allotmentDate }),
+                        url: '/Allotment/SaveForPost',
+                        success: function (result) {
+                            if (result == true) {
+                                CloseCommnetPostPopUpReject();
+                                //alertify.error("Reject successfully");
+                                window.location.href = '@Url.Action("UnSuccessfullAllotteList", "Allotment")';
+                            }
+                            else {
+                                document.getElementById("btnCommentPostReject").disabled = false;
+                                return true;
+                            }
+                        },
+                        error: function (objAjaxRequest, strError) {
+                            document.getElementById("btnCommentPostReject").disabled = false;
+                            alertify.error("There is some error. Please contact to administrator.");
+                            $("#txtCommentReject").val('');
+                            //var respText = objAjaxRequest.responseText;
+                            //alert(respText);
+                        }
+
+                    });
+                }
+                else {
+                    alert("Please enter comment.")
+                }
+
+            });
+
+            $("#btnClose").click(function () {
+                window.location.href = '@Url.Action("UnSuccessfullAllotteList", "Allotment")';
+            });
+        </script>
+</body>
+
+</html>

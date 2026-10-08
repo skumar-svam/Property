@@ -1,0 +1,527 @@
+﻿@model NA.PMS.Model.OnlineApplicationDetailsTrans
+
+@{
+    ViewBag.Title = "PaymentDetails";
+    Layout = "~/Views/Shared/_OnlineRequestLayout.cshtml";
+}
+
+@*@model NA.PMS.Model.OnlineApplicationFormModel*@
+@using Kendo.Mvc.UI
+@using NA.PMS.Common
+
+@{
+    ViewBag.Title = "Online Application Request";
+    Layout = "~/Views/Shared/_OnlineRequestLayout.cshtml";
+}
+
+@*@model NoidaAuthority.PMS.Entity.DtoPaymentSchedule*@
+
+
+<link href="~/Content/CSS/bootstrap-theme.min.css" rel="stylesheet" />
+<link href="~/Content/CSS/bootstrap.css" rel="stylesheet" />
+<link href="~/Content/CSS/TabStyle.css" rel="stylesheet" />
+
+<link rel="stylesheet" href="~/Content/kendo/2014.2.716/kendo.common.min.css" />
+<link rel="stylesheet" href="~/Content/kendo/2014.2.716/kendo.default.min.css" />
+<link rel="stylesheet" href="~/Content/kendo/2014.2.716/kendo.dataviz.min.css" />
+<link rel="stylesheet" href="~/Content/kendo/2014.2.716/kendo.dataviz.default.min.css" />
+<script src="~/Scripts/kendo/2014.2.716/jquery.min.js"></script>
+<script src="~/Scripts/bootstrap.min.js"></script>
+<script src="~/Scripts/kendo/2014.2.716/kendo.web.min.js"></script>
+<script src="~/Scripts/kendo/2014.2.716/kendo.all.min.js"></script>
+<script src="~/Scripts/jquery.mask.min.js"></script>
+<script src="~/Scripts/jquery.ba-hashchange.js"></script>
+
+
+<style>
+    .text-20px {
+        height: 20px;
+    }
+
+    .height-17px {
+        height: 17px;
+    }
+
+    body {
+        margin-top: 20px;
+    }
+
+
+    .credit-card-box .panel-title {
+        display: inline;
+        font-weight: bold;
+    }
+
+    .credit-card-box .form-control.error {
+        border-color: red;
+        outline: 0;
+        box-shadow: inset 0 1px 1px rgba(0,0,0,0.075),0 0 8px rgba(255,0,0,0.6);
+    }
+
+    .credit-card-box label.error {
+        font-weight: bold;
+        color: red;
+        padding: 2px 8px;
+        margin-top: 2px;
+    }
+
+    .credit-card-box .payment-errors {
+        font-weight: bold;
+        color: red;
+        padding: 2px 8px;
+        margin-top: 2px;
+    }
+
+    .credit-card-box label {
+        display: block;
+    }
+    /* The old "center div vertically" hack */
+    .credit-card-box .display-table {
+        display: table;
+    }
+
+    .credit-card-box .display-tr {
+        display: table-row;
+    }
+
+    .credit-card-box .display-td {
+        display: table-cell;
+        vertical-align: middle;
+        width: 50%;
+    }
+    /* Just looks nicer */
+    .credit-card-box .panel-heading img {
+        min-width: 180px;
+    }
+</style>
+<h3>Payment</h3>
+
+@*<input type="hidden" id="hdnScheduleID" value="@Model.PaymentScheduleId" />
+    <input type="hidden" id="hdnRegistrationId" value="@Model.RegistrationId" />*@
+
+
+<div id="v-nav">
+    <ul>
+        <li tab="tab1" id="firstLI" class="first"><img src="/Content/Images/credit-card-icon.png" height="25" width="25" />&nbsp;Debit Card</li>
+        <li tab="tab2" class=""><img src="~/Content/Images/mouse-icon.png" height="25" width="25" />&nbsp; Net Banking</li>
+
+    </ul>
+    <div class="tab-content" style="display: block;">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Payment Details</h3>
+                @Html.HiddenFor(model => model.OnlineApplicationId)
+                @Html.HiddenFor(model => model.Txnid)
+                @Html.HiddenFor(model => model.Amount)                
+            </div>
+            <div class="panel-body">
+                <table style="width:100%">
+                    <tr>
+                        <td style="width:5%; vertical-align:top">
+                            <table>
+                                <tr>
+                                    <td style="padding-top:5px">
+                                        &nbsp;  <img width="50" height="33" src="/Content/Images/Payment/3LmmFFV.png"> &nbsp; <img src="~/Content/Images/Payment/ewMjaHv.png" width="50" height="33" />  &nbsp; <img src="~/Content/Images/Payment/Pu4e7AT.png" width="50" height="33" />  &nbsp; <img src="~/Content/Images/Payment/Z5HVIOt.png" width="50" height="33" />
+                                    </td>
+
+
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <label>CARD NUMBER</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="input-group" style="width:250px">
+                                            <input type="tel" autofocus="" required="" autocomplete="cc-number" placeholder="Valid Card Number" id="cardNumber1" class="form-control input-md">
+                                            <span class="input-group-addon"><i><img width="20" height="20" src="/Content/Images/credit-card-icon.png" class="k-image" /></i></span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="height:10px"></td>
+                                </tr>
+
+                                <tr>
+                                    <td>
+                                        <table style="width:100%">
+                                            <tr>
+                                                <td style="width:40%">
+                                                    <label><span>EXP DATE</span></label>
+                                                </td>
+                                                <td style="width:20%"></td>
+                                                <td style="width:40%">
+                                                    <label><span>CV CODE</span></label>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <table style="width:100%">
+                                            <tr>
+                                                <td style="width:40%">
+                                                    <input type="tel" id="expire1" style="width:100px" placeholder="MM / YY" name="cardExpiry" class="form-control input-md" />
+                                                </td>
+                                                <td style="width:20%"></td>
+                                                <td style="width:40%">
+                                                    <input type="tel" placeholder="CVC" id="cvv1" class="form-control input-md" style="width:100px" />
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="height:10px"></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <label><span>Name on Card</span></label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input type="text" placeholder="Name on Card" class="form-control input-md">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="height:10px"></td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <button type="submit" class="btn btn-success btn-md btn-block" onclick="paymentDebitCard()">Make Payment</button>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td style="width:95%;vertical-align:top">
+                            &nbsp;<br />  <br />  <br />
+                            <fieldset>
+                                <table style="width:70%">
+                                    <tr>
+                                        <td style="height:10px"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right" style="vertical-align:middle"><label>Consumer Name :@*@Model.ApplicantName*@</label></td>
+                                        @*<td style="vertical-align:middle">&nbsp;&nbsp;@Model.ApplicantName</td>*@
+                                    </tr>
+                                    <tr>
+                                        <td style="height:10px"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right" style="vertical-align:middle">
+                                            @*<label>Registration No :</label>*@
+                                        </td>
+                                        @*<td style="vertical-align:middle">&nbsp;&nbsp;@Model.RegistrationId</td>*@
+                                    </tr>
+                                    <tr>
+                                        <td style="height:10px"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right" style="vertical-align:middle"><label>Date :@*@Model.ApplicationDate*@</label></td>
+                                        <td style="vertical-align:middle">
+                                            &nbsp;&nbsp;@{
+                                                @*if (Model.paymentScheduleDate.HasValue)
+                                                    {
+                                                        <span>@Model.paymentScheduleDate.Value.ToString("dd-MMM-yyyy")</span>
+                                                    }*@
+                                            }
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="height:10px"></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="text-right" style="vertical-align:middle"><label>Payment :@Model.Amount</label></td>
+                                        <td style="vertical-align:middle">
+                                            &nbsp;&nbsp;<span>&#8377</span>@{
+                                                @*if (Model.ScheduleAmount.HasValue)
+                                                    {
+                                                        <span>@Model.PendingDueAmount.ToString("0,0.00")</span>
+                                                    }*@
+                                            }
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td style="height:10px"></td>
+                                    </tr>
+                                </table>
+                            </fieldset>
+                        </td>
+                    </tr>
+                </table>
+
+
+            </div>
+        </div>
+
+
+    </div>
+    <div class="tab-content" style="display: none;">
+
+
+        <div class="panel panel-default ">
+            <div class="panel-heading">
+                <h3 class="panel-title">Banks</h3>
+            </div>
+            <div class="panel-body">
+                <div style="height:10px"></div>
+                <div class="row">
+                    <div class="col-sm-2">
+                        <a data-toggle="collapse" href="#panel-looking-info">
+                            <div class="panel panel-default">
+                                <div class="panel-heading text-center">
+                                    <img width="100%" height="37" src="/Content/Images/hdfc-logo.png">
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-sm-2">
+                        <a data-toggle="collapse" href="#panel-looking-info">
+                            <div class="panel panel-default">
+                                <div class="panel-heading text-center">
+                                    <img src="~/Content/Images/axisbank-logo.png" width="100%" height="37" />
+
+                                </div>
+
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-sm-2">
+                        <a data-toggle="collapse" href="#panel-looking-info">
+                            <div class="panel panel-default">
+                                <div class="panel-heading text-center">
+                                    <img src="~/Content/Images/icici-logo.png" width="100%" height="37" />
+
+                                </div>
+
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-sm-2">
+                        <a data-toggle="collapse" href="#panel-looking-info">
+                            <div class="panel panel-default">
+                                <div class="panel-heading text-center">
+
+                                    <img src="~/Content/Images/yesbank-logo.png" width="100%" height="37" />
+
+                                </div>
+
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div style="height:10px"></div>
+                <div class="row">
+                    <div class="col-sm-2">
+                        <a data-toggle="collapse" href="#panel-looking-info">
+                            <div class="panel panel-default">
+                                <div class="panel-heading text-center">
+                                    <img src="~/Content/Images/sbi.png" width="88" height="37" />
+                                </div>
+
+                            </div>
+                        </a>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="panel panel-default">
+                            <div class="panel-heading text-center">
+                                <a data-toggle="collapse" href="#panel-looking-info">
+                                    <img src="~/Content/Images/pnb-logo.png" width="88" height="37" />
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <div class="panel panel-default">
+                            <div class="panel-heading text-center">
+                                <a data-toggle="collapse" href="#panel-looking-info">
+                                    <img src="~/Content/Images/idbi-logo.png" width="88" height="37" />
+                                </a>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <table style="width:70%">
+                    <tr>
+                        <td style="vertical-align:middle" class="text-right">
+                            <label>Other Banks :</label>
+                        </td>
+                        <td>
+                            &nbsp;&nbsp;
+                            <select style="height:30px" id="ddlBank"><option value="">------Select Bank------</option><option value="0">Allahabad Bank</option><option value="1">Andhra Bank</option><option value="2">AXIS Bank</option><option value="3">Bank of Bahrain and Kuwait</option><option value="4">Bank of Baroda Corp Accnt</option><option value="5">Bank of Baroda Retail Accnt</option><option value="6">Bank of India</option><option value="7">Bank of Maharashtra</option><option value="8">Canara Bank</option><option value="9">Catholic Syrian Bank</option><option value="10">Central Bank of India</option><option value="11">Citibank</option><option value="12">City Union Bank</option><option value="13">Corporation Bank</option><option value="14">Cosmos Bank</option><option value="15">Dena Bank</option><option value="16">Deutsche Bank</option><option value="17">Development Credit Bank</option><option value="18">Dhanlaxmi Bank</option><option value="19">Federal Bank</option><option value="20">HDFC Bank</option><option value="21">ICICI Bank</option><option value="22">IDBI Bank</option><option value="23">Indian bank</option><option value="24">Indian Overseas Bank</option><option value="25">IndusInd Bank</option><option value="26">ING Vysya (now Kotak)</option><option value="27">Jammu &amp; Kashmir Bank</option><option value="28">Karnataka Bank</option><option value="29">Karur Vysya Bank</option><option value="30">Kotak Mahindra Bank</option><option value="31">Lakshmi Vilas Bank Corporate</option><option value="32">Lakshmi Vilas Bank Retail</option><option value="33">Oriental Bank of Commerce</option><option value="34">Punjab &amp; Maharashtra Cooperative Bank</option><option value="35">Punjab &amp; Sind Bank</option><option value="36">Punjab National Bank</option><option value="37">Punjab National Bank Corp Accnt</option><option value="38">Ratnakar Bank</option><option value="39">Royal Bank of Scotland</option><option value="40">Saraswat Bank</option><option value="41">Shamrao Vithal Cooperative Bank Ltd</option><option value="42">South Indian Bank</option><option value="43">Standard Chartered Bank</option><option value="44">State Bank of Bikaner and Jaipur</option><option value="45">State Bank of Hyderabad</option><option value="46">State Bank of India</option><option value="47">State Bank of Mysore</option><option value="48">State Bank of Patiala</option><option value="49">State Bank of Travancore</option><option value="50">Syndicate Bank</option><option value="51">Tamilnad Mercantile Bank</option><option value="52">TNSC Bank</option><option value="53">UCO Bank</option><option value="54">Union Bank of India</option><option value="55">United Bank of India</option><option value="56">Vijaya Bank</option><option value="57">YES Bank</option></select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="height:10px"></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right"><label>Consumer Name :</label></td>
+                        @*<td>&nbsp;&nbsp;@Model.ApplicantName</td>*@
+                    </tr>
+                    <tr>
+                        <td style="height:10px"></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right"><label>Registration No :</label></td>
+                        @*<td>&nbsp;&nbsp;@Model.RegistrationId</td>*@
+                    </tr>
+                    <tr>
+                        <td style="height:10px"></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right"><label>Date :</label></td>
+                        <td>
+                            &nbsp;&nbsp;@{
+                                @*if (Model.paymentScheduleDate.HasValue)
+                                    {
+                                        <span>@Model.paymentScheduleDate.Value.ToString("dd-MMM-yyyy")</span>
+                                    }*@
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="height:10px"></td>
+                    </tr>
+                    <tr>
+                        <td class="text-right"><label>Payment :</label></td>
+                        <td>
+                            &nbsp;&nbsp;<span>&#8377</span>@{
+                                @*if (Model.ScheduleAmount.HasValue)
+                                    {
+                                        <span>@Model.PendingDueAmount.ToString("0,0.00")</span>
+                                    }*@
+                            }
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="height:10px"></td>
+                    </tr>
+                </table>
+                <table style="width:100%">
+                    <tr>
+                        <td>
+                            <div class="row">
+                                <div class="col-sm-3 col-sm-offset-3">
+                                    <button type="submit" class="btn btn-success btn-md btn-block" onclick="paymentNetBanking()">Make Payment</button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="myModalPaymentData" class="modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="width:40%;z-index:2000">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Please wait your payment is in process...</h3>
+            </div>
+            <div class="modal-body">
+                <table style="width:100%">
+                    <tr>
+                        <td></td>
+                        <td class="text-center">
+                            <img src="~/Content/Images/Payment/Processing.gif" />
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+
+    function paymentNetBanking() {
+        $('#myModalPaymentData').modal({ keyboard: false, backdrop: 'static' });
+        $("#myModalPaymentData").modal('show');
+
+        setTimeout(function () {
+            $("#myModalPaymentData").modal('hide');
+        }, 8000);
+    }
+
+    function paymentDebitCard() {
+        $('#myModalPaymentData').modal({ keyboard: false, backdrop: 'static' });
+        $("#myModalPaymentData").modal('show');
+        updatePayment();
+        setTimeout(function () {
+            $("#myModalPaymentData").modal('hide');
+            var regId = $('#hdnRegistrationId').val();
+            //var appId = $("#ApplicationId").val();
+            //window.location = "/Property/Allotment/TrasactionDetails/" + appId;
+            //window.location.href = 'Url.Action("TrasactionDetails", "Allotment")';
+        }, 8000);
+    }
+
+    $(document).ready(function () {
+
+
+        $('#cardNumber1').mask('0000-0000-0000-0000');
+        $('#expire1').mask('00/00');
+        $('#cvv1').mask('000');
+
+        $('#liNetBanking').click();
+
+        var items = $('#v-nav>ul>li').each(function () {
+            $(this).click(function () {
+                //remove previous class and add it to clicked tab
+                items.removeClass('current');
+                $(this).addClass('current');
+                $('#v-nav>div.tab-content').hide().eq(items.index($(this))).show();
+                window.location.hash = $(this).attr('tab');
+            });
+        });
+
+        if (location.hash) {
+            showTab(location.hash);
+        }
+        else {
+            showTab("tab1");
+        }
+
+        function showTab(tab) {
+            $('#v-nav ul li[tab*=" + tab + "]').click();
+        }
+
+        // Bind the event hashchange, using jquery-hashchange-plugin
+        $(window).hashchange(function () {
+            showTab(location.hash.replace("#", ""));
+        })
+
+        // Trigger the event hashchange on page load, using jquery-hashchange-plugin
+        $(window).hashchange();
+    });
+
+
+    function updatePayment() {
+        var scheduleId = $('#hdnScheduleID').val();
+        $.ajax({
+            type: "GET",
+            async: false,
+            url: "/api/Payment?id=" + scheduleId,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (msg) {
+
+            },
+            error: function (err) {
+
+            }
+        });
+    }
+
+</script>

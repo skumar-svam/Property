@@ -1,0 +1,726 @@
+﻿@model NA.PMS.Model.PaymentViewModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@using NA.PMS.Common;
+
+@{
+    ViewBag.Title = "Demand Note";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    #display-comment-box {
+        min-height: 250px;
+        max-height: 470px;
+    }
+
+    .form-group table {
+        /*margin-left:30px;*/
+        /*margin-right:30px;*/
+        float: right;
+    }
+    #kendo-editor-window{
+        display:none;
+    }
+</style>
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Demand Notes </h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                @*<a href="#" id="btnViewComment" class="" onclick="javascript:ViewAllComments();">View Comment</a>*@
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 content-top-spce">
+        <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            <h2 class="blck-heading" style="margin-bottom:5px;">Create Custom Demand Note</h2>
+            <div class="form-bx">
+                <div class="row" style="margin-bottom:5px;padding-bottom:8px;border-bottom:#abc solid 1px;">
+                    <div class="col-md-4" id="div-payment-type" style="text-align:center;">
+                        <input type="radio" name="PaymentType" id="rbtnPaymentTypeI" value="LeaseRent" checked="checked">&nbsp;<b>Lease Rent</b> &nbsp;&nbsp;
+                        <input type="radio" name="PaymentType" id="rbtnPaymentTypeII" value="Installment" />&nbsp;<b>Installment</b>
+                    </div>
+                    <div class="col-md-4" id="div-custom-type" style="text-align:center;">
+                        @*<input type="radio" name="CustomType" id="rbtnCustomTypeI" value="CustomTypeI" checked="checked">&nbsp;<b>CustomType-I</b> &nbsp;&nbsp;
+                        <input type="radio" name="CustomType" id="rbtnCustomTypeII" value="CustomTypeII" />&nbsp;<b>CustomType-II</b>*@
+                    </div>
+                    <div class="col-md-4" id="div-language-type" style="text-align:center;">
+                        <input type="radio" name="LanguageType" id="rbtnEnglish" value="English">&nbsp;<b>English</b> &nbsp;&nbsp;
+                        <input type="radio" name="LanguageType" id="rbtnHindi" value="Hindi" />&nbsp;<b>Hindi</b>
+                    </div>
+                </div>
+                <div>
+                    @Html.HiddenFor(model => model.DepartmentId)
+                    @Html.HiddenFor(model => model.PropertyId)
+                    @Html.HiddenFor(model => model.SectorName)
+                    @Html.HiddenFor(model => model.BlockName)
+                    @Html.HiddenFor(model => model.PlotNo)
+                </div>
+                <div class="row row-type-I">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.Label("Registration Id")
+                        @(Html.Kendo().DropDownListFor(m => m.RegistrationId)
+                            .Filter("contains")
+                            .DataTextField("Text")
+                            .DataValueField("Id")
+                            .OptionLabel("---select---")
+                            .DataSource(source =>
+                            {
+                                source.Custom()
+                                .ServerFiltering(true)
+                                .ServerPaging(true)
+                                .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                .Transport(transport => transport.Read(read => read.Action("GetRegistrationIdListAsDataSource", "Authority", new { area = "Member" })))
+                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                .PageSize(100);
+                            })
+                            .HtmlAttributes(new { style = "width:90%; float:right;" })
+                            .Events(e => e.Change("ChangeRegistrationIdEvent"))
+                        )
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.Label("Department")
+                        @Html.TextBoxFor(m => m.Department, htmlAttributes: new { @class = "form-control", style = "width:90%;float:right;" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.Label("Property/Plot")
+                        @Html.TextBoxFor(m => m.PropertyNo, htmlAttributes: new { @class = "form-control", style = "width:90%; height:30px; float:right;" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.Label("Notification No")
+                        @Html.TextBoxFor(m => m.NotificationId, htmlAttributes: new { @class = "form-control", style = "width:90%; height:30px; float:right;" })
+                    </div>
+                </div>
+
+                <div class="row row-type-I">
+                    <div class="col-md-6 col-sm-6 col-xs-12  form-group">
+                        @Html.Label("Allottee")
+                        @Html.TextAreaFor(m => m.Applicant, htmlAttributes: new { @class = "form-control", style = "width:95%; height:30px; float:right;" })
+                    </div>
+                    <div class="col-md-6 col-sm-6 col-xs-12   form-group">
+                        @Html.Label("Address")
+                        @Html.TextAreaFor(m => m.ApplicantAddress, htmlAttributes: new { @class = "form-control", style = "width:96%; height:30px; float:right;" })
+                    </div>
+                </div>
+                <div class="row row-type-I">
+                    <div class="col-md-9 col-sm-12 col-xs-12  form-group">
+                        @Html.Label("Subject")
+                        @Html.TextBoxFor(m => m.ActionType, htmlAttributes: new { @class = "form-control", style = "width:97%; height:30px; float:right;" })
+                    </div>
+                    <div class="col-md-3 col-sm-12 col-xs-12  form-group">
+                        @Html.Label("Dues Upto")
+                        @(Html.Kendo().DatePickerFor(m => m.DuesUptoDate).HtmlAttributes( new { @class = "form-control", style = "width:90%; height:30px; float:right;" }))
+                    </div>
+                </div>
+                <div class="row row-type-I">
+                    <div class="col-md-12 col-sm-12 col-xs-12  form-group">
+                        @Html.Label("Content")
+                        @Html.TextAreaFor(m => m.DemandNoteContent, htmlAttributes: new { @class = "form-control", style = "width:97%; float:right;" })
+                    </div>
+                </div>
+
+                <div class="row row-type-I">
+                    <div class="col-md-3 col-sm-6 col-xs-12  form-group">
+                        @Html.Label("Installment Amount")
+                        @Html.TextBoxFor(m => m.InstallmentAmount, htmlAttributes: new { @class = "form-control", @maxlength = "12", style = "width:90%; height:30px; float:right;" })
+                    </div>
+                    <div class="col-md-3 col-sm-6 col-xs-12   form-group">
+                        @Html.Label("Installment Interest")
+                        @Html.TextBoxFor(m => m.InstallmentInterest, htmlAttributes: new { @class = "form-control", @maxlength = "12", style = "width:90%; height:30px; float:right;" })
+                    </div>
+                    <div class="col-md-3 col-sm-6 col-xs-12   form-group">
+                        @Html.Label("Total Installment Dues")
+                        @Html.TextBoxFor(m => m.TotalInstallment, htmlAttributes: new { @class = "form-control", @maxlength = "12", style = "width:90%; height:30px; float:right;" })
+                    </div>
+                </div>
+                <div class="row row-type-I">
+                    <div class="col-md-3 col-sm-6 col-xs-12  form-group">
+                        @Html.Label("Lease Rent")
+                        @Html.TextBoxFor(m => m.LeaseRentDues, htmlAttributes: new { @class = "form-control", @maxlength = "12", style = "width:90%; height:30px; float:right;" })
+                    </div>
+                    <div class="col-md-3 col-sm-6 col-xs-12   form-group">
+                        @Html.Label("Lease Rent Interest")
+                        @Html.TextBoxFor(m => m.LeaseRentInterest, htmlAttributes: new { @class = "form-control", @maxlength = "12", style = "width:90%; height:30px; float:right;" })
+                    </div>
+                    <div class="col-md-3 col-sm-6 col-xs-12   form-group">
+                        @Html.Label("Total Lease Rent")
+                        @Html.TextBoxFor(m => m.TotalLeaseRent, htmlAttributes: new { @class = "form-control", @maxlength = "12", style = "width:90%; float:right;" })
+                    </div>
+                </div>
+                <div class="row row-type-I">
+                    @*<div class="col-md-3 col-sm-6 col-xs-12  form-group">
+                        @Html.Label("Year")
+                        @(Html.Kendo().DropDownListFor(m => m.Year)
+                            .Filter("contains")
+                            .DataTextField("Text")
+                            .DataValueField("Id")
+                            .OptionLabel("---select---")
+                            //.DataSource(source => source.Read(read => read.Action("GetYearsForOneTimeLeaseRent", "Payment", new { area="Revenue"})).ServerFiltering(true))
+                            .DataSource(source =>
+                            {
+                                source.Custom()
+                                .ServerFiltering(true)
+                                .ServerPaging(true)
+                                .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                .Transport(transport => transport.Read(read => read.Action("GetYearsForOneTimeLeaseRent", "Payment", new { area = "Revenue" })))
+                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                .PageSize(100);
+                            })
+                            .HtmlAttributes(new { style = "width:90%; float:right;" })
+                            //.Events(e => e.Change("ChangeRegistrationIdEvent"))
+                        )
+                    </div>*@
+                    <div class="col-md-3 col-sm-6 col-xs-12  form-group">
+                        @Html.Label("One Time Lease Rent")
+                        <div class="col-md-12 lbl-form-control" id="div-onetime-rent" style="width:90%;float:right;">
+                            &nbsp;&nbsp;<b>No</b> &nbsp;<input type="radio" name="RentType" id="rbtnNo" value="No" checked="checked">
+                            &nbsp;&nbsp;&nbsp;<b>Yes</b> &nbsp;<input type="radio" name="RentType" id="rbtnYes" value="Yes" />
+                        </div>                      
+                    </div>
+                    <div class="col-md-3 col-sm-6 col-xs-12  form-group">
+                        @Html.Label("Lese Rent Annual:")
+                        @Html.TextBoxFor(m => m.LeaseRentPerAnnum, htmlAttributes: new { @class = "form-control" ,@maxlength = "30", style = "width:90%; float:right;" })
+                    </div>
+                    <div class="col-md-3 col-sm-6 col-xs-12  form-group">
+                        @Html.Label("One Time Lease Rent Amount:")
+                        @Html.TextBoxFor(m => m.OneTimeLeaseRentAmount, htmlAttributes: new { @class = "form-control", @maxlength = "30", style = "width:90%; float:right;" })
+                    </div>
+                    <div class="col-md-3 col-sm-6 col-xs-12  form-group">
+                        @Html.Label("Total Dues Amount:")
+                        @Html.TextBoxFor(m => m.TotalDuesAmount, htmlAttributes: new { @class = "form-control", @maxlength = "30", style = "width:90%; float:right;" })
+                    </div>
+                </div>
+                <div class="row row-type-I">
+                    
+                </div>
+                <div class="row row-type-I">
+                    <div class="col-md-12 col-sm-12 col-xs-12  form-group">
+                        @Html.Label("Amount In words:")
+                        @Html.TextAreaFor(m => m.AmountInWords, htmlAttributes: new { @class = "form-control", style = "width:97%; height:30px; float:right;" })
+                    </div>
+                </div>
+               
+                <div class="row row-type-II" id="kendo-editor-window">
+                    <div class="col-md-12 col-sm-12 col-xs-12  form-group">
+                        @(Html.Kendo().Editor()
+                        .Name("DemandNoteContentII")
+                        .Pdf(pdf => pdf
+                            .Margin(20, 20, 20, 20)
+                            .PaperSize("A4")
+                            .ProxyURL(Url.Action("ExportKendoEditorToPdf", "Payment", new { area = "Revenue" }))
+                            )
+                        .Tools(tools => tools.FontColor().FontSize().Print().Pdf())
+                        .HtmlAttributes(new { style = "height:400px; width:97%; float:right;" })
+                        .Resizable(resizable => resizable.Content(true).Toolbar(true))
+                        )
+                    </div>
+                </div>
+
+            </div>
+
+            
+
+            <div class="box-button text-center">
+                <input type='button' id="btnBack" class='btn btn-default' value='Back' />
+                <input type="button" id="btn-create-demand" class="btn btn-add" alt="click to open Check List popup" value="Create Demand" />
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<div class="col-md-12 popup-window" id="display-comment-box">
+    <div class="row">
+        <div id="divCommentBody" class="col-md-12 form-group">
+            <div id="comment" style="word-wrap:break-word; padding:5px 15px;">
+              
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12" style="text-align:center;">
+            <button class="btn btn-default" id="btn-print">Print</button>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        //var editor = $('#NotingDetail').data('kendoEditor');
+
+        $("div[id='display-comment-box']").kendoWindow({
+            modal: true,
+            title: "Comments",fotter: "Shatrughna",
+            actions: ["Pin", "Minimize", "Maximize", "Close"],
+            visible: false,
+            width: "70%"
+        });
+
+        $("#btnBack").click(function () {
+            window.location.href = '@Url.Action("ManageDemandNote", "Authority", new { area="Member"})';
+        });
+
+        $("#btn-create-demand").click(function () {
+            //OpenApproverWindow()
+            CreateDemandNote();
+        });
+
+        $('#btnViewComment').click(function () {
+            var win = $("#display-comment-box").data("kendoWindow");
+            win.center();
+            win.open();
+        })
+
+        //$("#btnSubmitForApproval").click(function () {
+        //    SubmitNotingForApproval();
+        //});
+
+        //$("#btnAddComment").click(function () {
+        //    AddCommentInNoting();
+        //});
+
+        //$('#btnPrintNotingDetail').click(function () {
+        //    PrintDiv();
+        //});
+
+        $('input[name=CustomType]').change(function () {
+            var radiobtnVal = $('input[name=CustomType]:checked', '#div-custom-type').val();
+            if (radiobtnVal == "CustomTypeII") {
+                $('.row-type-I').css("display", "none");
+                $('.box-button').css("display", "none");
+                $('#kendo-editor-window').show();
+            }
+            else {
+                $('#kendo-editor-window').css("display", "none");
+                $('.row-type-I').show();
+                $('.box-button').show();
+            }
+        });
+
+        $('input[name=RentType]').change(function () {
+            var radiobtnVal = $('input[name=RentType]:checked', '#div-onetime-rent').val();
+            if (radiobtnVal == "Yes") {
+                var annualrent = $('#LeaseRentPerAnnum').val();
+                if (annualrent != '') {
+                    var onetime = parseInt(annualrent) * 15;
+                    $('#OneTimeLeaseRentAmount').val(onetime);
+                }
+                else {
+                    $('input[name=RentType][value=No]').prop("checked",true);
+                    alert("Please enter annual lease rent.");
+                    return false;
+                }
+            }
+            else {
+                //$('#LeaseRentPerAnnum').val('');
+                $('#OneTimeLeaseRentAmount').val('');
+            }
+        });
+
+        $('input[name=PaymentType]').change(function () {
+            var radiobtnVal = $('input[name=PaymentType]:checked', '#div-payment-type').val();
+            if (radiobtnVal == "Installment") {
+                $("#LeaseRentDues").val('');
+                $("#LeaseRentInterest").val('')
+                $("#TotalLeaseRent").val('')
+                //$('.row-type-I').css("display", "none");
+                //$('#kendo-editor-window').show();
+            }
+            else {
+                $("#InstallmentAmount").val('');
+                $("#InstallmentInterest").val('');
+                $("#TotalInstallment").val('');
+                //$('#kendo-editor-window').css("display", "none");
+                //$('.row-type-I').show();
+            }
+        });
+
+        $('#btn-print').click(function () {
+            PrintDiv();
+        });
+    });
+
+    function OpenApproverWindow() {
+        var win = $("#approver-window").data("kendoWindow");
+        win.center();
+        win.open();
+    }
+    function CloseApproverWindow() {
+        var win = $("#approver-window").data("kendoWindow");
+        win.close();
+        ClearInputFields();
+    }
+
+    function ChangeRegistrationIdEvent() {
+        var URL = "/Revenue/Payment/GetLeaseRentDuesForDemandNote";
+        //var duesUrl = "/Revenue/Payment/GetInstallmentDuesForDemandNote";
+        var radiobtnVal = $('input[name=PaymentType]:checked', '#div-payment-type').val();
+        if (radiobtnVal == undefined) {
+            alertify.error("Please check payment type.");
+            return false;
+        }
+        if (radiobtnVal == "Installment") {
+            URL = "/Revenue/Payment/GetInstallmentDuesForDemandNote";
+        }
+        if ($("#RegistrationId").val() == "") {
+            alertify.error("Select Registration Id");
+            return false;
+        }
+        else {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ RegistrationId: $("#RegistrationId").val() }),
+                url: '/Revenue/Payment/GetDuesAmountForDemandNoteById',
+                //url: URL,
+                success: function (result) {
+                    if (result.ActionTypeId == '@ReturnType.NotAllotted') {
+                        alertify.error("Update property details");
+                    }
+                    else {
+                        $("#DepartmentId").val(result.DepartmentId);
+                        $("#Department").val(result.Department);
+                        $("#PropertyId").val(result.PropertyId);
+                        $("#SectorName").val(result.SectorName);
+                        $("#BlockName").val(result.BlockName);
+                        $("#PlotNo").val(result.PlotNo);
+                        $("#Applicant").val(result.Applicant);
+                        $("#ApplicantAddress").val(result.ApplicantAddress);
+                        $("#PropertyNo").val(result.SectorName + "/" + result.BlockName + "-" + result.PlotNo);
+                        $("#InstallmentAmount").val(result.InstallmentAmount);
+                        $("#InstallmentInterest").val(result.InstallmentInterest);
+                        $("#TotalInstallment").val(result.TotalInstallment);
+                        $("#LeaseRentPerAnnum").val(result.LeaseRentPerAnnum)
+                        $("#LeaseRentDues").val(result.LeaseRentDues)
+                        $("#LeaseRentInterest").val(result.LeaseRentInterest);
+                        $("#TotalLeaseRent").val(result.TotalLeaseRent);
+                        $("#TotalDuesAmount").val(result.TotalDuesAmount);
+                        $('#ActionType').val(result.ActionType);
+                        $('#DemandNoteContent').val(result.DemandNoteContent);
+                        $('input[name=RentType][value=No]').prop("checked", true);
+                    }
+                    @*else if (result.ActionTypeId == '@ReturnType.Other') {
+                        var msg = (radiobtnVal == "Installment") ? "validate Installment Dues data." : "Validate lease rent entered data";
+                        alertify.success(msg);
+                    }*@
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again later.");
+                }
+
+            });
+        }
+    }
+
+    function CreateDemandNote() {
+        var radiobtnValI = $('input[name=PaymentType]:checked', '#div-payment-type').val();
+        var radiobtnValII = $('input[name=CustomType]:checked', '#div-custom-type').val();
+        var radiobtnValIII = $('input[name=LanguageType]:checked', '#div-language-type').val();
+        if (radiobtnValIII == undefined) {
+            alert("Please select language for demand draft.");
+            return false;
+        }
+        else if (ValidateInputFields()) {
+            var customUrl = "/Revenue/Payment/CreateCustomDemandNote";
+            if (radiobtnValIII == "Hindi") {
+                customUrl = "/Revenue/Finance/CreateDemandNoteInHindi";
+            }
+            var demand = {
+                RegistrationId: $("#RegistrationId").val(),
+                DepartmentId: $("#DepartmentId").val(),
+                PropertyId: $("#PropertyId").val(),
+                Department: $("#Department").val(),
+                SectorName: $("#SectorName").val(),
+                BlockName: $("#BlockName").val(),
+                PlotNo: $("#PlotNo").val(),
+                Applicant: $("#Applicant").val(),
+                ApplicantAddress: $("#ApplicantAddress").val(),
+                DemandNoteContent: $("#DemandNoteContent").val(),
+                NotificationId: $("#NotificationId").val(),
+                ActionType: $("#ActionType").val(),
+                InstallmentAmount: $("#InstallmentAmount").val(),
+                InstallmentInterest: $("#InstallmentInterest").val(),
+                TotalInstallment: $("#TotalInstallment").val(),
+                LeaseRentDues: $("#LeaseRentDues").val(),
+                LeaseRentInterest: $("#LeaseRentInterest").val(),
+                TotalLeaseRent: $("#TotalLeaseRent").val(),
+                TotalDuesAmount: $("#TotalDuesAmount").val(),
+                TotalAmount: $("#TotalAmount").val(),
+                AmountInWords: $("#AmountInWords").val(),
+                DuesUptoDate: $("#DuesUptoDate").val(),
+                OneTimeLeaseRentAmount: $('#OneTimeLeaseRentAmount').val(),
+                FilterType: $('input[name=PaymentType]:checked', '#div-payment-type').val()
+            };
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ model: demand }),
+                //url: '/Revenue/Payment/CreateCustomDemandNote',
+                //url: '/Revenue/Finance/CreateDemandNoteInHindi',
+                url: customUrl,
+                success: function (result) {
+                    if (result != null) {
+                        if (radiobtnValIII == "Hindi") {
+                            $("#comment").html(result);
+                        }
+                        else {
+                            $("#comment").html(result.DemandNoteContent);
+                        }                      
+                        var win = $("#display-comment-box").data("kendoWindow");
+                        win.center();
+                        win.open();
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again later.");
+                }
+
+            });
+        }
+    }
+
+    function SubmitNotingForApproval() {
+        var rid = $("#RegistrationId").val();
+        var user = $("#ApproverId").val();
+        if (user == "") {
+            alertify.error("Please select assignee user");
+            return false;
+        }
+        else {
+            var model = {
+                RegistrationId: $("#RegistrationId").val(),
+                DepartmentId: $("#DepartmentId").val(),
+                NotingFile: $("#NotingFile").val(),
+                NotingFileNo: $("#NotingFileNo").val(),
+                Applicant: $("#Applicant").val(),
+                Address: $("#Address").val(),
+                NotingDetail: $("#NotingDetail").val(),
+            };
+
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ model: model }),
+                url: '/Member/Authority/SaveNotingFileContent',
+                success: function (result) {
+                    if (result == '@ReturnType.Saved') {
+                        $("#approver-window").data("kendoWindow").close();
+                        alertify.success("Noting saved successfully.")
+                    }
+                    else {
+                        alertify.error("Noting is not saved, try again");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again later.");
+                }
+
+            });
+        }
+    }
+
+    function AddCommentInNoting() {
+        var rid = $("#RegistrationId").val();
+        var noting = $("#NotingDetail").val();
+        if (noting == "" || rid == "") {
+            alertify.error("Please write your comment.");
+            return false;
+        }
+        else {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json:charset=utf-8',
+                data: JSON.stringify({ rid: rid, addNotingDetails: AddNotingDetails }),
+                url: '/PropertyRegistration/AddNotingsDetails',
+                success: function (result) {
+                    if (result != "") {
+                        alertify.success("Your comment is added successfully.")
+                        $('#AddNotingDetails').data("kendoEditor").value('');
+                        window.location.reload();
+                    }
+                    else {
+                        alertify.error("Your comment is not saved");
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+    }
+
+    function ChangeInRentPaymentType() {
+        var radiobtnVal = $('input[name=RentType]:checked', '#div-onetime-rent').val();
+        if (radiobtnVal == "Yes") {
+            var annualrent = $('#LeaseRentPerAnnum').val();
+            if (annualrent != '') {
+                var onetime = parseInt(annualrent) * 15;
+                $('#OneTimeLeaseRentAmount').val(onetime);
+                $('#TotalDuesAmount').val(onetime);
+                $('#LeaseRentDues').val('');
+                $('#LeaseRentInterest').val('');
+                $('#TotalLeaseRent').val('');
+            }
+            else {
+                $('input[name=RentType][value=No]').prop("checked", true);
+                $('#LeaseRentPerAnnum').val('');
+                $('#OneTimeLeaseRentAmount').val('');
+                //$('#TotalDuesAmount').val('');
+                alert("Please enter annual lease rent.");
+                return false;
+            }
+        }
+        else {
+            $('#LeaseRentPerAnnum').val('');
+            $('#OneTimeLeaseRentAmount').val('');
+        }
+    }
+
+    function ValidateOneTimeFields() {
+        var flag = true;
+
+    }
+
+    function ValidateInputFields() {
+        var flag = true;
+        var radiobtnVal = $('input[name=RentType]:checked', '#div-onetime-rent').val();
+        var radiobtnInstallment = $('input[name=PaymentType]:checked', '#div-payment-type').val();
+        if ($("#RegistrationId").val()=="") {
+            alertify.error("Please select RID");
+            flag = false;
+        }
+        if ($("#Department").val() == "") {
+            alertify.error("Please enter Department");
+            flag = false;
+        }
+        if ($("#NotificationId").val() == "") {
+            alertify.error("Please enter Notification No");
+            flag = false;
+        }
+        if ($("#Applicant").val() == "") {
+            alertify.error("Please enter Allottee Name");
+            flag = false;
+        }
+        if ($("#ApplicantAddress").val() == "") {
+            alertify.error("Please enter Allottee Address");
+            flag = false;
+        }
+        if ($("#ActionType").val() == "") {
+            alertify.error("Please enter subject");
+            flag = false;
+        }
+        if ($("#DemandNoteContent").val() == "") {
+            alertify.error("Please write content for letter");
+            flag = false;
+        }
+        if (radiobtnVal == "Yes") {
+            if ($("#LeaseRentPerAnnum").val() == "") {
+                alertify.error("Please enter annual lease rent amount");
+                flag = false;
+            }
+            if ($("#OneTimeLeaseRentAmount").val() == "") {
+                alertify.error("Please enter one time lease rent amount");
+                flag = false;
+            }
+        }
+        else {
+            if (radiobtnInstallment == "Installment") {
+                if ($("#InstallmentAmount").val() == "") {
+                    alertify.error("Please enter annual Installment amount");
+                    flag = false;
+                }
+                if ($("#InstallmentInterest").val() == "") {
+                    alertify.error("Please enter installment interest");
+                    flag = false;
+                }
+                if ($("#TotalInstallment").val() == "") {
+                    alertify.error("Please enter total installment amount");
+                    flag = false;
+                }
+            }
+            else {
+                if ($("#LeaseRentDues").val() == "") {
+                    alertify.error("Please enter Lease rent Amount");
+                    flag = false;
+                }
+                if ($("#LeaseRentInterest").val() == "") {
+                    alertify.error("Please enter lease rent interest");
+                    flag = false;
+                }
+                if ($("#TotalLeaseRent").val() == "") {
+                    alertify.error("Please enter Total Lease rent");
+                    flag = false;
+                }
+            }           
+        }
+        
+        if ($("#TotalDuesAmount").val() == "") {
+            alertify.error("Please enter total dues amount");
+            flag = false;
+        }
+        if ($("#AmountInWords").val() == "") {
+            alertify.error("Please write amount in words.");
+            flag = false;
+        }
+        return flag;
+    }
+
+    function ClearInputFields() {
+       $("#RegistrationId").data("kendoDropDownList").value('');
+       $("#DepartmentId").val('');
+       $("#Department").val('');
+       $("#Applicant").val('');
+       $("#ApplicantAddress").val('');
+       $("#DemandNoteContent").val('');
+       $("#NotificationId").val('');
+       $("#ActionType").val('');
+       $("#InstallmentAmount").val('');
+       $("#InstallmentInterest").val('');
+       $("#TotalInstallment").val('');
+       $("#LeaseRentDues").val('');
+       $("#LeaseRentInterest").val('');
+       $("#TotalLeaseRent").val('');
+       $("#TotalDuesAmount").val('');
+       $("#TotalAmount").val('');
+       $("#AmountInWords").val('');
+    }
+
+    function PrintDiv() {
+        var contents = document.getElementById("comment").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('<style>tr{padding-top:4px;padding-bottom:4px;}</style>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+</script>
+

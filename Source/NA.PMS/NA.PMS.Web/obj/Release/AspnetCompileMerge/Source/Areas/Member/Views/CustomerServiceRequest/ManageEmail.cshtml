@@ -1,0 +1,313 @@
+﻿@model NA.PMS.Model.ApplicantModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@using NA.PMS.Common;
+@{
+    ViewBag.Title = "Manage Email";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .btn-padding{
+        padding:3px 25px;
+    }
+   .more-less {
+        float: right;
+        color: #212121;
+    }
+    .panel-title a{
+        text-decoration:none;
+    }
+</style>
+
+<script src="~/Scripts/common-validation.js"></script>
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Manage Email/Message</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory"></div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                <div class="panel panel-default" id="Panel-01">
+                    <div class="panel-heading" role="tab" id="headingOne">
+                        <h4 class="panel-title">
+                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                <i class="more-less glyphicon glyphicon-plus"></i>
+                                Send Message
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                        <div class="panel-body">
+                            <div class="row form-group">
+                                <div class="col-md-3">
+                                    @Html.Label("Registration Id:")
+                                </div>
+                                <div class="col-md-4">
+                                    @(Html.Kendo().DropDownListFor(model => model.RegistrationId)
+                                      .Filter("contains")
+                                      .DataTextField("text")
+                                      .DataValueField("id")
+                                      .OptionLabel(" --- Select ---")
+                                      .DataSource(source =>
+                                        {
+                                            source.Custom()
+                                            .ServerFiltering(true)
+                                            .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                            .Transport(transport =>transport.Read(read => read.Action("GetRegistrationIdList", "CustomerServiceRequest")))
+                                            .Schema(schema =>schema.Data("Data").Total("Total"))
+                                            .PageSize(100);
+                                        })
+                                      .HtmlAttributes(new { style = "width: 100%" })
+                                      .Events(e => e.Change("GetApplicantDetail"))
+                                    )
+                                </div>
+                               
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-md-3">
+                                    @Html.Label("Mobile:")
+                                </div>
+                                <div class="col-md-4">
+                                    @Html.TextBoxFor(model => model.MobileNo, htmlAttributes: new { @class = "form-control", @maxlength = "10" })
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-md-3">
+                                    @Html.Label("Email:")
+                                </div>
+                                <div class="col-md-4">
+                                    @Html.TextBoxFor(model => model.Email, htmlAttributes: new { @class = "form-control", @maxlength = "50" })
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-md-3">
+                                    @Html.Label("Message:")
+                                </div>
+                                <div class="col-md-4">
+                                   @(Html.Kendo().DropDownListFor(model=>model.MessageValue)
+                                      .Filter("contains")
+                                      .DataTextField("Text")
+                                      .DataValueField("Value")
+                                      .OptionLabel(" -- Select --")
+                                      .DataSource(source =>source.Read(read=>read.Action("GetResourceMessageList","CustomerServiceRequest")))                                      
+                                      .HtmlAttributes(new { style = "width: 100%" })
+                                )
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-md-3">
+                                    @Html.Label("Applicant:")
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.TextBoxFor(model => model.ApplicantName, htmlAttributes: new { @class = "form-control", @maxlength = "100" })
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-md-3">
+                                    @Html.Label("Email Message:")
+                                </div>
+                                <div class="col-md-9">
+                                    @Html.TextAreaFor(model => model.Message, htmlAttributes: new { @class = "form-control", @maxlength = "200" })
+                                </div>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-md-12" style="text-align:center">
+                                    <input type="button" id="btnSubmit" class="k-button btn-padding" value="Send" />
+                                    <input type="button" id="btnClear" class="k-button btn-padding" value="Clear" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel panel-default" id="Panel-02">
+                    <div class="panel-heading" role="tab" id="headingTwo">
+                        <h4 class="panel-title">
+                            <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+                                <i class="more-less glyphicon glyphicon-plus"></i>
+                                Bulk SMS
+                            </a>
+                        </h4>
+                    </div>
+                    <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+                        <div class="panel-body">
+                            <form id="CollapseTwoForm">
+                                <div class="row form-group">
+                                    <div class="col-md-3">
+                                        <label>Online Form Status</label>
+                                    </div>
+                                    <div class="col-md-3">
+                                        @(Html.Kendo().DropDownList()
+                                          .Name("FormStatus")
+                                          .DataTextField("Text")
+                                          .DataValueField("Value")
+                                          .OptionLabel(" --- Select ---")
+                                          .BindTo(new List<SelectListItem>() {
+                                              new SelectListItem() { Text = "Form Uploaded", Value = "FormUploaded" },
+                                              new SelectListItem() { Text = "Form Draw", Value = "Draw" },
+                                              new SelectListItem() { Text = "Other", Value = "Other" }
+                                          })
+                                          .HtmlAttributes(new { style = "width: 100%" })
+                                        )
+                                    </div>
+                                    <div class="col-md-3" style="text-align:center">
+                                        <input type="radio" name="StatusOn" value="Off" checked="checked"/><b>OFF</b> &nbsp;&nbsp;&nbsp;
+                                        <input type="radio" name="StatusOn" value="On" /><b>ON</b>                                      
+                                    </div>
+                                    <div class="col-md-3" style="text-align:center">
+                                        <input type="button" id="submitfile" class="k-button btn-padding" value="Send" />
+                                    </div>
+                                </div>                             
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.panel-group').on('hidden.bs.collapse', toggleIcon);
+        $('.panel-group').on('shown.bs.collapse', toggleIcon);
+
+        $('#btnSubmit').click(function () {
+            SendEmailMessage();
+        });
+
+        $('#btnClear').click(function () {
+            ClearAllFields();
+        })
+
+        $('#submitfile').click(function () {
+            SendBulkMessage();
+        });
+    });
+
+    function toggleIcon(e) {
+        $(e.target).prev('.panel-heading').find(".more-less").toggleClass('glyphicon-plus glyphicon-minus');
+    }
+
+   
+
+    function GetApplicantDetail() {
+        var rid = $('#RegistrationId').val();
+        if (rid != "") {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ registrationId: rid }),
+                url: '/Member/CustomerServiceRequest/GetApplicantDetailToSendMessage',
+                success: function (result) {
+                    if (result != null) {
+                        $('#ApplicantName').val(result.ApplicantName);
+                        $('#MobileNo').val(result.MobileNo);
+                        $('#Email').val(result.Email);
+                    }
+                    else {
+                        alertify.error("Please try again.");
+                    }
+                },
+                error: function (obj) {
+                    alertify.error("Network error. Please try after some time");
+                }
+            });
+        }       
+    }
+
+    function SendEmailMessage() {
+        if ($('#MobileNo').val().length < 10) {
+            alertify.error("Please enter valid mobile number.");
+            return false;
+        }
+        if ($('#Message').val() != "") {
+            if ($('#Message').val().length == 0) {
+                alertify.error("Please write your message");
+                return false;
+            }
+            if ($('#Message').val().length > 200) {
+                alertify.error("Message should be less than 200 characters.");
+                return false;
+            }
+        }
+        var model = {
+            RegistrationId: $('#RegistrationId').val(),
+            ApplicantName: $('#ApplicantName').val(),
+            MobileNo: $('#MobileNo').val(),
+            MessageKey: $('#MessageValue').data("kendoDropDownList").text(),
+            MessageValue: $('#MessageValue').val(),
+            Message: $('#Message').val()
+        };
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ model: model }),
+            url: '/Member/CustomerServiceRequest/SendMessageToApplicant',
+            success: function (result) {
+                if (result == true) {
+                    alertify.success("Message has been sent successfully");
+                }
+                else {
+                    alertify.error("Please try again.");
+                }
+            },
+            error: function (obj) {
+                alertify.error("Network error. Please try after some time");
+            }
+        });
+    }
+
+    function SendBulkMessage() {
+        //var formData = new FormData($('form#CollapseTwoForm').get());
+        var status = $("input[type='radio'][name='StatusOn']:checked").val();
+        if (status == "On") {
+            var formtype = $("#FormStatus").val();
+            if (formtype != "") {
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ type: formtype }),
+                    url: '/Online/Application/SendMessageInBulk',
+                    success: function (result) {
+                        if (result == '@ReturnType.Success') {
+                            alertify.success("Message has been sent successfully");
+                        }
+                        else {
+                            alertify.error("Message is not sent. Please try again.");
+                        }
+                    },
+                    error: function (obj) {
+                        alertify.error("Network error. Please try after some time");
+                    }
+                });
+            }
+            else {
+                alertify.error("Please select form status");
+            }
+        }
+        else {
+            alertify.error("Please check On");
+        }
+    }
+
+    function ClearAllFields() {
+        $('#RegistrationId').data("kendoDropDownList").value("");
+        $('#MessageValue').data("kendoDropDownList").value("");
+        $('#ApplicantName').val("");
+        $('#MobileNo').val("");
+        $('#Message').val("");
+        $('#Email').val("");
+    }
+
+</script>

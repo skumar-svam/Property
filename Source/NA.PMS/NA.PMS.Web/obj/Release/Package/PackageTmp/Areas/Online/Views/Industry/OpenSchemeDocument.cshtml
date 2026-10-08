@@ -1,0 +1,771 @@
+﻿@model NA.PMS.OnlineScheme.SchemeFormViewModel
+@using Kendo.Mvc.UI
+@using NA.PMS.OnlineScheme
+@using NA.PMS.Common
+
+@{
+    ViewBag.Title = "Open Scheme Document";
+    if (Session["WBasicDetailsNIC"] != null || Model.AppType == Constants.AppType)
+    {
+        Layout = "~/Views/Shared/_LayoutNIC.cshtml";
+    }
+    else
+    {
+        Layout = "~/Areas/Online/Views/Shared/_LayoutOnlineScheme.cshtml";
+    }
+ }
+<style>
+    .hyperlink {
+        color: #547ae1;
+    }
+
+        .hyperlink:hover {
+            cursor: pointer;
+            color: #547ae1;
+        }
+
+    #divCompanyInfo {
+        display: none;
+    }
+
+    #second-form {
+        display: none;
+    }
+
+    .k-button.k-upload-button {
+        margin: 0;
+    }
+
+    .k-upload-files {
+        margin: 0;
+    }
+
+    #loader {
+        display: none;
+    }
+
+</style>
+
+@using (Html.BeginForm("SaveDocumentForOnlineSchemeForm", "Industry", FormMethod.Post, new { enctype = "multipart/form-data", id = "applicationform" }))
+{
+    <div class="upload-document" id="UploadDocument">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Upload Document</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory"><h1 class="gridTitle">Form No :- @Model.ApplicationFormId</h1></div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce" id="first-form">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <h2 class="blck-heading" style="margin-bottom:6px;">Upload Document/PDF</h2>
+                <div class="form-bx">
+                    <div>
+                        @Html.HiddenFor(model => model.Id)
+                        @Html.HiddenFor(model => model.ApplicationFormId)
+                        @Html.HiddenFor(model => model.EncryptedFormId)
+                        @Html.HiddenFor(model => model.SchemeId)
+                        @Html.HiddenFor(model => model.SchemeTypeId)
+                        @Html.HiddenFor(model => model.DepartmentId)
+                        @Html.HiddenFor(model => model.ApplicantType)
+                        @Html.HiddenFor(model => model.StrDocList)
+                        @Html.HiddenFor(model => model.DocumentIdList)
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-4 col-40 col-sm-6 col-xs-12 form-group">
+                                    @Html.Label("Scheme Name", htmlAttributes: new { @class = "required" })
+                                </div>
+                                <div class="col-md-8 col-60 col-sm-6 col-xs-12 form-group">
+                                    @Html.TextBoxFor(model => model.SchemeName, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 col-40 col-sm-6 col-xs-12 form-group">@Html.Label("Department", htmlAttributes: new { @class = "required" })</div>
+                                <div class="col-md-8 col-60 col-sm-6 col-xs-12 form-group">
+                                    @Html.TextBoxFor(model => model.Department, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 col-40 col-sm-6 col-xs-12 form-group">@Html.Label("Applicant", htmlAttributes: new { @class = "required" })</div>
+                                <div class="col-md-8 col-60 col-sm-6 col-xs-12 form-group">
+                                    @Html.TextBoxFor(model => model.Applicant, htmlAttributes: new { @class = "form-control", placeholder = "", @readonly = "readonly" })
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 col-40 col-sm-3 col-xs-12 form-group col-prnt-lt4">
+                                    @Html.Label("Area Range", htmlAttributes: new { @class = "required" })
+                                </div>
+                                <div class="col-md-8 col-60 col-sm-3 col-xs-12 form-group col-prnt-lt4">
+                                    @Html.TextBoxFor(model => model.AreaRange, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6" style="">
+                            <div class="row">
+                                <div class="col-md-4 col-40 col-sm-6 col-xs-12">
+
+                                </div>
+                                <div class="col-md-8 col-60 col-sm-6 col-xs-12 form-group">
+                                    <div class="row">
+                                        <div class="col-md-12 text-right" style="margin-bottom:5px;">
+                                            <img id="userphoto" src="@Model.UserImage" alt="your image" height="150px" width="140px" name="userImage2" />
+                                        </div>
+                                        <div class="col-md-12 text-right">
+                                            <img id="signature" src="@Model.SignImage" alt="your sign" height="40px" width="140px" name="usersign" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <h2 class="blck-heading" style="">Proposed Project Detail</h2>
+                <div class="form-bx" id="ProposedCompany">
+                    <div class="row">
+                        <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Proposed Project Name", new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.SchemeProposedFirm.ProposedProject, new { @class = "form-control", @maxlength = "100" })
+                        </div>
+                        <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Estimated Cost  (In lakhs)", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.SchemeProposedFirm.TotalCost, new { @class = "form-control", @maxlength = "8", onkeypress = "return IsNumeric(event);" })
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Implementation Time (yr)", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.SchemeProposedFirm.ImplementationTime, new { @class = "form-control", @maxlength = "2", onkeypress = "return IsNumeric(event);" })
+                        </div>
+                        <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+
+                        </div>
+                        <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                            <input type="button" class="k-button" value="Save Project" id="btn-save-project" style="min-width:110px;" />
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="blck-heading" style="">Director's Information</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Director's Name", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.SchemeProposedFirm.DirectorName, new { @class = "form-control", @maxlength = "99" })
+                        </div>
+                        <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Director's Share(%)", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.SchemeProposedFirm.DirectorShare, new { @class = "form-control", @maxlength = "7" })
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Director Type", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(model => model.SchemeProposedFirm.DirectorTypeId)
+                                .DataTextField("Text")
+                                .DataValueField("Id")
+                                .OptionLabel("--Select--")
+                                .DataSource(source => source.Read(read => read.Action("GetDirectorTypeList", "Default", new { area = "Online" })))
+                                .HtmlAttributes(new { @class = "", style = "width:100%;" })
+                            )
+                        </div>
+                        <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("PAN")
+                        </div>
+                        <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.SchemeProposedFirm.PAN, new { @class = "form-control", @maxlength = "10", @onchange = "ProposedFirmPANChangeEvent();" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                        </div>
+                        <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                        </div>
+                        <div class="col-md-2 col-20 col-sm-3 col-xs-12 form-group">
+                        </div>
+                        <div class="col-md-4 col-30 col-sm-3 col-xs-12 form-group">
+                            <input type="button" class="k-button" value="Add" id="btn-save-director" style="min-width:110px;" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-12 k-grid-content">
+                    @(Html.Kendo().Grid<NA.PMS.OnlineScheme.SchemeProposedFirmViewModel>()
+                        .Name("gridDirectors")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(c => c.DirectorId).Hidden();
+                            columns.Bound(c => c.Id).Title("SNo").Width(50);
+                            columns.Bound(c => c.DirectorName).Title("Name").Width(80);
+                            columns.Bound(c => c.DirectorType).Title("Type").Width(50);
+                            columns.Bound(c => c.DirectorShare).Title("Share (In %)").Width(80);
+                            columns.Bound(c => c.PAN).Title("PAN").Width(80);
+                            columns.Bound(c => c.DirectorId).Hidden(true).Title("Action");
+                            columns.Bound(c => c.DirectorId).Title("Action").ClientTemplate("<a href='##' onclick='javascript: return RemoveProposedDirector(this);' id='RemoveTag'>Remove</a>").Width(50).Filterable(false).Sortable(false);
+                        })
+                        .Resizable(resize => resize.Columns(true))
+                        .AutoBind(true)
+                        .DataSource
+                        (
+                            dataSource => dataSource
+                            .Ajax().Model(model => model.Id(p => p.Id))
+                            .ServerOperation(true)
+                            .Read(read => read.Action("GetProposedFirmDirectorsDetailAsDataSource", "Industry", new { area = "Online" }).Data("FilterFormId"))
+                        )
+                    )
+                </div>
+
+
+                <div class="col-md-12" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                    <label class="" style="color:red"><b>Please refer scheme brochure to upload your documents.</b></label><br />
+                    <label class="" style="color:red"><b>Upload pdf document only. Minimum size(10kb), Maximum size(5Mb)</b></label>
+                </div>
+                <div class="col-md-12 k-grid-content">
+
+                    @(Html.Kendo().Grid<NA.PMS.OnlineScheme.SchemeDocumentViewModel>()
+                        .Name("gridDocs")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(c => c.Sno).Title("Sl .No.").Width(100);
+                            columns.Bound(c => c.Id).Hidden(true);
+                            columns.Bound(c => c.DocumentName).Title("Description").Encoded(false);
+                            columns.Bound(c => c.DocumentId).Title("file").ClientTemplate("# if (UploadedDocument != null) {#<a onclick='javascript:OpenDocument(this);' class='hyperlink'>View Docs</a>#}else {#<input type='file' id='f_#= DocumentId #' class='single' name='files' disabled='disabled' onchange='CheckFileSize(this)' />#}#").Width(200);
+                            columns.Bound(c => c.PathName).Title("File").Width(100).ClientTemplate("# if (UploadedDocument != null) {#<span onclick='RemoveDocument(this)' class='hyperlink'>Remove</span>#}else {#<input  type='checkbox' #= IsSelected ? checked='checked':'' # class='inpchk' ></input>#} #").Filterable(false);
+                            columns.Bound(c => c.PathName).Hidden(true);
+                            columns.Bound(c => c.ParentDocumentType).Title(" ").Hidden(true);
+                        })
+                        .Resizable(resize => resize.Columns(true))
+                        .AutoBind(true)
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .Model(model => model.Id(c => c.Id))
+                            .ServerOperation(true)
+                            .Group(groups => groups.Add(p => p.ParentDocumentType))
+                            .Read(read => read.Action("GetDocumentListAsDataSourceForOnlineSchemeform", "Industry").Data("FilterFormId"))
+                        )
+                    )
+                </div>
+            </div>
+        </div>
+        <div class="box-button text-center">
+            <input type="button" id="btnCancel" value="Back" class="btn btn-default" onclick="window.history.back()" />
+            @{
+                    if (Model.IsApplicationFeePaid != true)
+                    {
+                        if (Model.IsDocumentUploaded == true)
+                        {
+                            <input type="button" value="Skip" id="btnPayment" class="btn btn-add" />
+                        }
+                        <input type="button" value="Upload" id="btnUpdate" class="btn btn-add" />
+                    }
+                }
+
+            @*@{
+                if (Model.IsApplicationFeePaid != true && Model.PropertyTypeId == 1)
+                {
+                    <input type="button" value="Upload" id="btnUpdate" class="btn btn-add" />
+                }
+            }*@
+        </div>
+    </div>
+}
+
+<div id="divDocumentView" style="overflow:hidden">
+    <div class="row">
+        <div class="col-md-12 no-margin no-padding" id="divPageView" style="overflow:hidden">
+            <iframe id="ifrmViewPdf"></iframe>
+        </div>
+    </div>
+</div>
+
+<div id="progressbar" style="width:100%; text-align:center;">
+    <div id="loader" style="position: fixed;top:210px; left:0;  width:100%; height: 100%;  ">
+        <img src="~/Content/Images/ajax_loader_red.gif" style="width:200px;height:200px;" />
+    </div>
+</div>
+
+<script type="text/javascript">
+     @{
+        if (TempData["Document"] != null || TempData["Document"] != "")
+         {
+             if (TempData["Document"] == "success")
+             {
+                 @:alertify.success("Document uploaded successfully");
+                                         }
+             if (TempData["Document"] == "failure")
+             {
+                 @:alertify.error("Unable to upload your document");
+                                         }
+         }
+     }
+
+    $(document).ready(function () {
+        //$('form').submit(function () {
+        //    $('#loader').show();
+        //})
+
+        $("#btnUpdate").click(function () {
+            ValidateFormFields();
+        });
+
+        $("#btnPayment").click(function () {
+            var formId = $("#Id").val();
+            var encryptedId = $('#EncryptedFormId').val();
+            window.location.href = '/Online/Industry/PreviewSchemeForm?ApplicationFormId=' + formId;
+            @*window.location.href = '@Url.Action("PreviewSchemeForm", "Industry", new { area = "Online" })' + "/" + encryptedId;*@
+        });
+
+        $('#divDocumentView').kendoWindow({
+            modal: true,
+            title: "Document",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "15%"
+            },
+            width: "70%", height: "80%"
+        });
+    });
+
+    var checkedIDs = [];
+    $(function () {
+        $('#gridDocs').on('change', '.inpchk', function () {
+            var checked = $(this).is(':checked');
+            var grid = $('#gridDocs').data().kendoGrid;
+            var dataItem = grid.dataItem($(this).closest('tr'));
+            if (checked == true) {
+                $("#f_" + dataItem.DocumentId).attr("disabled", false);
+                checkedIDs.push(dataItem.DocumentId);
+            }
+            else {
+                $("#f_" + dataItem.DocumentId).attr("disabled", true);
+                $("#f_" + dataItem.DocumentId).val('');
+                var i = checkedIDs.indexOf(dataItem.DocumentId);
+                checkedIDs.splice(i, 1);
+            }
+            $('#DocumentIdList').val(checkedIDs);
+        });
+    });
+
+    function FilterFormId() {
+        return {
+            ApplicationFormId: $("#ApplicationFormId").val(),
+            SchemeId: $("#SchemeId").val(),
+            DepartmentId: $("#DepartmentId").val(),
+            SchemeTypeId: $("#SchemeTypeId").val(),
+            CheckListType: "OES"
+        };
+    }
+
+
+    function OpenDocument(row) {
+        $("#divDocumentView").empty();
+        var tr = $(row).parent().parent();
+        var link = $(tr).children("td:eq(6)").text();
+        $("#divDocumentView").append($('<iframe src=' + link + ' style="width:100%; height:100%;"></iframe>'));
+        $("#divDocumentView").data("kendoWindow").center();
+        $("#divDocumentView").data("kendoWindow").open();
+    }
+
+    function RemoveDocument(row) {
+        var tr = $(row).parent().parent();
+        var link = $(tr).children("td:eq(6)").text();
+        var arr = link.split('/');
+        var filename = arr[arr.length - 1];
+        var formNumber = $('#ApplicationFormId').val();
+        $.ajax({
+            url: '/Online/Application/RemoveDocumentFromApplicationForm',
+            type: 'POST',
+            dataType: 'json',
+            data: { formNo: formNumber, filename: filename },
+            success: function (result) {
+                if (result == '@ReturnType.Success') {
+                    $('#gridDocs').data("kendoGrid").dataSource.read();
+                    alertify.success("File is deleted successfully");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+
+    
+
+    function ValidateFormFields() {
+
+        if (checkedIDs.length > 0) {
+            for (var i = 0; i < checkedIDs.length; i++) {
+                var fl = $('#f_' + checkedIDs[i]).val();
+                if (fl == "" || fl == null) {
+                    alertify.error("Please upload checked document.");
+                    return false;
+                }
+            }
+            $('#DocumentIdList').val(checkedIDs);
+            $('#StrDocList').val(checkedIDs);
+            $('#applicationform').submit();
+        }
+        else {
+            //$('#applicationform').submit();
+            alertify.error("Please upload atleast one document.");
+        }
+    }
+
+    var IsError = false;
+    function CheckFileSize(row) {
+        var filename = row.files[0].name;
+        var size = row.files[0].size/1024;
+        var extension = filename.substr(filename.lastIndexOf('.') + 1);
+        if (extension.toLowerCase() == "pdf") {
+            //if (size < 100 ) {
+            //    alertify.error("Minimum 100kb file size is allowed");
+            //    IsError = true;
+            //}
+            if (size / 1024 > 5) {
+                IsError = true;
+                alertify.error("Maximum 5Mb file size is allowed");
+            }
+            if (IsError == true) {
+                row.value = '';
+            }
+        }
+        else {
+            alertify.error("Please upload pdf documents.");
+            row.value='';
+        }
+    }
+
+    function ValidateDocumentUpload() {
+        var flag = false;
+        var formId = $("#Id").val();
+        if (formId.trim() != "") {
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                data: { formNo: formId },
+                url: '/Online/Application/IsDocumentUploaded',
+                success: function (result) {
+                    if (result == true) {
+                        flag = true;
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+        return flag;
+    }
+
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#btn-save-director').click(function () {
+            SaveProposedDirector();
+        });
+
+        $('#btn-save-project').click(function () {
+            SaveProposedProject();
+        });
+
+        //if ($('#ApplicationFormId').val() != "") {
+        //    //$("#gridDirectors").data("kendoGrid").dataSource.read();
+        //    //if ($("#gridDirectors").data("kendoGrid").dataSource.total() == 0) {
+        //    //    $('.row-director-grid').css("display", "none");
+        //    //}
+        //    //else {
+        //        $('.row-director-grid').show();
+        //    //}
+        //}
+
+        //$("#gridDirectors").data("kendoGrid").dataSource.read();
+        //if ($("#gridDirectors").data("kendoGrid").dataSource.total() == 0) {
+        //    $('.row-director-grid').css("display", "none");
+        //}
+        //else {
+        //    $('.row-director-grid').show();
+        //}
+    });
+
+    function SaveProposedProject() {
+        var pnam = $('#SchemeProposedFirm_ProposedProject').val();
+        var cost = $('#SchemeProposedFirm_TotalCost').val();
+        var time = $('#SchemeProposedFirm_ImplementationTime').val();
+        if (pnam == "" || pnam == undefined) {
+            alertify.error("Enter Project Name");
+            return false;
+        }
+        else if (cost == "" || cost == undefined) {
+            alertify.error("Enter Estimated Cost");
+            return false;
+        }
+        else if (time == "" || time == undefined) {
+            alertify.error("Enter Estimated Time");
+            return false;
+        }
+        else {
+            var proj = {
+                ApplicationFormId: $('#ApplicationFormId').val(),
+                ProposedProject: pnam,
+                TotalCost: cost,
+                ImplementationTime: time,
+                ActionType: "SaveProject"
+            };
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ model: proj }),
+                url: "/Online/Industry/SaveProposedFirmDirectorsDetail",
+                success: function (data) {
+                    if (data.ReturnTypeId == '@OSReturnTypeId.Saved') {
+                        alertify.success("Record added successfully.");
+                    }
+                    else {
+                        alertify.error("Provider failed to save data.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    //alert("error");
+                }
+            });
+        }
+    }
+
+    function ProposedFirmPANChangeEvent() {
+        if ($("#SchemeProposedFirm_PAN").val().trim() == '') {
+            $("#SchemeProposedFirm_PAN").val('');
+        }
+        else {
+            var firmpan = $("#SchemeProposedFirm_PAN").val().trim();
+            var panregex = /^[A-Z]{5}\d{4}[A-Z]{1}$/;
+            if (!panregex.test(firmpan) || firmpan.length != 10) {
+                alertify.error("Pan Number format is wrong.");
+                $("#SchemeProposedFirm_PAN").val('');
+                return false;
+            }
+        }
+    }
+
+
+    //function ValidateProposedCompany() {
+    //    var flag = true;
+    //    var projname = $('#ProposedModel_ProposedProject').val();
+    //    var cost = $('#ProposedModel_TotalCost').val();
+    //    var time = $('#ProposedModel_ImplementationTime').val();
+    //    //var dflag = $("#chkboxDeclaration").prop("checked");
+    //    var director = $('#gridDirectors').data("kendoGrid").dataSource.total();
+    //    if (projname == "") {
+    //        alertify.error("Please enter proposed project name.");
+    //        flag = false;
+    //    }
+    //    if (cost == "") {
+    //        alertify.error("Please enter Estimated cost.");
+    //        flag = false;
+    //    }
+    //    if (time == "") {
+    //        alertify.error("Please enter Estimated Time to implement.");
+    //        flag = false;
+    //    }
+    //    if (director == 0) {
+    //        alertify.error("Please add atleast one director.");
+    //        flag = false;
+    //    }
+    //    //if (dflag == false) {
+    //    //    alertify.error("Please check Declaration .");
+    //    //    flag = false;
+    //    //}
+    //    //else {
+    //    //    $('#applicationform').submit();
+    //    //}
+    //    return flag;
+    //}
+
+    //function ValidateDirector() {
+    //    var flag = true;
+    //    var director = $('#gridDirectors').data("kendoGrid").dataSource.total();
+
+    //    if (director == 0) {
+    //        alertify.error("Please add atleast one director.");
+    //        flag = false;
+    //    }
+
+    //    return flag;
+    //}
+
+    function SaveProposedDirector() {
+        debugger
+        var formId = $('#ApplicationFormId').val();
+        var name = $('#SchemeProposedFirm_DirectorName').val();
+        var share = $('#SchemeProposedFirm_DirectorShare').val();
+        var type = $('#SchemeProposedFirm_DirectorTypeId').val();
+        var typetext = $('#SchemeProposedFirm_DirectorTypeId').data('kendoDropDownList').text();
+        var pan = $('#SchemeProposedFirm_PAN').val();
+        var grid = $("#gridDirectors").data("kendoGrid");
+        var data = grid.dataSource._data;
+
+        //var grid = $("#gridDirectors").data("kendoGrid");
+        //var data = grid.dataSource;
+        //dataSource.data([]);
+        //dataSource.sync();//refresh grid
+
+        if (name.trim() == "") {
+            alertify.error("Please enter Director name.");
+            return false;
+        }
+        if (share.trim() == "") {
+            alertify.error("Please enter Director's share.");
+            return false;
+        }
+        if (isNaN(share.trim())) {
+            $('#SchemeProposedFirm_DirectorShare').val('');
+            alertify.error("Please enter a number for share.");
+            return false;
+        }
+        if (share.trim() != "" && share.trim() > 100) {
+            alertify.error("Director's share can't be more than 100.");
+            return false;
+        }
+
+        if (type.trim() == "") {
+            alertify.error("Please select Director's type.");
+            return false;
+        }
+        if (pan.trim() == "") {
+            alertify.error("Please enter Director's PAN.");
+            return false;
+        }
+        share = parseFloat($('#SchemeProposedFirm_DirectorShare').val()).toFixed(2);
+        var sum = 0.0000;
+        var flag = false;
+        var tpan;
+        $.each(data, function (p, row) {
+            sum = sum + (row.DirectorShare);
+            if (pan == row.PAN) {
+                flag = true;
+            }
+        });
+        sum = parseFloat(sum) + parseFloat(share);
+        if (parseFloat(sum).toFixed(4) > 100) {
+            alertify.error("Sum of Shares can't exceed 100%");
+            return false;
+        }
+        //if (parseFloat(sum).toFixed(4) < 100) {
+        //    alertify.error("Sum of Shares should be 100%");
+        //    return false;
+        //}
+        if (flag == true) {
+            alertify.error("PAN can't be same for other person");
+            return false;
+        }
+        else {
+            var model = {
+                ApplicationFormId: formId,
+                DirectorName: name,
+                DirectorShare: share,
+                DirectorType: typetext,
+                DirectorTypeId: type,
+                PAN: pan,
+                ActionType: "Save"
+            };
+
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ model: model }),
+                url: "/Online/Industry/SaveProposedFirmDirectorsDetail",
+                //url: "/Scheme/Application/SaveDirectorDetailsForOpenScheme",
+                success: function (data) {
+                    if (data.ReturnTypeId == '@OSReturnTypeId.Saved') {
+                        $("#gridDirectors").data("kendoGrid").dataSource.read();
+                        $('.row-director-grid').show();
+                        alertify.success("Record added successfully.");
+                        ClearDirectorFields();
+                    }
+                    else {
+                        alertify.error("Please try again later.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    //alert("error");
+                }
+            });
+        }
+    }
+
+    function RemoveProposedDirector(row) {
+        var tr = $(row).parent().parent();
+        var directorId = $(tr).children("td:eq(0)").text();
+        var formId = $('#ApplicationFormId').val();
+        var bflag = false;
+
+        if (confirm("Are you sure? You want to remove this record.")) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ ApplicationFormId: formId, DirectorId: directorId, ActionType: "Remove" }),
+                url: '/Online/Industry/SaveProposedFirmDirectorsDetail',
+                success: function (result) {
+                    if (result.ReturnTypeId == '@OSReturnTypeId.Removed') {
+                        event.preventDefault();
+                        $("#gridDirectors").data("kendoGrid").dataSource.read();
+                        alertify.success("Record deleted successfully.");
+                        if (($("#gridDirectors").data("kendoGrid").dataSource._total) == 0) {
+                            $('.row-director-grid').css("display", "none");
+                        }
+                        else {
+                            $('.row-director-grid').show();
+                        }
+                    }
+                    else {
+                        alertify.error("Please try again later.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                }
+            });
+            return false;
+        }
+        else {
+            event.preventDefault();
+            //event.defaultPrevented();
+        }
+    }
+
+    function ClearDirectorFields() {
+        $('#DirectorModel_DirectorName').val('');
+        $('#DirectorModel_DirectorShare').val('');
+        $('#DirectorModel_PAN').val('');
+        $('#DirectorModel_DirectorTypeId').data("kendoDropDownList").value('');
+    }
+
+</script>
+

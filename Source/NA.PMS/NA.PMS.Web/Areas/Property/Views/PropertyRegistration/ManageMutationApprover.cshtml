@@ -1,0 +1,60 @@
+﻿@using Kendo.Mvc.UI
+@{
+    ViewBag.Title = "Manage Mutations";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    #btnRequest {
+        float: right;
+    }
+</style>
+
+    <div class="ManageMutationApprover">
+       
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Mutations</h1></div>
+                <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                    @*<a href="#" id="btnAddApplication" class="" onclick="javascript:AddApplication(event);">Add Application</a>*@
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 k-grid-content">
+            @(Html.Kendo().Grid<NA.PMS.Model.MutationModel>()
+        .Name("gridMutations")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.ReqNo).Title("Request No").ClientTemplate("<a href=\"/Property/PropertyRegistration/ViewMutationRequestApprover/#= ReqNo#\" id='v_#=ReqNo#'  style = 'width: 30px;' >#=ReqNo#</a>");
+            columns.Bound(c => c.RId).Title("Registration Id").Width(150);
+            columns.Bound(c => c.DepttName).Title("Department");
+            columns.Bound(c => c.SectorName).Title("Sector").Width(100);
+            columns.Bound(c => c.BlockName).Title("Block").Width(100);
+            columns.Bound(c => c.PropertyNo).Title("Property No").Width(150);
+            //columns.Bound(c => c.PropNo).Title("Property No");
+            columns.Bound(c => c.ReqDate).Title("Request Date").Format("{0:dd/MM/yyyy}");
+            columns.Bound(c => c.MutationDate).Title("Mutation Date").Format("{0:dd/MM/yyyy}");
+            columns.Bound(c => c.Status).Title("Status").Width(130);
+        })
+        .Sortable()
+        .Filterable()
+                .Resizable(resize => resize.Columns(true))
+        .Pageable(pageable => pageable
+                                               .Enabled(true)
+                                               .Refresh(true)
+                                               .PageSizes(true)
+                                            )
+                                            .Groupable()
+        .DataSource(dataSource => dataSource
+        .Ajax().Model(model => model.Id(c => c.RId))
+                .ServerOperation(true).Sort(sort => sort.Add("ReqNo").Descending())
+        .Read(read => read.Action("GetMutationDataByApproverId", "PropertyRegistration")).PageSize(20)
+        )
+            )
+        </div>
+    </div>
+
+<script type="text/javascript">
+</script>
+

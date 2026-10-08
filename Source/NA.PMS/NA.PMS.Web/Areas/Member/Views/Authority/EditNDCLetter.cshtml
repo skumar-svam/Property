@@ -1,0 +1,459 @@
+﻿@model NA.PMS.Model.NDCVeiwModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@using NA.PMS.Common
+
+
+@{
+    ViewBag.Title = "EditNDCLetter";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">No Dues Certificate</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory"></div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div id="DivPropertyInformation" class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <h2 class="blck-heading" style="margin-bottom:5px;">Property Information</h2>
+                <div class="form-bx">
+                    <div>
+                        @Html.HiddenFor(model => model.Id)
+                        @Html.HiddenFor(model => model.DepartmentId)
+                        @Html.HiddenFor(model => model.Department)
+                        @Html.HiddenFor(model => model.Sector)
+                        @Html.HiddenFor(model => model.Block)
+                        @Html.HiddenFor(model => model.PlotNo)
+                        @Html.HiddenFor(model=>model.ActionType)
+                    </div>
+                    <div class="row" style="margin-bottom:5px;padding-bottom:8px;border-bottom:#abc solid 1px;">
+                        <div class="col-md-12" id="div-language-type" style="text-align:center;">
+                            <input type="radio" name="LanguageType" id="rbtnEnglish" value="English">&nbsp;<b>English</b> &nbsp;&nbsp;
+                            <input type="radio" name="LanguageType" id="rbtnHindi" value="Hindi" />&nbsp;<b>Hindi</b>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Registration Id:", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @*@(Html.Kendo().DropDownListFor(m => m.RegistrationId)
+                                .DataTextField("Text")
+                                .DataValueField("Id")
+                                .Filter("contains")
+                                .OptionLabel("---Select---")
+                                .DataSource(source =>
+                                {
+                                    source.Custom()
+                                    .ServerFiltering(true)
+                                    .ServerPaging(true)
+                                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                    .Transport(transport =>
+                                    {
+                                        transport.Read(read => read.Action("GetRegistrationIdListAsDataSource", "Authority", new { area = "Member" }));
+                                    })
+                                    .Schema(schema => schema.Data("Data").Total("Total"))
+                                    .PageSize(100);
+                                })
+                               //.Events(events => { events.Change("GetApplicantDetails"); })
+                               .HtmlAttributes(new { @class = "", style = "width:100%" ,@readonly="readonly"})
+                            )*@
+
+                            @Html.TextBoxFor(model => model.RegistrationId, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Sector/Block-PlotNo:")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.PropertyNo, htmlAttributes: new { @class = "form-control", @maxlength = "50", @readonly = "readonly" })
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Allottee Name:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextAreaFor(model => model.Applicant, htmlAttributes: new { @class = "form-control", @maxlength = "100", @readonly = "readonly" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Allottee Address:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextAreaFor(model => model.Address, htmlAttributes: new { @class = "form-control", @maxlength = "500" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Installment Paid upto:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @*@(Html.Kendo().DatePickerFor(model => model.InstallmentPaidUpto).HtmlAttributes(new { style = "width:100%;" }))*@
+                            @Html.TextBoxFor(model => model.InstallmentDateInWord, htmlAttributes: new { @class = "form-control" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Installment Paid Amount:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.InstallmentInWord, htmlAttributes: new { @class = "form-control", @maxlength = "50" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Installment Insterest Paid upto:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @*@(Html.Kendo().DatePickerFor(model => model.InstallmentInterestPaidUpto).HtmlAttributes(new { style = "width:100%;" }))*@
+                            @Html.TextBoxFor(model => model.InterestDateInWord, htmlAttributes: new { @class = "form-control", @maxlength = "50" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Installment Insterest:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.InterestInWord, htmlAttributes: new { @class = "form-control", @maxlength = "50" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Leaserent Paid upto:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @*@(Html.Kendo().DatePickerFor(model => model.LeaseRentPaidUpto).HtmlAttributes(new { style = "width:100%;" }))*@
+                            @Html.TextBoxFor(model => model.LeaseRentDateInWord, htmlAttributes: new { @class = "form-control", @maxlength = "50" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Lease Rent Amount:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.LeaseRentInWord, htmlAttributes: new { @class = "form-control", @maxlength = "50" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Challan Id:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.ChallanId, htmlAttributes: new { @class = "form-control", @maxlength = "80" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Amount", htmlAttributes: new { @class = "", })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.ChalanAmount, htmlAttributes: new { @class = "form-control", @maxlength = "50" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Letter No:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.LetterNo, htmlAttributes: new { @class = "form-control", @maxlength = "20" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Letter Date:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DatePickerFor(model => model.NDCDate).HtmlAttributes(new { style = "width:100%;" }))
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Bank Name", htmlAttributes: new { @class = "", })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(model => model.BankId)
+                            .DataTextField("Text")
+                            .DataValueField("Id")
+                            .OptionLabel("---select---")
+                            .Filter("contains")
+                            .DataSource(source =>
+                            {
+                                source.Custom().ServerFiltering(true).ServerPaging(true).ServerPaging(true).Type("aspnetmvc-ajax")
+                                .Transport(transport => transport.Read("GetBankListAsDataSource", "Authority", new { area = "Member" }))
+                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                .PageSize(100);
+                            })
+                            .HtmlAttributes(new { style = "width: 100%; float:right;" })
+                            )
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Request Ref No", htmlAttributes: new { @class = "", })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.OnlineReqNo, htmlAttributes: new { @class = "form-control", @maxlength = "20", @readonly = "readonly" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-12 col-xs-12 form-group">
+                            @Html.Label("Remarks", htmlAttributes: new { @class = "", })
+                        </div>
+                        <div class="col-md-9 col-sm-12 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.Remarks, htmlAttributes: new { @class = "form-control", @maxlength = "100" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div id="barcode2"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="box-button text-center">
+                <input type="button" class="btn btn-default" value="Back" id="btnBack" onclick="window.history.back();" />
+                <input type="button" class="btn btn-default" value="Update" id="btnUpdate" />
+                @*<input type="button" class="btn btn-default" value="Generate Letter" id="btn-generate-letter" />*@
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="divLetterBodyModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="padding-top:20px;">
+    <div class="modal-dialog" style="width: 65%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title"><b><span id="LetterHeading"></span></b></h4>
+            </div>
+            <div class="modal-body" id="divmodalbody" style="overflow:auto; height:480px;">
+                <div>
+                    <input type="hidden" name="btype" id="code128" value="code128">
+                    <input type="hidden" id="bgColor" value="#FFFFFF" size="7">
+
+                    <input type="hidden" id="color" value="#000000" size="7">
+
+                    <input type="hidden" id="barWidth" value="1" size="3">
+
+                    <input type="hidden" id="barHeight" value="50" size="3">
+
+                    <input type="hidden" id="moduleSize" value="5" size="3">
+
+                    <input type="hidden" id="quietZoneSize" value="1" size="3">
+
+                    <input type="hidden" name="rectangular" id="rectangular">
+                    <input type="hidden" id="posX" value="10" size="3">
+
+                    <input type="hidden" id="posY" value="20" size="3">
+                    <input type="hidden" id="css" name="renderer" value="css" checked="checked">
+
+                </div>
+                @*<div id="barcodeTarget" class="barcodeTarget"></div>*@
+                @*<canvas id="canvasTarget" width="100" height="100"></canvas>*@
+                <div id="divLetterBody"></div>
+
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="submit" id="btnPrintLetter" class="k-button" data-dismiss="modal" onclick="PrintNDCLetter();">Print</button>
+                @*<input type="button" onclick="generateBarcode();" value="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Generate the barcode&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;">*@
+                @*<button type="button" id="downloadLetter" class="k-button">Download</button>*@
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+
+    $(document).ready(function () {
+        var actionType = $('#ActionType').val();
+        var rid = $('#RegistrationId').val();
+        //$("#RegistrationId").data('kendoDropDownList').value(rid);
+        if (actionType == "Hindi") {
+            $('#rbtnHindi').attr('checked', true);
+        }
+        else if (actionType == "English") {
+            $('#rbtnEnglish').attr('checked', true);
+        }
+        
+        $('#LanguageType').val(actionType);
+
+        $('#LeaserentpaidNo').hide();
+        $('#ndcdate').hide();
+        $('#IsPremiumPaid').val("Y");
+        //$('#IsLeaseRentPaid').val("Y");
+
+        $('#btn-generate-letter').click(function () {
+            var radiobtnVal = $('input[name=LanguageType]:checked', '#div-language-type').val();
+            var rid = $('#RegistrationId').val();
+            var allottee = $('#Applicant').val();
+            var property = $('#PropertyNo').val();
+            var letterDate = $('#NDCDate').val();
+
+            if (radiobtnVal == "" || radiobtnVal == null) {
+                alertify.error("please Select a language.");
+                return false;
+            }
+            else if (rid == "" || rid == null) {
+                alertify.error("please Select RegistrationId.");
+                return false;
+            }
+            else if (allottee == "" || allottee == null) {
+                alertify.error("please enter Applicant Name.");
+                return false;
+            }
+            else if (property == "" || property == null) {
+                alertify.error("please enter Property.");
+                return false;
+            }
+            else if (letterDate == "" || letterDate == null) {
+                alertify.error("please enter Letter Date.");
+                return false;
+            }
+            else {
+                GenerateNDCLetter();
+            }
+        });
+
+        $('#btnUpdate').click(function () {
+            UpdateNDCLetterDetails();
+        });
+
+    });
+
+    function UpdateNDCLetterDetails() {
+        var radiobtnVal = $('input[name=LanguageType]:checked', '#div-language-type').val();
+        var ndc = {
+            Id: $('#Id').val(),
+            RegistrationId: $('#RegistrationId').val(),
+            DepartmentId: $('#DepartmentId').val(),
+            Department: $('#Department').val(),
+            Applicant: $('#Applicant').val(),
+            Address: $('#Address').val(),
+            //InstallmentPaidUpto: $('#InstallmentPaidUpto').val(),
+            InstallmentDateInWord: $('#InstallmentDateInWord').val(),
+            InstallmentInWord: $('#InstallmentInWord').val(),
+            //InstallmentInterestPaidUpto: $('#InstallmentInterestPaidUpto').val(),
+            InterestDateInWord: $('#InterestDateInWord').val(),
+            InterestInWord: $('#InterestInWord').val(),
+            //LeaseRentPaidUpto: $('#LeaseRentPaidUpto').val(),
+            LeaseRentDateInWord: $('#LeaseRentDateInWord').val(),
+            LeaseRentInWord: $('#LeaseRentInWord').val(),
+            ChallanId: $('#ChallanId').val(),
+            ChalanAmount: $('#ChalanAmount').val(),
+            BankId: $('#BankId').val(),
+            BankName: $('#BankId').val() == "" ? null : $('#BankId').data("kendoDropDownList").text(),
+            Remarks: $('#Remarks').val(),
+            Sector: $('#Sector').val(),
+            Block: $('#Block').val(),
+            PlotNo: $('#PlotNo').val(),
+            NDCDate: $('#NDCDate').val(),
+            LetterNo: $('#LetterNo').val(),
+            OnlineReqNo: $('#OnlineReqNo').val(),
+            ActionType: radiobtnVal
+        };
+        $.ajax({
+            type: "post",
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            data: JSON.stringify({ model: ndc }),
+            url: '/Member/Authority/UpdateNDCLetterDetails',
+            success: function (result) {
+                if (result == '@ReturnType.Updated') {
+                    alertify.success("Updated Successfully.");
+                }
+                else {
+                    alertify.error("Network Error");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                //alertify.error("Lease Rent doesn't exist for this Property, Please enter Lease Rent for this property.");
+            }
+        });
+    }
+
+    function GenerateNDCLetter() {
+        var radiobtnVal = $('input[name=LanguageType]:checked', '#div-language-type').val();
+        var ndc = {
+            Id: $('#Id').val(),
+            RegistrationId: $('#RegistrationId').val(),
+            DepartmentId: $('#DepartmentId').val(),
+            Department: $('#Department').val(),
+            Applicant: $('#Applicant').val(),
+            Address: $('#Address').val(),
+            //InstallmentPaidUpto: $('#InstallmentPaidUpto').val(),
+            InstallmentDateInWord: $('#InstallmentDateInWord').val(),
+            InstallmentInWord: $('#InstallmentInWord').val(),
+            //InstallmentInterestPaidUpto: $('#InstallmentInterestPaidUpto').val(),
+            InterestDateInWord: $('#InterestDateInWord').val(),
+            InterestInWord: $('#InterestInWord').val(),
+            //LeaseRentPaidUpto: $('#LeaseRentPaidUpto').val(),
+            LeaseRentDateInWord: $('#LeaseRentDateInWord').val(),
+            LeaseRentInWord: $('#LeaseRentInWord').val(),
+            ChallanId: $('#ChallanId').val(),
+            ChalanAmount: $('#ChalanAmount').val(),
+            BankId: $('#BankId').val(),
+            BankName: $('#BankId').val() == "" ? null : $('#BankId').data("kendoDropDownList").text(),
+            Remarks: $('#Remarks').val(),
+            Sector: $('#Sector').val(),
+            Block: $('#Block').val(),
+            PlotNo: $('#PlotNo').val(),
+            NDCDate: $('#NDCDate').val(),
+            LetterNo: $('#LetterNo').val(),
+            OnlineReqNo: $('#OnlineReqNo').val(),
+            ActionType: radiobtnVal
+        };
+        $.ajax({
+            type: "post",
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            data: JSON.stringify({ model: ndc }),
+            url: '/Reports/Report/GenerateNDCLetter',
+            success: function (result) {
+                if (result != null) {
+                    $("#divLetterBody").html(result);
+                    //$("#inputdata").before("<div id='divBarcode' class='font-barcode' style='text-align:center;'></div>");
+                    //generateBarcode();
+                    //$('#divBarcode').html($('#inputdata').html());
+                    //$('#inputdata').css("display", "none");
+
+                    $("#divLetterBodyModal").modal('show');
+                    $('#barcode').kendoBarcode({
+                        value: "10000013",
+                        height: "50"
+                    });
+                }
+                else {
+                    alertify.error("Property doesn't exist for this Rid");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Lease Rent doesn't exist for this Property, Please enter Lease Rent for this property.");
+            }
+        });
+    }
+
+    function PrintNDCLetter() {
+        var contents = document.getElementById("divLetterBody").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+</script>
+

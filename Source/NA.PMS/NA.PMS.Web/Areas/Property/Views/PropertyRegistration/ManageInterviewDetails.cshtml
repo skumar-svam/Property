@@ -1,0 +1,104 @@
+﻿@model NA.PMS.Model.InterviewDetailsModel 
+@using Kendo.Mvc.UI;
+@using NA.PMS.Model
+
+@{
+    ViewBag.Title = "Manage Interview";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="ManageInterviewDetails">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Interview Details for Open ended schemes</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                <a href="#" id="btnAddApplication" class="" onclick="javascript: AddFunctionalReq(event);">Add Interview Details</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class=" col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<InterviewDetailsModel>()
+                      .Name("gridInterviewDetails")
+              .Columns(columns =>
+              {
+                  columns.Bound(c => c.FormNo).Title("Form Number").ClientTemplate("<a href='" + "/Property/PropertyRegistration/ViewInterviewDetails/#= Id #'>#=FormNo#</a>");
+                  columns.Bound(c => c.SchemeName).Title("Scheme Name");
+                  columns.Bound(c => c.DepartmentName).Title("Department");
+                  columns.Bound(c => c.InterviewDate).Title("Interview Date").Format("{0:dd-MM-yyyy}");
+                  columns.Bound(c => c.Id).ClientTemplate("# if (IsAllotted != 1) {#<a href='" + "/Property/PropertyRegistration/EditInterviewDetails/#= Id #'><span class='glyphicon glyphicon-edit'></span> Edit </a>#} else {#<span style='color:red'>Edit</span>#} #").Title("Edit").Filterable(false);
+
+                  columns.Bound(c => c.Id).Title("Remove").ClientTemplate("# if (IsAllotted != 1) {#<a onclick='javascript:return RemoveDetails(#=Id#)' class='btn' id='RemovescheIdTag'><i class='fa fa-trash-o'></i>Remove</a>#}#").Filterable(false);
+
+                  //columns.Bound(c => c.Id).ClientTemplate("<a href='" + "/Property/PropertyRegistration/EditInterviewDetails/#= Id #'><span class='glyphicon glyphicon-eye-open'></span> Edit</a>").Title("Edit").Filterable(false);
+                  // columns.Bound(c => c.Id).Title("Action").ClientTemplate("<a onclick='javascript:RemoveDetails(\"#=Id#\");'class='linkCss'>Remove</a>").Filterable(false).Sortable(false);
+
+              })
+              .Sortable()
+              .Filterable()
+              .Resizable(resize => resize.Columns(true))
+            //.ToolBar(toolBar =>
+            //{
+
+            //    toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Add Interview Details").HtmlAttributes(new { onclick = "javascript:AddFunctionalReq(event);", @class = "k-button", id = "btnRequest" });
+            //})
+              .Pageable
+              (
+                      pageable => pageable
+                      .Enabled(true)
+                      .Refresh(true)
+                      .PageSizes(true)
+              )
+              .DataSource
+              (
+                 dataSource => dataSource
+                .Ajax()
+                .Model(model => model.Id(p => p.Id))
+                .ServerOperation(true)
+                        .Read(read => read.Action("GetInterviewDetails", "PropertyRegistration"))
+                .PageSize(10)
+              )
+        )
+    </div>
+
+</div>
+
+
+
+
+<script type="text/javascript">
+    function AddFunctionalReq(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("AddInterviewdetails", "PropertyRegistration")';
+    }
+
+    function RemoveDetails(RequestNo) {
+
+        var removeNotification = confirm('Are you sure you want to remove ?');
+        //var rId = $("#RequestNo").val();
+        //alert("Anuj");
+        //alert("Id=" + RequestNo);
+        if (removeNotification) {
+            $.ajax({
+                url: '@(Url.Action("RemoveInterviewDetails", "PropertyRegistration"))',
+                type: 'POST',
+                data: { rId: RequestNo },
+                success: function (result) {
+                    if (result == true) {
+                        $('#gridInterviewDetails').data('kendoGrid').dataSource.read();
+                        $('#gridInterviewDetails').data('kendoGrid').refresh();
+                        alertify.success("Record deleted successfully.");
+                    }
+                    else {
+                        alert("Interview Details  not removed");
+                        return false;
+                    }
+                }
+            });
+        }
+        else {
+            return false;
+        }
+    }
+
+    </script>

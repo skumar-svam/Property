@@ -1,0 +1,250 @@
+﻿@model NA.PMS.Model.FunctionalModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+
+@{
+    ViewBag.Title = "View Functional";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .hide {
+        display: none !important;
+    }
+
+    .show {
+        display: block !important;
+    }
+
+    .disable_a_href {
+        pointer-events: none;
+    }
+
+    #hdnFunctionalDate {
+        display: none;
+    }
+
+    .k-window {
+        width: 39%;
+        /*min-height:180px;*/
+    }
+</style>
+
+
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">View Functional Request</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 col-btn">
+                    @if (Model.Status == "Approved")
+                    {
+
+                        <i style="font-size: 18px; " class=" glyphicon glyphicon-ok-sign" aria-hidden="true"></i>
+                        <strong style="color: lightgreen;"> Property Is Functional</strong>
+                    }
+                    else if (Model.Status == "Rejected")
+                    {
+                        <strong style="color: red;"><i class="glyphicon glyphicon-remove-sign" aria-hidden="true"></i>  Property not in Functional</strong>
+                    }
+                    <a href='#' class="" id="btnComment">View Comments</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <div>
+                    <input type="hidden" value="@Model.RId" id="hdnRId" />
+                    @Html.HiddenFor(c => c.RequestNo)
+                    @Html.HiddenFor(c => c.PropertyNumber)
+                    @Html.HiddenFor(c => c.FunctionalDate, htmlAttributes: new { @id = "hdnFunctionalDate" })
+                </div>
+                @{Html.RenderPartial("_FunctionalDetails", Model);}
+            </div>
+            <div class="box-button text-center">
+                <input type="button" value="Back" id="btnBack" class="btn btn-default" />
+                <input type="button" id="btnReject" value="Reject" class="btn btn-default" />
+                <input type="button" id="btnApprove" value="Approve" class="btn btn-add" />
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@(Html.Kendo().Window().Name("commentsWindow").Title("Please Provide a Comment").Modal(true).Visible(false).Content(@<text>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-10 col-md-offset-1 form-group">
+                    @Html.Label("Comment :      ")
+                    @Html.TextAreaFor(m => m.ApproverComments, new { @maxlength = "500", @class = "form-control" })
+                </div>
+            </div>
+
+            <div class="row" style="text-align:right">
+                <div class="col-md-10 col-md-offset-1 form-group">
+                    <input type="button" id="btnSubmit" value="Submit" class="btn btn-default" />
+                </div>
+            </div>
+        </div>
+</text>)
+.Draggable()
+.Resizable()
+//.Width(400)
+.Actions(actions => actions.Close())
+)
+
+@(Html.Kendo().Window()
+    .Name("viewCommentsWindow")
+    .Title("View Comments")
+    .Modal(true)
+    .Visible(false)
+    .Content(@<text>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-3 form-group">
+                    @Html.Label("From :", htmlAttributes: new { @class = "font-bold" })
+                </div>
+                <div class="col-md-9 form-group">
+                    @Html.DisplayFor(model => model.From)
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    @Html.Label("Date :", htmlAttributes: new { @class = "font-bold" })
+                </div>
+                <div class="col-md-9">
+                    @*@Html.DisplayFor(model => model.SubmittedDate)*@
+                    @Convert.ToString(string.Format("{0:dd/MM/yyyy}", Model.FunctionalDueDate))
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 form-group">
+                    @Html.Label("Comments :", htmlAttributes: new { @class = "font-bold" })
+                </div>
+                <div class="col-md-9 form-group">
+                    @Html.TextAreaFor(model => model.Comment, new { @disabled = "disabled", @class = "form-control", @style = "margin:0;padding:0;" })
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 form-group" style="text-align:center">
+                    <input type="button" class="btn btn-default closePopup" value="Close" />
+                </div>
+            </div>
+        </div>
+    </text>)
+    .Draggable()
+    .Resizable()
+    //.Width(500)
+    .Actions(actions => actions.Close())
+)
+<script src="~/Scripts/_references.js"></script>
+<script type="text/javascript">
+    var i = 0;//To check whether "Approve" or "Reject" has been clicked.
+    $(document).ready(function () {
+        $("#ReqRefNo").attr("readonly", "readonly");
+        $("#fileMeterSealing").hide();
+        $("#fileAffidavit").hide();
+        $("#fileRegistrationCertificate").hide();
+        $("#fileNDCAccount").hide();
+        $("#RId").data('kendoDropDownList').value($("#hdnRId").val());
+
+        //Disable fields in the case of View Request
+        $("#FunctionalCharge").data("kendoNumericTextBox").enable(false);
+        $('#FunctionalDueDate').data('kendoDatePicker').enable(false);
+        $('#FunctionalDate').data('kendoDatePicker').enable(false);
+        $('#MeterSealing').attr("disabled", true);
+        $('#Affidavit').attr("disabled", true);
+        $('#RegistrationCertificate').attr("disabled", true);
+        $('#NDCAccount').attr("disabled", true);
+        var dropDown = $("#RId").data("kendoDropDownList");
+        dropDown.enable(false);
+        var status = $("#Status").val();
+        if (status == '@NA.PMS.Common.AllotmentStatus.Cancelled') {
+            $("#btnApprove").hide();
+            $("#btnReject").hide();
+        }
+
+        else if (status == '@NA.PMS.Common.AllotmentStatus.Approved') {
+            $("#btnApprove").hide();
+            $("#btnReject").hide();
+        }
+
+        else if (status == '@NA.PMS.Common.AllotmentStatus.Rejected') {
+            $("#btnApprove").hide();
+            $("#btnReject").hide();
+        }
+        else if (status == '@NA.PMS.Common.AllotmentStatus.InProgress') {
+
+            $("#btnComment").hide();
+
+        }
+
+        $("#btnBack").click(function () {
+            var PendencyReq = '@Request.QueryString["pr"]';
+            if (PendencyReq == 'true') {
+                window.location.href = '@Url.Action("PendencyReport", "Report", new { Area = "Reports" })';
+            }
+            else { window.location.href = '@Url.Action("ManageFunctionalApprover", "PropertyRegistration")'; }
+        });
+
+        $("#btnApprove").click(function () {
+            $("#commentsWindow").data("kendoWindow").center();
+            $("#commentsWindow").data("kendoWindow").open();
+            i = 1;
+        });
+        $("#btnReject").click(function () {
+            $("#commentsWindow").data("kendoWindow").center();
+            $("#commentsWindow").data("kendoWindow").open();
+            i = 2;
+        });
+
+        $("#btnSubmit").click(function () {
+            var comments = $("#ApproverComments").val();
+            var RequestNo = $("#RequestNo").val();
+            if (i == 2) {
+                if ($("#ApproverComments").val() == "") {
+                    alertify.error("Please enter Comments.");
+                    return false;
+                }
+            }
+
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ comments: comments, intStatus: i, ReqNo: RequestNo }),
+                url: '/PropertyRegistration/SaveFunctionalApprovalStatus',
+                success: function (result) {
+                    if (result == true) {
+                        $("#commentsWindow").data("kendoWindow").close();
+                        $("#ApproverComments").val('');
+                        $("#btnApprove").hide();
+                        $("#btnReject").hide();
+                        alertify.success("Request saved successfully.");
+                    }
+                    else {
+                        alertify.error("Some error occured. Please try again later.");
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            });
+        });
+
+        $(".closePopup").click(function () {
+            $("#viewCommentsWindow").data("kendoWindow").close();
+            $("#commentsWindow").data("kendoWindow").close();
+        });
+
+        $("#btnComment").click(function () {
+            $("#viewCommentsWindow").data("kendoWindow").center();
+            $("#viewCommentsWindow").data("kendoWindow").open();
+        });
+    });
+</script>
+

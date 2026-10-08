@@ -1,0 +1,221 @@
+﻿
+@model NA.PMS.Model.ChallanViewModel
+@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+
+@*@{
+    ViewBag.Title = "ChallanVerification";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}*@
+
+@{
+    ViewBag.Title = "ChallanVerification";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    var userInfo = HttpContext.Current.Session["CurrentUser"] as NA.PMS.Web.Models.CurrentUserDetail;
+    if (userInfo != null)
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Blank.cshtml";
+    }
+}
+
+<style>
+    .form-bx{
+        background-color:white;
+        padding-top:30px;
+        padding-bottom:30px;
+    }
+    .verify-btn{
+        /*text-align:right;*/
+        padding-left:15px;
+    }
+    .lbl{
+        font-size:18px;
+    }
+    #ChallanHeader{
+        border-top:10px;
+    }
+    #btn-verify-challan{
+        display:none;
+    }
+</style>
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1" id="bank-challan">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Verify Challan</h1></div>
+            <div class="col-md-6 col-sm-6 col-xs-12" style="text-align:right"><label class="challan-status" style="font-size:22px;color:green;"></label></div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 content-top-spce">
+        <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            <div class="form-bx form-box">
+                <div class="row">
+                    <div class="col-md-10">
+                        <div class="col-md-2 col-sm-4 col-xs-12 form-group">
+                            @Html.Label("Challan Id", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.ChallanId, htmlAttributes: new { @class = "form-control", style = "width:90%;float:right;" })
+                        </div>
+                        <div class="col-md-4 col-sm-4 col-xs-12 form-group verify-btn">
+                            <input type="button" value="Verify" id="btnVerify" class="btn btn-default" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row" id="ChallanHeader">
+                    <div style="text-align:center;"><h4 style="font-weight:700;">Challan</h4></div>
+                    @Html.HiddenFor(m=>m.Id)
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12" id="divChallanBody2" style="padding-left:30px;">
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 form-group" style="text-align:center;">
+                        <button id="btn-verify-challan" class="btn btn-default" onclick="javascript:VerifyChallan()">Verify Challan</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="divPrintChallan" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="padding-top:40px;">
+    <div class="" style="width: 100%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">  <b>Challan</b></h4>
+            </div>
+            <div class="modal-body" style="overflow:auto; height:400px;">
+                <style>
+                    .td-amount {
+                        padding-right: 30px;
+                    }
+
+                    #divChallanBody {
+                        /*padding: 5px;*/
+                    }
+
+                    #authorityChallan {
+                        border: 1px solid black;
+                        padding: 5px;
+                    }
+                </style>
+                <div id="divChallanBody"></div>
+            </div>           
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var userInfo = '@HttpContext.Current.Session["CurrentUser"]';
+        if (userInfo == '') {
+            $('#bank-challan').css({ "margin-top": "30px" });
+        }
+
+        $("#ChallanHeader").hide();
+
+        $("#btnVerify").click(function () {
+            var challanId = $("#ChallanId").val();
+            if (challanId == "") {
+                alertify.error("Please enter Challan Id");
+                return false;
+            }
+
+            if (challanId != "") {
+                if (challanId.length == 9) {
+                    ViewChallan();                    
+                }
+                else {
+                    alertify.error("Challan Id should be of 9 digits.");
+                    return false;
+                }
+            }
+        });
+    });
+
+    function ViewChallan() {
+        var challan = {
+            ChallanId: $("#ChallanId").val()
+        };
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ model: challan }),
+            url: '/Member/Authority/GetGeneratedChallanByChallanId',
+            success: function (result) {
+                if (result != null && result != '') {
+                    $('#Id').val(result.Id);
+                    $("#ChallanHeader").show();
+                    $("#divChallanBody2").html(result.ChallanContent);
+                    
+                    if (result.IsVerified == true) {
+                        $(".challan-status").text("Verified");
+                        $(".challan-status").css("{font-size:16px; color: green}");
+                        $("#btn-verify-challan").css("display", "none");
+                    }
+                    else if (result.IsVerified == false || iresult.IsVerified == '') {
+                        $(".challan-status").text("Not Verified");
+                        $(".challan-status").css("{font-size:16px; color: red}");
+                        $("#btn-verify-challan").show();
+                    }
+                }
+                else {
+                    $("#btn-verify-challan").css("display","none");
+                    alertify.error("Challan Id doesn't exist.");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Network Error, please try again later.");
+            }
+        });
+    }
+
+    function VerifyChallan() {
+        var flag = confirm("Are You sure to verify this challan");
+        if (flag) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ Id: $('#Id').val() ,ActionType:"Verify"}),
+                url: '/Member/Authority/VerifyChallanDetailById',
+                success: function (result) {
+                    if (result == '@ReturnType.Updated') {
+                        alertify.success("Challan verfied successfully.");
+                        ViewChallan();
+                    }
+                    else if (result == '@ReturnType.Exist') {
+                        alertify.success("Challan already verfied.");
+                    }
+                    else if (result == '@ReturnType.None') {
+                        alertify.error("Provider failed to update, try again later.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    alertify.error("Network Error, please try again later.");
+                }
+            });
+        }
+    }
+</script>
+
+
+
+
+

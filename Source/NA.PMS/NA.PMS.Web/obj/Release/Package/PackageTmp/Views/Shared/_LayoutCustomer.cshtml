@@ -1,0 +1,97 @@
+﻿@using System.Web.Optimization;
+@using NA.PMS.Model;
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>@ViewBag.Title</title>
+
+    @Styles.Render("~/Content/others")
+    @Styles.Render("~/bundles/KendoCSS")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/others")
+    @Scripts.Render("~/bundles/KendoJS")
+
+    @*<link href="~/Content/CSS/style-new.css" rel="stylesheet" />
+        <link href="~/Content/CSS/responsive.css" rel="stylesheet" />
+        <link href="~/Content/CSS/open-top-bx.css" rel="stylesheet" />*@
+    <script src="~/Scripts/kendo.aspnetmvc.min.js"></script>
+    <link href="~/Content/CSS/CustomerTemplate.css" rel="stylesheet" /> 
+    <link href="~/Content/CSS/open-top-bx.css" rel="stylesheet" />
+    <link href="~/Content/CSS/Customer/MenuStyle.css" rel="stylesheet" />
+    <style>
+        a.nav-menu {
+            text-decoration: none;
+            color: #000;
+            font-size: 14px;
+            font: 600;
+        }
+        .dropdown:hover{
+            background:green;
+        }
+        .input-group-addon {
+            padding: 6px 12px;
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 1;
+            color: #555;
+            text-align: center;
+            /* background-color: #eee; */
+            /* border: 1px solid #ccc; */
+            border-radius: 4px;
+            background:none;
+            border:none;
+        }
+        span .input-group-addon{
+            width:162px;
+        }
+    </style>
+
+    <script>
+        $(document).ready(function () {
+            $(".input-disabled").keypress(function () {
+                return false;
+            });
+        });
+    </script>
+</head>
+<body>
+    <header>
+        <div class="container-fluid">
+            @if (Session["CurrentCustomer"] != null)
+            {
+                var user2 = (UserViewModel)Session["CurrentCustomer"];
+                <div class="input-group">
+                    <span class="input-group-addon" style="width:165px;"><a class="header-logo" href="#"></a></span>
+                    <div class="input-group-addon" style="text-align:center;width:100%;">
+                        <h2 class="" style="color:green;padding-top:10px;"><b>New Okhla Industrial Development Authority</b></h2>
+                        <label class="" style="color:#fff; font-size:20px;font-weight:700;padding-right:30px;">@user2.Applicant</label>
+                    </div>                    
+                </div>
+                <div class="container-fluid nav-wrap">
+                    @{Html.RenderPartial("~/Areas/Customer/Views/Shared/_CustomerMenu.cshtml");}
+                </div>
+            }
+            else
+            {
+                Response.Redirect("/Customer/PISAccount/Logout");
+            }
+        </div>
+    </header>
+
+    <div class="container-fluid content-wrapper">
+        @RenderBody()
+    </div>
+
+    <footer>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12 col-xs-12 copyright text-center">
+                    Copyright © @DateTime.Now.Year <b>NOIDA</b>. Developed and Maintained by <a href="http://www.svam.com">North Shore Technologies</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

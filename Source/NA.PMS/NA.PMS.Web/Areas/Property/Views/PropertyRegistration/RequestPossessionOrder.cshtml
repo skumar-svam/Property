@@ -1,0 +1,235 @@
+﻿@model NA.PMS.Model.PossessionOrderModel
+@using Kendo.Mvc.UI
+@{
+    ViewBag.Title = "Request Possession Order";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h3>Possession Order</h3>
+<br />
+<div class="container-fluid">
+
+    <div class="row">
+        <div class="col-md-3">
+            @Html.Label("RID", new { @class = "k-label" })<span class="text-danger">*</span>
+        </div>
+        <div class="col-md-3">
+            @(Html.Kendo().DropDownListFor(po => po.RId)
+                    .Filter("contains")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel("Select")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetRIDs", "Allotment");
+                        });
+                    })
+                    .Events(events => { events.Change("RIdChange"); })
+     .HtmlAttributes(new { @class = "schemeForms" })
+            )
+        </div>
+        <div class="col-md-3">
+            @Html.Label("Property No", new { @class = "k-label" })
+        </div>
+        <div class="col-md-3">
+            @Html.DisplayFor(po => po.PropNo)
+        </div>
+    </div>
+    <br />
+    <fieldset>
+        <legend>Applicant Details</legend>
+        <div class="row">
+            <div class="col-md-3">
+                @Html.Label("Scheme Name", new { @class = "k-label" })
+            </div>
+            <div class="col-md-3">
+                @Html.DisplayFor(po => po.SchemeName)
+            </div>
+            <div class="col-md-3">
+                @Html.Label("Department", new { @class = "k-label" })
+            </div>
+            <div class="col-md-3">
+                @Html.DisplayFor(po => po.Deptt)
+            </div>
+        </div>
+        <br />
+        <div class="row">
+            <div class="col-md-3">
+                @Html.Label("Applicant's Name", new { @class = "k-label" })
+            </div>
+            <div class="col-md-3">
+                @Html.DisplayFor(po => po.ApplicantName)
+            </div>
+            <div class="col-md-3">
+                @Html.Label("Gender", new { @class = "k-label" })
+            </div>
+            <div class="col-md-3">
+                @Html.DisplayFor(po => po.Gender)
+            </div>
+        </div>
+        <br />
+        <div class="row">
+            <div class="col-md-3">
+                @Html.Label("Father's/Husband's Name", new { @class = "k-label" })
+            </div>
+            <div class="col-md-3">
+                @Html.DisplayFor(po => po.RelativeName)
+            </div>
+            <div class="col-md-3">
+                @Html.Label("Property type", new { @class = "k-label" })
+            </div>
+            <div class="col-md-3">
+                @Html.DisplayFor(po => po.PropType)
+            </div>
+        </div>
+        <br />
+        <div class="row">
+            <div class="col-md-3">
+                @Html.Label("Area", new { @class = "k-label" })
+            </div>
+            <div class="col-md-3">
+                @Html.DisplayFor(po => po.Area)
+            </div>
+            <div class="col-md-3">
+                @Html.Label("Floor", new { @class = "k-label" })
+            </div>
+            <div class="col-md-3">
+                @Html.DisplayFor(po => po.Floor)
+                @Html.HiddenFor(po => po.ReqStatus)
+            </div>
+        </div>
+        @*<br />
+        <div class="row">
+            <div class="col-md-3">
+                @Html.Label("Possession Due Date", new { @class = "k-label" })
+            </div>
+            <div class="col-md-3">
+                @Html.DisplayFor(po => po.PossessionDate)
+            </div>
+            <div class="col-md-3">
+            </div>
+            <div class="col-md-3">
+            </div>
+        </div>*@
+    </fieldset>
+    <br />
+    <div class="row">
+        <div class="col-md-9"></div>
+        <div class="col-md-3">
+            <input type="button" value="Back" id="btnBack" />
+            <input type="button" value="Submit Request" id="btnSubmitReq" />
+        </div>
+    </div>
+</div>
+
+@(Html.Kendo().Window().Name("assignToWindow").Title("Assign Request to Approver").Modal(true).Visible(false).Content(@<text>
+        <div class="container-fluid">
+            <div class="row">
+                @Html.Label("Assign To: ")
+                @(Html.Kendo().DropDownListFor(model => model.User)
+                                      .Name("User")
+                              .DataTextField("text")
+                              .DataValueField("id")
+                      .OptionLabel("Select").Filter("conatins")
+                      .DataSource(source =>
+                      {
+                          source.Read(read =>
+                          {
+                              read.Action("GetAssineTo", "Allotment");
+                          });
+                      })
+                )
+            </div>
+            <br />
+            <div class="row" style="text-align:right">
+                    <input type="button" class="btn-primary" id="btnPopupSubmit" value="Submit" />
+                    <input type="button" class="btn-danger closePopup" value="Close" />
+            </div>
+        </div>
+</text>)
+.Draggable()
+.Resizable()
+.Width(400)
+.Actions(actions => actions.Close())
+)
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#btnBack").click(function () {
+            window.location.href = '@Url.Action("ManagePossession", "PropertyRegistration")';
+        });
+
+        $("#btnSubmitReq").click(function () {
+            var rId = $("#RId").val();
+            if (rId == '') {
+                alertify.error("Please select an RID");
+                return false;
+            }
+            $("#assignToWindow").data("kendoWindow").center();
+            $("#assignToWindow").data("kendoWindow").open();
+        });
+
+        $(".closePopup").click(function () {
+            $("#viewCommentsWindow").data("kendoWindow").close();
+            $("#assignToWindow").data("kendoWindow").close();
+        });
+
+        $("#btnPopupSubmit").click(function () {
+            var rId = $("#RId").val();
+            if (rId == '') {
+                alertify.error("Please select an RID");
+                return false;
+            }
+            if (userVal == '' || userVal == null) {
+                alertify.error("Please select a User.");
+                return false;
+            }
+            var userVal = $("#User").val();
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ rId: rId, userVal: userVal }),
+                url: '/PropertyRegistration/SavePOReq',
+                success: function (result) {
+                    if (result == true) {
+                        //TODO:
+                    }
+                    else {
+                        alertify.error("Some error occured. Please try again later.");
+                    }
+                },
+                error: function (obj) {
+                }
+            });
+        });
+    });
+
+    function RIdChange(event) {
+        var rId = $("#RId").val();
+        if (rId == '') {
+            alertify.error("Please select an RID");
+            return false;
+        }
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rId: rId }),
+            url: '/PropertyRegistration/GetDetailsByRID',
+            success: function (result) {
+                if (result == true) {
+                    //TODO:
+                }
+                else {
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            },
+            error: function (obj) {
+            }
+        });
+    }
+</script>
+

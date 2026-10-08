@@ -1,0 +1,169 @@
+﻿@model NA.PMS.Model.RolesModel
+@using Kendo.Mvc.UI;
+@using NA.PMS.Model
+
+@{
+    ViewBag.Title = "Manage Admin Roles";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script src="~/Scripts/kendo.aspnetmvc.min.js"></script>
+<style>
+    .k-grid-content{
+        overflow-y:hidden;
+        overflow-x:hidden;
+    }
+</style>
+
+<div class="ManageAdminRoles">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Admin Roles</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                <a href="#" id="btnAddRole" class="" onclick="javascript:AddRole(event);">Add Role</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<RolesModel>()
+              .Name("gridRoles")
+              .Columns(columns =>
+              {
+                  //columns.Bound(c => c.roleName).Width(150);
+                  columns.Bound(c => c.RoleName).Width(150).ClientTemplate("<a href='" + "/SuperAdmin/ManageAdminRoles/ViewAdminRole/#= RoleId #'>#=RoleName#</a>").Width(80).Filterable(false);
+                  columns.Bound(c => c.ApplicationName).Width(150).Filterable(true);
+                  //columns.Bound(c => c.createdBy).Width(100);
+                  //columns.Bound(c => c.ModifiedDate).Format("{0:dd/MM/yyyy}").Width(100);
+                  //columns.Bound(p => p.RoleId).ClientTemplate("# if (IsActive == true) {#<a href='" + Url.Action("MenuMappingAdmin", "MenuMappingAdmin") + "?rId=#= RoleId #&appID=#=ApplicationId#'" + ">Map Role</a>#} else {#<span style='color:red'>Map Role</span>#} #").Width(80).Title("Menu Mapping").Filterable(false);
+                  columns.Bound(c => c.RoleId).ClientTemplate("# if (IsActive == true) {#<a href='" + Url.Action("MapUsers", "ManageUsers") + "?rId=#= RoleId #&appID=#=ApplicationId#'" + ">Map Users</a>#} else {#<span>Map Users</span>#} #").Width(80).Title("User Mapping").Filterable(false);
+                  //columns.Bound(c => c.roleID).ClientTemplate("<a href='" + "/Admin/ManageRoles/ViewDetails/#= RoleId #'><span class='glyphicon glyphicon-eye-open'></span> View</a>").Width(80).Title("View").Filterable(false);
+                  columns.Bound(c => c.RoleId).ClientTemplate("# if (IsActive == true) {#<a class='gridEdit' href='" + "/SuperAdmin/ManageAdminRoles/EditAdminRole/#= RoleId #'> Edit </a>#} else {#<span class='gridNotEdit'>Edit</span>#} #").Width(80).Title("Action").Filterable(false);
+                  //columns.Bound(c => c.RoleId).Title("Status").ClientTemplate("<a href='##' onclick='javascript:Deactivate(#= RoleId #);'><span class='glyphicon glyphicon-remove'></span> Deactivate</a>").Width(90).Filterable(false);
+                  columns.Bound(c => c.IsActive).Title("Activate/DeActivate").Width(70).ClientTemplate(
+                      "# if (IsActive == true) {#<a id=\"activate\" runat=\"server\"  href='javascript: void(0);' onclick=\"role.StatusActivate(this,'#= RoleId#','true');\" " + "><label class='hyperlinkcss'>DeActivate</label></a># }else{#<a id=\"deactivate\" runat=\"server\" href='javascript: void(0);' onclick=\"role.StatusActivate(this,'#= RoleId#','false');\" " + "><label class='hyperlinkcss'>Activate</label></a>#} #").Sortable(false).Filterable(false).HtmlAttributes(new { style = "cursor:pointer" });
+
+              })
+              .Sortable()
+              .Filterable()
+                //.ToolBar(toolBar =>
+                //{
+                //    toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Add Role").HtmlAttributes(new { onclick = "javascript:AddRole(event);", @class = "k-button", id = "btnAddRole" });
+                //})
+              .Resizable(resize => resize.Columns(true))
+              .Pageable
+              (
+                  pageable => pageable
+                      .Enabled(true)
+                      .Refresh(true)
+                      .PageSizes(true)
+              )
+              .Groupable()
+              .DataSource
+              (
+                  dataSource => dataSource
+                      .Ajax()
+                      .Model(model => model.Id(p => p.RoleId))
+                      .ServerOperation(true)
+                      .Read(read => read.Action("GetAllRoles", "ManageAdminRoles"))
+                      .PageSize(10)
+              )
+        )
+        @Html.HiddenFor(model => model.ViewName)
+    </div>
+</div>
+
+
+<div id="myModal" class="modal fade" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog  modal-sm" style="margin:150px auto">
+        <div class="modal-content">
+            <!-- dialog body -->
+            <div class="modal-body">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <div>
+                    @Html.Label("Title", new { @class = "", @id = "Title" })
+                </div>
+            </div>
+
+            <!-- dialog buttons -->
+            <div class="modal-footer footerbtn">
+                <button type="button" id="Deactivatebtn" usrid="" status="" class="k-button" data-dismiss="modal" onclick="role.DeActivateRole();">Yes</button>
+                <button type="button" class="k-button" data-dismiss="modal">No</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    @*function Deactivate(roleID) {
+        $.ajax({
+            url: '@(Url.Action("Delete", "ManageAdminRoles"))',
+            type: 'POST',
+            data: { id: roleID },
+            contenttype: "application/json; charset=utf-8",
+            success: function () {
+                //alert("Yes");
+            },
+            error: function () {
+                //alert("No");
+            }
+        });
+    }*@
+
+    function AddRole(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("AddAdminRole", "ManageAdminRoles")';
+    }
+</script>
+
+<script>
+    var role = new function () {
+        this.DeActivateRole = function () {
+            var roleId = $("#Deactivatebtn").attr("roleId");
+            var status = $("#Deactivatebtn").attr("status");
+            var viewN = $("#ViewName").val();
+            $.ajax({
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                type: "POST",
+                @*url: '@Url.Action("DeActivateRole", "ManageAdminRoles")',*@
+                //data: { "roleId": roleId, "status": status, "viewName": viewName },
+                data: JSON.stringify({ roleId: roleId, status: status, viewN: viewN }),
+                url: '/ManageRoles/DeActivateRole',
+                success: function (data) {
+                    $('#gridRoles').data('kendoGrid').dataSource.read();
+                    $('#gridRoles').data('kendoGrid').refresh();
+                    $("#Deactivatebtn").attr("roleId", "");
+                    $("#Deactivatebtn").attr("status", "");
+                },
+                error: function (msg) {
+                    alert("Error Occured-" + msg.responseText);
+                }                
+            });
+        };
+        this.StatusActivate = function (e, id, status) {
+            $('#myModal').modal('show');
+            $("#Deactivatebtn").attr("roleId", id);
+            $("#Deactivatebtn").attr("status", status);
+            if (e.id === "deactivate") {
+                $("#Title").text("Do you want to activate this Role?");
+            } else {
+                $("#Title").text("Do you want to deactivate this Role?");
+            }
+        };
+    }
+
+    $(document).ready(function () {
+        $("#ViewName").val("ManageAdminRoles");
+        @{if (TempData["MesgAdd"] != null && TempData["MesgAdd"] != "")
+          {
+                @:alertify.success('Changes saved successfully.');
+                 }}
+        @{if (TempData["MesgEdit"] != null && TempData["MesgEdit"] != "")
+           {
+                 @:alertify.success('Changes saved successfully.');
+                   }}
+    });
+</script>

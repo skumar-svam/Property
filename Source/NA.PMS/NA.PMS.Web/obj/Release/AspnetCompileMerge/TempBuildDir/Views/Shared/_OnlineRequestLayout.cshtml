@@ -1,0 +1,186 @@
+﻿@using System.Web.Optimization;
+@using NA.PMS.Common.Helpers;
+@using NA.PMS.Web.Models;
+@using System.Web.Mvc
+@using NA.PMS.Model
+@*@using StackExchange.Profiling;*@
+@{
+    var displayMiniProfiler = SettingsHelper.IsMiniProfilerEnabled;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="template">
+    <title>@ViewBag.Title</title>
+
+    @Styles.Render("~/Content/others")
+    @Styles.Render("~/bundles/KendoCSS")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/others")
+    @Scripts.Render("~/bundles/KendoJS")
+
+
+    <link href="~/Content/CSS/style-new.css" rel="stylesheet" />
+    <link href="~/Content/CSS/responsive.css" rel="stylesheet" />
+    <script src="~/Scripts/kendo.aspnetmvc.min.js"></script>
+
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script>
+        $(document).ready(function () {
+
+            $(".mbl-menu-btn").click(function () {
+                $(".menu-wrapper").toggle("slide");
+            });
+
+            //Disable Keyboard for Kendo Date Picker
+            $(".DisableKeyboardInput").keypress(function () {
+                return false;
+            });
+
+        });
+    </script>
+    <style type="text/css">
+        .navbar-collapse.collapse {
+            display: block !important;
+        }
+
+        .navbar-nav > li, .navbar-nav {
+            float: left !important;
+        }
+
+            .navbar-nav.navbar-right:last-child {
+                margin-right: -15px !important;
+            }
+
+        .navbar-right {
+            float: right !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="mainWrapper" class="grad1">
+        <nav id="header-full" class="navbar navbar-default navbar-fixed-top nav-bg">
+            <div class="container-fluid">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                    @*<button type="button" class="navbar-toggle collapsed pull-left" data-toggle="collapse" data-target="#mainNav" aria-expanded="false">
+                            <span class="sr-only">Toggle navigation</span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                            <span class="icon-bar"></span>
+                        </button>*@
+                    <div class="brand-wrap">
+                        <a class="navbar-brand" href="#"></a>
+                    </div>
+                </div>
+
+                <!-- Collect the nav links, forms, and other content for toggling -->
+                <div class="collapse navbar-collapse" id="mainNav">
+                    @{
+                        if (Session["CurrentUser"] != null)
+                        {
+                            var usr = (CurrentUserDetail)Session["CurrentUser"];
+                            //var usr = (LoginUserDetail)Session["CurrentUser"];
+                            <ul class="nav navbar-nav navbar-right top-links hidden-xs">
+                                <li class="dropdown">
+                                    <a href="#"><i class="fa fa-square" aria-hidden="true"></i><span class="label label-success">4</span></a>
+                                </li>
+                                <li class="dropdown">
+                                    <a href="#"><i class="fa fa-bell" aria-hidden="true"></i><span class="label label-warning">10</span></a>
+                                </li>
+                                <li class="dropdown user-tasks">
+                                    <a href="#"><i class="fa fa-flag" aria-hidden="true"></i><span class="label label-danger">9</span></a>
+                                </li>
+                                <li class="dropdown">
+                                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                        <i class="fa fa-user" aria-hidden="true"></i>
+                                        <span class="caret"></span>
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <span>Welcome @usr.FirstName <br /> @usr.RoleMaster.RoleName</span>
+                                        </li>
+
+                                        <li>@Html.ActionLink("Change Password", "ChangePassword", new { @Controller = "Account", @Area = "" })</li>
+                                        <li style="display:none"><a href="#">Settings</a></li>
+                                        <li class="divider"></li>
+                                        <li><a href="/Account/Logout/">Logout</a></li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        }
+                        else
+                        {
+                            //Response.Redirect("~/Account/Login");
+                        }
+                    }
+
+                    <div class="container-fluid nav-wrap">
+                        @*@Html.MvcSiteMap().Menu(false, true, true)*@
+                        @*@Html.MvcSiteMap().Menu("_PartialSiteMapMenu")*@
+                    </div>
+                </div><!-- /.navbar-collapse -->
+            </div><!-- /.container-fluid -->
+        </nav>
+
+
+
+        <div class="container-fluid contentWrapper main" id="mainMaster">
+            @RenderBody()
+        </div>
+        <footer>
+            <div class="container-fluid">
+
+                <div class="row">
+                    <div class="col-md-12 col-xs-12 copyright text-center">
+                        Copyright © 2016 <b>NOIDA</b>. Developed and Maintained by <a href="http://www.svam.com">North Shore Technologies</a>
+
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+</body>
+</html>
+
+<script>
+    //Upon session end, throws back to Logout page automatically.
+    var sessionTimeoutWarning = @Session.Timeout -1;
+
+    var sTimeout = parseInt(sessionTimeoutWarning) * 60 * 1000;
+    setTimeout('SessionEnd()', sTimeout);
+
+    function SessionEnd() {
+        window.location = "/Account/Logout";
+    }
+
+    $(function () {
+        $(".dropdown").hover(
+            function () {
+                $('.dropdown-menu', this).stop(true, true).fadeIn("fast");
+                $(this).toggleClass('open');
+            },
+            function () {
+                $('.dropdown-menu', this).stop(true, true).fadeOut("fast");
+                $(this).toggleClass('open');
+            }
+		);
+
+    });
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#cssmenu > ul > li:last-child").addClass("last-child");
+    });
+
+
+</script>

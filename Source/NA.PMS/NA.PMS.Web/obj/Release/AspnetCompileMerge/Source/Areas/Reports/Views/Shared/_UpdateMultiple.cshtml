@@ -1,0 +1,449 @@
+﻿@using Kendo.Mvc.UI;
+@using NA.PMS.Common;
+
+<div class="panel-body">
+    <div class="row">
+        <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+            <label class="">Registration Id:</label>
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            @(Html.Kendo().ComboBox()
+                .Name("MRegistrationId")
+                .DataTextField("text")
+                .DataValueField("id")             
+                .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => { transport.Read("GetRegistrationIdList", "Report"); })
+                        .Schema(schema => { schema.Data("Data").Total("Total"); })
+                        .PageSize(100);
+                     }
+                 )
+                .Events(events => { events.Change("GetDetailsByRegistrationId"); })
+                .HtmlAttributes(new { style = "width:100%"})
+            )
+        </div>
+        
+        <div class="col-md-7 col-sm-12 col-xs-12 form-group rdio-bx" id="MGroup" style="text-align:center">
+            <input type="radio" id="rbtnChecklist" name="InfoType" value="Checklist" checked="checked">&nbsp;Checklist &nbsp;&nbsp;
+            <input type="radio" id="rbtnAllotment" name="InfoType" value="Allotment">&nbsp;Allotment &nbsp;&nbsp;
+            <input type="radio" id="rbtnRegistry" name="InfoType" value="Registry" />&nbsp;Lease deed &nbsp;&nbsp;
+            <input type="radio" id="rbtnPossession" name="InfoType" value="Possession" />&nbsp;Possession
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+            <label>Checklist Date:</label>
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <input id="checklistDate" value="" title="checklistDate" class="kendo-datepicker" style="width: 100%" />
+        </div>
+        <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+            <label></label>
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            
+        </div>
+        <div class="col-md-2 col-sm-12 col-xs-12 form-group" style="text-align:right">
+            <input type="button" id="btnUpdateChecklist" value="Update" class="k-button" onclick="javascript: UpdateDateFields();" />
+            <input type="button" id="btnClearChecklist" value="Clear" class="k-button" />
+        </div>
+    </div>   
+
+    <div class="row">       
+        <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+            <label>Allotment Date:</label>           
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <input id="allotmentDate" value="" title="allotmentDate" style="width: 100%" />
+        </div>
+        <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+            <label>Installment Start Date:</label>            
+        </div>  
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <input id="allotmentStartDate" value="" title="allotmentStartDate" style="width: 100%" />
+        </div>   
+        <div class="col-md-2 col-sm-12 col-xs-12 form-group" style="text-align:right">
+            <input type="button" id="btnUpdateAllotment" value="Update" class="k-button" onclick="javascript: UpdateDateFields();" />
+            <input type="button" id="btnClearAllotment" value="Clear" class="k-button" />
+        </div>   
+    </div>
+
+    <div class="row">
+        <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+            <label>Lease Deed Date:</label>
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <input id="registryDate" value="" title="registryDate" class="kendo-datepicker" style="width: 100%" />
+        </div>
+        <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+            <label>Lease Due Date </label>
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <input id="registryDueDate" value="" title="registryDueDate" class="kendo-datepicker" style="width: 100%" />
+        </div>
+        <div class="col-md-2 col-sm-12 col-xs-12 form-group" style="text-align:right">
+            <input type="button" id="btnUpdateRegistry" value="Update" class="k-button" onclick="javascript: UpdateDateFields();" />
+            <input type="button" id="btnClearRegistry" value="Clear" class="k-button" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+            <label>Possession Order Date:</label>
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <input id="possessionOrderDate" value="" title="possessionStartDate" style="width: 100%" />
+        </div>
+        <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+            <label>Possession Date:</label>
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <input id="possessionDate" value="" title="possessionDate" style="width: 100%" />
+        </div>
+        <div class="col-md-2 col-sm-12 col-xs-12 form-group" style="text-align:right">
+            <input type="button" id="btnUpdatePossession" value="Update" class="k-button" onclick="javascript: UpdateDateFields()" />
+            <input type="button" id="btnClearPossession" value="Clear" class="k-button" />
+        </div> 
+    </div>
+
+    <div class="row">
+        <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+            <label>Application Id:</label>
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">            
+            @(Html.Kendo().ComboBox()
+                .Name("A-Application-Id")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => { transport.Read("GetApplicationIdListAsDataSource", "Report"); })
+                        .Schema(schema => { schema.Data("Data").Total("Total"); })
+                        .PageSize(100);
+                    }
+                 )
+                .Events(events => { events.Change("GetDetailsByApplicationId"); })
+                .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+        <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+            <label>Registration Id:</label>
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <input id="A-Registration-Id" value="" title="a-registration-id" style="width: 100%" />
+        </div>
+        <div class="col-md-2 col-sm-12 col-xs-12 form-group" style="text-align:right">
+            <input type="button" id="btnUpdateRID" value="Update" class="k-button" onclick="javascript: UpdateRegistrationId()" />
+            <input type="button" id="btnClearRID" value="Clear" class="k-button" />
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#MGroup input:radio[name=InfoType]').on('change', function () {
+            var radiobtnVal = $('input[name=InfoType]:checked', '#MGroup').val();
+            if (radiobtnVal == "Checklist") {
+                //ClearAllotmentDateFields();
+                ClearDateFields();
+                GetDetailsByRegistrationId();
+            }
+            else if (radiobtnVal == "Allotment") {
+                //ClearPossessionDateFields();
+                ClearDateFields();
+                GetDetailsByRegistrationId();
+            }
+            else if (radiobtnVal == "Registry") {
+                //ClearAllotmentDateFields();
+                ClearDateFields();
+                GetDetailsByRegistrationId();
+            }
+            else if (radiobtnVal == "Possession") {
+                //ClearAllotmentDateFields();
+                ClearDateFields();
+                GetDetailsByRegistrationId();
+            }
+        });
+
+        $(".kendo-datepicker").kendoDatePicker();
+
+        // create DatePicker from input HTML element
+        $("#allotmentDate").kendoDatePicker();
+        $("#allotmentStartDate").kendoDatePicker();
+        //$("#allotmentStartDate").kendoDatePicker({
+        //    // defines the start view
+        //    start: "year",
+        //    // defines when the calendar should return date
+        //    depth: "year",
+        //    // display month and year in the input
+        //    format: "MMMM yyyy",
+        //    // specifies that DateInput is used for masking the input element
+        //    dateInput: true
+        //});
+
+        $("#possessionOrderDate").kendoDatePicker();
+        $("#possessionDate").kendoDatePicker();
+
+        $('#btnClearAllotment').click(function () {
+            ClearAllotmentDateFields();
+        });
+
+        $('#btnClearPossession').click(function () {
+            ClearPossessionDateFields();
+        });
+
+        $('#btnClearChecklist').click(function () {
+            ClearChecklistDateFields();
+        });
+        $('#btnClearRegistry').click(function () {
+            ClearRegistryDateFields();
+        });
+        $('#btnClearRID').click(function () {
+            ClearRegistrationIdField();
+        });
+
+    });
+
+    function GetDetailsByRegistrationId() {
+        var rbtnval = $('input[name=InfoType]:checked', '#MGroup').val();
+        var rid = $('#MRegistrationId').val();
+        if (rbtnval == "" || rbtnval == "undefined") {
+            alertify.error("Please select options");
+            return false;
+        }
+        if (rid != "" || rid != null) {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ registrationId: rid, flag: rbtnval }),
+                url: '@Url.Action("GetDetailsByRegistrationId", "Report")',
+                success: function (result) {
+                    if (result != null) {
+                        if (rbtnval == "Checklist") {
+                            $('#checklistDate').data("kendoDatePicker").value(result.ChecklistDate);
+                        }
+                        if (rbtnval == "Allotment") {
+                            $('#allotmentDate').data("kendoDatePicker").value(result.AllotmentDate);
+                            $('#allotmentStartDate').data("kendoDatePicker").value(result.InstallmentStartDate);
+                        }
+                        if (rbtnval == "Registry") {
+                            $('#registryDate').data("kendoDatePicker").value(result.RegistryDate);
+                            $('#registryDueDate').data("kendoDatePicker").value(result.RegistryDueDate);
+                        }
+                        if (rbtnval == "Possession") {
+                            $('#possessionDate').data("kendoDatePicker").value(result.PossessionDate);
+                            $('#possessionOrderDate').data("kendoDatePicker").value(result.PossessionOrderDate);
+                        }
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Please try again.");
+                }
+            });
+        }
+    }
+
+    function GetDetailsByApplicationId() {
+
+        var appId = $('#A-Application-Id').val();
+
+        if (appId != "" || appId != null) {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ ApplicationId: appId }),
+                url: '@Url.Action("GetRegistrationIdByApplicationIdOrFormNo", "Report")',
+                success: function (result) {
+                    if (result != null) {
+                        $("#A-Registration-Id").val(result.RegistrationId);
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Please try again.");
+                }
+            });
+        }
+    }
+
+    function UpdateDateFields() {
+        var fDate; var lDate;
+        var rbtnval = $('input[name=InfoType]:checked', '#MGroup').val();
+        var rid = $('#MRegistrationId').val();
+        if (rbtnval == "" || rbtnval == "undefined") {
+            alertify.error("Please select options");
+            return false;
+        }
+        if (rbtnval == "Checklist") {
+            fDate = $('#checklistDate').val();
+            if (fDate == "" || fDate == "undefined") {
+                alertify.error("Please select checklist date");
+                return false;
+            }
+            //lDate = null;
+        }
+        if (rbtnval == "Allotment") {
+            fDate = $('#allotmentDate').val();
+            lDate = $('#allotmentStartDate').val();
+            if (fDate == "" || fDate == "undefined") {
+                alertify.error("Please select allotment date");
+                return false;
+            }
+            if (lDate == "" || lDate == "undefined") {
+                alertify.error("Please select installment start date");
+                return false;
+            }
+        }
+        if (rbtnval == "Registry") {
+            fDate = $('#registryDate').val();
+            lDate = $('#registryDueDate').val();
+            if (fDate == "" || fDate == "undefined") {
+                alertify.error("Please select lease deed date");
+                return false;
+            }
+            if (lDate == "" || lDate == "undefined") {
+                alertify.error("Please select lease deed start date");
+                return false;
+            }
+        }
+        if (rbtnval == "Possession") {
+            fDate = $('#possessionOrderDate').val();
+            lDate = $('#possessionDate').val();
+            if (fDate == "" || fDate == "undefined") {
+                alertify.error("Please select possession order date");
+                return false;
+            }
+            if (lDate == "" || lDate == "undefined") {
+                alertify.error("Please select possession date");
+                return false;
+            }
+        }
+        if (rid != "" || rid != null) {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ registrationId: rid, firstDate: fDate, secondDate: lDate, flag: rbtnval }),
+                url: '@Url.Action("UpdateDateFieldsByRegistrationId", "Report")',
+                success: function (result) {
+                    if (rbtnval == "Checklist") {
+                        if (result == '@ReturnType.Success') {
+                            alertify.success("Checklist date updated successfuly");
+                        }
+                        if (result == '@ReturnType.Failure') {
+                            alertify.error("Checklist date not updated");
+                        }
+                    }
+                    if (rbtnval == "Allotment") {
+                        if (result == '@ReturnType.Success') {
+                            alertify.success("Allotment date updated successfuly");
+                        }
+                        if (result == '@ReturnType.Failure') {
+                            alertify.error("Allotment date not updated");
+                        }
+                    }
+                    if (rbtnval == "Registry") {
+                        if (result == '@ReturnType.Success') {
+                            alertify.success("Lease deed date updated successfuly");
+                        }
+                        if (result == '@ReturnType.Failure') {
+                            alertify.error("Lease deed date not updated");
+                        }
+                    }
+                    if (rbtnval == "Possession") {
+                        if (result == '@ReturnType.Success') {
+                            alertify.success("Possession date updated successfuly");
+                        }
+                        if (result == '@ReturnType.Failure') {
+                            alertify.error("Possession date not updated");
+                        }
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Please try again.");
+                }
+            });
+        }
+    }
+
+    function UpdateRegistrationId() {
+        var rid = $("#A-Registration-Id").val();
+        var appId = $("#A-Application-Id").val();
+        var flag = confirm("Are you sure to update Rid?");
+        if (appId != "" && flag == true) {
+            //if ((rid != "" && rid.length == 8)|| rid=="") {
+
+            //}
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ ApplicationId: appId, RegistrationId: rid }),
+                url: '@Url.Action("UpdateRegistrationIdByApplicationIdOrFormNo", "Report")',
+                success: function (result) {
+                    if (result == '@ReturnType.Updated') {
+                        alertify.success("RegistrationId is Updated Successfully");
+                    }
+                    else if (result == '@ReturnType.None') {
+                        alertify.error("RegistrationId is not updated");
+                    }
+                    else if(result=="") {
+                        alertify.error("Network Error");
+                    }
+                    ClearRegistrationIdField();
+                },
+                error: function (ajaxRequest, strError) {                    
+                    alertify.error("Please try again.");
+                }
+            });
+        }
+
+    }
+
+    function ClearRegistrationIdField() {
+        $('#A-Registration-Id').val('');
+    }
+
+    function ClearChecklistDateFields() {
+        $('#checklistDate').data("kendoDatePicker").value('');
+    }
+
+    function ClearAllotmentDateFields() {
+        $('#allotmentDate').data("kendoDatePicker").value('');
+        $('#allotmentStartDate').data("kendoDatePicker").value('');
+    }
+
+    function ClearRegistryDateFields() {
+        $('#registryDate').data("kendoDatePicker").value('');
+        $('#registryDueDate').data("kendoDatePicker").value('');
+    }
+
+    function ClearPossessionDateFields() {
+        $('#possessionOrderDate').data("kendoDatePicker").value('');
+        $('#possessionDate').data("kendoDatePicker").value('');
+    }
+
+    function ClearDateFields() {
+        $('#checklistDate').data("kendoDatePicker").value('');
+        $('#allotmentDate').data("kendoDatePicker").value('');
+        $('#allotmentStartDate').data("kendoDatePicker").value('');
+        $('#registryDate').data("kendoDatePicker").value('');
+        $('#registryDueDate').data("kendoDatePicker").value('');
+        $('#possessionOrderDate').data("kendoDatePicker").value('');
+        $('#possessionDate').data("kendoDatePicker").value('');
+    }
+</script>

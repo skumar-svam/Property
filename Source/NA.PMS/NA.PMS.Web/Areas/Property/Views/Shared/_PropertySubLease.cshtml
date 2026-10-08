@@ -1,0 +1,59 @@
+﻿@model NA.PMS.Model.SubLeaseViewModel
+@using Kendo.Mvc.UI;
+
+<div class="PropertyDocument">
+    <div class="col-md-12 divHeaderClass" id="divPropertyDetailHeader2">
+        <h4 class="PropertyDetailHeader alot-prop-header">Attachment Details</h4>
+    </div>
+
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.SubLeaseViewModel>()
+                    .Name("SubLeaseProperty")
+                    .Columns(columns =>
+                        {
+                            columns.Bound(c => c.Id).Hidden(true);
+                            columns.Bound(c => c.ParentPropertyId).Hidden(true);
+                            columns.Bound(c => c.RegistrationId).Title("Registration Id").ClientTemplate("<label class='hyperlinkcss' onclick='javascript:ViewProperty(#=Id#)'>#=RegistrationId#</label>");
+                            columns.Bound(c => c.Sector).Title("Sector");
+                            columns.Bound(c => c.Block).Title("Block");
+                            columns.Bound(c => c.PlotNo).Title("Plot No");
+                            columns.Bound(c => c.Department).Title("Department");
+                            columns.Bound(c => c.PropertyArea).Title("Area");
+                            columns.Bound(c => c.TotalCost).Title("Cost").HtmlAttributes(new { @class = "fa fa-inr" });
+                            columns.Bound(c => c.SubLeaseStatus).Title("Status").ClientTemplate("#if(SubLeaseStatus=='Active'){#<label class='actve'>#=SubLeaseStatus#</label>#}else{#<label class='inactve'>#=SubLeaseStatus#</label>#}#").HtmlAttributes(new { @class = "abc" });
+                        })
+                    .Sortable()
+                    .Filterable()
+                    .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                    .DataSource(dataSource => dataSource
+                                .Ajax().Model(model => model.Id(p => p.Id))
+                                .ServerOperation(true)                                
+                                .Read(read => read.Action("GetSubLeasedProperty", "PropertyAllotment").Data("AdditionalInfoForSubLease")).Sort(sort => sort.Add("Id").Descending())
+                                .PageSize(10)
+                            )
+        )
+    </div>
+</div>
+<div class="col-md-12" id="divSubleaseDetail" style="min-height:250px;">
+    @{Html.RenderPartial("~/Areas/Master/Views/ManageProperty/_SubLeaseProperty.cshtml");}
+</div>
+<script type="text/javascript">
+    function AdditionalInfoForSubLease() {
+        return {
+            rid: $('#hdnRID').val() > 0 ? $('#hdnRID').val() : 0
+        }
+    }
+
+    $(document).ready(function () {
+        $('#divSubleaseDetail').kendoWindow({
+            title: "Sub Lease Property",
+            visible: false,
+            actions: ["Pin", "Minimize", "Maximize", "Close"],
+            width: "70%"
+        })
+    });
+
+    function ViewProperty(id) {
+        GetSubleaseDetails(id);
+    }
+</script>

@@ -1,0 +1,297 @@
+﻿@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+
+<div class="panel-body">
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group"></div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group rdio-bx" id="TGroup1">
+            <input type="radio" id="rbtnTransferee" name="InfoType" value="Transferee">&nbsp;Transferee &nbsp;&nbsp;
+            <input type="radio" id="rbtnAllottee" name="InfoType" value="Allottee" />&nbsp;Allottee
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group"></div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group rdio-bx" id="TGroup2">
+            <input type="radio" id="rbtnTIndividual" name="InfoType2" value="Individual" />&nbsp;Individual &nbsp;&nbsp;
+            <input type="radio" id="rbtnTCompany" name="InfoType2" value="Company" />&nbsp;Company
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Registration Id:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().ComboBox()
+                .Name("TRegistrationId")
+                .DataTextField("text")
+                .DataValueField("id")
+                .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => { transport.Read("GetRegistrationIdList", "Report"); })
+                        .Schema(schema => { schema.Data("Data").Total("Total"); })
+                        .PageSize(100);
+                    }
+                 )
+                .Events(events => { events.Change("GetTransferDetailsByRegistrationId"); })
+                .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label class="lbl-t-name">First Name:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="100" id="TFirstName" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row row-t-individual">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Middle Name:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="100" id="TMiddleName" class="k-textbox" />
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Last Name:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="100" id="TLastName" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label class="lbl-t-authority">Father/Husband:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="100" id="TGuardian" class="k-textbox" />
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Mobile:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="10" id="TMobile" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label class="">Transfer Charge:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="20" id="TTransferCharge" class="k-textbox text-right" />
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Transfer Date:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input id="TTransferDate" value="" title="TransferDate" style="width:100%;" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Correspond Add:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <textarea id="TCorresspondanceAdd" maxlength="500" class="form-control"></textarea>
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Permanent Add:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <textarea id="TPermanentAdd" maxlength="500" class="form-control"></textarea>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 form-group" style="text-align:right;">
+            <input type="button" id="btnTransferUpdate" value="Update" class="k-button" style="width:100px;" />
+            <input type="button" id="btnClearTransferFields" value="Clear" class="k-button" style="width:100px;" />
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#TTransferDate").kendoDatePicker();
+        //var Tflag = null;
+        $('#TGroup1 input:radio[name=InfoType]').on('change', function () {
+            var radiobtnVal = $('input[name=InfoType]:checked', '#TGroup1').val();
+            if (radiobtnVal == "Transferee") {
+                ClearTransferDetails();
+                GetTransferDetailsByRegistrationId();
+            }
+            else if (radiobtnVal == "Allottee") {
+                ClearTransferDetails();
+                GetTransferDetailsByRegistrationId();
+            }
+        });
+
+        $('#TGroup2 input:radio[name=InfoType2]').on('change', function () {
+            var radiobtnVal = $('input[name=InfoType2]:checked', '#TGroup2').val();
+            if (radiobtnVal == "Company") {
+                ChangeIntoTransferCompanyDetails();
+            }
+            else {
+                ChangeIntoTransferIndividualDetails();
+            }
+        });
+
+        $('#btnClearTransferFields').click(function () {
+            $('#TRegistrationId').val('');
+            ClearTransferDetails();
+        });
+
+        $('#btnTransferUpdate').click(function () {
+            var flag1 = $('input[name=InfoType]:checked', '#TGroup1').val();
+            var flag2 = $('input[name=InfoType2]:checked', '#TGroup2').val();
+            var rid = $('#TRegistrationId').val();
+            var fname = $('#TFirstName').val();
+            var mname = $('#TMiddleName').val();
+            var lname = $('#TLastName').val();
+            var guardian = $('#TGuardian').val();
+            var mobile = $('#TMobile').val();
+            var caddress = $('#TCorresspondanceAdd').val();
+            var paddress = $('#TPermanentAdd').val();
+            if (flag1 == null || flag1 == "undefined") {
+                alertify.error("Please select Transferee or allottee radio button");
+                return false;
+            }
+            if (rid.trim() == "" || rid.length != 8) {
+                alertify.error("Please enter Registration Id");
+                return false;
+            }
+            if (fname.trim() == "") {
+                alertify.error("Please enter First name");
+                return false;
+            }
+            //if (mobile == "") {
+            //    alertify.error("Please enter mobile number.");
+            //    return false;
+            //}
+            if (caddress.trim() == "") {
+                alertify.error("Please enter Corresspondance Address");
+                return false;
+            }
+            else {
+                UpdateTransferDetail();
+            }
+        });
+
+    });
+
+    function GetTransferDetailsByRegistrationId() {
+        var Tflag = $('input[name=InfoType]:checked', '#TGroup1').val();
+        var rid = $('#TRegistrationId').val();
+        if (Tflag == null || Tflag == "undefined") {
+            alertify.error("Please select Transferee or Allottee");
+            return false;
+        }
+        if (rid != "" && rid.length == 8) {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ registrationId: rid, flag: Tflag }),
+                url: '@Url.Action("GetTransferDetailsByRid", "Report")',
+                success: function (result) {
+                    if (result != null) {
+                        $('#TFirstName').val(result.FirstName);
+                        $('#TMiddleName').val(result.MiddleName);
+                        $('#TLastName').val(result.LastName);
+                        $('#TMobile').val(result.MobileNo);
+                        $('#TTransferCharge').val(result.TransferCharge);
+                        $('#TTransferDate').data("kendoDatePicker").value(result.TransferDate);
+                        $('#TCorresspondanceAdd').val(result.CorrespondAddress);
+                        $('#TPermanentAdd').val(result.PermanentAddress);
+                        if (result.ApplicantType == '@Constants.Company') {
+                            $('#TGuardian').val(result.ApplicantMaster);
+                            $('input[name="InfoType2"][value="Individual"]','#TGroup2').removeAttr("checked");
+                            $('input[name="InfoType2"][value="Company"]', '#TGroup2').attr("checked", true);
+                            ChangeIntoTransferCompanyDetails();
+                        }
+                        else {
+                            $('#TGuardian').val(result.ApplicantMaster);
+                            $('input[name="InfoType2"][value="Company"]', '#TGroup2').removeAttr("checked");
+                            $('input[name="InfoType2"][value="Individual"]', '#TGroup2').attr("checked", true);
+                            ChangeIntoTransferIndividualDetails();
+                        }
+                    }
+                    if (result == '@ReturnType.NotExist') {
+                        alertify.error("Registration Id doesn't exist");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Please try again.");
+                }
+            });
+        }
+    }
+
+    function UpdateTransferDetail() {
+        var Tmodel = {
+            TransferFlag : $('input[name=InfoType]:checked', '#TGroup1').val(),
+            ApplicantType : $('input[name=InfoType2]:checked', '#TGroup2').val(),
+            RegistrationId : $('#TRegistrationId').val(),
+            FirstName : $('#TFirstName').val(),
+            MiddleName : $('#TMiddleName').val(),
+            LastName : $('#TLastName').val(),
+            ApplicantMaster : $('#TGuardian').val(),
+            MobileNo: $('#TMobile').val(),
+            TransferDate: Date.parse($('#TTransferDate').val()),
+            TransferCharge: $('#TTransferCharge').val(),
+            CorrespondAddress : $('#TCorresspondanceAdd').val(),
+            PermanentAddress : $('#TPermanentAdd').val()
+        };
+        
+        $.ajax({
+            type: "post",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ model : Tmodel }),
+            url: '@Url.Action("UpdateTransferDetail", "Report")',
+            success: function (result) {
+                if (result == '@ReturnType.Success') {
+                    alertify.success("Information updated successfully.");
+                    ClearTransferDetails();
+                }
+                if (result == '@ReturnType.NotExist') {
+                    alertify.error("Information updated successfully.");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Please try again.");
+            }
+        });
+    }
+
+    function ClearTransferDetails() {
+        //$('#TRegistrationId').val('');
+        $('#TFirstName').val('');
+        $('#TMiddleName').val('');
+        $('#TLastName').val('');
+        $('#TGuardian').val('');
+        $('#TMobile').val('');
+        $('#TCorresspondanceAdd').val('');
+        $('#TPermanentAdd').val('');
+        $('#TTransferCharge').val('');
+        $('#TTransferDate').data('kendoDatePicker').value('');
+    }
+
+    function ChangeIntoTransferCompanyDetails() {
+        $('.lbl-t-name').text("Company Name:");
+        $('.lbl-t-authority').text("Signing Authority:");
+        $('.row-t-individual').css("display", "none");
+        $('.TMiddleName').val('');
+        $('.TLastName').val('');
+    }
+
+    function ChangeIntoTransferIndividualDetails() {
+        $('.lbl-t-name').text("First Name:");
+        $('.lbl-t-authority').text("Father/Husband:");
+        $('.row-t-individual').show();
+    }
+
+</script>

@@ -1,0 +1,279 @@
+﻿@using NA.PMS.Web.Models;
+
+@{
+    Layout = null;
+    var PIMS = NA.PMS.Common.Application.PMS;
+    var PMS = NA.PMS.Common.Application.ProjectManagementSystem;
+    var GA = NA.PMS.Common.Application.GeneralAdministration;
+    var FMS = NA.PMS.Common.Application.FinancialManagementSystem;
+    var PayRoll =  NA.PMS.Common.Application.PayRollManagementSystem;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>NOIDA ERP::Noida Enterprise Resource Planning System</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600" rel="stylesheet">
+    <link href="~/Content/CSS/Dashboard/bootstrap-reboot.min.css" rel="stylesheet" />
+    <link href="~/Content/CSS/Dashboard/bootstrap.min.css" rel="stylesheet" />
+    <link href="~/Content/CSS/Dashboard/kendo.common.min.css" rel="stylesheet" />
+    <link href="~/Content/CSS/Dashboard/kendo.custom.css" rel="stylesheet" />
+    <link href="~/Content/CSS/Dashboard/style.css" rel="stylesheet" />
+	<style>
+	button.circ-inr-link{
+        cursor:pointer;
+    }
+	a.circ-inr-link{
+        cursor:default;
+    }
+	</style>
+</head>
+<body class="d-flex flex-column">
+    <!-- main wrapper starts here  -->
+    <header>
+        <!-- header wrapper starts here  -->
+        <div class="row m-0 page-spcaing">
+            <div class="col-6">
+                <!-- Brand/logo -->
+                <!-- Toggler/collapsibe Button -->
+                <button class="navbar-toggler d-sm-inline-block d-md-none" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+                    <span class="navbar-toggler-icon" data-icon="storage"></span>
+                </button>
+                <a class="navbar-brand p-0" href="#"><img src="~/Content/Images/Dashboard/logo.png" alt="logo" style="width:auto;"></a>
+            </div>
+            <div class="col-6 d-md-block d-none wlcme-usr-blck text-right">
+                <!-- welcome user section starts here -->
+                @{
+                    if (Session["CurrentUser"] != null)
+                    {
+                        var usr = (CurrentUserDetail)Session["CurrentUser"];
+                        @*<a class="usr-nme d-inline-block text-uppercase pr-3 pt-3" href="#">Welcome, @usr.UserName</a>*@ @*-@usr.RoleMaster.RoleName*@
+                        <span class="usr-nme d-inline-block text-uppercase pr-3 pt-3">
+                            Welcome, @usr.UserName
+                        </span>
+                    }
+                }
+                <a class="usr-logout d-inline-block text-uppercase pt-3" href="/Account/Logout/">Logout</a>
+            </div>
+        </div>
+        <!-- header wrapper ends here  -->
+    </header>
+    <section class="container-fluid flex-grow">
+        <!-- inner content wrapper starts here  -->
+        <div class="content-area">
+            <div class="circ-cont">
+                @{
+                    var username = ViewBag.UserName;
+                    var pass = ViewBag.Password;
+
+                    var data = (List<NA.PMS.Model.ApplicationMaster>)ViewBag.MenuData;
+
+                    var pimsMenu = data.Where(m => m.ApplicationName == PIMS).FirstOrDefault();
+                    var pmsMenu = data.Where(m => m.ApplicationName == PMS).FirstOrDefault();
+                    var fmsMenu = data.Where(m => m.ApplicationName == FMS).FirstOrDefault();
+                    var gaMenu = data.Where(m => m.ApplicationName == GA).FirstOrDefault();
+                    var payMenu = data.Where(m => m.ApplicationName == PayRoll).FirstOrDefault();
+
+                    if (pimsMenu != null)
+                    {
+                        <form action="@pimsMenu.ApplicationUrl" method="post" id="frmPims">
+                            <input type="hidden" name="Uname" value="@username" />
+                            <input type="hidden" name="Department" value="@pass" />
+                            <input type="hidden" name="ApplicationId" value="@pimsMenu.ApplicationId" />
+                            <button id="btnPims" class="circ-inr-link link-1 btn-remove">
+                                <span>
+                                    <i class="slide-num slide-num-1">01</i>
+                                    <i class="link-text link-style">@pimsMenu.ApplicationName</i>
+                                </span>
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a href="#" class="circ-inr-link link-1">
+                            <span>
+                                <i class="slide-num slide-num-1">01</i>
+                                <i class="link-text">Property Information Management System</i>
+                            </span>
+                        </a>
+                    }
+
+                    if (fmsMenu != null)
+                    {
+                        <form action="@fmsMenu.ApplicationUrl" method="post" id="frmFms">
+                            <input type="hidden" name="Uname" value="@username" />
+                            <input type="hidden" name="Department" value="@pass" />
+                            <input type="hidden" name="ApplicationId" value="@fmsMenu.ApplicationId" />
+                            <button id="btnFms" class="circ-inr-link link-2 btn-remove">
+                                <span>
+                                    <i class="slide-num slide-num-2">02</i>
+                                    <i class="link-text link-style">@fmsMenu.ApplicationName</i>
+                                </span>
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a href="#" class="circ-inr-link link-2">
+                            <span>
+                                <i class="slide-num slide-num-2">02</i>
+                                <i class="link-text">Financial Management System</i>
+                            </span>
+                        </a>
+                    }
+
+                    if (pmsMenu != null)
+                    {
+                        <form action="@pmsMenu.ApplicationUrl" method="post" id="frmPms">
+                            <input type="hidden" name="Uname" value="@username" />
+                            <input type="hidden" name="Department" value="@pass" />
+                            <input type="hidden" name="ApplicationId" value="@pmsMenu.ApplicationId" />
+                            <button id="btnPms" class="circ-inr-link link-3 btn-remove">
+                                <span>
+                                    <i class="slide-num slide-num-3">03</i>
+                                    <i class="link-text link-style">@pmsMenu.ApplicationName</i>
+                                </span>
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a href="#" class="circ-inr-link link-3"><span><i class="slide-num slide-num-3">03</i><i class="link-text">Project Management System</i></span></a>
+                    }
+
+                    if (payMenu != null)
+                    {
+                        <form action="@payMenu.ApplicationUrl" method="post" id="frmPayRoll">
+                            <input type="hidden" name="Uname" value="@username" />
+                            <input type="hidden" name="Department" value="@pass" />
+                            <input type="hidden" name="ApplicationId" value="@payMenu.ApplicationId" />
+                            <button id="btnPay" class="circ-inr-link link-4 btn-remove">
+                                <span>
+                                    <i class="slide-num slide-num-4">04</i>
+                                    <i class="link-text link-style">@payMenu.ApplicationName</i>
+                                </span>
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a href="#" class="circ-inr-link link-4">
+                            <span>
+                                <i class="slide-num slide-num-4">04</i>
+                                <i class="link-text">HR & Payroll Management System</i>
+                            </span>
+                        </a>
+                    }
+
+                    @*<a href="#" class="circ-inr-link link-4"><span><i class="slide-num slide-num-4">04</i><i class="link-text">HR & Payroll Management System</i></span></a>*@
+                    <a href="#" class="circ-inr-link link-5"><span><i class="slide-num slide-num-5">05</i><i class="link-text">Litigation Management System</i></span></a>
+
+                    if (gaMenu != null)
+                    {
+                        <form action="@gaMenu.ApplicationUrl" method="post" id="frmGa">
+                            <input type="hidden" name="Uname" value="@username" />
+                            <input type="hidden" name="Department" value="@pass" />
+                            <input type="hidden" name="ApplicationId" value="@gaMenu.ApplicationId" />
+                            <button id="btnGa" class="circ-inr-link link-6 btn-remove">
+                                <span>
+                                    <i class="slide-num slide-num-6">06</i>
+                                    <i class="link-text link-style">@gaMenu.ApplicationName</i>
+                                </span>
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <a href="#" class="circ-inr-link link-6"><span><i class="slide-num slide-num-6">06</i><i class="link-text">General Administration</i></span></a>
+                    }
+                }
+                <div class="circ-divison"><img src="~/Content/Images/Dashboard/circ-divison.png" width="100%" height="100%" /></div>
+                <div class="small-circle"><img src="~/Content/Images/Dashboard/top-circle.png" width="70%" height="60%" /><span class="sml-circ-txt">Noida Enterprise Resource Planning</span></div>
+                <div class="slide-1"><div class="slide-1-inner"></div></div>
+                <div class="slide-2"><div class="slide-2-inner"></div></div>
+                <div class="slide-3"><div class="slide-3-inner"></div></div>
+                <div class="slide-4"><div class="slide-4-inner"></div></div>
+                <div class="slide-5"><div class="slide-5-inner"></div></div>
+                <div class="slide-6"><div class="slide-6-inner"></div></div>
+            </div>
+        </div>
+        <!-- inner content wrapper ends here  -->
+    </section>
+    <footer class="flex-grow pb-md-5 pb-lg-1 pb-xl-1">
+        <!-- footer wrapper starts here  -->
+        <div class="row m-0">
+            <div class="col-12 page-spcaing">
+                <div class="row m-0 ftr-bdr-tp">
+                    <div class="col-12 col-md-8 text-center text-md-left p-0">Copyright &copy; 2018, North Shore Technologies Pvt. Ltd. All Rights Reserved</div>
+                    <div class="col-12 col-md-4 text-center text-md-right p-0">
+                        <a href="#">Privacy Policy</a> | <a href="#">Terms of Use</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <!-- footer wrapper ends here  -->
+    </footer>
+    <!-- include javascript files -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="~/Scripts/KendoJS/2016.2/kendo.all.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+    <script type="text/javascript">
+
+        $("#btnPms").click(function () {
+            ("#frmPms").submit();
+        });
+
+        $("#btnFms").click(function () {
+            ("#frmFms").submit();
+        });
+
+        $("#btnPims").click(function () {
+            ("#frmPims").submit();
+        });
+
+        $("#btnGa").click(function () {
+            ("#frmGa").submit();
+        });
+
+        $("#btnPay").click(function () {
+            ("#frmPayRoll").submit();
+        });
+
+        $(document).ready(function () {
+            $('.link-1').hover(function () {
+                $(".slide-1-inner").addClass('hover');
+            }, function () {
+                $(".slide-1-inner").removeClass('hover');
+            })
+            $('.link-2').hover(function () {
+                $(".slide-2-inner").addClass('hover');
+            }, function () {
+                $(".slide-2-inner").removeClass('hover');
+            })
+            $('.link-3').hover(function () {
+                $(".slide-3-inner").addClass('hover');
+            }, function () {
+                $(".slide-3-inner").removeClass('hover');
+            })
+            $('.link-4').hover(function () {
+                $(".slide-4-inner").addClass('hover');
+            }, function () {
+                $(".slide-4-inner").removeClass('hover');
+            })
+            $('.link-5').hover(function () {
+                $(".slide-5-inner").addClass('hover');
+            }, function () {
+                $(".slide-5-inner").removeClass('hover');
+            })
+            $('.link-6').hover(function () {
+                $(".slide-6-inner").addClass('hover');
+            }, function () {
+                $(".slide-6-inner").removeClass('hover');
+            })
+        });
+    </script>
+</body>
+</html>

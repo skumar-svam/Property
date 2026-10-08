@@ -1,0 +1,153 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@using NA.PMS.Common;
+@using NA.PMS.Model
+@model NA.PMS.Model.PaymentViewModel
+
+@{
+    ViewBag.Title = "Payment Detail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .nav-sub-group .nav-tabs li a {
+        margin-left: 2px;
+        margin-right: 0;
+        /*line-height: 1.42857143;
+    border: 1px solid transparent;
+    border-radius: 4px 4px 0 0;*/
+    }
+
+    .nav-sub-group .nav.nav-tabs.content-tabs li.active > a {
+        background: #fff;
+        color: #000;
+    }
+</style>
+
+
+<div class="PropertyDetails col-lg-12 col-md-12 col-sm-12">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Payment Details</h1></div>
+                <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                    <h1 class="gridTitle">Registration Id: @Model.RegistrationId</h1>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 allotmentProperty" style="padding-top:5px;">
+            <div class="row">
+                @Html.HiddenFor(model => model.RegistrationId, htmlAttributes: new { @id="hdn-registration-id"})
+                @Html.HiddenFor(model => model.DepartmentId)
+                @Html.HiddenFor(model => model.PropertyId)
+                @Html.HiddenFor(model => model.SectorId)
+                @Html.HiddenFor(model => model.BlockId)
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <ul class="nav nav-tabs content-tabs" id="ulProperty" role="tablist">
+                        <li class="active"><a href="#zero" role="tab" data-toggle="tab">Account Basic Info</a></li>
+                        <li><a href="#one" role="tab" data-toggle="tab">Allotment Detail</a></li>
+                        <li><a href="#two" role="tab" data-toggle="tab">Installment</a></li>
+                        <li><a href="#three" role="tab" data-toggle="tab">Excess Area</a></li>
+                        <li><a href="#four" role="tab" data-toggle="tab">Lease Rent</a></li>
+                        <li><a href="#five" role="tab" data-toggle="tab">Transfer</a></li>
+                        <li><a href="#six" role="tab" data-toggle="tab">Compensation</a></li>
+                        <li><a href="#seven" role="tab" data-toggle="tab">Payment History</a></li>
+                        <li><a href="#eight" role="tab" data-toggle="tab">Demand Note</a></li>
+                        <li><a href="#nine" role="tab" data-toggle="tab">NDC</a></li>
+                        <li><a href="#ten" role="tab" data-toggle="tab">Other</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-12 tabbable " id="divProperty">
+
+                    <div class="tab-content">
+                        <div class="tab-pane fade in active" id="zero">
+                            @{
+                                Html.RenderPartial("_PaymentBasicInfo");
+                            }
+                        </div>
+                       
+                        <div class="tab-pane fade" id="one">
+                            @{
+                                Html.RenderPartial("_PaymentAllotmentDetail");
+                            }
+                        </div>
+                        <div class="tab-pane fade" id="two">
+                            @{
+                                Html.RenderPartial("_PaymentInstallment");
+                            }
+                        </div>
+                        <div class="tab-pane fade" id="three">
+                            @{
+                                Html.RenderPartial("_PaymentExcessArea");
+                            }
+                        </div>
+                        <div class="tab-pane fade" id="four">
+                            @{
+                                Html.RenderPartial("_PaymentLeaseRent");
+                            }
+                        </div>
+
+                        <div class="tab-pane fade" id="five">
+                            @{
+                                Html.RenderPartial("_PaymentTransfer");
+                            }
+                        </div>
+                        <div class="tab-pane fade" id="six">
+                            @{
+                                Html.RenderPartial("_PaymentCompensation");
+                            }
+                        </div>
+                        <div class="tab-pane fade" id="seven">
+                            @{
+                                Html.RenderPartial("_PaymentHistory");
+                            }
+                        </div>
+                        <div class="tab-pane fade" id="eight">
+                            @{
+                                Html.RenderPartial("_PaymentDemandNote");
+                            }
+                        </div>
+                        <div class="tab-pane fade" id="nine">
+                            @{
+                                Html.RenderPartial("_PaymentNDC");
+                            }
+                        </div>
+                        <div class="tab-pane fade" id="ten">
+                            @{
+                                
+                            }
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        //Reschedule Payment
+        $("#hdnRescheduleGrid").hide();
+        if ($("#isReschedule").val() == "True") {
+            $("#hdnRescheduleGrid").show();
+        }
+
+        $('.nav-tabs a').click(function (e) {
+            e.preventDefault();
+            // $(this).tab('show');
+        });
+    });
+
+    function FilterRegistrationId() {
+        //return rid = $('#Property_RegistrationId').val();
+        return { RegistrationId: $('#hdn-registration-id').val() };
+    }
+</script>
+
+

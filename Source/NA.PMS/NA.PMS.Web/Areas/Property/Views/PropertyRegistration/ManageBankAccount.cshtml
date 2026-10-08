@@ -1,0 +1,226 @@
+﻿@model NA.PMS.Model.BankAccountManagementModel 
+@using Kendo.Mvc.UI;
+@using NA.PMS.Model
+
+@{
+    ViewBag.Title = "Manage Bank Challan";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="ManageApplicationRole">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Bank Challan</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                <a href="#" id="btnAddRole" class="" onclick="javascript: AddChallan(event);">Create Challan</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<BankAccountManagementModel>()
+        .Name("gridRoles")
+              .Columns(columns =>
+              {
+                  //columns.Bound(c => c.roleName).Width(150);
+                  columns.Bound(c => c.ChallanNo).Title("Challan Id").Width(130).ClientTemplate("<a href='javascript: void(0);'onclick=\"ChallanGenerate('#= ChallanNo#','#= RId#');\">#=ChallanNo#</a>").Filterable(false);
+                  columns.Bound(c => c.RId).Title("Registration Id").Width(150);
+                  columns.Bound(c => c.DepttName).Title("Department");
+                  columns.Bound(c => c.ChallanDate).Title("Challan Date").Format("{0:dd-MMM-yyyy}"); ;
+                  columns.Bound(c => c.BankName).Title("Bank Name");
+                  columns.Bound(c => c.BranchName).Title("Branch Name");
+                  columns.Bound(c => c.IsActive).Title("Active").ClientTemplate(
+                      "# if (IsActive == true) {#<a id=\"activate\" runat=\"server\" href='javascript: void(0);' onclick=\"role.StatusActivate(this,'#= ChallanNo#','true');\" " + "><label class='hyperlinkcss'>DeActivate</label></a># }else{#<a id=\"deactivate\" runat=\"server\" href='javascript: void(0);' onclick=\"role.StatusActivate(this,'#= ChallanNo#','false');\" " + "><label class='hyperlinkcss'>Activate</label></a>#} #").Sortable(false).HtmlAttributes(new { @style = "cursor:pointer" });
+              })
+                //.Groupable()
+              .Sortable()
+              .Filterable()
+                //.ToolBar(toolBar =>
+                //{
+                //    toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Add Role").HtmlAttributes(new { onclick = "javascript:AddRole(event);", @class = "k-button", id = "btnAddRole" });
+                //})
+              .Resizable(resize => resize.Columns(true))
+              .Pageable
+              (
+                  pageable => pageable
+                      .Enabled(true)
+                      .Refresh(true)
+                      .PageSizes(true)
+              )
+              .DataSource
+              (
+                  dataSource => dataSource
+                      .Ajax()
+                      .Model(model => model.Id(p => p.ChallanNo))
+                      .ServerOperation(true)
+                      .Read(read => read.Action("GetManageAccountDetails", "PropertyRegistration"))
+                      .PageSize(10)
+                      .Group(group => group.Add(g => g.RId))
+              )
+              .Events(e=>e.DataBound("collapserow"))
+        )
+
+    </div>
+</div>
+<div id="myModal" class="modal fade" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog  modal-sm" style="margin:150px auto">
+        <div class="modal-content">
+            <!-- dialog body -->
+            <div class="modal-body">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <div>
+                    @Html.Label("Title", new { @class = "", @id = "Title" })
+                </div>
+            </div>
+
+            <!-- dialog buttons -->
+            <div class="modal-footer footerbtn">
+                <button type="button" id="Deactivatebtn" usrid="" status="" class="k-button" data-dismiss="modal" onclick="role.DeActivateRole();">Yes</button>
+                <button type="button" class="k-button" data-dismiss="modal">No</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+<div id="divPrintChallan" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="padding-top:20px;">
+    <div class="modal-dialog" style="width: 65%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">  <b>Challan</b></h4>
+            </div>
+            <div class="modal-body" style="overflow:auto; height:450px;">
+                <div id="divChallanBody"></div>
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <input type="hidden" id="rid" /><input type="hidden" id="challanid" />
+                <button type="submit" id="btnPrintDiv" class="k-button" data-dismiss="modal" onclick="PrintDiv();">Print</button>
+                <button type="button" id="downloadDoc" class="k-button">Download</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#ViewName").val("ManageBankAccount");
+        $("#ViewName").val("ManageRoles");
+
+      @{
+          if (TempData["MesgAdd"] != null && TempData["MesgAdd"] != "")
+          {
+              @:alertify.success('Changes saved successfully.');
+          }
+      }
+      @{
+          if (TempData["MesgEdit"] != null && TempData["MesgEdit"] != "")
+          {
+              @:alertify.success('Changes saved successfully.');
+          }
+      }
+    });
+
+    $('#downloadDoc').click(function () {
+        var rid = $("#rid").val();
+        var challanid = $("#challanid").val();
+        alert("Rid " + rid + " challan id " + challanid);
+        window.location = "/PropertyRegistration/DownloadPaymentChallan?rid=" + rid + "&challanId=" + challanid;
+    });
+
+    function AddChallan(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("CreateChallan", "PropertyRegistration")';
+    }
+    function ChallanGenerate(ChallanNo, RId) {
+        $('#rid').val(RId);
+        $('#challanid').val(ChallanNo);
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ChallanNo:ChallanNo, rid: RId }),
+            url: '/PropertyRegistration/ChallanGenerate',
+            success: function (result) {
+                $("#divChallanBody").html(result);
+                $("#divPrintChallan").modal('show');
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                alertify.error("Some error occured. Please try again later.");
+            }
+        });
+    }
+
+    
+    var role = new function () {
+        this.DeActivateRole = function () {
+
+            var roleId = $("#Deactivatebtn").attr("roleId");
+
+            var status = $("#Deactivatebtn").attr("status");
+
+            var viewN = $("#ViewName").val();
+
+            $.ajax({
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                type: "POST",
+                @*url: '@Url.Action("DeActivateRole", "ManageRoles")',*@
+                //data: { roleId: roleId, status: status, viewN: viewN },
+                data: JSON.stringify({ ChallanNo: roleId, status: status, viewN: viewN }),
+                url: '/PropertyRegistration/DeActivateRole',
+                success: function (result) {
+                    $('#gridRoles').data('kendoGrid').dataSource.read();
+                    $('#gridRoles').data('kendoGrid').refresh();
+                    $("#Deactivatebtn").attr("roleId", "");
+                    $("#Deactivatebtn").attr("status", "");
+                },
+                error: function (msg) {
+                    alert("Error Occured-" + msg.responseText);
+                }
+            });
+        };
+        this.StatusActivate = function (e, id, status) {
+            $('#myModal').modal('show');
+            $("#Deactivatebtn").attr("roleId", id);
+            $("#Deactivatebtn").attr("status", status);
+            if (e.id === "deactivate") {
+                $("#Title").text("Do you want to activate?");
+            } else {
+                $("#Title").text("Do you want to deactivate?");
+            }
+        };
+    }
+
+
+    function collapserow() {
+        var grid = $("#gridRoles").data("kendoGrid");
+        grid.collapseGroup(".k-grouping-row:contains(aria-expanded='true')");
+        //grid.collapseGroup(".k-grouping-row:contains(RId)");
+        //grid.expandGroup(".k-grouping-row:contains(Beverages)");
+        //var t = $('.k-grouping-row').children("td"); //alert(t); t.add("aria-expanded", "false");aria-expanded="true"
+        //t.attr("aria-expanded", "false");
+    }
+
+    function PrintDiv() {
+        var contents = document.getElementById("divChallanBody").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+</script>

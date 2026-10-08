@@ -1,0 +1,483 @@
+﻿@model NA.PMS.Model.OnlineFormViewModel
+@using Kendo.Mvc.UI
+@using NA.PMS.Common
+@using NA.PMS.Model
+@{
+    ViewBag.Title = "Company Detail";
+    Layout = "~/Views/Shared/_LayoutOnline.cshtml";
+}
+
+<style>
+    #loader{display:none;}	
+</style>
+
+@using (Html.BeginForm("CompanyDetail", "Application", FormMethod.Post, new { enctype = "multipart/form-data", id = "applicationform" }))
+{
+    <div class="online-registration">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Online Application Form</h1></div>
+                @*<div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>*@
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle" style="text-align:right">Form No:- @Model.ApplicationFormId</h1></div>
+            </div>
+        </div>
+        
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce" id="first-form">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px" id="divApplicantInformation">
+                <h2 class="blck-heading" style="">Proposed Project Detail</h2>
+                <div class="form-bx" id="ProposedCompany">
+                    <div>
+                        @Html.HiddenFor(model => model.Id)
+                        @Html.HiddenFor(model => model.ApplicationFormId)
+                        @Html.HiddenFor(model => model.SchemeId)
+                        @Html.HiddenFor(model => model.DepartmentId)
+                        @Html.HiddenFor(model => model.ApplicantType)
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Proposed Project Name", new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.ProposedModel.ProposedProject, new { @class = "form-control", @maxlength = "100" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Estimated Cost  (In lakhs)", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.ProposedModel.TotalCost, new { @class = "form-control", @maxlength = "8", onkeypress = "return IsNumeric(event);" })
+                        </div>
+                    </div>
+
+                    @*<div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Funding From Own Source", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.ProposedModel.FundingFromOwnSource, new { @class = "form-control", @maxlength = "8", onkeypress = "return IsNumeric(event);" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Funding From Other Source", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.ProposedModel.FundingFromOtherSource, new { @class = "form-control", @maxlength = "8", onkeypress = "return IsNumeric(event);" })
+                        </div>
+                    </div>*@
+
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Implementation Time (In year)", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.ProposedModel.ImplementationTime, new { @class = "form-control", @maxlength = "2", onkeypress = "return IsNumeric(event);" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                           
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                           
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="blck-heading" style="">Director's Information</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Director's Name", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.DirectorModel.DirectorName, new { @class = "form-control", @maxlength = "99" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Director's Share(%)", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.DirectorModel.DirectorShare, new { @class = "form-control", @maxlength = "7" })
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Director Type", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(model => model.DirectorModel.DirectorTypeId)
+                            .DataTextField("Text")
+                            .DataValueField("Id")
+                            .OptionLabel("--Select--")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetDirectorTypeList", "Application", new { area = "Online" });
+                                });
+                            })
+                            .HtmlAttributes(new { @class = "", style = "width:100%;" })
+                            )
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("PAN")
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.DirectorModel.PAN, new { @class = "form-control", @maxlength = "10", @onchange = "PanNumberChange();" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">                            
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            <input type="button" class="k-button" value="Add" id="btnAdd" style="width:100px;"/>
+                        </div>
+                    </div>
+                    <div class="row" id="divDirectors">
+                        <div class="col-md-12 k-grid-content" style="padding-left:30px;">
+                            @(Html.Kendo().Grid<NA.PMS.Model.onlineDirectorViewModel>()
+                               .Name("gridDirectors")
+                              .Columns(columns =>
+                              {
+                                  columns.Bound(c => c.DirectorId).Hidden();
+                                  columns.Bound(c => c.Id).Title("SNo").Width(50);
+                                  columns.Bound(c => c.DirectorName).Title("Name").Width(80);
+                                  columns.Bound(c => c.DirectorType).Title("Type").Width(50);
+                                  columns.Bound(c => c.DirectorShare).Title("Share (In %)").Width(80);
+                                  columns.Bound(c => c.PAN).Title("PAN").Width(80);
+                                  columns.Bound(c => c.DirectorId).Hidden(true).Title("Action");
+                                  columns.Bound(c => c.DirectorId).Title("Action").ClientTemplate("<a href='##' onclick='javascript: return RemoveRecord(this);' id='RemoveTag'>Remove</a>").Width(50).Filterable(false).Sortable(false);
+                              })
+                              .Sortable()
+                              .Filterable()
+                              .Resizable(resize => resize.Columns(true))
+                              .Pageable(pageable => pageable.Enabled(true).PageSizes(true))
+                              .AutoBind(true)
+                              .DataSource
+                              (
+                                 dataSource => dataSource
+                                .Ajax().Model(model => model.Id(p => p.Id))
+                                .ServerOperation(true)
+                                .Read(read => read.Action("GetDirectorDetails", "Application", new { area = "Online" }).Data("FilterFormId"))
+                                .PageSize(5)
+                              )
+                            )
+                        </div>
+                    </div>
+                    
+                </div>
+
+                <h2 class="blck-heading" style="margin-bottom:6px;">DECLARATION BY THE APPLICANT</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-12 form-group">                          
+                            <p>
+                                <label>
+
+                                    <input type="checkbox" required name="chkboxDeclaration" id="chkboxDeclaration" />
+                                    I/We hereby declare that the information, submitted with application form, are true to the best of our knowledge. Nothing
+                                    has been concealed and no part of it is false. I/We further declare that we have carefully read and understood the terms and conditions
+                                    for allotment of industrial plot and do hereby abide by the same. I/We are aware, if allotment is obtained on the basis of false
+                                    information, the NOIDA may cancel our allotment at any stage and forfeit all the deposits made by me/us.
+                                    @Html.ActionLink("Terms&Condition", "HelpOnline", new { controller = "Application", area = "Online" }, new { target = "_blank" })
+                                </label>
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-12 form-group">
+                            <label><b>Way to submit document: </b></label>
+                            @Html.RadioButtonFor(model => model.FormType, "Online", htmlAttributes: new { @checked="checked", @id="OnFormType" })<b>Online</b>
+                            @Html.RadioButtonFor(model => model.FormType, "Offline", htmlAttributes: new { @id="OffFormType" })<b>Offline</b>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box-button text-center">
+                <input type="button" id="btnBack" value="Back" class="btn btn-default"/>               
+                @{
+                    if (Model.IsApplicationFeePaid == true)
+                    {
+                         <input type="button" value="Skip" id="btnNext" class="btn btn-add" />
+                    }
+                    else
+                    {
+                        <input type="button" value="Next" id="btnSubmit" class="btn btn-add" />
+                    }
+                }
+            </div>
+        </div>
+    </div>
+}
+
+
+<div id="progressbar" style="width:100%; text-align:center;">
+    <div id="loader" style="position: fixed;top:210px; left:0;  width:100%; height: 100%;  ">
+        <img src="~/Content/Images/ajax_loader_red.gif" style="width:200px;height:200px;" />
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    function preventBack() { window.history.forward(); }
+    setTimeout("preventBack()", 1);
+    window.onunload = function () { null };
+
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+
+    var floatKeys = new Array();
+    floatKeys.push(8); //Backspace 
+    floatKeys.push(46); // (.)dot
+    function IsFloatNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || floatKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+
+    $('#btnBack').click(function () {
+        window.location.href = "/Online/Application/EditForm?id="+'@Model.EncryptedFormId';
+    });
+
+    $('#btnAdd').click(function () {
+        SaveDirector();
+    });
+
+    $(document).ready(function () {
+        ToggleFormType();
+
+        $('form').submit(function () {
+            $('#loader').show();
+        })
+
+        $('#btnSubmit').click(function () {
+            SubmitFormData();
+        });
+
+        $('#btnNext').click(function () {
+            var formId = $("#Id").val();
+            window.location.href = '@Url.Action("UploadDocument", "Application", new { area = "Online" })' + "?id=" + '@Model.EncryptedFormId'; //formId;
+        });
+
+        var director = $('#gridDirectors').data("kendoGrid").dataSource.total();
+        if (director == 0) {
+            $('#divDirectors').css("display","none");
+        }
+        else {
+            $('#divDirectors').show();
+        }
+
+        $("input[type='radio'][name='FormType']").on("change", function () {
+            ToggleFormType();
+        });
+
+    });
+
+
+    function ToggleFormType() {
+        var form = $("input[type='radio'][name='FormType'][value='Online']:checked").val();
+        if (form == "Online") {
+            $('#btnSubmit').val("Next");
+        }
+        else {
+            $('#btnSubmit').val("Submit");
+        }
+    }
+
+    function FilterFormId() {
+        return { formId: $('#ApplicationFormId').val() };
+    }
+
+
+    function PanNumberChange() {
+        if ($("#DirectorModel_PAN").val().trim() == '') {
+            $("#DirectorModel_PAN").val('');
+        }
+        var bool = CheckPanNoFormat();
+        if (bool == false) {
+            alertify.error("Pan Number format is wrong.");
+            $("#DirectorModel_PAN").val('');
+            return false;
+        }
+        else {
+           
+        }
+    }
+
+    function CheckPanNoFormat() {
+        var value = $("#DirectorModel_PAN").val().trim();
+        var regex1 = /^[A-Z]{5}\d{4}[A-Z]{1}$/;
+        if (!regex1.test(value) || value.length != 10) {
+            return false;
+        }
+        return true;
+    }
+
+    function SubmitFormData() {
+        var projname = $('#ProposedModel_ProposedProject').val();
+        var cost = $('#ProposedModel_TotalCost').val();
+        var time = $('#ProposedModel_ImplementationTime').val();
+        var flag = $("#chkboxDeclaration").prop("checked");
+        var director = $('#gridDirectors').data("kendoGrid").dataSource.total();
+        if (projname == "") {
+            alertify.error("Please enter proposed project name.");
+            return false;
+        }
+        if (cost == "") {
+            alertify.error("Please enter Estimated cost.");
+            return false;
+        }
+        if (time == "") {
+            alertify.error("Please enter Estimated Time to implement.");
+            return false;
+        }
+        if (flag == false) {
+            alertify.error("Please check Declaration .");
+            return false;
+        }
+        if (director == 0) {
+            alertify.error("Please add atleast one director.");
+            return false;
+        }
+        else {
+            $('#applicationform').submit();
+        }
+
+    }
+
+    function SaveDirector() {
+        var formId = $('#ApplicationFormId').val();
+        var name = $('#DirectorModel_DirectorName').val();
+        var share = $('#DirectorModel_DirectorShare').val();
+        var type = $('#DirectorModel_DirectorTypeId').val();
+        var pan = $('#DirectorModel_PAN').val();
+        var grid = $("#gridDirectors").data("kendoGrid");
+        var data = grid.dataSource._data;
+
+        if(name.trim() == ""){
+            alertify.error("Please enter Director name.");
+            return false;
+        }
+        if(share.trim() == ""){
+            alertify.error("Please enter Director's share.");
+            return false;
+        }
+        if (isNaN(share.trim())) {
+            $('#DirectorModel_DirectorShare').val('');
+            alertify.error("Please enter a number for share.");
+            return false;
+        }
+        if (share.trim() != "" && share.trim() >100) {
+            alertify.error("Director's share can't be more than 100.");
+            return false;
+        }
+        
+        if (type.trim() == "") {
+            alertify.error("Please select Director's type.");
+            return false;
+        }
+        if (pan.trim() == "") {
+            alertify.error("Please enter Director's PAN.");
+            return false;
+        }
+        share = parseFloat($('#DirectorModel_DirectorShare').val()).toFixed(2);
+        var sum = 0.0000;
+        var flag = false;
+        var tpan;
+        $.each(data, function (p, row) {
+            sum = sum + (row.DirectorShare);
+            if (pan == row.PAN) {
+                flag = true;
+            }
+        });
+        sum = parseFloat(sum) + parseFloat(share);
+        if (parseFloat(sum).toFixed(4) > 100) {
+            alertify.error("Sum of Shares can't exceed 100%");
+            return false;
+        }
+        //if (parseFloat(sum).toFixed(4) < 100) {
+        //    alertify.error("Sum of Shares should be 100%");
+        //    return false;
+        //}
+        if(flag == true){
+            alertify.error("PAN can't be same for other person");
+            return false;
+        }
+        else {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ formId: formId, directorName: name, share: share, directorTypeId: type, pan: pan }),
+                url: "/Online/Application/SaveDirectorDetails",
+                success: function (data) {
+                    if (data == '@ReturnType.Success') {
+                        $("#gridDirectors").data("kendoGrid").dataSource.read();
+                        $('#divDirectors').show();
+                        alertify.success("Record added successfully.");
+                        ClearDirectorFields();
+                    }
+                    else {
+                        alertify.error("Please try again later.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    //alert("error");
+                }
+            });
+        }
+    }
+
+    function RemoveRecord(row) {
+        var tr = $(row).parent().parent();
+        var directorId = $(tr).children("td:eq(0)").text();
+        var formId = $('#ApplicationFormId').val();
+        //var formId = 143143;
+        var bflag = false;
+       
+        if (confirm("Are you sure? You want to remove this record.")) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({formId:formId, directorId: directorId }),
+                url: '/Online/Application/RemoveDirectorDetails',
+                success: function (result) {
+                    if (result == '@ReturnType.Success') {
+                        event.preventDefault();
+                        $("#gridDirectors").data("kendoGrid").dataSource.read();
+                        alertify.success("Record deleted successfully.");
+                        //ClearDirectorFields();
+                       
+                    }
+                    else {
+                        alertify.error("Please try again later.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                }
+            });
+            return false;
+        }
+    }
+
+    function ClearDirectorFields() {
+        $('#DirectorModel_DirectorName').val('');
+        $('#DirectorModel_DirectorShare').val('');
+        $('#DirectorModel_PAN').val('');
+        $('#DirectorModel_DirectorTypeId').data("kendoDropDownList").value('');
+    }
+
+</script>

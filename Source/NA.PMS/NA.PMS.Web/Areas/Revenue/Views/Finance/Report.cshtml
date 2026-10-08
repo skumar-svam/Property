@@ -1,0 +1,204 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@model NA.PMS.Model.LeaseRentViewModel
+
+@{
+    ViewBag.Title = "Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="ManageLeaseRentList">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Lease Rent Report</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+
+    <div class="col-md-12 content-top-spce">
+        <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            <h2 class="blck-heading" style="margin-bottom:15px;">Search</h2>
+            <div class="form-bx">
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <b>@Html.Label("Department")</b>
+                        @(Html.Kendo().DropDownListFor(m => m.DepartmentId)
+                            .Filter("contains")
+                            .DataTextField("Text")
+                            .DataValueField("Id")
+                            .OptionLabel(" --- select ---")
+                            .DataSource(source =>
+                            {
+                                source.Custom()
+                                .ServerFiltering(true)
+                                .ServerPaging(true)
+                                .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                .Transport(transport => transport.Read(read => read.Action("GetDepartmentList", "Finance", new { area = "Revenue" })))
+                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                .PageSize(6);
+                            })
+                            .Events(events => { events.Change("ChangeDepartmentEvent"); })
+                            .HtmlAttributes(new { @class = "input-disabled", style = "width:90%; float:right;" })
+                        )
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label>Session Year</label>
+                        @(Html.Kendo().DropDownListFor(model => model.FinancialYear)
+                                //.Name("DDLFinancialYear")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel(" --- Select ---")
+                            .BindTo(new List<SelectListItem>() {
+                                new SelectListItem() { Text = "2015-2016", Value = "2015-2016" },
+                                new SelectListItem() { Text = "2016-2017", Value = "2016-2017" },
+                                new SelectListItem() { Text = "2017-2018", Value = "2017-2018" }
+                            })
+                            .HtmlAttributes(new { style = "width: 90%; float:right;" })
+                            .Events(e => e.Change("ChangeDepartmentEvent"))
+                        )
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label>Receipt Type</label>
+                        @(Html.Kendo().DropDownListFor(model => model.ActionType)
+                                //.Name("DDLActionType")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel(" --- Select ---")
+                            .BindTo(new List<SelectListItem>() {
+                                new SelectListItem() { Text = "Lease Rent", Value = "Lease Rent" }
+                            })
+                            .HtmlAttributes(new { style = "width: 90%; float:right;" })
+                            .Events(e => e.Change("ChangeDepartmentEvent"))
+                        )
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="blck-heading" style="margin-bottom: 0px;">Lease Rent Details</h2>
+
+
+
+
+            <div class="k-grid-content">
+                @(Html.Kendo().Grid<NA.PMS.Model.Sp_AccountReport_list_Result>()
+                .Name("GridLeaseRentReport")
+                .Excel(excel => excel.AllPages(true).Filterable(true).FileName("ServiceReport.xlsx"))
+                .ToolBar(toolsExcel => toolsExcel.Excel())
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.Id).Hidden(true);
+                    columns.Bound(c => c.RegistrationId).Title("Registration Id").ClientTemplate("<a href='" + "/Property/PropertyAllotment/PropertyDetails/#= RegistrationId #'>#= RegistrationId #</a>").Filterable(true);
+                    //columns.Bound(c => c.Department).Title("Department");
+                    //columns.Bound(c => c.PropertyNo).Title("Property");
+                    columns.Bound(c => c.LeaseRentPremium).Title("Lease Rent (<span class='fa fa-rupee'></span>)").ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+                    columns.Bound(c => c.DepositDueDate).Title("Due Date").Format("{0:dd-MMM-yyyy}");
+                    //columns.Bound(c => c.PremiumPaidStatus).Title("Premium Paid");
+                    //columns.Bound(c => c.IsLeaseRentPaid).Title("Lease Rent Paid");
+                    columns.Bound(c => c.PremiumPaidUptoDate).Title("Paid Upto Date").Format("{0:dd-MMM-yyyy}");
+                    columns.Bound(c => c.BalanceAmount).Title("Total Balance (<span class='fa fa-rupee'></span>)").ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+                    columns.Bound(c => c.RegistrationId).Title("Demand Note").Width(140).ClientTemplate(" <center><a onclick='javascript:PrintDemandNote(#=RegistrationId#,#=LeaseRentDues#);'><span class='fa fa-print'></span></a></center> ");
+                })
+                .Sortable()
+                .Filterable()
+                .Resizable(resize => resize.Columns(true))
+                .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .DataSource(dataSource => dataSource
+                    .Ajax()
+                    .Model(model => model.Id(p => p.Id))
+                    .ServerOperation(true)
+                     .Read(read => read.Action("GetRevenueReportDetails", "Finance", new { area = "Revenue" }).Data("FilterParam")).PageSize(10)
+                    .Aggregates(aggregates => aggregates.Add(p => p.BalanceAmount).Sum())
+                                    .Aggregates(aggregates => aggregates.Add(p => p.LeaseRentPremium).Sum())
+                    )
+                )
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+<div id="divPrintSchemeForm" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="padding-top:40px;">
+    <div class="modal-dialog" style="width: 60%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title"><b>Demand Note</b></h4>
+            </div>
+            <div class="modal-body" style="overflow:auto; height:400px;">
+                <div id="divSchemeForm"></div>
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="submit" id="btnPrintDiv" class="k-button" data-dismiss="modal" onclick="PrintSchemeFormDiv();">Print</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var departmentId = $("#DepartmentId").val();
+        var financialYear = $("#FinancialYear").val();
+        var actionType = $("#ActionType").val();
+
+        @*if ('@Model.FinancialYear' != null || '@Model.FinancialYear' != '') {
+            var fy = '@Model.FinancialYear';
+            $("#DDLFinancialYear").data("kendoDropDownList").value(fy);
+        }*@
+
+
+    });
+
+
+    function ChangeDepartmentEvent() {
+        departmentId = $("#DepartmentId").val();
+        financialYear = $("#FinancialYear").val();
+        actionType = $("#ActionType").val();
+        $("#GridLeaseRentReport").data("kendoGrid").dataSource.read();
+    }
+
+
+
+    function LeaseRent() {
+        var model = { DepartmentId: $("#DepartmentId").val(), PremiumPaidStatus: '@NA.PMS.Common.NDCOptions.Id_No' };
+        return model;
+    }
+
+    function FilterParam() {
+        var model = {
+            DepartmentId: $("#DepartmentId").val() == "" ? 4 : $("#DepartmentId").val(),
+            FinancialYear: $("#FinancialYear").val() == "" ? "2017-2018" : $("#FinancialYear").val(),
+            ActionType: $("#ActionType").val() == "" ? "Lease Rent" : $("#ActionType").val()
+        }
+        return model;
+    }
+
+    function PrintDemandNote(registrationId, dueAmount) {
+        //, DuesUptoDate: duesUptoDate
+        var _ObjDemand = { RegistrationId: registrationId, LeaseRentDues: dueAmount };
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ _LeaseRentViewModel: _ObjDemand }),
+            url: '/Revenue/Finance/PrintDemandNote',
+            success: function (result) {
+                $("#divApplicationForm").modal('hide');
+                $("#divSchemeForm").html(result);
+                $("#divPrintSchemeForm").modal('show');
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                alertify.error("Some Error in save database.");
+            }
+        });
+    }
+
+</script>

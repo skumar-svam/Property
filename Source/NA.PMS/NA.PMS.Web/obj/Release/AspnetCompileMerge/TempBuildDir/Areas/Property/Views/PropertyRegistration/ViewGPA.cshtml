@@ -1,0 +1,361 @@
+﻿@model NA.PMS.Model.GPAModel
+@using Kendo.Mvc.UI
+
+@{
+    ViewBag.Title = "View";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style type="text/css">
+    .modal-header .close {
+        margin-top: 4px;
+        margin-right: 6px;
+    }
+
+    .floatRight {
+        float: right;
+    }
+
+    .blck-heading {
+        border: 1px solid #299a8b;
+    }
+
+    .modal-header, .modal-body {
+        background: url(/Content/Images/boxed-bg.jpg) repeat;
+    }
+</style>
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">View GPA/Nominee</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory"></div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <h2 class="blck-heading">REGISTRATION ID <span class="floatRight"><a id="allotteeModal" class="btn-sm floatRight" data-toggle="modal" data-target="#myModal">Allottee Information</a></span> </h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Registration Id", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <input type="hidden" value="@Model.RId" id="hdnRid" />
+                            @(Html.Kendo().DropDownListFor(m => m.RId)
+                                .Filter("contains")
+                                .DataTextField("text")
+                                .DataValueField("id")
+                                .OptionLabel("Select")
+                                .DataSource(source =>
+                                {
+                                    //source.Read(read =>
+                                    //{
+                                    //    read.Action("GetRIDsByDeptt", "PropertyRegistration");
+                                    //});
+                                    source.Custom()
+                                    .ServerFiltering(true)
+                                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                    .Transport(transport =>
+                                    {
+                                        transport.Read(read => read.Action("GetRIDsByDeptt", "PropertyRegistration").Data("GetRid"));
+                                    }).Schema(schema =>
+                                    {
+                                        schema.Data("Data")
+                                        .Total("Total");
+                                    }).PageSize(100);
+                                })
+                                .Enable(false)
+                                    //.Events(events => { events.Change("RIdChange"); })
+                                .HtmlAttributes(new { @class = "schemeForms", style = "width:100%" })
+                            )
+                        </div>
+
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Type", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(m => m.GPAType)
+                                .Filter("contains")
+                                .DataTextField("text")
+                                .DataValueField("text")
+                                .OptionLabel("Select")
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("GetGPAType", "PropertyRegistration").Data("FilterCompany");
+                                    }).ServerFiltering(true);
+                                })
+                               // .CascadeFrom("RId")
+                                .Enable(false)
+                             .HtmlAttributes(new { @class = "schemeForms", style = "width:100%" })
+                            )
+                            @Html.HiddenFor(gpa => gpa.GPAId)
+                            @Html.HiddenFor(gpa => gpa.hdnGPAType)
+                        </div>
+
+                    </div>
+                </div>
+
+                @*<div class="form-bx">
+                        @{Html.RenderPartial("_TransferAllotteDetails");}
+                    </div>*@
+                <div id="divGPA">
+                    @{Html.RenderPartial("_GPAForm", Model);}
+                </div>
+                <div id="divNominee">
+                    <div class="k-grid-content">
+                        @(Html.Kendo().Grid<NA.PMS.Model.GPAModel>()
+                                .Name("gridNominees")
+                                .Columns(columns =>
+                                {
+                                    columns.Bound(c => c.NomineeId).Hidden(true).Width(10);
+                                    columns.Bound(c => c.SNo).Title("Serial No.").Width(100);
+                                    columns.Bound(c => c.NomineeName).Title("Nomination Name").Width(100);
+                                    columns.Bound(c => c.NomineeRelation).Title("Relation").Width(100);
+                                    columns.Bound(c => c.NominationDate).Title("Nomination Date").Width(100).Format("{0:dd/MM/yyyy}");
+                                    //columns.Bound(c => c.NomineeId).Title("Action").Width(100).ClientTemplate("<a onclick='javascript:RemoveNominee(this);' class='linkCss'>Remove</a>").Width(35).Filterable(false).Sortable(false);
+                                })
+                                .Sortable()
+                                .Filterable()
+                                .Resizable(resize => resize.Columns(true))
+                                //.ToolBar(toolBar =>
+                                //{
+                                //    toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Add").HtmlAttributes(new { onclick = "javascript:AddNominee(event);", @class = "k-button", id = "btnRequest" });
+                                //})
+                                .Pageable(pageable => pageable
+                                                                       .Enabled(true)
+                                                                       .Refresh(true)
+                                                                       .PageSizes(true)
+                                                                    ).AutoBind(false)//Read grid on RID selection in Add screen and on document.ready in Edit screen
+                                .DataSource(dataSource => dataSource
+                                        .Ajax().Model(model => model.Id(c => c.NomineeId))
+                                .ServerOperation(true)
+                                        .Read(read => read.Action("GetNomineeData", "PropertyRegistration").Data("GetRID")).PageSize(20)
+                                )
+                        )
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="box-button text-center">
+                <input type="button" id="btnCancel" value="Cancel" class="btn btn-default" />
+                @*<input type="submit" id="btnSubmit" value="Add" class="btn btn-add" />*@
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title blck-heading" style="margin-bottom: 0px;" id="myModalLabel">Allottee Information</h4>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12 blnk-rw"></div>
+                    <div class="col-md-12 content-top-spce">
+                        <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px;padding-top:10px;">
+                            <div id="divAllotteeDetails">
+                                @{Html.RenderPartial("_TransferAllotteDetails");}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @*<div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    </div>*@
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+    function GetRid() {
+        var regId = $("#hdnRid").val();
+        if (regId == "") { regId = 0; }
+        return {
+            Rid: regId
+        };
+    }
+
+    $(document).ready(function () {
+        DisableFields();
+        var GPASOAVal = $("#GPASOA").val();
+        var AgreementTypeVal = $("#AgreementType").val();
+        if (GPASOAVal == '@NA.PMS.Common.MortPrevLoan.yes') {
+            $(".RegisteredPart").hide();
+            $(".UnRegisteredPart").hide();
+            $(".DivAgreement").show();
+            if (AgreementTypeVal == '1') {
+                $(".RegisteredPart").show();
+                $(".UnRegisteredPart").hide();
+            }
+            else {
+                $(".RegisteredPart").hide();
+                $(".UnRegisteredPart").show();
+            }
+        }
+        else {
+            $(".RegisteredPart").hide();
+            $(".UnRegisteredPart").hide();
+            $(".DivAgreement").hide();
+        }
+        $("#divNominee").hide();
+
+        //Code to pick values for _TransferAllotteDetails Partial View
+        var rId = $("#RId").val();
+        if (rId == '') {
+            ClearValues();
+            alertify.error("Please select an RID");
+            return false;
+        }
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rId: rId }),
+            url: '/PropertyRegistration/GetOriginalDetailsForTransferByRID',
+            success: function (result) {
+                if (result != null) {
+                    if (result.isLeaseDeedExecuted == false) {
+                        ClearValues();
+                        alertify.error("Please execute Lease Deed for this RID before Transfer process");
+                        $("#RId").data('kendoDropDownList').value('');
+                        return false;
+                    }
+                    else {
+                        $("#lblScNa").html(result.SchemeName);
+                        $("#lblDeNa").html(result.DepttName);
+                        $("#lblApNa").html(result.ApplicantName);
+                        $("#lblCoNa").html(result.T_Company_Name);
+                        $("#lblGend").html(result.Gender);
+                        $("#lblReNa").html(result.RelationName);
+                        $("#lblSiAu").html(result.TransfereeCompanySigningAuth);
+                        $("#lblPropTy").html(result.PropType);
+                        $("#lblArea").html(result.Area);
+                        $("#lblFloo").html(result.Floor);
+                        $("#lblProMo").html(result.PropMortgaged);
+                        $("#lblProFu").html(result.PropFunctional);
+                        $("#lblOTLR").html(result.OneTimeLeaseRent);
+                        $("#hdnDepttId").val(result.DepttId);
+                        $("#hdnPropId").val(result.PropId);
+                        $("#BalanceDues").val(result.BalanceDues)
+                        if (result.Gender == "company" || result.Gender == "Company") {
+                            $('#lbl_mfGender').hide();
+                            //$('#lbl_mfGender').css("display", "none");
+                            //$('#lblApNa').hide();
+                            $('#lbl_comGender').show();
+                            $('#lblCoNa').hide();
+                            $('#lbl_FHname').hide();
+                            $('#lbl_SAname').show();
+                            $('#lblReNa').hide();
+                            $('#lblSiAu').show();
+                        }
+                        else {
+                            $('#lbl_mfGender').show();
+                            $('#lblApNa').show();
+                            $('#lbl_comGender').hide();
+                            $('#lblCoNa').hide();
+                            $('#lbl_FHname').show();
+                            $('#lbl_SAname').hide();
+                            $('#lblReNa').show();
+                            $('#lblSiAu').hide();
+                        }
+                        $("#lblCorrAdd").html(result.TransferorCorrAdd);
+                        $("#lblPerAdd").html(result.TransferorPerAdd);
+                    }
+                }
+                else {
+                    ClearValues();
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            },
+            error: function (obj) {
+                ClearValues();
+                alertify.error("Some error occured. Please try again later.");
+            }
+        });
+
+        var type = $("#GPAType").val();
+        if (type == '@NA.PMS.Common.GPAType.Nominee') {
+            $("#divGPA").hide();
+            $("#btnAdd").hide();
+            $("#divNominee").show();
+            //setTimeout(function () { $("#gridNominees").data("kendoDropDownList").dataSource.read(); }, 1000);
+            $("#gridNominees").data("kendoGrid").dataSource.read();
+        }
+        else {
+            $("#divNominee").hide();
+            $("#divGPA").show();
+            $("#btnAdd").show();
+        }
+
+        var registeredVal = $("#GPARegistered").val();
+        if (registeredVal == '@NA.PMS.Common.MortPrevLoan.no') {
+            $("#GPARegisteredNo").val('');
+            $("#GPARegisteredNo").prop("disabled", true);
+        }
+        else {
+            $("#GPARegisteredNo").prop("disabled", true);
+        }
+
+        //Button click
+        $("#btnCancel").click(function () {
+            //window.location.href = '@Url.Action("ManageGPA", "PropertyRegistration")';
+            window.history.back();
+        });
+    });
+
+    function GetRID() {
+        return {
+            rid: $("#RId").val()
+        };
+    }
+
+    function DisableFields() {
+        var ddlRid = $("#RId").data("kendoDropDownList");
+        ddlRid.enable(false);
+        var ddlType = $("#GPAType").data("kendoDropDownList");
+        ddlType.enable(false);
+        $("#GPAHolderName").prop("disabled", true);
+        $("#GPAHolderAdd").prop("disabled", true);
+        $("#RelationName").prop("disabled", true);
+        $("#GPARegisteredNo").prop("disabled", true);
+        var ddlRegistered = $("#GPARegistered").data("kendoDropDownList");
+        ddlRegistered.enable(false);
+        $('#ApplicationDate').data('kendoDatePicker').enable(false);
+        $('#EffectiveFrom').data('kendoDatePicker').enable(false);
+        $('#EffectiveTo').data('kendoDatePicker').enable(false);
+        $('#AcceptanceDate').data('kendoDatePicker').enable(false);
+
+        $("#BahiNo").prop("disabled", true);
+        $("#BahiZildNo").prop("disabled", true);
+        $("#BahiPageNo").prop("disabled", true);
+        $("#SINo").prop("disabled", true);
+        $("#GPASOA").data("kendoDropDownList").enable(false);
+        $("#AgreementType").data("kendoDropDownList").enable(false);
+        $("#RegistrationDate").data('kendoDatePicker').enable(false);
+        $("#SOABahiNo").prop("disabled", true);
+        $("#SOABahiZildNo").prop("disabled", true);
+        $("#SOABahiPageNo").prop("disabled", true);
+        $("#SOASINo").prop("disabled", true);
+        $("#AdvertismentInNewsPaper").prop("disabled", true);
+        $("#PublishedDate").data('kendoDatePicker').enable(false);
+    }
+
+    function FilterCompany() {
+        //return { company: $('#lblGend').text() };
+        return { company: $('#RId').val().toString() };
+    }
+
+    function ClearValues() {
+    }
+</script>

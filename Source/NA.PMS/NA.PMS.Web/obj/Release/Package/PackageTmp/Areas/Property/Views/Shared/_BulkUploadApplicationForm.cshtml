@@ -1,0 +1,281 @@
+﻿@*@model NA.PMS.Model.SchemeDepartmentModel*@
+@using Kendo.Mvc.UI;
+
+<style>
+    #divSchemeDept{
+        display:none;
+    }
+    #uploadDiv {
+        display: none;
+    }
+
+    #loadingImg {
+        display: none;
+    }
+
+    /*input[type="file"] {
+        width: 190px;
+    }
+    type{
+        width:200px;
+        height:10px;
+    }*/
+</style>
+
+<div class="col-md-11 col-sm-12 col-xs-12  col-md-offset-1">
+    @using (Html.BeginForm("BulkUploadApplicationForm", "Allotment", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        <div class="col-md-12">
+            <div id="divSchemeDept" class="row" style="padding-bottom:30px; padding-top:25px;">
+                <div class="col-md-5 col-sm-5 col-xs-12 form-group">
+                    @Html.Label("Scheme Name")
+                    @(Html.Kendo().DropDownList()
+                      .Name("SchemeId")
+                      .DataTextField("schemeName")
+                      .DataValueField("schemeId")
+                      .OptionLabel(" -- Please Select --")
+                      .DataSource(source => source.Read(read => read.Action("GetSchemeListForAllotment", "PropertyAllotment")))
+                      .Enable(true)
+                      .AutoBind(true)
+                      .HtmlAttributes(new { style = "width: 100%; height:100%" })
+                    )
+                </div>
+
+                <div class="col-md-5 col-sm-5 col-xs-12 col-md-offset-1 col-sm-offset-1 form-group">
+                    @Html.Label("Department")
+                    @(Html.Kendo().DropDownList()
+                      .Name("DepartmentId")
+                      .DataTextField("DepartmentName")
+                      .DataValueField("DepartmentId")
+                      .OptionLabel(" -- Please Select --")
+                      .DataSource(source => source.Read(read => read.Action("FilterDepartmentOnScheme", "PropertyAllotment").Data("FilterDepartment2"))
+                                                          .ServerFiltering(true))
+                      .Enable(false)
+                      .AutoBind(false)
+                      .CascadeFrom("SchemeId")
+                      .HtmlAttributes(new { style = "width: 100%;" })
+                    )
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12" id="downloadDiv" style="padding-top:30px;">
+            <div class="row">
+                <div class="col-md-5 col-sm-5 col-xs-12 form-group">
+                    <input type="button" class="btn btn-default" id="downloadIndividualExcelFormat" value="Download Format For Individual" />
+                </div>
+                <div class="col-md-5 col-sm-5 col-xs-12 col-md-offset-1 col-sm-offset-1 form-group">
+                    <input type="button" class="btn btn-default" id="downloadCompanyExcelFormat" value="Download Format For Company" />
+                </div>
+            </div>
+            <div class="row" style="margin-top:30px;">
+                <div class="col-md-11 col-sm-11 form-group" style="text-align:right">
+                    <button class="btn btn-add" id="btnNext">Next</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12" id="uploadDiv">
+            <div class="row" style="padding-bottom:20px;">
+                <div class="col-md-10 col-sm-6 col-xs-12 form-group">
+                    <input type="file" accept=".xls, .xlsx" id="fileUploadId" onchange="UploadFileSelection(this)" name="uploadExcel" />
+                    @*@(Html.Kendo().Upload().Name("fileUploadId").Multiple(false).HtmlAttributes(new { style="padding:0;margin:0;width:100%;"}))*@
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <div id="loadingImg" class="chartContainer" style="border-left: 5px solid #fff; border-top: 5px solid #fff; border-right: 5px solid #fff;">
+                        <img src="@Url.Content("~/Content/Images/loading_green.gif")" class="loading" />
+                    </div>
+                </div>
+
+                <div class="col-md-6 col-sm-3 col-xs-12 form-group">
+                    <button class="btn btn-default" id="btnBack">Back</button>
+                    <button type="button" class="btn btn-add" id="btnUpload">Upload</button>
+                </div>
+            </div>
+        </div>
+    }
+
+</div>
+
+
+<div id="divBulkApplicationMessage" class="col-md-12">
+    <div class="col-md-10 col-sm-12 col-xs-12 col-md-offset-1">
+        <div id="divErrorMessage" style="min-height:140px;overflow:auto"></div>
+    </div>
+    <div class="col-md-10 col-sm-12 col-xs-12 col-md-offset-1" style="text-align:center;">
+        <input type="button" id="btnCloseBulkApplicationMessage" value="Close" class="btn btn-default" />
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+    $('#divBulkApplicationMessage').kendoWindow({
+        modal: true,
+        title: "Bulk Upload Error Message",
+        visible: false,
+        width: "40%",
+        height: "30%"
+    });
+
+
+    $('#btnCloseBulkApplicationMessage').click(function () {
+        $("#divBulkApplicationMessage").data("kendoWindow").close();
+    });
+
+    function FilterDepartment2() {
+        return { schemeId: $("#SchemeId").val() };
+    }
+
+    function ShowProgressbar() {
+        var bar = $('.bar');
+        var percent = $('.percent');
+        var status = $('#status');
+
+        $('form').ajaxForm({
+            beforeSend: function () {
+                status.empty();
+                var percentVal = '0%';
+                bar.width(percentVal);
+                percent.html(percentVal);
+            },
+            uploadProgress: function (event, position, total, percentComplete) {
+                var percentVal = percentComplete + '%';
+                bar.width(percentVal);
+                percent.html(percentVal);
+            },
+            complete: function (xhr) {
+                status.html(xhr.responseText);
+            }
+        });
+    }
+
+    function UploadFileSelection(file) {
+        var schemeId = $('#SchemeId').val();
+        var departmentId = $('#DepartmentId').val();
+        var uploadFile = $("#fileUploadId").val();
+        var fileExtension = uploadFile.split('.');
+        if (uploadFile == null) {
+            alertify.error("Please select file");
+            return false;
+        }
+        if (fileExtension[1] != "xlsx") {
+            alertify.error("Please select only excel(xlsx) file.");
+            file.value = null;
+            return false;
+        }
+    }
+    $(document).ready(function () {
+        $('#btnNext').click(function () {
+            $('#downloadDiv').css("display", "none");
+            $('#divSchemeDept').show();
+            $('#uploadDiv').show();
+            return false;
+        });
+
+        $('#btnBack').click(function () {
+            $('#divSchemeDept').hide();
+            $('#uploadDiv').css("display", "none");
+            $('#downloadDiv').show();
+            return false;
+        });
+
+        $('#downloadIndividualExcelFormat').click(function () {
+            var individual = "individual";
+            var schemeId = $('#SchemeId').val();
+            var departmentId = $('#DepartmentId').val();
+            window.location = "/PropertyAllotment/DownloadExcelApplicationForm?schemeId=" + schemeId + "&departmentId=" + departmentId + "&formType=" + individual;
+        });
+        $('#downloadCompanyExcelFormat').click(function () {
+            var company = "company";
+            var schemeId = $('#SchemeId').val();
+            var departmentId = $('#DepartmentId').val();
+            window.location = "/PropertyAllotment/DownloadExcelApplicationForm?schemeId=" + schemeId + "&departmentId=" + departmentId + "&formType=" + company;
+        });
+
+        $('#btnUpload').click(function () {
+            var schemeId = $('#SchemeId').val();
+            var departmentId = $('#DepartmentId').val();
+            var uploadFile = $("#fileUploadId").val();
+
+            // Create FormData object
+            var formData = new FormData();
+            var file = $('#fileUploadId')[0];
+            formData.append("excelFile", file.files[0]);
+            formData.append("schemeId", schemeId);
+            formData.append("departmentId", departmentId);
+            formData.append("uploadFile", uploadFile);
+
+            if (uploadFile == null || uploadFile == "") {
+                alertify.error("Please select file");
+                return false;
+            }
+            if (schemeId != 0 && departmentId != 0) {
+                $('#loadingImg').show();
+                $.ajax({
+                    url: '/Allotment/BulkUploadApplicationForm',
+                    type: "POST",
+                    contentType: false, // Not to set any content header
+                    processData: false, // Not to process data
+                    //data: {schemeId:schemeId, departmentId:departmentId,uploadExcel:fileData},
+                    data: formData,
+                    success: function (result) {
+                        //if (result == 0) {
+                        if (result == "invalid") {
+                            alertify.error("Invalid field data");
+                            $('#loadingImg').css("display", "none");
+                            file.value = null;
+                        }
+                        //if (result == 1) {
+                        if (result == "notnull") {
+                            alertify.error("Form can't be null");
+                            $('#loadingImg').css("display", "none");
+                            file.value = null;
+                        }
+                        //if (result == 2) {
+                        if (result == "duplicate") {
+                            alertify.error("Form no already exists");
+                            $('#loadingImg').css("display", "none");
+                            file.value = null;
+                        }
+                        //if (result == 3) {
+                        if (result == "uploaded") {
+                            $('#loadingImg').css("display", "none");
+                            $("#divBulkApplicationMessage").data("kendoWindow").close();
+                            file.value = null;
+                            $("#gvApplications").data("kendoGrid").dataSource.read();
+                            alertify.success("Uploaded successfully");
+                        }
+                        else {
+                            //alertify.error("Upload is not successful");
+                            //alert("Error : " + result);
+                            //alertify.error(result);
+                            $('#loadingImg').css("display", "none");
+                            file.value = null;
+                            $('#divErrorMessage').html(result);
+                            var win = $("#divBulkApplicationMessage").data("kendoWindow");
+                            win.center();
+                            win.open();
+                        }
+                    },
+                    error: function (err) {
+                        //alert(err.statusText);
+                        alertify.error("Data field is not valid");
+                        $('#loadingImg').css("display", "none");
+                        file.value = null;
+                    }
+                });
+
+            }
+            else {
+                alertify.error("Select valid entry");
+                return false;
+            }
+        });
+
+
+
+    });
+</script>
+

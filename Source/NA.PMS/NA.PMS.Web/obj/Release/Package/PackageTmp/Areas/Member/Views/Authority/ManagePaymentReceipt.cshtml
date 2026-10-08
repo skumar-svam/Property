@@ -1,0 +1,212 @@
+﻿@model NA.PMS.Model.PaymentViewModel
+@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+
+@{
+    ViewBag.Title = "Manage Payment Receipt";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .hyperlink{
+        color:blue;
+    }
+    .panel-group{
+        margin-bottom:0;
+    }
+    [role=button]:hover{
+        
+    }
+    .kendo-popup-window{
+        display:none;
+    }
+</style>
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1 account-content">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Payment Receipt</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                <a href="#" onclick="javascript:DisplayWindow()">Add/Update Service Type</a>   
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12  blnk-rw"></div>
+    <div class="col-md-12" style="border-left:1px solid #abc;border-right:1px solid #abc;">
+        <div class="row form-group">
+            <div class="col-md-4 pad-left">
+                @Html.Label("Payment Receipt Head")
+                @(Html.Kendo().DropDownListFor(model => model.ReceiptId)
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel(" -- Select --")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true).ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetReceiptHeadListAsDataSource", "Authority", new { area = "Member" })))
+                        .Schema(schema => schema.Data("Data").Total("Total")).PageSize(100);
+                    })
+                    .Events(e => e.Change("ChangeReceiptHead"))
+                   .HtmlAttributes(new { style = "width:90%;float:right;", @class = "input-disabled" })
+                )
+            </div>
+            <div class="col-md-2" style="text-align:center;">
+              
+            </div>
+        </div>
+    </div>
+   
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.PaymentViewModel>()
+            .Name("gridPaymentReceipt")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Hidden(true);
+                columns.Bound(c => c.ReceiptId).Title("Head Id").Width(120);
+                columns.Bound(c => c.ReceiptHeadName).Title("Receipt Head");
+                columns.Bound(c => c.IsActive).Title("Status").Width(120).ClientTemplate("<label class='hyperlink' onclick='javascript:ChangeReceiptHeadStatus(this)'>#=HeadStatus#</label>");
+                //columns.Bound(c => c.BranchStatus).Title("Status").Width(110);
+            })
+            .Sortable()
+            .Filterable()
+            .Resizable(resize => resize.Columns(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+            .ClientDetailTemplateId("template").AutoBind(true)
+            .DataSource
+            (
+                dataSource => dataSource
+                .Ajax()
+                .Model(model => model.Id(p => p.Id))
+                .ServerOperation(true)
+                 .Read(read => read.Action("GetPaymentReceiptHeadAsDataSource", "Authority", new { area = "Member" }).Data("FilterSearchParameter"))
+                //.PageSize(10)
+                .Sort(r => r.Add(s => s.ReceiptId))
+            )
+        )
+    </div>
+</div>
+
+
+<div class="col-md-12 kendo-popup-window" id="bank-window" style="background:url(/Content/Images/boxed-bg.jpg) repeat">
+    @{Html.RenderPartial("_PartialReceiptHead");}
+</div>
+
+<script id="template" type="text/kendo-tmpl">
+    @(Html.Kendo().Grid<NA.PMS.Model.PaymentViewModel>()
+            .Name("grid_#=Id#") // template expression, to be evaluated in the master context
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Hidden(true);
+                columns.Bound(o => o.ReceiptCode).Title("Head Id").Width(100);
+                columns.Bound(o => o.ReceiptSubHeadId).Title("Sub Head Id").Width(100);              
+                columns.Bound(o => o.ReceiptSubHeadName);
+                columns.Bound(o => o.SubHeadStatus).Width(120).Title("Status");
+                columns.Bound(o => o.SubHeadStatus).Width(120).Title("Action").ClientTemplate("<label class='hyperlink' onclick='javascript:ChangeReceiptSubHeadStatus(this)'>action</label>");               
+            })
+            .DataSource(dataSource => dataSource
+                .Ajax()
+                .PageSize(10)
+                .Read(read => read.Action("GetPaymentReceiptSubHeadAsDataSource", "Authority", new { area = "Member", ReceiptId = "#=Id#" }))
+            )
+            .ToClientTemplate()
+    )
+</script>
+<script>
+    function dataBound() {
+        this.expandRow(this.tbody.find("tr.k-master-row").first());
+    }
+</script>
+
+
+<script>
+    $(document).ready(function () {
+        $('.kendo-popup-window').kendoWindow({
+            modal: true,
+            title: "Add/Update Receipt Head/SubHead",
+            actions: ["Pin", "Minimize", "Maximize", "Close"],
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "30%"
+            },
+            width: "70%",// height: "35%"
+        });
+    });
+    function DisplayWindow() {
+        $('.kendo-popup-window').data("kendoWindow").open();
+        $('.kendo-popup-window').data("kendoWindow").center();
+    }
+
+    function FilterReceiptId() {
+        return { receiptId: $('#ReceiptId').val() };
+    }
+    function ChangeReceiptHead() {
+        $('#gridPaymentReceipt').data("kendoGrid").dataSource.read();
+    }
+    function FilterSearchParameter() {
+        return { ReceiptId: $('#ReceiptId').val() }
+    }
+
+    function ChangeReceiptHeadStatus(row) {
+        var flag = confirm("Are You sure to change status?");
+        if (flag) {
+            var tr = $(row).parent().parent();
+            var id = $(tr).children("td:eq(1)").text();
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ ReceiptId: id, ActionType: "Head" }),
+                url: '/Member/Authority/ActivatePaymentReceiptStatus',
+                success: function (result) {
+                    if (result == '@ReturnType.Updated') {
+                        alertify.success("Status updated successfully");
+                    }
+                    $("#gridPaymentReceipt").data("kendoGrid").dataSource.read();
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again later");
+                }
+            });
+        }
+    }
+
+
+    function ChangeReceiptSubHeadStatus(row) {
+        var flag = confirm("Are You sure to change status?");
+        if (flag) {
+            var tr = $(row).parent().parent();
+            var id = $(tr).children("td:eq(0)").text();
+            var id2 = $(tr).children("td:eq(1)").text();
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ ReceiptSubHeadId: id, ActionType: "SubHead" }),
+                url: '/Member/Authority/ActivatePaymentReceiptStatus',
+                success: function (result) {
+                    if (result == '@ReturnType.Updated') {
+                        alertify.success("Status updated successfully");
+                    }
+                    $("#grid_"+id2).data("kendoGrid").dataSource.read();
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again later");
+                }
+            });
+        }
+    }
+
+</script>
+
+
+
+
+
+
+

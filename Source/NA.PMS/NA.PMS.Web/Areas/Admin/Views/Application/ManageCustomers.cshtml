@@ -1,0 +1,464 @@
+﻿@model NA.PMS.Model.UserViewModel
+@using Kendo.Mvc.UI;
+@using System.Web.Optimization;
+@using NA.PMS.Common;
+
+@{
+    ViewBag.Title = "Manage Customers";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style type="text/css">
+    .k-window div.k-window-content {
+        overflow: hidden;
+    }
+
+    div#UserListGrid .k-grid-content {
+        min-height: 50px;
+        max-height: 600px;
+    }
+
+    .view-docs {
+        color: blue;
+        text-decoration: underline;
+    }
+
+    .view-docs:hover {
+        color: blue;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+    /*td.td-active1{
+        padding:0;
+        background-color:green;
+        color:#fff;
+    }*/
+     /*.td-active{
+        background-color:green;
+        color:#fff;
+    }*/
+      .td-action:hover{
+        cursor:pointer;
+    }
+    td .k-button{
+        width:100%;
+    }
+</style>
+
+<div class="manage-customers">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Customers</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                <a href="/Admin/Application/Index"  target="_blank">Register</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12" style="border:solid #e2e3e4; border-width:0 1px 1px">
+        <div>
+            @Html.HiddenFor(model => model.Id)
+            @Html.HiddenFor(model => model.UserName)
+        </div>
+        <div class="row">
+            <div class="col-md-3 form-group">
+                <label>Department</label>
+                @(Html.Kendo().DropDownListFor(model => model.DepartmentId)
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel(" -- Select --")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetDepartmentListAsDataSource", "Application", new { area = "Admin" })))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(100);
+                    })
+                    .Events(e => e.Change("CustomerGridEvent"))
+                   .HtmlAttributes(new { style = "width:95%;float:right;", @class = "input-disabled" })
+                )
+            </div>
+            <div class="col-md-3 form-group">
+                <label>Status</label>
+                @(Html.Kendo().DropDownListFor(model => model.IsActive)
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("IsActive")
+                    .OptionLabel(" -- Select --")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetUserStatusListAsDataSource", "Application", new { area = "Admin" })))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(100);
+                    })
+                     .Events(events => { events.Change("CustomerGridEvent"); })
+                    .HtmlAttributes(new { @class = "input-disabled", style = "width:95%;float:right;" })
+                )
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.UserViewModel>()
+            .Name("CustomerListGrid")
+            .Columns(columns =>
+            {
+                columns.Bound(p => p.Id).Visible(false);
+                columns.Bound(p => p.RoleId).Visible(false);
+                columns.Bound(p => p.UserName).Title("User Name").Width(130);
+                columns.Bound(p => p.Department).Title("Department").Width(130);
+                columns.Bound(p => p.FullName).Title("Customer").HtmlAttributes(new { @class = "longTextPopup" });
+                columns.Bound(p => p.PropertyId).Width(140).Title("Property No").ClientTemplate("# {#<a href='/Property/PropertyDetail/#=PropertyId#'>#=PropertyNo#</a>#}#").HtmlAttributes(new { @class = "longTextPopup" });
+                columns.Bound(p => p.MobileNo).Width(120).Title("Mobile No");               
+                columns.Bound(p => p.Email).Width(160).Title("Email");
+                columns.Bound(p => p.CreatedOn).Width(120).Title("Date").Format("{0:dd-MMM-yyyy}");
+                columns.Bound(p => p.Status).Width(100).Title("Status").ClientTemplate("#if(IsRejected == true) {#<label class=='rej'>Rejected</label> #} else if(Status == true) {# <label class='act'>Active</label> #} else{#<label class='inact'>InActive</label> #}#").HtmlAttributes(new { @class="td-active1"});
+            })
+            .Filterable().Resizable(resize => resize.Columns(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(new[] { 10, 20, 50, 100 }).Info(true).PreviousNext(true).Input(true).Numeric(true).ButtonCount(10))
+            .ClientDetailTemplateId("template")
+            .AutoBind(true)
+            .DataSource(dataSource => dataSource
+                .Ajax()
+                .ServerOperation(true) // paging, sorting, filtering and grouping will be applied client-side
+                .Read(read => read.Action("GetPropertyCustomersList", "Application", new { area = "Admin" }).Data("FilterSearchParameter"))
+                .Model(model =>model.Id(x=>x.Id))
+                .Sort(s=>s.Add(o=>o.Id).Descending())
+                //.Events(events => events.Error("error_handler"))
+            )
+        )
+    </div>
+
+</div>
+
+<div class="col-md-12 popup-window" id="document-window">
+    <div style="width:100%">
+        <img alt="Document" id="document-link" style="max-width:100%" />
+    </div>
+</div>
+
+
+<div class="col-md-12" id="comment-box" style="min-height:200px;background:url(/Content/Images/boxed-bg.jpg) repeat;">
+    <div class="row">
+        <div class="col-sm-12 form-group" style="margin-top:12px;">
+            <label>Reason for Rejection</label>
+            <textarea class="k-textbox" id="txtRemarks" maxlength="200" onkeypress=" return IsAlpha(event);" style="width:100%; height:70px;"></textarea>           
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 form-group">
+            <input type="button" class="k-button" id="btnSubmit" value="Submit" style="width:100%;background-color:blue; color:#fff;"/>
+        </div>
+    </div>
+</div>
+
+<script id="template" type="text/kendo-tmpl">
+    @(Html.Kendo().Grid<NA.PMS.Model.UserViewModel>()
+            .Name("grid_#=Id#") // template expression, to be evaluated in the master context
+            .Columns(columns =>
+            {
+                columns.Bound(p => p.UserName).Hidden(true);
+                columns.Bound(p => p.CustomerIdFileName).Hidden(true);
+                columns.Bound(p => p.AuthorityLetter).Hidden(true);
+                columns.Bound(p => p.IsActive).Title("Status").ClientTemplate("<input type='button' class='k-button' value='#if(IsActive == true){# Active #}else{# InActive #}#' onclick='javascript:ToggleActivation(this)'>").HtmlAttributes(new { @class = "td-active td-action" });
+                columns.Bound(p => p.IsLocked).Title("Locked").ClientTemplate("<input type='button'  class='k-button' value='#if(IsLocked == true){# Unlock #} else{# Lock #}#' onclick='javascript:LockUnLockCustomer(this);'>");
+                //columns.Bound(p => p.IsRejected).Title("Activate").ClientTemplate("#if(IsRejected == true){#<input type='button' value='Approve' onclick='javascript:ApprovalAction(this);' class='k-button'>#}else {#<input type='button' value='Reject' onclick='javascript:ApprovalAction(this);' class='k-button'>#}#");
+                columns.Bound(p => p.Pasword).Title("Reset Password").ClientTemplate("<input type='button' value='Reset' onclick='javascript:ResetPassword(this);' class='k-button'>");
+                columns.Bound(p => p.Remarks).Title("Remarks").ClientTemplate("<input type='button' value='Reject' onclick='javascript:OpenRemarksPopUp(this);' class='k-button'>").HtmlAttributes(new { @class = "td-link" });
+                columns.Bound(p => p.CustomerIdFileName).Title("Id Document").ClientTemplate("#if(IsIdFileUploaded == true){# <a onclick='javascript:OpenCustomerFile(this);' class='view-docs'>View</a> #}else{# <label>NA</label> #}#");
+                columns.Bound(p => p.AuthorityLetter).Title("Letter Document").ClientTemplate("#if(IsPropertyFileUploaded == true){#<a onclick='javascript:OpenLetterFile(this);' class='view-docs'>View</a>#}else{# <label>NA</label> #}#");
+                columns.Bound(p => p.IsApproved).Width(120).Title("Action").ClientTemplate("#if(IsApproved==true){# <label>Approved</label> #}else{#<input type='button' class='k-button' onclick='javascript:ApproveCustomer(this)' value='Approve'/>#}#").HtmlAttributes(new { @class = "td-btn-approve" });
+                //columns.Bound(o => o.RequestDate).Format("{0:dd/MM/yyyy}").Width(120);
+            })
+            .DataSource(dataSource => dataSource
+                .Ajax().Read(read => read.Action("GetPropertyCustomersListById", "Application", new { username = "#=UserName#" }))
+            )
+            .ToClientTemplate()
+    )
+</script>
+<script>
+    function dataBound() {
+        this.expandRow(this.tbody.find("tr.k-master-row").first());
+    }
+</script>
+
+
+<script type="text/javascript">
+    $(window).load(function () {
+        
+    });
+
+    $(document).ready(function () {
+       
+        $('.popup-window').kendoWindow({
+            modal: true,
+            title: "Uploaded Document",
+            actions: [ "Pin", "Minimize", "Maximize", "Close"],
+            visible: false,
+            width: "60%"
+        });
+
+        $('#comment-box').kendoWindow({
+            modal: true,
+            title: "Reason for Rejection",
+            actions: ["Pin", "Minimize", "Maximize", "Close"],
+            visible: false,
+            width: "40%"
+        });
+
+        $('#btnSubmit').click(function () {
+            SaveRemarks();
+        });
+    });
+
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsAlphaNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+    var specialKeys1 = new Array();
+    specialKeys1.push(8); //Backspace
+    function IsAlpha(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || (keyCode >= 65 && keyCode <= 90) || (keyCode >= 97 && keyCode <= 122) || (keyCode == 32) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+
+    function OpenCustomerFile(row) {
+        var tr = $(row).parent().parent();
+        var link = $(tr).children("td:eq(1)").text();
+        alert(link);
+        $("#document-link").attr("src", link);
+        $(".popup-window").data("kendoWindow").center();
+        $(".popup-window").data("kendoWindow").open();
+    }
+
+    function OpenLetterFile(row) {
+        var tr = $(row).parent().parent();
+        var link = $(tr).children("td:eq(2)").text();
+        alert(link);
+        $("#document-link").attr("src", link);
+        $(".popup-window").data("kendoWindow").center();
+        $(".popup-window").data("kendoWindow").open();
+    }
+
+    //function error_handler(e) {
+    //    if (e.errors) {
+    //        var message = "Errors:\n";
+    //        $.each(e.errors, function (key, value) {
+    //            if ('errors' in value) {
+    //                $.each(value.errors, function () {
+    //                    message += this + "\n";
+    //                });
+    //            }
+    //        });
+    //        alert(message);
+    //    }
+    //}
+</script>
+
+<script type="text/javascript">
+
+    function FilterSearchParameter() {
+        return {
+            DepartmentId: $('#DepartmentId').val(),
+            IsActive: $('#IsActive').val()
+        }       
+    }
+
+    function CustomerGridEvent() {
+        $("#CustomerListGrid").data("kendoGrid").dataSource.read();
+    }
+
+    function OpenRemarksPopUp(row) {
+        var flag = confirm('Are you sure you want to update remarks?');
+        if (flag == true) {
+            var tr = $(row).parent().parent();
+            var username = $(tr).children("td:eq(0)").text();
+            $('#UserName').val(username);
+            $("#comment-box").data("kendoWindow").center();
+            $("#comment-box").data("kendoWindow").open();
+            //return false;
+        }
+    }
+
+    function ToggleActivation(row) {
+        var status = confirm('Are you sure you want to change status of user?');
+        if (status == true) {
+            var tr = $(row).parent().parent();
+            var username = $(tr).children("td:eq(0)").text();
+            //var mobileNo = $(tr).children("td:eq(1)").text();
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ UserName: username, ActionType: "Active" }),
+                url: '/Admin/Application/UpdateCustomerStatus',
+                success: function (result) {
+                    if (result == '@ReturnType.Updated') {
+                        alertify.success("User updated successfully.");
+                    }
+
+                    $("#CustomerListGrid").data("kendoGrid").dataSource.read();
+                    //$("#UserListGrid").data("kendoGrid").dataSource.read();
+                },
+                error: function (obj) {
+                }
+            });
+        }
+    }
+
+    function ApproveCustomer(row) {
+        var status = confirm('Are you sure you want to approve allottee?');
+        if (status == true) {
+            var tr = $(row).parent().parent();
+            var username = $(tr).children("td:eq(0)").text();
+            //var mobileNo = $(tr).children("td:eq(1)").text();
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ UserName: username, ActionType: "Approval" }),
+                url: '/Admin/Application/UpdateCustomerStatus',
+                success: function (result) {
+                    if (result == '@ReturnType.Updated') {
+                        alertify.success("User updated successfully.");
+                    }
+
+                    $("#CustomerListGrid").data("kendoGrid").dataSource.read();
+                    //$("#UserListGrid").data("kendoGrid").dataSource.read();
+                },
+                error: function (obj) {
+                }
+            });
+        }
+    }
+
+    function SaveRemarks() {
+        var remarks = $('#txtRemarks').val();
+        var username = $('#UserName').val();
+        var userid = $('#UserId').val();
+        if (remarks.trim() != '' && username.trim() != "") {
+            //wnd.center().close();
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ ActionType: "Remarks", Remarks: remarks, UserName: username, UserId: userid }),
+                url: '/Admin/Application/UpdateCustomerStatus',
+                success: function (result) {
+                    if (result == '@ReturnType.Rejected') {
+                        alertify.success("User Rejected successfully.");
+                    }
+                    else alertify.success("User updated successfully");
+                    $("#CustomerListGrid").data("kendoGrid").dataSource.read();
+                    //$("#UserListGrid").data("kendoGrid").dataSource.read();
+                },
+                error: function (obj) {
+                }
+            });
+        }
+        else {
+            alert("Blank space and special characters are not allowed")
+        }
+    }
+
+    function ApprovalAction(row) {
+        var tr = $(row).parent().parent();
+        var username = $(tr).children("td:eq(0)").text();
+        var statusText = $(tr).children("td:eq(5)").children("input:button").val();
+        $('#UserName').val(username);
+        var flag = confirm('Are you sure you want to ' + statusText.trim() + ' user?');
+        if (flag == true && statusText.trim() == "Reject") {
+            $("#comment-box").data("kendoWindow").center();
+            $("#comment-box").data("kendoWindow").open();
+        }
+        else {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ UserName: username, ActionType: "Approval" }),
+                url: '/Admin/Application/UpdateCustomerStatus',
+                success: function (result) {
+                    if (result == '@ReturnType.Updated') {
+                        alertify.success("User updated successfully.");
+                    }
+
+                    $("#CustomerListGrid").data("kendoGrid").dataSource.read();
+                    //$("#UserListGrid").data("kendoGrid").dataSource.read();
+                },
+                error: function (obj) {
+                }
+            });
+        }
+    }
+
+    function ResetPassword(row) {
+        var flag = confirm('Are you sure you want to Reset User Password?');
+        if (flag == true) {
+            var tr = $(row).parent().parent();
+            var username = $(tr).children("td:eq(0)").text();
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ UserName: username, ActionType: "Password" }),
+                url: '/Admin/Application/UpdateCustomerStatus',
+                success: function (result) {
+                    if (result == '@ReturnType.Updated') {
+                        alertify.success("User password reset successfully.");
+                    }
+                    else alertify.error("Provider failed to update");
+                    $("#CustomerListGrid").data("kendoGrid").dataSource.read();
+                    //$("#UserListGrid").data("kendoGrid").dataSource.read();
+                },
+                error: function (obj) {
+                }
+            });
+        }
+    }
+
+
+    function LockUnLockCustomer(row) {
+        var tr = $(row).parent().parent();
+        var username = $(tr).children("td:eq(0)").text();      
+        var statusText = $(tr).children("td:eq(4)").children("input:button").val();
+        var flag = confirm('Are you sure you want to ' + statusText.trim() + ' Customer?');
+        if (flag == true) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ UserName: username, ActionType: "Locked" }),
+                url: '/Admin/Application/UpdateCustomerStatus',
+                success: function (result) {
+                    if (result == '@ReturnType.Locked') {
+                        alertify.success("User Locked successfully.");
+                    }
+                    else { alert("User Unlocked successfully."); }
+                    $("#CustomerListGrid").data("kendoGrid").dataSource.read();
+                },
+                error: function (obj) {
+                }
+            });
+        }
+    }
+
+    //$(document).ready(function () {
+    //    setCurrentTab('admi')
+
+    //});
+</script>
+

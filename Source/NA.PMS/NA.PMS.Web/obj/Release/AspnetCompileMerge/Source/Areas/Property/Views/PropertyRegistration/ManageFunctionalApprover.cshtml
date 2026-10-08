@@ -1,0 +1,54 @@
+﻿@using Kendo.Mvc.UI
+@{
+    ViewBag.Title = "Manage Functional";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="ManageFunctional">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Functional</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+               
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.FunctionalModel>()
+                .Name("gridFunctionals")
+               .Columns(columns =>
+                      {
+                          columns.Bound(c => c.RequestNo).Title("Request No").Width(130).ClientTemplate("<a href='" + "/Property/PropertyRegistration/ViewFunctionalRequestApprover/#= RequestNo #'>#=RequestNo#</a>");
+                          columns.Bound(c => c.RId).Title("Registration Id").Width(150);
+                          columns.Bound(c => c.SectorName).Title("Sector").Width(100);
+                          columns.Bound(c => c.BlockName).Title("Block").Width(100);
+                          columns.Bound(c => c.PropertyNo).Title("Property No").Width(150);
+                          //columns.Bound(c => c.PropertyNumber).Title("Property No.");
+                          columns.Bound(c => c.CreatedDate).Title("Request Date").Format("{0:dd-MM-yyyy}");
+                          columns.Bound(c => c.ApproveDate).Title("Approved Date").Format("{0:dd-MM-yyyy}");
+                          columns.Bound(c => c.Status).Title("Status").Width(150);
+                      })
+        .Sortable()
+        .Filterable()
+                .Resizable(resize => resize.Columns(true))
+        .Pageable(pageable => pageable
+                                               .Enabled(true)
+                                               .Refresh(true)
+                                               .PageSizes(true)
+                                            )
+                                            .Groupable()
+        .DataSource(dataSource => dataSource
+        .Ajax().Model(model => model.Id(c => c.RId))
+                .ServerOperation(true).Sort(sort => sort.Add("RequestNo").Descending())
+                .Read(read => read.Action("GetFunctionalDataByApproverId", "PropertyRegistration")).PageSize(20)
+        )
+        )
+    </div>
+
+</div>
+
+
+

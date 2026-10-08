@@ -1,0 +1,94 @@
+﻿@model List<NA.PMS.Model.DashboardPropertyVM>
+
+@{
+    ViewBag.Title = "Dashboard";
+}
+
+<style type="text/css">
+    .contentWrapper {
+        padding-top: 87px !important;
+    }
+</style>
+
+<div style="margin-top:30px;">
+    <div id="PropertyListHeading">
+        <div class="row">
+            <div class="col-md-12 col-sm-12 col-xs-12 dsh-btn" style="padding-right:5px;">
+                <div class="row dsh-btn-rw" style="margin-top:-2%">
+                    @{
+                        foreach (var item in Model)
+                        {
+                            <div class="col-md-4 col-sm-4 col-xs-12 home-btns-spce" style="width:20%;height:30%;">
+                                <div class="dashbrd-btn" style="padding-top:15px;">
+                                    <h3> @item.DepartmentName</h3>
+                                    <div class="row">
+                                        <div class="col-md-6"> <h5>Allotted Property</h5><a href="@Url.Action("ForAllotmentMaster","Home",new { departmentId=item.DepartmentId })">@item.AllottedProperty</a></div>
+                                        <div class="col-md-6"> <h5>Full Paid</h5> <a>@item.FullPaid</a></div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+        <br />
+        <div class="row">
+            <div class="col-md-6">
+                <div id="piechart_AllotedType"></div>
+            </div>
+            <div class="col-md-6">
+                <div id="barchart_AllotedType"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+    google.charts.load('current', { 'packages': ['corechart'] });
+    google.charts.setOnLoadCallback(drawPieChart);
+
+    function drawPieChart() {
+        var chart_pieChart = [];
+        var propList_data = @Html.Raw(Json.Encode(Model));
+        chart_pieChart.push(['Department', 'Alloted Property']);
+
+        for (var i = 0; i < propList_data.length; i++) {
+            chart_pieChart.push([propList_data[i].DepartmentName, propList_data[i].AllottedProperty]); }
+
+        var data = google.visualization.arrayToDataTable(chart_pieChart);
+
+        var options = {
+            title: 'Alloted Property'
+        };
+        var chart = new google.visualization.PieChart(document.getElementById('piechart_AllotedType'));
+        chart.draw(data, options);
+    }
+</script>
+<script type="text/javascript">
+    google.charts.load('current', { 'packages': ['bar'] });
+    google.charts.setOnLoadCallback(drawBarChart);
+
+    function drawBarChart() {
+
+        var chart_barType = [];
+        var propList_bar = @Html.Raw(Json.Encode(Model));
+        chart_barType.push(['Department', 'Alloted Property','Full Paid Property']);
+
+        for (var i = 0; i < propList_bar.length; i++) {
+            chart_barType.push([propList_bar[i].DepartmentName, propList_bar[i].AllottedProperty, propList_bar[i].FullPaid]); }
+
+        var data = google.visualization.arrayToDataTable(chart_barType);
+
+        var options = {
+            legend: { position: 'bottom' },
+            chart: {
+                title: 'Alloted vs Full paid property'
+            }
+        };
+
+        var chart = new google.charts.Bar(document.getElementById('barchart_AllotedType'));
+        chart.draw(data, google.charts.Bar.convertOptions(options));
+    }
+</script>

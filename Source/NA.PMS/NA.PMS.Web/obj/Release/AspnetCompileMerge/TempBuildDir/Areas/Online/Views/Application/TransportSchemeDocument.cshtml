@@ -1,0 +1,456 @@
+﻿@model NA.PMS.Model.OnlineFormViewModel
+@using Kendo.Mvc.UI
+@using NA.PMS.Common
+
+@{
+    ViewBag.Title = "Transport Scheme Document";
+    if (Session["WBasicDetailsNIC"] != null || Model.AppType == Constants.AppType)
+    {
+        Layout = "~/Views/Shared/_LayoutNIC.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_LayoutOnline.cshtml";
+    }
+}
+<style>
+    .hyperlink {
+        color: #547ae1;
+    }
+
+        .hyperlink:hover {
+            cursor: pointer;
+            color: #547ae1;
+        }
+
+    #divCompanyInfo {
+        display: none;
+    }
+
+    #second-form {
+        display: none;
+    }
+
+    .k-button.k-upload-button {
+        margin: 0;
+    }
+
+    .k-upload-files {
+        margin: 0;
+    }
+
+    #loader {
+        display: none;
+    }
+</style>
+
+@using (Html.BeginForm("UploadDocument", "Application", FormMethod.Post, new { enctype = "multipart/form-data", id = "applicationform" }))
+{
+    <div class="upload-document" id="UploadDocument">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Upload Document</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory"><h1 class="gridTitle">Form No :- @Model.ApplicationFormId</h1></div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce" id="first-form">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <h2 class="blck-heading" style="margin-bottom:6px;">Upload Document/PDF</h2>
+                <div class="form-bx">
+                    <div>
+                        @Html.HiddenFor(model => model.Id)
+                        @Html.HiddenFor(model => model.ApplicationFormId)
+                        @Html.HiddenFor(model => model.EncryptedFormId)
+                        @Html.HiddenFor(model => model.SchemeId)
+                        @Html.HiddenFor(model => model.DepartmentId)
+                        @Html.HiddenFor(model => model.ApplicantType)
+                        @Html.HiddenFor(model => model.StrDocList)
+                        @Html.HiddenFor(model => model.DocList)
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-4 col-sm-6 col-xs-12 form-group">
+                                    @Html.Label("Scheme Name", htmlAttributes: new { @class = "required" })
+                                </div>
+                                <div class="col-md-8 col-sm-6 col-xs-12 form-group">
+                                    @Html.TextBoxFor(model => model.SchemeName, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 col-sm-6 col-xs-12 form-group">@Html.Label("Department", htmlAttributes: new { @class = "required" })</div>
+                                <div class="col-md-8 col-sm-6 col-xs-12 form-group">
+                                    @Html.TextBoxFor(model => model.Department, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 col-sm-6 col-xs-12 form-group">@Html.Label("Applicant", htmlAttributes: new { @class = "required" })</div>
+                                <div class="col-md-8 col-sm-6 col-xs-12 form-group">
+                                    @Html.TextBoxFor(model => model.Applicant, htmlAttributes: new { @class = "form-control", placeholder = "", @readonly = "readonly" })
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt-lt4">
+                                    @Html.Label("Area Range", htmlAttributes: new { @class = "required" })
+                                </div>
+                                <div class="col-md-8 col-sm-3 col-xs-12 form-group col-prnt-lt4">
+                                    @Html.TextBoxFor(model => model.AreaRange, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6" style="">
+                            <div class="row">
+                                <div class="col-md-4 col-sm-6 col-xs-12">
+
+                                </div>
+                                <div class="col-md-8 col-sm-6 col-xs-12 form-group">
+                                    <div class="row">
+                                        <div class="col-md-12 text-right" style="margin-bottom:5px;">
+                                            <img id="userphoto" src="@Model.UserImage" alt="your image" height="150px" width="140px" name="userImage2" />
+                                        </div>
+                                        <div class="col-md-12 text-right">
+                                            <img id="signature" src="@Model.SignImage" alt="your sign" height="40px" width="140px" name="usersign" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="col-md-12" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                    <label class="" style="color:red"><b>Please refer scheme brochure to upload your documents.</b></label><br />
+                    <label class="" style="color:red"><b>Upload pdf document only. Minimum size(10kb), Maximum size(5Mb)</b></label>
+                </div>
+                <div class="col-md-12 k-grid-content">
+                    @(Html.Kendo().Grid<NA.PMS.Model.OnlineDocumentViewModel>()
+                        .Name("gridDocs")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(c => c.Sno).Title("Sl .No.").Width(100);
+                            columns.Bound(c => c.Id).Hidden(true);
+                            columns.Bound(c => c.DocumentName).Title("Description").Encoded(false);
+                            columns.Bound(c => c.DocumentId).Title("file").ClientTemplate("# if (UploadedDocument != null) {#<a onclick='javascript:OpenDocument(this);' class='hyperlink'>View Docs</a>#}else {#<input type='file' id='f_#= DocumentId #' class='single' name='files' disabled='disabled' onchange='CheckFileSize(this)' />#}#").Width(200);
+                            columns.Bound(c => c.PathName).Title("File").Width(100).ClientTemplate("# if (UploadedDocument != null) {#<span onclick='RemoveDocument(this)' class='hyperlink'>Remove</span>#}else {#<input  type='checkbox' #= IsSelected ? checked='checked':'' # class='inpchk' ></input>#} #").Filterable(false);
+                            columns.Bound(c => c.PathName).Hidden(true);
+                            columns.Bound(c => c.ParentDocumentType).Title(" ").Hidden(true);
+                        })
+                        .Resizable(resize => resize.Columns(true))
+                        .AutoBind(true)
+                        .DataSource(dataSource => dataSource
+                            .Ajax()
+                            .Model(model => model.Id(c => c.Id))
+                            .ServerOperation(true)
+                            .Group(groups => groups.Add(p => p.ParentDocumentType))
+                            .Read(read => read.Action("GetUploadedDocumentsForOnlineForm", "Application").Data("FilterFormId"))
+                        )
+                    )
+                </div>
+            </div>
+        </div>
+        <div class="box-button text-center">
+            <input type="button" id="btnCancel" value="Back" class="btn btn-default" onclick="window.history.back()" />
+            @{
+                if (Model.IsApplicationFeePaid != true)
+                {
+                    if (Model.IsDocumentUploaded == true)
+                    {
+                        <input type="button" value="Skip" id="btnPayment" class="btn btn-add" />
+                    }
+                    <input type="button" value="Upload" id="btnUpdate" class="btn btn-add" />
+                }
+            }
+        </div>
+    </div>
+}
+
+<div id="divDocumentView" style="overflow:hidden">
+    <div class="row">
+        <div class="col-md-12 no-margin no-padding" id="divPageView" style="overflow:hidden">
+            <iframe id="ifrmViewPdf"></iframe>
+        </div>
+    </div>
+</div>
+
+<div id="progressbar" style="width:100%; text-align:center;">
+    <div id="loader" style="position: fixed;top:210px; left:0;  width:100%; height: 100%;  ">
+        <img src="~/Content/Images/ajax_loader_red.gif" style="width:200px;height:200px;" />
+    </div>
+</div>
+
+<script type="text/javascript">
+     @{
+    if (TempData["Document"] != null || TempData["Document"] != "")
+         {
+             if (TempData["Document"] == "success")
+             {
+                 @:alertify.success("Document uploaded successfully");
+                                         }
+             if (TempData["Document"] == "failure")
+             {
+                 @:alertify.error("Unable to upload your document");
+                                         }
+         }
+     }
+
+    $(document).ready(function () {
+        $('form').submit(function () {
+            $('#loader').show();
+        })
+
+        $('#userid').click(function () {
+            $("#imguser").click();
+        });
+
+        $('#signatureid').click(function () {
+            $('#imgsign').click();
+        });
+
+        $('#signature').click(function () {
+            $('#imgsign').click();
+        });
+
+        $('#imgsign').change(function () {
+            displaySignatueImage(this);
+        });
+
+        $('.helpsupport').click(function () {
+            window.location.href = '@Url.Action("HelpOnline", "Application", new {area="Online", target="_blank"})';
+        });
+
+        $("#btnUpdate").click(function () {
+            ValidateFormFields();
+        });
+
+        $("#btnPayment").click(function () {
+            var formId = $("#Id").val();
+            var encryptedId = $('#EncryptedFormId').val();
+            window.location.href = '@Url.Action("PreviewForm", "Application", new { area = "Online" })' + "/" + encryptedId; //formId;
+            //ValidatePayment(formId);
+        });
+
+        $('#divDocumentView').kendoWindow({
+            modal: true,
+            title: "Document",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "15%"
+            },
+            width: "70%", height: "80%"
+        });
+    });
+
+    function displayUserImage(input) {
+        if (CheckUserImage(input)) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                $('#userid').css("display", "none");
+                reader.onload = function (e) {
+                    $('#userphoto').attr('src', e.target.result);
+                }
+                $('#userphoto').show();
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        else {
+            $("#imguser").val('');
+        }
+    }
+
+    function displaySignatueImage(input) {
+        if (CheckUserImage(input)) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                $('#signatureid').css("display", "none");
+                reader.onload = function (e) {
+                    $('#signature').attr('src', e.target.result);
+                }
+                $('#signature').show();
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        else {
+            $('#imgsign').val('');
+        }
+    }
+
+    function CheckUserImage(input) {
+        var file = input.files[0].name;
+        var count = file.lastIndexOf('.') + 1;
+        var ext = file.substr(count);
+        if (ext == "jpg") {
+            return true;
+        }
+        else {
+            alertify.error("Only jpg file allowed.");
+            return false;
+        }
+    }
+
+    var checkedIDs = [];
+    $(function () {
+        $('#gridDocs').on('change', '.inpchk', function () {
+            var checked = $(this).is(':checked');
+            var grid = $('#gridDocs').data().kendoGrid;
+            var dataItem = grid.dataItem($(this).closest('tr'));
+            if (checked == true) {
+                $("#f_" + dataItem.DocumentId).attr("disabled", false);
+                checkedIDs.push(dataItem.DocumentId);
+            }
+            else {
+                $("#f_" + dataItem.DocumentId).attr("disabled", true);
+                $("#f_" + dataItem.DocumentId).val('');
+                var i = checkedIDs.indexOf(dataItem.DocumentId);
+                checkedIDs.splice(i, 1);
+            }
+            $('#DocList').val(checkedIDs);
+        });
+    });
+
+    function FilterFormId() {
+        return {
+            formId: $("#ApplicationFormId").val()
+        };
+    }
+
+    function FilterSchemeId() {
+        return { schemeId: $("#SchemeId").val() };
+    }
+
+    function FilterDepartmentId() {
+        return { departmentId: $("#DepartmentId").val() };
+    }
+
+
+    function OpenDocument(row) {
+        $("#divDocumentView").empty();
+        var tr = $(row).parent().parent();
+        var link = $(tr).children("td:eq(6)").text();
+        $("#divDocumentView").append($('<iframe src=' + link + ' style="width:100%; height:100%;"></iframe>'));
+        $("#divDocumentView").data("kendoWindow").center();
+        $("#divDocumentView").data("kendoWindow").open();
+    }
+
+    function RemoveDocument(row) {
+        var tr = $(row).parent().parent();
+        var link = $(tr).children("td:eq(6)").text();
+        var arr = link.split('/');
+        var filename = arr[arr.length - 1];
+        var formNumber = $('#ApplicationFormId').val();
+        $.ajax({
+            url: '/Online/Application/RemoveDocumentFromApplicationForm',
+            type: 'POST',
+            dataType: 'json',
+            data: { formNo: formNumber, filename: filename },
+            success: function (result) {
+                if (result == '@ReturnType.Success') {
+                    $('#gridDocs').data("kendoGrid").dataSource.read();
+                    alertify.success("File is deleted successfully");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+
+    function ValidatePayment(formId) {
+        if (formId.trim() != "") {
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                data: { formNo: formId },
+                url: '/Online/Application/ValidateOnlineFormPayment',
+                success: function (result) {
+                    if (result == '@ReturnType.Exist') {
+                        alertify.success("Application fee already paid.");
+                        return false;
+                    }
+                    else {
+                        @*window.location.href = '@Url.Action("OnlinePayment", "Allotment", new { area = "Property"})' + "/" + formId;*@
+                        window.location.href = '@Url.Action("OnlinePayment", "Payment", new { area = "Online"})' + "/" + formId;
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+    }
+
+    function ValidateFormFields() {
+
+        if (checkedIDs.length > 0) {
+            for (var i = 0; i < checkedIDs.length; i++) {
+                var fl = $('#f_' + checkedIDs[i]).val();
+                if (fl == "" || fl == null) {
+                    alertify.error("Please upload checked document.");
+                    return false;
+                }
+            }
+            $('#DocList').val(checkedIDs);
+            $('#StrDocList').val(checkedIDs);
+            $('#applicationform').submit();
+        }
+        else {
+            //$('#applicationform').submit();
+            alertify.error("Please upload atleast one document.");
+        }
+    }
+
+    var IsError = false;
+    function CheckFileSize(row) {
+        var filename = row.files[0].name;
+        var size = row.files[0].size/1024;
+        var extension = filename.substr(filename.lastIndexOf('.') + 1);
+        if (extension.toLowerCase() == "pdf") {
+            //if (size < 100 ) {
+            //    alertify.error("Minimum 100kb file size is allowed");
+            //    IsError = true;
+            //}
+            if (size / 1024 > 5) {
+                IsError = true;
+                alertify.error("Maximum 5Mb file size is allowed");
+            }
+            if (IsError == true) {
+                row.value = '';
+            }
+        }
+        else {
+            alertify.error("Please upload pdf documents.");
+            row.value='';
+        }
+    }
+
+    function ValidateDocumentUpload() {
+        var flag = false;
+        var formId = $("#Id").val();
+        if (formId.trim() != "") {
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                data: { formNo: formId },
+                url: '/Online/Application/IsDocumentUploaded',
+                success: function (result) {
+                    if (result == true) {
+                        flag = true;
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+        return flag;
+    }
+</script>
+
+
+

@@ -1,0 +1,108 @@
+﻿@model NA.PMS.Model.NMServicesVM
+@using Kendo.Mvc.UI
+
+@{
+    ViewBag.Title = "Add/Edit Services";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="col-md-12" style="position:static">
+        <div class="row">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Add/Edit Service </h1></div>
+            <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<label class="star">*</label>) are required.</div>
+        </div>
+    </div>
+    <div class="col-md-12 content-top-spce">
+        <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            <h2 class="blck-heading" style="margin-bottom:5px;">Service Information</h2>
+            <div class="form-bx">
+
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="required">  Nivesh Mitra Services: </label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @(Html.Kendo().DropDownListFor(model => model.Id)
+                                                    .DataTextField("ServiceCode")
+                                                    .DataValueField("Id")
+                                                    .OptionLabel("Select")
+                                                    .Filter("contains")
+                                                    .DataSource(source =>
+                                                    {
+                                                        source.Custom()
+                                                        .ServerFiltering(true)
+                                                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                                        .Transport(transport =>
+                                                        {
+                                                            transport.Read(read => read.Action("GetNiveshMitraServices", "ManageNiveshMitra"));
+                                                        }).Schema(schema =>
+                                                        {
+                                                            schema.Data("Data")
+                                                            .Total("Total");
+                                                        }).PageSize(100);
+                                                    }).HtmlAttributes(new { style = "width:100%;" })
+                        )
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="required"> Citizen Services: </label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @*@(Html.Kendo().MultiSelectFor(model => model.CitizenServiceId)
+        .DataTextField("Text")
+        .DataValueField("Id")
+        // .OptionLabel("Select")
+        .Filter("contains")
+        .DataSource(source =>
+        {
+            source.Custom()
+            .ServerFiltering(true)
+            .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+            .Transport(transport =>
+            {
+                transport.Read(read => read.Action("GetServiceListAsDataSource", "ManageNiveshMitra"));
+            }).Schema(schema =>
+            {
+                schema.Data("Data")
+                .Total("Total");
+            }).PageSize(100);
+        }).HtmlAttributes(new { style = "width:100%;" })
+         )*@
+
+                        @*@(Html.Kendo().MultiSelectFor(m => m.CitizenServiceIds)
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .DataSource(dataSource => dataSource.Read(read => read.Action("GetServiceListAsDataSource", "ManageNiveshMitra")))
+                .HtmlAttributes(new { style = "width:100%;" })
+                        )*@
+
+                        @(Html.Kendo().MultiSelectFor(m => m.CitizenServiceIds)
+                           .DataTextField("StatusCode")
+                           .DataValueField("Id")
+                           .Placeholder("-Please Select-")
+                           .AutoClose(false)
+                           .DataSource(source => source.Read(read => read.Action("GetNiveshMitraServiceStatus", "ManageNiveshMitra")))
+                           .HtmlAttributes(new { style = "width: 100%; height:100%" })
+                        )
+                    </div>
+                </div>
+                <div class="row" id="divDescription">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="">Amount:</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.TextBoxFor(model => model.Amount, htmlAttributes: new { @class = "form-control", @maxlength = "15" })
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="box-button text-center">
+            <input type="button" id="btnBack" value="Back" class="btn btn-add" />
+            <input type="button" id="btnSubmit2" value="Submit" class="btn btn-add" />
+        </div>
+    </div>
+</div>
+

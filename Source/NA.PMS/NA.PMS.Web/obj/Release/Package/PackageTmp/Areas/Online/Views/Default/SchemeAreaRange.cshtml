@@ -1,0 +1,310 @@
+﻿@model NA.PMS.OnlineScheme.OSSchemeAreaViewModel
+@using Kendo.Mvc.UI
+@using NA.PMS.Common
+
+@{
+    ViewBag.Title = "Scheme Available Area";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style type="text/css">
+
+
+</style>
+
+<div class="row row-scheme-area-range">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Area For Scheme</h1></div>
+            <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 content-top-spce">
+        <form action="/Online/Default/SavePropertyDetail" enctype="multipart/form-data" id="propertyform" method="post" novalidate="novalidate">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <h2 class="blck-heading">Property Detail</h2>
+                <div class="form-bx">
+                    <div style="text-align:center">
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        @Html.HiddenFor(model => model.AreaForUse)
+                        @Html.HiddenFor(model => model.PropertyType)
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-20 col-sm-3 col-xs-12 form-group">
+                            <label class="required">Scheme Name</label>
+                        </div>
+                        <div class="col-md-3 col-30 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(model => model.SchemeId)
+                                    .DataValueField("Id")
+                                    .DataTextField("Text")
+                                    .OptionLabel("--Select--")
+                                    .AutoBind(true).Enable(true)
+                                    .Filter("contains")
+                                    .DataSource(source =>
+                                    {
+                                        source.Custom()
+                                        .ServerFiltering(true)
+                                        .ServerPaging(true)
+                                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                        .Transport(transport => transport.Read(read => read.Action("GetSchemeListAsDataSource", "Default", new { area = "Online" }).Data("FilterSchemeType")))
+                                        .Schema(schema => schema.Data("Data").Total("Total"))
+                                        .PageSize(100);
+                                    })
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    .Events(e=>e.Change("DepartmentSchemeChangeEvent"))
+                            )
+                        </div>
+                        <div class="col-md-3 col-20 col-sm-3 col-xs-12 form-group">
+                            <label class="required">Department</label>
+                        </div>
+                        <div class="col-md-3 col-30 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(model => model.DepartmentId)
+                                    .DataValueField("Id")
+                                    .DataTextField("Text")
+                                    .OptionLabel("--Select--")
+                                    .AutoBind(true).Enable(true)
+                                    .Filter("contains")
+                                    .DataSource(source =>
+                                    {
+                                        source.Custom()
+                                        .ServerFiltering(true)
+                                        .ServerPaging(true)
+                                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                        .Transport(transport => transport.Read(read => read.Action("GetDepartmentListAsDataSource", "Default", new { area = "Online" })))
+                                        .Schema(schema => schema.Data("Data").Total("Total"))
+                                        .PageSize(100);
+                                    })
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    .Events(e => e.Change("DepartmentSchemeChangeEvent"))
+                            )
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-20 col-sm-3 col-xs-12 form-group">
+                            <label class="required">Property Type</label>
+                        </div>
+                        <div class="col-md-3 col-30 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(model => model.PropertyTypeRefId)
+                                    .DataValueField("Id")
+                                    .DataTextField("Text")
+                                    .OptionLabel("--Select--")
+                                    .AutoBind(true).Enable(true)
+                                    .Filter("contains")
+                                    .CascadeFrom("DepartmentId")
+                                    .CascadeFromField("DepartmentId")
+                                    .DataSource(source =>
+                                    {
+                                        source.Custom()
+                                        .ServerFiltering(true)
+                                        .ServerPaging(true)
+                                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                        .Transport(transport => transport.Read(read => read.Action("GetPropertyTypeListAsDataSource", "Default", new { area = "Online" })))
+                                        .Schema(schema => schema.Data("Data").Total("Total"))
+                                        .PageSize(100);
+                                    })
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    .Events(e=>e.Change("PropertyTypeChangeEvent"))
+                            )
+                        </div>
+                        <div class="col-md-3 col-20 col-sm-3 col-xs-12 form-group">
+                            <label class="required">Area Range</label>
+                        </div>
+                        <div class="col-md-3 col-30 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.AreaRange, new { @class = "form-control", @maxlength = "10" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-20 col-sm-3 col-xs-12 form-group">
+                            <label class="required">Approx Area (sqm)</label>
+                        </div>
+                        <div class="col-md-3 col-30 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().NumericTextBoxFor(m => m.ApproxArea)
+                                    .Min(0)
+                                    .Max(9999999999999999)
+                                    .Spinners(false).Step(0)
+                                    .Enable(true)
+                                    .HtmlAttributes(new { style = "width: 100%", @maxlength = "13", @class = "text-right" })
+                            )
+                        </div>
+                        <div class="col-md-3 col-20 col-sm-3 col-xs-12 form-group">
+                            <label class="required">Sector Rate</label>
+                        </div>
+                        <div class="col-md-3 col-30 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().NumericTextBoxFor(m => m.SectorRate)
+                                    .Min(0)
+                                    .Max(99999999999999)
+                                    .Spinners(false).Step(0)
+                                    .Enable(true)
+                                    .HtmlAttributes(new { style = "width: 100%", @maxlength = "14", @class = "text-right" })
+                            )
+                        </div>
+                    </div>
+
+                    <div class="row row-housing">
+                        <div class="col-md-3 col-20 col-sm-3 col-xs-12 form-group">
+                            <label class="required">Processing Fee</label>
+                        </div>
+                        <div class="col-md-3 col-30 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().NumericTextBoxFor(m => m.ProcessingFee)
+                                    .Min(0)
+                                    .Max(99999999999999)
+                                    .Spinners(false).Step(0)
+                                    .Enable(true)
+                                    .HtmlAttributes(new { style = "width: 100%", @maxlength = "14", @class = "text-right" })
+                            )
+                        </div>
+                        <div class="col-md-3 col-20 col-sm-3 col-xs-12 form-group">
+                            <label>Earnest Money</label>
+                        </div>
+                        <div class="col-md-3 col-30 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().NumericTextBoxFor(m => m.EarnestMoney)
+                                    .Min(0)
+                                    .Max(99999999999999)
+                                    .Spinners(false).Step(0)
+                                    .Enable(true)
+                                    .HtmlAttributes(new { style = "width: 100%", @maxlength = "14", @class = "text-right" })
+                            )
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-20 col-sm-3 col-xs-12 form-group">
+                            <label>Reserved Price</label>
+                        </div>
+                        <div class="col-md-3 col-30 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().NumericTextBoxFor(m => m.ReservedPrice)
+                                    .Min(0)
+                                    .Max(99999999999999)
+                                    .Spinners(false).Step(0)
+                                    .Enable(true)
+                                    .HtmlAttributes(new { style = "width: 100%", @maxlength = "14", @class = "text-right" })
+                            )
+                        </div>
+                        <div class="col-md-3 col-20 col-sm-3 col-xs-12 form-group">
+                            <label>Category</label>
+                        </div>
+                        <div class="col-md-3 col-30 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.Category, new { @class = "form-control", @maxlength = "30" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box-button text-center">
+                <input type="button" id="btn-cancel" value="Cancel" class="btn btn-default" />
+                <input type="button" id="btn-submit" value="Submit" class="btn btn-add" />
+            </div>
+        </form>
+    </div>
+
+    <div class="col-md-12 content-top-spce">
+        @(Html.Kendo().Grid<NA.PMS.OnlineScheme.OSSchemeAreaViewModel>()
+              .Name("gridAreaRange")
+              .Columns(columns =>
+              {
+                  columns.Bound(c => c.Id).Title("Id").Width(70);
+                  columns.Bound(c => c.AreaRange).Title("Area Range");
+                  columns.Bound(c => c.Department).Title("Department");
+                  columns.Bound(p => p.PropertyType).Title("Property Type");
+                  columns.Bound(p => p.SectorRate).Title("Sector Rate");
+                  columns.Bound(p => p.ProcessingFee).Title("Processing Fee");
+                  columns.Bound(p => p.EarnestMoney).Title("Earnest Money");
+                  columns.Bound(p => p.ReservedPrice).Title("Reserved Price");
+                  columns.Bound(c => c.IsActive).Title("Status").ClientTemplate("#if(IsActive==true){# Active #}else{# Not Active #}#");
+               })
+              .Sortable().Filterable()
+              .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(new[] { 10, 50, 100, 500 }).Info(true).PreviousNext(true).Input(true).Numeric(true).ButtonCount(5))
+              .Resizable(resize => resize.Columns(true))
+              .Groupable()
+              .DataSource
+              (
+                  dataSource => dataSource
+                      .Ajax()
+                      .Model(model => model.Id(p => p.Id))
+                      .ServerOperation(true).Group(g => g.Add(m => m.SchemeName))
+                      .Read(read => read.Action("GetSchemeAreaRangeListAsDataSource", "Default", new { area = "Online" }).Data("FilterSchemeDepartment"))
+                      .PageSize(10)
+              )
+        )
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        $('#btn-submit').click(function () {
+            SaveSchemeAreaRangeDetail();
+        });
+
+        $('#btn-cancel').click(function () {
+            ClearInputFields();
+        });
+    });
+
+    function FilterSchemeType() {
+        return {
+            FilterType: "Online"
+        }
+    }
+
+    function FilterSchemeDepartment() {
+        return {
+            SchemeId: $('#SchemeId').val(),
+            DepartmentId: $('#DepartmentId').val()
+        }
+    }
+
+    function PropertyTypeChangeEvent() {
+        var ptype = $('#PropertyTypeRefId').data("kendoDropDownList").text();
+        ptype = (ptype == "" || ptype == undefined) ? null : ptype;
+        $('#AreaForUse').val(ptype);
+    }
+
+    function DepartmentSchemeChangeEvent() {
+        $('#gridAreaRange').data("kendoGrid").dataSource.read();
+    }
+
+    function SaveSchemeAreaRangeDetail() {
+        
+        var formData = new FormData($('form').get(0));
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: false, // Not to set any content header
+            processData: false, // Not to process data
+            data: formData,
+            url: '/Online/Default/SaveSchemeAreaRange',
+            success: function (result) {
+                if (result != null) {
+                    if (result.ReturnTypeId == '@ReturnType.Exist') {
+                        alertify.message("Data already saved.");
+                    }
+                    if (result.ReturnTypeId == '@ReturnType.Saved') {
+                        alertify.success("Data saved successfully.");
+                    }
+                    ClearInputFields();
+                    $('#gridAreaRange').data("kendoGrid").dataSource.read();
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                alertify.error("Network error, try again later");
+            }
+        });
+    }
+
+    function ClearInputFields() {
+        $("#SchemeId").data("kendoDropDownList").value("");
+        $("#DepartmentId").data("kendoDropDownList").value("");
+        //$("#propertyTypeRefId").data("kendoDropDownList").value("");
+        
+        $("#ReservedPrice").data("kendoNumericTextBox").value('');
+        $("#EarnestMoney").data("kendoNumericTextBox").value('');
+        $("#ProcessingFee").data("kendoNumericTextBox").value('');
+        $("#SectorRate").data("kendoNumericTextBox").value('');
+        $("#ApproxArea").data("kendoNumericTextBox").value('');
+
+        $('#AreaForUse').val('');
+        $('#Category').val('');
+        $('#AreaRange').val('');
+    }
+</script>

@@ -1,0 +1,560 @@
+﻿@using Kendo.Mvc.UI
+@using NA.PMS.Common
+@using System.Linq
+
+<div id="div-graph-services">
+    <div class="row" style="padding-bottom:8px;">
+        <div class="col-md-3">
+            <label>Department</label>
+            @(Html.Kendo().DropDownList()
+                .Name("DDLServiceDepartmentId")
+                .DataTextField("Text")
+                .DataValueField("Value")
+                //.OptionLabel(" --- Select ---")
+                .BindTo(new List<SelectListItem>() {
+                    new SelectListItem() { Text = "Institutional", Value = "1" },
+                    new SelectListItem() { Text = "Industrial", Value = "4" },
+                    new SelectListItem() { Text = "Commercial", Value = "2" },
+                    new SelectListItem() { Text = "Residential", Value = "3" },
+                    new SelectListItem() { Text = "Housing", Value = "5" },
+                    new SelectListItem() { Text = "Group Housing", Value = "6" },
+                    new SelectListItem() { Text = "5 % Abadi", Value = "7" }
+                })
+                .Events(e => e.Change("ServiceChangeEvent"))
+                .HtmlAttributes(new { style = "width: 90%;" })
+            )
+        </div>
+        <div class="col-md-3">
+            <label>Start Date</label>
+            @(Html.Kendo().DatePicker().Name("ServiceStartDate")
+                    .Events(e => e.Change("ServiceChangeEvent"))
+                    .HtmlAttributes(new { style = "width:90%;" })
+            )
+        </div>
+        <div class="col-md-3">
+            <label>End Date</label>
+            @(Html.Kendo().DatePicker().Name("ServiceEndDate")
+                    .Events(e => e.Change("ServiceChangeEvent"))
+                    .HtmlAttributes(new { style = "width:90%;" })
+            )
+        </div>
+    </div>
+    <div class="row">
+       <div class="col-md-12">
+           <input type="hidden" id="hdn-department-id" />
+           <input type="hidden" id="hdn-service-id" />
+       </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 demo-section k-content wide">
+            <div id="DivServicePieChartI"></div>
+        </div>
+        <div class="col-md-6 demo-section k-content wide">
+            <div id="DivServicePieChartII"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 demo-section k-content wide">
+            <div id="DivServicePieChartIII"></div>
+        </div>
+        <div class="col-md-6 demo-section k-content wide">
+            <div id="DivServicePieChartIV"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 demo-section k-content wide">
+            @*<div id="DivServicePieChartV" style="width:100%;"></div>*@
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12" style="margin-top:20px;">
+            <div class="row rw-spce">
+                <div class="col-md-12">
+                    <h2 class=" blck-heading" style="border-left:1px solid green;border-right:1px solid green;margin-bottom:0;">Status Of Services (1st-Jan-2018 Onwards)</h2>
+                    <div class="col-md-12 k-grid-content">
+                        @(Html.Kendo().Grid<NA.PMS.Model.ServiceViewModel>()
+                    .Name("GridServiceDetailStatus")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(c => c.ServiceName).Title("Service Name").ClientFooterTemplate("Total Count:");
+                        columns.Bound(c => c.Completed).Title("Completed").Width(110).ClientFooterTemplate("#=sum#");
+                        columns.Bound(c => c.Cancelled).Title("Cancelled").Width(110).ClientFooterTemplate("#=sum#");
+                        columns.Bound(c => c.Rejected).Title("Rejected").Width(110).ClientFooterTemplate("<div>#= sum #</div>");
+                        columns.Bound(c => c.Pending).Title("Pending").Width(110).ClientFooterTemplate("<div>#= sum #</div>");
+                        //columns.Bound(c => c.InProgress).Title("In Progresss").Width(110).ClientFooterTemplate("<div>#= sum #</div>");
+                        columns.Bound(c => c.TotalRequest).Title("Total Request").Width(110).ClientFooterTemplate("<div>#= sum #</div>");
+                        //columns.Bound(c => c.PercentInProgress).Title("Progress(%)").Width(110);//.ClientFooterTemplate("<div>#= sum #</div>");
+                        //columns.Bound(c => c.DateMar).Title("Average Days").ClientFooterTemplate("<div>Avg: #= kendo.toString(average, '0.00') #</div>");//Gap Between submit date and approve date
+                    })
+                    .Resizable(resize => resize.Columns(true))
+                    //.Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                    .AutoBind(true)
+                    .DataSource
+                    (
+                        dataSource => dataSource
+                        .Ajax().ServerOperation(true)
+                        .Read(read => read.Action("GetServiceReportsAsDataSource", "Report", new { area = "Reports" }).Data("FilterParameterForServices"))
+                        .Aggregates(aggregates =>
+                        {
+                            aggregates.Add(p => p.Completed).Sum();
+                            aggregates.Add(p => p.Cancelled).Sum();
+                            aggregates.Add(p => p.Rejected).Sum();
+                            aggregates.Add(p => p.Pending).Sum();
+                            //aggregates.Add(p => p.InProgress).Sum();
+                            aggregates.Add(p => p.TotalRequest).Sum();
+                        })
+                    ))
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    $(document).ready(function () {
+        var startdate = '2018-01-01';
+        $('#ServiceStartDate').data("kendoDatePicker").value(startdate);
+        var todayDate = kendo.toString(kendo.parseDate(new Date()), 'MM/dd/yyyy');
+        $("#ServiceEndDate").data("kendoDatePicker").value(todayDate);
+        $('#DDLServiceDepartmentId').data("kendoDropDownList").value(1);
+        //GetServiceListForGraph();
+        //CreateBarGraphForServices();
+        //TotalServiceListByDepartment();
+    });
+
+  
+
+    function FilterParameterForServices() {
+        var today = new Date().toDateString();
+        return {
+            //DepartmentId : $('#DDLServiceDepartmentId').val() == "" ? 4 : $('#DDLServiceDepartmentId').val(),
+            //StartDate : $('#ServiceStartDate').val() == "" ? "2018-01-01" : $('#ServiceStartDate').val(),
+            //EndDate: $('#ServiceEndDate').val() == "" ? today : $('#ServiceEndDate').val(),
+            //RequestThrough:""
+            DepartmentId: $('#DDLServiceDepartmentId').val(),
+            StartDate: $('#ServiceStartDate').val(),
+            EndDate: $('#ServiceEndDate').val(),
+        }
+    }
+
+    function ServiceChangeEvent() {
+        $('#GridServiceDetailStatus').data("kendoGrid").dataSource.read();
+        //GetServiceListForGraph();
+        TotalServiceListByDepartment();
+        TotalInProcessServiceListByDepartment();
+        TotalCompletedServicesByServiceName();
+        TotalInProcessServicesByServiceName();
+    }
+
+    function GetServiceListForGraph() {
+        var today = new Date().toDateString();
+        var departmentId = $('#DDLServiceDepartmentId').val();
+        var startDate = $('#ServiceStartDate').val();
+        var endDate = $('#ServiceEndDate').val();
+        var reqThrough = "";
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ DepartmentId: departmentId, StartDate: startDate, EndDate: endDate, RequestThrough: reqThrough }),
+            url: '/Reports/Report/GetServiceReportsForGraph',
+            success: function (result) {
+                if (result != null) {
+                    //CreateTotalServiceRequestChart(result);
+                    //CreateCompletedServiceChart(result);
+                    //CreatePendencyServiceReportChart(result);
+                    //CreateInProgressServiceReportChart(result);
+                    //CreateBarGraphForServices(result);
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Network error, Please try again later.");
+            }
+        });
+    }
+
+    //$(document).bind("kendo:skinChange", GetServiceListForGraph());
+    //$(document).bind("kendo:skinChange", CreateBarGraphForServices());
+
+    function TotalServiceListByDepartment() {
+        var today = new Date().toDateString();
+        var departmentId = $('#DDLServiceDepartmentId').val();
+        var startDate = $('#ServiceStartDate').val();
+        var endDate = $('#ServiceEndDate').val();
+        var reqThrough = "";
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ DepartmentId: departmentId, StartDate: startDate, EndDate: endDate, RequestThrough: reqThrough, FilterType:"TotalServicesByDepartment" }),
+            url: '/Reports/Report/GetServiceReportsForGraphII',
+            success: function (result) {
+                if (result != null) {
+                    CreateTotalServiceRequestChart(result);
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Network error, Please try again later.");
+            }
+        });
+    }
+
+    function CreateTotalServiceRequestChart(GraphData) {
+        //var date = $('#StatusDate').val();
+        $("#DivServicePieChartI").kendoChart({
+            title: {
+                text: "Total Service Request"
+            },
+            legend: {
+                //position: "bottom"
+                visible: false
+            },
+            dataSource: {
+                data: GraphData
+            },
+            seriesDefaults: {
+                labels: {
+                    visible: true,
+                    background: "transparent",
+                    template: "#= category #: \n #= value#"
+                }
+            },
+            //series: [{
+            //    type: "pie",
+            //    field: "TotalRequest",
+            //    categoryField: "ServiceName"
+            //}],
+            series: [{
+                type: "pie",
+                field: "Value",
+                categoryField: "Label",
+                overlay: {
+                    //gradient: "none"
+                }
+            }],
+            //chartArea: {
+            //    height:700
+            //},
+            seriesColors: ["#03a9f4", "#ff9800", "#fad84a", "#4caf50", "#FF0000", "#FF00FF", "#000080"],
+            tooltip: {
+                visible: true,
+                template: "#= category #: \n #= value#",
+                //contentLoad: function () {
+                //    alert("content is loaded");
+                //}
+            },
+            seriesClick: TotalServicesPieChartSeriesClickEvent,
+            plotAreaClick: TotalServicesPieChartPlotAreaClickEvent,
+            //seriesHover: function () {
+            //    $("#DivServicePieChartI").css("cursor", "pointer");
+            //}
+        });
+    }
+
+    function TotalServicesPieChartSeriesClickEvent(e) {
+        var dept = e.category;
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ Department: dept, ActionType: dept, FilterType: "ServicesByDepartment" }),
+            url: "/Reports/Report/GetServiceReportsForGraphII",
+            success: function (result) {
+                if (result != null) {
+                    CreateTotalServiceRequestChart(result)
+                }
+                else {
+                    alertify.error("no data found.");
+                }
+
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+            }
+        });
+    }
+
+    function TotalServicesPieChartPlotAreaClickEvent(e) {
+        TotalServiceListByDepartment();
+    }
+
+
+
+    function TotalInProcessServiceListByDepartment() {
+        //_StatusDate = $('#StatusDate').val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ StartDate: $('#ServiceStartDate').val(), EndDate: $('#ServiceEndDate').val(), FilterType: "PendingServices" }),
+            url: '/Reports/Report/GetServiceReportsForGraphII',
+            success: function (result) {
+                if (result != null) {
+                    CreatePendencyServiceReportChart(result)
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Network error, Please try again later.");
+            }
+        });
+    }
+
+    function CreatePendencyServiceReportChart(GraphData) {
+        //var date = $('#StatusDate').val();
+        $("#DivServicePieChartII").kendoChart({
+            title: {
+                text: "In Process Service Request"
+            },
+            legend: {
+                //position: "bottom"
+                visible: false
+            },
+            dataSource: {
+                data: GraphData
+            },
+            seriesDefaults: {
+                labels: {
+                    visible: true,
+                    background: "transparent",
+                    template: "#= category #: \n #= value#"
+                }
+            },
+            series: [{
+                type: "pie",
+                field: "Value",
+                categoryField: "Label"
+            }],
+            seriesColors: ["#03a9f4", "#ff9800", "#fad84a", "#4caf50", "#FF0000", "#FF00FF", "#000080"],
+            tooltip: {
+                visible: true,
+                template: "#= category #: \n #= value#"
+            },
+            seriesClick: PendingServicesPieChartSeriesClickEvent,
+        });
+    }
+
+    function PendingServicesPieChartSeriesClickEvent(e) {
+        //alert(kendo.format("Series click :{0} ({1}): {2}", e.series.field, e.category, e.value));
+        var id = 17;
+        var dept = e.category;
+        var startdate = $('#ServiceStartDate').val();
+        var enddate = $('#ServiceEndDate').val();
+        window.location.href = "/Reports/Report/ManageServices?id=" + id + "&department=" + e.category + "&startDate=" + startdate + "&endDate=" + enddate;
+
+    }
+
+   
+
+    function TotalCompletedServicesByServiceName() {
+        var departmentid= $('#DDLServiceDepartmentId').val()
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ DepartmentId: $('#DDLServiceDepartmentId').val(), StartDate: $('#ServiceStartDate').val(), EndDate: $('#ServiceEndDate').val(), FilterType: "CompletedServicesByServiceName" }),
+            url: '/Reports/Report/GetServiceReportsForGraphII',
+            success: function (result) {
+                if (result != null) {
+                    CreateCompletedServiceChart(result)
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Network error, Please try again later.");
+            }
+        });
+    }
+
+    function CreateCompletedServiceChart(GraphData) {
+        //var date = $('#StatusDate').val();
+        $("#DivServicePieChartIII").kendoChart({
+            title: {
+                text: "Completed Service Request"
+            },
+            legend: {
+                //position: "bottom"
+                visible: false
+            },
+            dataSource: {
+                data: GraphData
+            },
+            seriesDefaults: {
+                labels: {
+                    visible: true,
+                    background: "transparent",
+                    template: "#= category #: \n #= value#"
+                }
+            },
+            series: [{
+                type: "pie",
+                field: "Value",
+                categoryField: "Label"
+            }],
+            seriesColors: ["#03a9f4", "#ff9800", "#fad84a", "#4caf50", "#FF0000", "#FF00FF", "#000080"],
+            tooltip: {
+                visible: true,
+                template: "#= category #: \n #= value#"
+            },
+            seriesClick: CompletedServicesPieChartSeriesClickEvent,
+        });
+    }
+
+    function CompletedServicesPieChartSeriesClickEvent(e) {
+        //alert(kendo.format("Series click :{0} ({1}): {2}", e.series.field, e.category, e.value));
+        var id = 9;  //inprocess-17
+        var department = $('#DDLServiceDepartmentId').data("kendoDropDownList").text();
+        var startdate = $('#ServiceStartDate').val();
+        var enddate = $('#ServiceEndDate').val();
+        window.location.href = "/Reports/Report/ManageServices?id=" + id + "&department="+ department +"&serviceName=" + e.category + "&startDate=" + startdate + "&endDate=" + enddate;
+        //$.ajax({
+        //    dataType: 'json',
+        //    type: 'Post',
+        //    contentType: 'application/json; charset=utf-8',
+        //    data: JSON.stringify({ Department: e.category, Status: "InProcess" }),
+        //    url: "/Reports/Report/GetMultipleTypeIdToRedirect",
+        //    success: function (result) {
+        //        if (result != null) {
+
+        //            window.location.href = "/Reports/Report/ManageServices?id=" + id + "&department="+ department +"&serviceName=" + e.category;
+        //        }
+        //        else {
+        //            alertify.error("no data found.");
+        //        }
+        //    },
+        //    error: function (ajaxRequest, strError) {
+        //        var respText = ajaxRequest.responseText;
+        //    }
+        //});
+    }
+
+
+
+    function TotalInProcessServicesByServiceName() {
+        var departmentid = $('#DDLServiceDepartmentId').val()
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ DepartmentId: $('#DDLServiceDepartmentId').val(), StartDate: $('#ServiceStartDate').val(), EndDate: $('#ServiceEndDate').val(), FilterType: "PendingServicesByServiceName" }),
+            url: '/Reports/Report/GetServiceReportsForGraphII',
+            success: function (result) {
+                if (result != null) {
+                    CreateInProgressServiceReportChart(result)
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Network error, Please try again later.");
+            }
+        });
+    }
+
+    function CreateInProgressServiceReportChart(GraphData) {
+        $("#DivServicePieChartIV").kendoChart({
+            title: {
+                text: "In Progress Service Request"
+            },
+            legend: {
+                //position: "bottom"
+                visible: false
+            },
+            dataSource: {
+                data: GraphData
+            },
+            seriesDefaults: {
+                labels: {
+                    visible: true,
+                    background: "transparent",
+                    template: "#= category #: \n #= value#" 
+                }
+            },
+            series: [{
+                type: "pie",
+                field: "Value",
+                categoryField: "Label"
+            }],
+            seriesColors: ["#03a9f4", "#ff9800", "#fad84a", "#4caf50", "#FF0000", "#FF00FF", "#000080"],
+            tooltip: {
+                visible: true,
+                template: "#= category #: \n #= value#"
+            },
+            seriesClick: InProcessServicesPieChartSeriesClickEvent,
+        });
+    }
+
+    function InProcessServicesPieChartSeriesClickEvent(e) {
+        //alert(kendo.format("Series click :{0} ({1}): {2}", e.series.field, e.category, e.value));
+        var id = 17;  //inprocess-17
+        var department = $('#DDLServiceDepartmentId').data("kendoDropDownList").text();
+        var startdate = $('#ServiceStartDate').val();
+        var enddate = $('#ServiceEndDate').val();
+        window.location.href = "/Reports/Report/ManageServices?id=" + id + "&department=" + department + "&serviceName=" + e.category + "&startDate=" + startdate + "&endDate=" + enddate;
+        
+    }
+
+
+    //function CreateBarGraphForServices(GraphData) {
+    //    $("#DivServicePieChartV").kendoChart({
+    //        dataSource: {
+    //            data: GraphData
+    //        },
+    //        title: {
+    //            text: " "
+    //        },
+    //        legend: {
+    //            position: "top",
+    //            Visible: true
+    //        },
+    //        seriesDefaults: {
+    //            type: "bar",
+    //            //stack: { type: "100%" }
+    //        },
+    //        series:
+    //        [
+    //            { field: "Completed", categoryField: "ServiceName", color: "#2e2e2e" },
+    //            { field: "Pending", categoryField: "ServiceName", color: "#b8b8b8" },
+    //            { field: "Initiated", categoryField: "ServiceName", color: "#bb6e36" },
+    //            //{ field: "InProgress", categoryField: "ServiceName" },
+    //            { field: "Cancelled", categoryField: "ServiceName", color: "#000000" }
+    //        ],
+    //        categoryAxis: {
+    //            //labels: {
+    //            //    rotation: -45
+    //            //}
+    //            categories: "PercentInProgress",
+    //            majorGridLines: {
+    //                visible: false
+    //            }
+    //        },
+    //        valueAxis: {
+    //            //labels: {
+    //            //    format: "{0:N0}"
+    //            //},
+    //            //majorUnit: 500
+    //            line: {
+    //                visible: false
+    //            },
+    //            minorGridLines: {
+    //                visible: true
+    //            }
+    //        },
+    //        tooltip: {
+    //            //visible: true,
+    //            //format: "{0:N0}"
+    //            visible: true,
+    //            template: "#= category #: \n #= value#"
+    //        },
+    //    });
+    //}
+</script>
+
+
+
+
+
+
+

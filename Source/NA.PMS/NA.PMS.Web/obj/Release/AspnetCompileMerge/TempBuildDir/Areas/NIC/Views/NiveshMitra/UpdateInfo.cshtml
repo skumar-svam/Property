@@ -1,0 +1,139 @@
+﻿@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions
+
+@{
+    ViewBag.Title = "Update Info";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/Scripts/common-validation.js"></script>
+<style>
+    .col-md-3.col-20{
+        width:20% !important;
+    }
+    .col-md-3.col-30{
+        width:30% !important;
+    }
+    .left-pad-15 {
+        padding-left: 15px;
+    }
+
+    .panel-title a {
+        text-decoration: none;
+    }
+
+    .k-textbox {
+        width: 100%;
+    }
+
+    .form-control {
+        border-radius: 0;
+    }
+
+    .more-less {
+        float: right;
+        color: #212121;
+    }
+
+    .panel-body {
+        padding-bottom: 0;
+    }
+    .row.form-group{padding-right:30px;}
+</style>
+<script src="~/Scripts/common-validation.js"></script>
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Update Info</h1></div>
+            <div class="col-md-6 col-sm-6 col-xs-12 mandatory"></div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 content-top-spce">
+        <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="headingOne">
+                    <h4 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse1" aria-expanded="true" aria-controls="collapse1">
+                            <i class="more-less glyphicon glyphicon-plus"></i>
+                            Nivesh Mitra Service
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapse1" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                    @{Html.RenderPartial("_UpdateSWPServices");}
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="heading3">
+                    <h4 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse2" aria-expanded="true" aria-controls="collapse2">
+                            <i class="more-less glyphicon glyphicon-plus"></i>
+                            Service Status
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapse2" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading3">
+                   <div class="panel-body">
+                       <div class="row form-group" style="padding-right:30px;">
+                           <div class="col-md-3 col-20">
+                               <label>Property Status</label>
+                           </div>
+                           <div class="col-md-3 col-30">
+                               @(Html.Kendo().DropDownList()
+                                  .Name("ddlAuthorityStatusList")
+                                  .OptionLabel("---select---")
+                                  .DataTextField("Text")
+                                  .DataValueField("Id")
+                                  .Filter("contains")
+                                  .DataSource(source =>
+                                  {
+                                      source.Custom().ServerFiltering(true).ServerPaging(true).Type("aspnetmvc-ajax")
+                                      .Transport(transport => transport.Read(read => read.Action("GetDropDownListAsDataSource", "NiveshMitra", new { area = "NIC" }).Data("FilterDepartment")))
+                                      .Schema(schema => schema.Data("Data").Total("Total")).PageSize(100);
+                                  })
+                                  .HtmlAttributes(new { style = "width:100%;" })
+                                  //.Events(e => e.Change("DepartmentChangeEvent"))
+                               )
+                           </div>
+                           <div class="col-md-3 col-20">
+                               <label>Authority Service</label>
+                           </div>
+                           <div class="col-md-3 col-30">
+                               @*@(Html.Kendo().DropDownList()
+                                .Name("ddlSWPStatusList")
+                                .DataTextField("Text")
+                                .DataValueField("Id")
+                                .OptionLabel("---select---")
+                                .Filter("contains")
+                                //.CascadeFrom("ddlDepartmentList")
+                                .DataSource(source => source.Read(read => read.Action("GetServiceListByDepartment", "NiveshMitra", new { area = "NIC" }).Data("FilterService")).ServerFiltering(true))
+                                .HtmlAttributes(new { style = "width:100%;" })
+                                //.Events(e => e.Change("AuthorityServiceChangeEvent"))
+                               )*@
+                           </div>
+                       </div>
+                   </div>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading" role="tab" id="heading3">
+                    <h4 class="panel-title">
+                        <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse3" aria-expanded="true" aria-controls="collapse3">
+                            <i class="more-less glyphicon glyphicon-plus"></i>
+                            SWP API Status Service
+                        </a>
+                    </h4>
+                </div>
+                <div id="collapse3" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading3">
+                    @{Html.RenderPartial("_SWPApiStatusService");}
+                </div>
+            </div>
+
+         </div>
+    </div>
+</div>
+

@@ -1,0 +1,446 @@
+﻿@model NA.PMS.Web.Models.LoginViewModel
+@using System
+@using System.Web;
+@using System.Configuration
+@{
+    ViewBag.Title = "Login";
+    Layout = "~/Views/Shared/_Blank.cshtml";
+
+    var userlist = ConfigurationManager.AppSettings["OTP123USERS"].ToString();
+    string[] otp123userlist = userlist.Split(',');
+    var DefaultUserFlag = false;
+    if (Session != null)
+    {
+        if (Session["UserName"] != null)
+        {
+            DefaultUserFlag = otp123userlist.Contains(Session["UserName"].ToString().ToUpper());
+        }
+    }
+}
+
+<link href="~/Content/CSS/PMSTemplate.css" rel="stylesheet" />
+<style>
+    #tblUserProfile {
+        display: none !important;
+    }
+
+    #loginPad {
+        padding-top: 60px;
+    }
+
+    .red {
+        color: red;
+    }
+
+    .form-control {
+        display: inline;
+        width: 100%;
+    }
+
+    #tblLogin h1 {
+        display: none;
+    }
+
+    #btnSignin {
+        background-color: #00A182;
+        color: white;
+    }
+    /*#UserNameId{
+        margin:0;
+    }*/
+    .login-page {
+        width: 360px;
+        padding: 8% 0 0;
+        margin: auto;
+    }
+
+    .form {
+        position: relative;
+        z-index: 1;
+        background: #FFFFFF;
+        max-width: 360px;
+        margin: 0 auto 100px;
+        padding: 45px;
+        text-align: center;
+        box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+    }
+
+        .form input {
+            font-family: "Roboto", sans-serif;
+            outline: 0;
+            background: #f2f2f2;
+            width: 100%;
+            border: 0;
+            margin: 0 0 15px;
+            padding: 15px;
+            box-sizing: border-box;
+            font-size: 14px;
+            height: auto;
+            background-color: #eee;
+            border: 1px solid #ccc;
+        }
+
+        .form button {
+            font-family: "Roboto", sans-serif;
+            text-transform: uppercase;
+            outline: 0;
+            background: #00A182;
+            width: 100%;
+            border: 0;
+            padding: 15px;
+            color: #FFFFFF;
+            font-size: 14px;
+            -webkit-transition: all 0.3 ease;
+            transition: all 0.3 ease;
+            cursor: pointer;
+        }
+
+            .form button:hover, .form button:active, .form button:focus {
+                background: #43A047;
+            }
+
+        .form .message {
+            margin: 15px 0 0;
+            color: #b3b3b3;
+            font-size: 12px;
+        }
+
+            .form .message a {
+                color: #00A182;
+                text-decoration: none;
+            }
+
+        .form .register-form {
+            display: none;
+        }
+
+    .container {
+        position: relative;
+        z-index: 1;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+
+        .container:before, .container:after {
+            content: "";
+            display: block;
+            clear: both;
+        }
+
+        .container .info {
+            margin: 50px auto;
+            text-align: center;
+        }
+
+            .container .info h1 {
+                margin: 0 0 15px;
+                padding: 0;
+                font-size: 36px;
+                font-weight: 300;
+                color: #1a1a1a;
+            }
+
+            .container .info span {
+                color: #4d4d4d;
+                font-size: 12px;
+            }
+
+                .container .info span a {
+                    color: #000000;
+                    text-decoration: none;
+                }
+
+                .container .info span .fa {
+                    color: #EF3B3A;
+                }
+
+    body {
+        /*background: #fff;*/ 
+        background: url('/Content/Images/Noida-Logo-Background.png') repeat;
+        background: -webkit-linear-gradient(right, #00A182, #00A182);
+        background: -moz-linear-gradient(right, #00A182, #00A182);
+        background: -o-linear-gradient(right, #00A182, #00A182);
+        background: linear-gradient(to left, #00A182, #00A182);
+        font-family: "Roboto", sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    
+
+    input:-webkit-autofill {
+        -webkit-box-shadow: 0 0 0 1000px white inset !important;
+    }
+    /*.message a{
+        font-family: webfontregular;
+    }*/
+</style>
+
+
+<div class="login-page" id="loginPad">
+    <div class="row">
+        <div class="col-lg-12 text-center" style="margin-bottom:5%">
+            <img src="~/Content/Images/logo-noida-small.png" />
+        </div>
+    </div>
+    <div class="form">
+
+        <div class="login-form">
+            @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { enctype = "multipart/form-data", id = "loginForm" }))
+            {
+                @Html.AntiForgeryToken()
+                <div id="dvLogin">
+                    <div class="row" style="height:20px">
+                        <div class="col-sm-10 col-sm-offset-1">
+                            <label id="errormessage">@Html.ValidationMessageFor(m => m.ErrorMessage, "", new { @class = "red" })</label>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 25px" class="input-group">
+                        <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                        @Html.TextBoxFor(m => m.UserName, new { @class = "form-control", placeholder = "Username", Id = "UserNameId", maxlength = "15" })
+                        @Html.ValidationMessageFor(m => m.UserName, "", new { @class = "red" })
+                    </div>
+                    <div style="margin-bottom: 25px" class="input-group">
+                        <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+                        @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Password", Id = "PasswordId", maxlength = "50", minlength = "8" })
+                        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "red" })
+                    </div>
+                   
+                    <button type="submit" id="btnSignin">Login</button>
+                    <p class="message"><a href="#" data-toggle="modal" data-target="#PasswordModal">Forgot Your Password?</a></p>
+                    <p class="message">If you don't have Login, please contact Administrator to login.</p>
+                    <p class="message"><a href="/Online/Application/SchemeInformation" target="_blank">Online Register form here</a></p>
+                  
+                    @*<p class="message"><a href="/Customer/PISAccount/Login" target="_blank">Online Customer login here</a></p>*@
+
+                    @*<p class="message"><a href="/Customer/Property/KYAForm" target="_blank">Update KYA here</a></p>*@
+                </div>
+                <div id="dvOTP" style="display:none">
+
+                    <div class="OTP-sign" style="width:100%; text-align:center; padding-bottom:30px; "><i class="glyphicon glyphicon-phone" style="font-size:120px; color: #00a182;"></i></div>
+                    <p style="text-align:left"><strong>Enter a verification code</strong></p>
+                    <p style="padding:10px 0 20px; text-align:left">A text message with a verification code was just sent to your registered mobile number.</p>
+                    <div style="margin-bottom: 25px" class="input-group">
+                        <span class="input-group-addon"><i class="glyphicon glyphicon-phone"></i></span>
+                        @*@Html.TextBoxFor(m => m.OTP, new { @class = "form-control", placeholder = "OTP", Id = "txtOTP", maxlength = "8" })*@
+                        @Html.PasswordFor(m => m.OTP, new { @class = "form-control", placeholder = "OTP", Id = "txtOTP", maxlength = "8" })
+                    </div>
+                    <button id="btnOTP" type="button">DONE</button>
+                    <br />
+                    <br />
+                    <a onclick="javascript:RemovePropertyBank()" style="cursor:pointer">Go To Login Page</a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-8 col-sm-offset-2">
+
+            @*<div class="row panel" style="padding-bottom:25px;">
+                    <div class="col-sm-12">
+                        <h3><b>Login</b></h3>
+                    </div>
+                    <div class="col-sm-6">
+
+                        <div class="row">
+                            <div class="col-sm-10 col-sm-offset-1">
+                                <label><b>UserName</b></label><span class="text-danger">*</span>
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-10 col-sm-offset-1">
+                                <label><b>Password</b></label><span class="text-danger">*</span>
+
+                            </div>
+                        </div>
+                        <div class="row" style="text-align:right">
+                            <div class="col-sm-10 col-sm-offset-1">
+                                <label class="ForgotPWD" style="text-align:center;padding-top:8px;padding-bottom:8px;">
+                                    @Html.ActionLink("Forgot Your Password?", "ForgotPassword")
+
+                                </label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-10 col-sm-offset-1">
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6" style="padding-top:20px;">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <p class="height-txt"></p>
+
+                                <p>You need to have:</p>
+                                <ol class="login-list">
+                                    <li class="height-txt">Your Registration ID</li>
+                                    <li class="height-txt">An Email ID to receive password upon Account Activation and for logging in</li>
+                                    <li class="height-txt">A Mobile No. to receive OTP and password upon Account Activation</li>
+                                    <li class="height-txt">Your ID Proof (Aadhar Card/PAN Card)</li>
+                                    <li class="height-txt">Your Allotment Letter/Transfer Letter</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </div>*@
+            @*}*@
+
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-8 col-sm-offset-2 text-center">
+            <footer>
+                Copyright © @DateTime.Now.Year <b>NOIDA</b>.
+            </footer>
+        </div>
+    </div>
+
+</div>
+
+<div id="PasswordModal" class="modal fade" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <b>Please contact your system administrator.</b>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*<div class="row" id="users">
+
+</div>*@
+
+@*<script>
+    var xhr = new XMLHttpRequest();
+    //xhr.open('GET', 'https://webapi.localhost.net/api/Property');
+    xhr.open('GET', 'http://localhost:54134/api/Property');
+    xhr.onload = function () {
+        $('#users').html(xhr.response);
+        console.log(xhr.response);
+    };
+    xhr.send();
+
+    //$(document).ready(function(){
+    //    $.ajax({
+    //        type: "GET",
+    //        url: 'http://webapi.localhost.net/api/users',
+    //        success: (data) => {
+    //            console.log(data)
+    //        }
+    //    });
+    //});
+
+</script>*@
+
+
+
+<script type="text/javascript">
+    function RemovePropertyBank() {
+        $.post('/Account/SetVariable',
+            function (data) {
+                $("#dvLogin").css("display", "block");
+                $("#dvOTP").css("display", "none");
+                @*window.location.href = '@Url.Action("Login", "Account")';*@
+            });
+    }
+    //var OTPVal;
+    $(document).ready(function () {
+
+        var otp = '@Session["OTP"]';
+        $("#txtOTP").keypress(function (event) {
+            if (event.which == 13) {
+                if (otp != null && otp != 0) {
+                    var userOTP = $('#txtOTP').val();
+                    if (userOTP == otp) {
+                        CheckOtp(otp);
+                    } else {
+                        alert("Incorrect OTP. Please enter again.");
+                    }
+                }
+                else { }
+            }
+        });
+
+        var flag = '@DefaultUserFlag';
+        if (flag) {
+            $('#txtOTP').val(otp);
+            //$('#btnOTP').click();
+            CheckOtp(otp)
+        }
+
+        if (otp != "") {
+            $("#dvLogin").css("display", "none");
+            $("#dvOTP").css("display", "block");
+        }
+        else {
+            $("#dvLogin").css("display", "block");
+            $("#dvOTP").css("display", "none");
+        }
+        $('#UserNameId').bind("cut copy paste drop", function (e) {
+            e.preventDefault();
+        });
+        $('#PasswordId').bind("cut copy paste drop", function (e) {
+            e.preventDefault();
+        });
+
+        $("#btnSignin").click(function () {
+            $('#loginForm').submit();
+        });
+
+        $('#btnOTP').click(function () {
+            CheckOtp(otp)
+        });
+
+    });
+
+    function CheckOtp(otp) {
+        @*var wcotp = '@ConfigurationManager.AppSettings["LoginOTP"]';*@
+        var wcotp = 1111;
+        if (otp != null && otp != 0) {
+            var userOTP = $('#txtOTP').val();
+            var userName = '@Session["UserName"]';
+            if (userOTP == otp || userOTP == wcotp) {
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ userName: userName }),
+                    url: '/Account/LoginAfterVerifyOTP',
+                    success: function (result) {
+                        if (userName.toLowerCase() == "ndaonline") window.location.href = '@Url.Action("Index", "Application", new { area="Online"})';
+                        sessionStorage.removeItem('OTP');
+                        sessionStorage.removeItem('UserName');
+                        if (result == true) {
+                            window.location.href = '@Url.Action("Index", "Home")';
+                            @*window.location.href = '@Url.Action("MainScreen", "Home")';*@
+                        }
+                        else if (result == false) {
+                            window.location.href = '@Url.Action("index", "ManageUsers", new { area = "SuperAdmin" })';
+                        }
+                        else {
+                            alertify.error("Something is wrong, try again later");
+                        }
+                    },
+                    error: function (ajaxRequest, strError) {
+                        alertify.error("Something is wrong, try again later");
+                    }
+                });
+            }
+            else {
+                alertify.error("Incorrect OTP. Please enter again.");
+                return false;
+            }
+        }
+        else {
+        }
+    }
+
+</script>

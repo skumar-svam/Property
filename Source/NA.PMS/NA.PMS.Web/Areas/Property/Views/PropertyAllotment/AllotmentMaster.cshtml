@@ -1,0 +1,211 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@model NA.PMS.Model.AdvanceSearchModel
+
+@{
+    ViewBag.Title = "Allotment Master";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .left-pad{
+        padding:0 10px 0 0px;
+    }
+</style>
+
+<div class="AllotmentMaster">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Allotted Property</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                @*<a id="export" class="k-button"><span class="k-icon k-i-excel"></span>Export to Excel</a>*@               
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    @*<div class="col-md-12" style="border:solid #e2e3e4; border-width:0 1px 1px">
+        <div class="row left-pad">
+            <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                @Html.Label("Department")
+                @(Html.Kendo().DropDownListFor(model => model.DepartmentId)
+                            .DataTextField("Name")
+                            .DataValueField("Value")
+                            .OptionLabel("--Select--")
+                            .Filter("contains")
+                            .DataSource(source => source.Read(read => read.Action("GetDepartmentForAdvanceSearch", "PropertyAllotment")))
+                            .HtmlAttributes(new { style = "width:95%; float:right;" })
+                )
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                @Html.Label("Registration Id")
+                @Html.TextBoxFor(model => model.RegistrationId, htmlAttributes: new { @class = "form-control", @maxlength = "10", style="width:95%;float:right;" })
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                @Html.Label("Sector")
+                @Html.TextBoxFor(model => model.Sector, htmlAttributes: new { @class = "form-control", @maxlength = "10", style = "width:95%;float:right;" })
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                @Html.Label("Block")
+                @Html.TextBoxFor(model => model.Block, htmlAttributes: new { @class = "form-control", @maxlength = "10", style = "width:95%;float:right;" })
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                @Html.Label("Plot No")
+                @Html.TextBoxFor(model => model.PlotNo, htmlAttributes: new { @class = "form-control", @maxlength = "10", style = "width:95%;float:right;" })
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                @Html.Label("Mobile No")
+                @Html.TextBoxFor(model => model.MobileNo, htmlAttributes: new { @class = "form-control", @maxlength = "10", style = "width:95%;float:right;" })
+            </div>
+        </div>
+
+        <div class="row left-pad">
+            <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                @Html.Label("Name")
+                @Html.TextBoxFor(model => model.Applicant, htmlAttributes: new { @class = "form-control", @maxlength = "30", style = "width:95%;float:right;" })
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                @Html.Label("Father Name")
+                @Html.TextBoxFor(model => model.ApplicantMaster, htmlAttributes: new { @class = "form-control", @maxlength = "30", style = "width:95%;float:right;" })
+            </div>
+
+            <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                @Html.Label("Address")
+                @Html.TextBoxFor(model => model.Address, htmlAttributes: new { @class = "form-control", @maxlength = "100", style = "width:95%;float:right;" })
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+
+            </div>
+            <div class="col-md-2 col-sm-3 col-xs-12 form-group" style="text-align:right">
+                @Html.Label("")<br />
+                <input type="button" id="btnAdvanceSearch" class="btn btn-add" value="Search" />
+                <input type="button" id="btnClear" class="btn btn-default" value="Clear" />
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.AllotmentViewModel>()
+            .Name("gridAdvanceSearch")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Hidden(true);
+                columns.Bound(c => c.RegistrationId).Title("Registration Id").Width(150).ClientTemplate("<a target='_blank' href='" + "/Property/PropertyAllotment/PropertyDetails/#= RegistrationId #'>#= RegistrationId #</a>").Sortable(true);
+                columns.Bound(c => c.Department).Title("Department").Width(130).Sortable(false);
+                columns.Bound(c => c.SectorName).Title("Sector").Width(100);
+                columns.Bound(c => c.BlockName).Title(" Block").Width(100);
+                columns.Bound(c => c.PlotNo).Title("Plot No.").Width(100);
+                columns.Bound(c => c.Applicant).Title("Applicant");
+                columns.Bound(c => c.SchemeName).Title("Scheme Name");
+                columns.Bound(c => c.IsDocumentAvailable).Title(" ").Width(50).ClientTemplate("#if(IsDocumentAvailable){# <center><span class='glyphicon glyphicon-download'></span></center> #}else{# <center>--</center> #}#").Filterable(true);
+            })
+            .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+            .ClientDetailTemplateId("template").AutoBind(true)
+            .DataSource
+            (
+                dataSource => dataSource
+                    .Ajax().Model(model => model.Id(p => p.Id)).ServerOperation(true).Sort(s=>s.Add(c=>c.AllotmentDate).Descending())
+                    .Read(read => read.Action("AdvanceSearchForAllottedPropertyII", "PropertyAllotment").Data("AdvanceSearchAttribute")).PageSize(10)
+            )
+        )
+    </div>*@
+
+
+    <div class="col-md-12 k-grid-content">
+        @{Html.RenderPartial("_PartialAdvanceSearch");}
+    </div>
+   
+</div>
+
+
+
+
+@*<script id="template" type="text/kendo-tmpl">
+    @(Html.Kendo().Grid<NA.PMS.Model.AllotmentViewModel>()
+            .Name("grid_#=Id#") // template expression, to be evaluated in the master context
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Hidden(true);
+                columns.Bound(c => c.RegistrationId).Hidden(true);
+                columns.Bound(c => c.PropertyId).Title("Property Id").Width(110);
+                //columns.Bound(c => c.ApplicationId).Title("Application Id").Width(120);
+                columns.Bound(c => c.FormNo).Title("Form No").Width(110);
+                columns.Bound(c => c.TotalArea).Title("Total Area").Width(110);
+                columns.Bound(c => c.TotalPropertyCost).Title("Property Cost").Width(120);              
+                columns.Bound(c => c.CorresspondAddress).Title("Address");
+                columns.Bound(c => c.MobileNo).Title("Mobile No").Width(110);
+                columns.Bound(c => c.AllotmentDate).Format("{0:dd-MMM-yyyy}").Width(120);
+                columns.Bound(c => c.Id).Title("Status").Width(110).ClientTemplate("#if(IsAllotted==true){#<lable>Allotted</label>#}else{#<label>Not Allotted</label>#}#");               
+            })
+            .DataSource(dataSource => dataSource
+                .Ajax().PageSize(10)
+                .Read(read => read.Action("AdvanceSearchForAllottedPropertyII", "PropertyAllotment", new { area = "Property", RegistrationId = "#=RegistrationId#" }))
+            )
+            .ToClientTemplate()
+    )
+</script>*@
+@*<script>
+    function dataBound() {
+        this.expandRow(this.tbody.find("tr.k-master-row").first());
+    }
+</script>*@
+
+
+@*<script>
+    $("#RegistrationId").keydown(function (e) {
+        // Allow: backspace, delete, tab, escape, enter and .
+        if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110]) !== -1 ||
+            // Allow: Ctrl+A, Command+A
+            (e.keyCode === 65 && (e.ctrlKey === true || e.metaKey === true)) ||
+            // Allow: home, end, left, right, down, up
+            (e.keyCode >= 35 && e.keyCode <= 40)) {
+            // let it happen, don't do anything
+            return;
+        }
+        // Ensure that it is a number and stop the keypress
+        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+            e.preventDefault();
+        }
+    });
+
+    $('#btnAdvanceSearch').click(function () {        
+        $("#gridAdvanceSearch").data("kendoGrid").dataSource.query({ page: 1, pageSize: 10 });
+        $("#gridAdvanceSearch").data("kendoGrid").dataSource.read();
+    });
+
+    $('#btnClear').click(function () {
+        $('#RegistrationId').val('');
+        $('#DepartmentId').data('kendoDropDownList').value('');
+        $('#Sector').val('');
+        $('#Block').val('');
+        $('#PlotNo').val('');
+        $('#Address').val('');
+        $('#ApplicantMaster').val('');
+        $('#Applicant').val('');
+        $('#MobileNo').val('');
+        $("#gridAdvanceSearch").data("kendoGrid").dataSource.read();
+    });
+
+    function AdvanceSearchAttribute() {
+        var ObjAdvanceSearchDetails = {
+            RegistrationId: $('#RegistrationId').val(),
+            DepartmentId: $('#DepartmentId').val(),
+            Sector: $('#Sector').val(),
+            Block: $('#Block').val(),
+            PlotNo: $('#PlotNo').val(),
+            Applicant: $('#Applicant').val(),
+            ApplicantMaster: $('#ApplicantMaster').val(),
+            MotherName: null,
+            MobileNo: $('#MobileNo').val(),
+            Address: $('#Address').val(),
+        };
+        return ObjAdvanceSearchDetails;
+    }
+
+
+
+
+</script>*@

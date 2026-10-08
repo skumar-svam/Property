@@ -1,0 +1,241 @@
+﻿@model NA.PMS.Model.SchemeViewModel
+@using Kendo.Mvc.UI
+@using NA.PMS.Model
+@{
+    ViewBag.Title = "Create Scheme";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!--tab-->
+<style>
+    .side-border{
+        border-left:1px solid #abc;
+        border-right:1px solid #abc;
+    }
+    .border-round{
+        border-left:1px solid #abc;
+        border-right:1px solid #abc;
+        border-bottom: 1px solid #abc;
+    }
+    .backward-forward {
+        text-align: center;
+        border: solid rgb(218, 218, 218);
+        border-width: 1px 0 0 0;
+        padding: 7px 30px 7px 30px;
+    }
+</style>
+
+<div class="PropertyScheme">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Create Scheme</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 mandatory">
+                Fields marked with an asterisk (<span class="star">*</span>) are required.
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 side-border">
+        <ul class="nav nav-tabs content-tabs" id="ulProperty" role="tablist">
+            <li class="active"><a role="tab" data-toggle="tab" href="#tab-1" id="acc1">Scheme</a></li>
+            <li><a role="tab" data-toggle="tab" href="#tab-2" id="acc2">Department</a></li>
+            <li><a role="tab" data-toggle="tab" href="#tab-5" id="acc3">Cost</a></li>
+            <li><a role="tab" data-toggle="tab" href="#tab-6" id="acc4">Bank </a></li>
+            <li><a role="tab" data-toggle="tab" href="#tab-7" id="acc5">Schedule</a></li>
+            <li><a role="tab" data-toggle="tab" href="#tab-3" id="acc6">Quota</a></li>
+            <li><a role="tab" data-toggle="tab" href="#tab-4" id="acc7">Rebate</a></li>
+        </ul>
+    </div>
+    <div class="col-md-12 tabbable border-round">
+        <div>
+            @Html.HiddenFor(model => model.SchemeId)
+        </div>
+        <div class="tab-content">
+            <div id="tab-1" class="tab-pane fade in active">
+                @{Html.RenderPartial("_SchemeBasicInfo", Model);}
+            </div>
+            <div id="tab-2" class="tab-pane fade" style="padding:0px;">
+                @{Html.RenderPartial("_SchemeDepartment", Model);}
+            </div>
+            <div id="tab-3" class="tab-pane fade" style="padding:0px;">
+                @*@{Html.RenderPartial("_SchemeQuotaRebate", Model);}*@
+            </div>
+           
+            <div id="tab-5" class="tab-pane fade" style="padding:0px;">
+                @*@{ Html.RenderPartial("_SchemePropertyCost", Model);}*@
+            </div>
+            <div id="tab-6" class="tab-pane fade" style="padding:0px;">
+                @*@{Html.RenderPartial("_SchemeBankList", Model);}*@
+            </div>
+            <div id="tab-7" class="tab-pane fade" style="padding:0px;">
+                @*@{Html.RenderPartial("_SchemeSchedule", Model);}*@
+            </div>
+
+        </div>
+    </div>
+   
+
+    <div class="col-md-12" style="text-align:right; padding-top:10px;">
+        <button type="button" class="btn btn-default" value="Submit" id="btnSubmitScheme" onclick="SumbitScheme();"> Activate Scheme </button>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    function AdditionalData() {
+        return { schemeId: $("#SchemeId").val() };
+    }
+
+    //$(document).ready(function () {
+    //    function close_accordion_section() {
+    //        jQuery('.tab .tab-section-title').removeClass('active');
+    //        jQuery('.tab .tab-section-content').slideUp(300).removeClass('open');
+    //    }
+
+
+    //    if ($('#scheId').val() == 0) {
+    //        $(".first .fke-link").hide();
+    //        $(".first .tab-section-title").show();
+
+    //        $(".second .fke-link").show();
+    //        $(".third .fke-link").show();
+    //        $(".fourth .fke-link").show();
+    //        $(".fifth .fke-link").show();
+    //        $(".sixth .fke-link").show();
+    //        $(".seventh .fke-link").show();
+    //        $(".second .tab-section-title").hide();
+    //        $(".third .tab-section-title").hide();
+    //        $(".fourth .tab-section-title").hide();
+    //        $(".fifth .tab-section-title").hide();
+    //        $(".sixth .tab-section-title").hide();
+    //        $(".seventh .tab-section-title").hide();
+    //        $('#btnNext1').attr('disabled', 'disabled');
+    //    }
+    //    else if ($('#scheId').val() != 0 && gridDepartment.length <= 0) {
+    //        $(".first .fke-link").hide();
+    //        $(".first .tab-section-title").show();
+    //        $(".second .fke-link").hide();
+    //        $(".second .tab-section-title").show();
+    //        $('#btnNext1').attr('disabled', 'disabled');
+    //    }
+
+ 
+    //    jQuery('.tab-section-title').click(function (e) {
+    //        var gridDepartment = $("#gridDepartment").data("kendoGrid").dataSource.data();
+    //        var currentAttrValue = jQuery(this).attr('href');
+    //        if ($('#scheId').val() == 0 && gridDepartment.length <= 0) {
+    //            if (curr == '#tab-1') {
+    //                jQuery(this).addClass('active');
+    //                jQuery('.tab ' + curr).slideDown(300).addClass('open');
+    //            }
+    //        }
+    //        else if ($('#scheId').val() != 0 && gridDepartment.length <= 0) {
+    //            if (currentAttrValue == '#tab-1') {
+    //                if (jQuery(e.target).is('.active')) {
+    //                    close_accordion_section();
+    //                    $(this).find('.fa-chevron-down').removeClass('fa-chevron-down').addClass('fa-chevron-right')
+    //                } else {
+    //                    close_accordion_section();
+    //                    $(this).find('.fa-chevron-right').removeClass('fa-chevron-right').addClass('fa-chevron-down')
+    //                    jQuery(this).addClass('active');
+    //                    jQuery('.tab ' + currentAttrValue).slideDown(300).addClass('open');
+    //                }
+    //            }
+    //            if (currentAttrValue == '#tab-2') {
+    //                if (jQuery(e.target).is('.active')) {
+    //                    close_accordion_section();
+    //                    $(this).find('.fa-chevron-down').removeClass('fa-chevron-down').addClass('fa-chevron-right')
+    //                } else {
+    //                    close_accordion_section();
+    //                    $(this).find('.fa-chevron-right').removeClass('fa-chevron-right').addClass('fa-chevron-down')
+    //                    jQuery(this).addClass('active');
+    //                    jQuery('.tab ' + currentAttrValue).slideDown(300).addClass('open');
+    //                }
+    //            }
+    //        }
+    //        else if ($('#scheId').val() != 0 && gridDepartment.length > 0) {
+    //            if (jQuery(e.target).is('.active')) {
+    //                close_accordion_section();
+    //                $(this).find('.fa-chevron-down').removeClass('fa-chevron-down').addClass('fa-chevron-right')
+    //            } else {
+    //                close_accordion_section();
+    //                $(this).find('.fa-chevron-right').removeClass('fa-chevron-right').addClass('fa-chevron-down')
+    //                jQuery(this).addClass('active');
+    //                jQuery('.tab ' + currentAttrValue).slideDown(300).addClass('open');
+    //            }
+    //        }
+    //        e.preventDefault();
+    //    });
+
+    //    $("#gridDepartment").data("kendoGrid").dataSource.read();
+    //    $("#gridQuota").data("kendoGrid").dataSource.read();
+    //    $("#gridBanks").data("kendoGrid").dataSource.read();
+    //    $("#gridReb").data("kendoGrid").dataSource.read();
+    //    $("#grdCosts").data("kendoGrid").dataSource.read();
+    //    $("#grdLandDevelopment").data("kendoGrid").dataSource.read();
+
+        
+    //    ActivateScheme();
+    //    $('#btnPre21').hide();
+    //    $('#btnNext21').hide();
+    //    $('#btnPre31').hide();
+    //    $('#btnNext31').hide();
+    //    $('#btnPre41').hide();
+    //    $('#btnNext41').hide();
+    //    $('#btnPre51').hide();
+    //    $('#btnNext51').hide();
+    //    $('#btnPre61').hide();
+    //    $('#btnNext61').hide();
+    //    $('#btnPre71').hide();
+    //});
+    function ActivateScheme() {
+        var gridDepartment = $("#gridDepartment").data("kendoGrid").dataSource.data();
+        var grdCosts = $("#grdCosts").data("kendoGrid").dataSource.data();
+        //var rebatedepartment = $("#gridReb").data("kendoGrid").dataSource.data();
+        var grdBanks = $("#gridBanks").data("kendoGrid").dataSource.data();
+        //var grdQuota = $("#gridQuota").data("kendoGrid").dataSource.data();
+        var grdLandDevelopment = $("#grdLandDevelopment").data("kendoGrid").dataSource.data();
+        if (gridDepartment.length > 0 && grdCosts.length > 0 && grdBanks.length > 0 && grdLandDevelopment.length > 0) {
+            $('#btnSubmitScheme').removeAttr('disabled');
+        }
+        else {
+            $('#btnSubmitScheme').attr('disabled', 'disabled');
+        }
+    }
+    function SumbitScheme() {
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ schemeId: $("#SchemeId").val() }),
+            url: "/Scheme/ActivateScheme",
+            success: function (data) {
+                if (data != null && data != '') {
+                    if (data == true) {
+                        alertify.success("Scheme activated successfully");
+                        window.location.href = '@Url.Action("Manage", "Scheme")';
+
+                    }
+                    else {
+                        alertify.error("Scheme is not activated.");
+                    }
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+
+    
+
+    function RebindDepartmentDdl() {
+        $("#quotaDepartmentId").data("kendoDropDownList").dataSource.read();
+        $("#rebatedepartment").data("kendoDropDownList").dataSource.read();
+        $("#depttID").data("kendoDropDownList").dataSource.read();
+        $("#LandDevelopmentDepartmentId").data("kendoDropDownList").dataSource.read();
+    }
+</script>
+
+

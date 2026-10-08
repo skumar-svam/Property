@@ -1,0 +1,443 @@
+﻿@using NA.PMS.Common
+@using NA.PMS.Model
+@model NA.PMS.OnlineScheme.SchemeFormViewModel
+
+@{
+    ViewBag.Title = "Scheme Information";
+    Layout = "~/Areas/Online/Views/Shared/_LayoutOnlineScheme.cshtml";
+}
+
+<style type="text/css">
+    .btn {
+        padding: 4px 18px;
+    }
+
+    .gridTitle {
+        margin-bottom: 5px;
+    }
+
+    .lbl-header-btn-nw:hover {
+        cursor: pointer;
+    }
+
+    .lbl-header-btn-ex:hover {
+        cursor: pointer;
+    }
+
+    .lbl-header-btn-nw {
+        padding: 6px;
+        background: #c0c0c0;
+        /*background-image: linear-gradient(to button, #fff 0, #c0c0c0 100%) ;*/
+    }
+
+    .lbl-header-btn-ex {
+        padding: 6px;
+        background: #f0ad4e;
+        /*background: green;*/
+    }
+
+    .form-group label {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    div.k-window-content{
+        padding:0;
+    }
+</style>
+
+<forme id="scheme-information">
+    <div class="scheme-dashboard">
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx">
+                <div class="form-bx">
+                    <div>
+                        @Html.HiddenFor(m => m.Id)
+                        @Html.HiddenFor(m => m.ApplicationFormId)
+                        @Html.HiddenFor(m => m.SchemeId)
+                        @Html.HiddenFor(m => m.DepartmentId)
+                        @Html.HiddenFor(m => m.AreaRange)
+                        @Html.HiddenFor(m => m.SchemeType)
+                        @Html.HiddenFor(m => m.ApplicationFormType)
+                        @Html.HiddenFor(m => m.ApplicantType)
+                        @Html.HiddenFor(m => m.FormType, htmlAttributes: new { @id = "hdnFormType" })
+                        @Html.HiddenFor(m => m.AppType)
+                        @Html.HiddenFor(m => m.NICApplicationId)
+                        @Html.HiddenFor(m => m.NICControlId)
+                        @Html.HiddenFor(m => m.NICServiceId)
+                        @Html.HiddenFor(m => m.NICProcessIndustryId)
+                        @Html.HiddenFor(m => m.NICUnitId)
+                        @Html.HiddenFor(m => m.IsFromNIC)
+
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12 col-xs-12 form-group" style="text-align:center">
+                            <h4 style="background:#008069;color:#fff;padding:6px 0;">Open Ended Scheme : NOIDA/IP/2019-20/OES/01</h4>
+                        </div>
+                        <div class="col-md-12 col-sm-12 col-xs-12 form-group" style="text-align:center;">
+                            <label class="lbl-header-btn-nw"> <input type="radio" group="OEUserGroup" class="" name="OERegisteredUser" value="OEUnRegistered" /> <b> New Application Form</b></label>
+                            <label class="lbl-header-btn-ex"> <input type="radio" group="OEUserGroup" class="" name="OERegisteredUser" value="OERegistered" /><b> Existing Application Form</b></label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12 col-xs-12 form-group" style="text-align:center">
+                            <h4 style="background:#008069;color:#fff;padding:6px 0;">Industrial Plot Scheme : NOIDA/IP/2019-20/03</h4>
+                        </div>
+                        <div class="col-md-12 col-sm-12 col-xs-12 form-group" style="text-align:center;">
+                            <label class="lbl-header-btn-nw"><input type="radio" group="IPUserGroup" class="" name="IPRegisteredUser" value="IPUnRegistered" /><b> New Application Form</b></label>
+                            <label class="lbl-header-btn-ex"><input type="radio" group="IPUserGroup" class="" name="IPRegisteredUser" value="IPRegistered" /><b> Existing Application Form</b></label>
+                        </div>
+                    </div>
+
+                    <div class="row" style="">
+                        <div class="col-md-12 col-sm-12 col-xs-12 form-group" style="text-align:center">
+                            <h4 style="background:#008069;color:#fff;padding:6px 0;">Transport Scheme : NOIDA/TN/2019-20/02</h4>
+                        </div>
+                        <div class="col-md-12 col-sm-12 col-xs-12 form-group" style="text-align:center;">
+                            <label class="lbl-header-btn-nw"><input type="radio" group="TUserGroup" class="" name="TRegisteredUser" value="TUnRegistered" /><b> New Application Form</b></label>
+                            <label class="lbl-header-btn-ex"><input type="radio" group="TUserGroup" class="" name="TRegisteredUser" value="TRegistered" /><b> Existing Application Form</b></label>
+                        </div>
+                    </div>
+
+                    <div class="row" style="">
+                        <div class="col-md-12 col-sm-12 col-xs-12 mandatory"><h1 class="gridTitle">No. of Vistors: @ApplicationInstance.Application["Totaluser"].ToString().PadLeft(4, '0')</h1></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</forme>
+
+
+
+<div class="col-md-12" id="divOTPwindow">
+    <div class="row" style="margin-top:25px;">
+        <div class="col-md-4 col-sm-4 col-xs-12 form-group" style="text-align:center">
+            <label>Enter mobile No:-</label>
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+            <input type="text" class="k-textbox" id="txtotp" maxlength="10" placeholder="" style="width:100%" />
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+            <input class="k-button" type="button" value="Resend" id="btnResend" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 col-sm-4 col-xs-12 form-group"></div>
+        <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+            <input type="button" class="k-button" id="btnMobileOTP" value="submit" style="width:100%" />
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-12 form-group"></div>
+    </div>
+</div>
+
+
+<div class="col-md-12" id="divLoginWindow">
+    <form action="/Online/Application/SchemeLogin" enctype="multipart/form-data" id="SchemeLoginform" method="post">
+        <div class="row" style="padding-top:25px;">
+            <div class="col-md-4 col-sm-6 col-xs-12 form-group" style="">
+                <label><b>Username/Form Id:</b></label>
+            </div>
+            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                <input type="text" class="k-textbox" id="txtUserName" name="txtUserName" maxlength="10" placeholder="Enter Your User Name/Form ID" style="width:100%" />
+            </div>
+        </div>
+        <div class="row row-for-login">
+            <div class="col-md-4 col-sm-6 col-xs-12 form-group" style="">
+                <label><b>Password:</b></label>
+            </div>
+            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                <input type="password" class="k-textbox" id="txtPassword" name="txtPassword" maxlength=" 10" placeholder="Enter Your Password" style="width:100%" />
+            </div>
+        </div>
+        <div class="row row-for-password">
+            <div class="col-md-4 col-sm-6 col-xs-12 form-group" style="">
+                <label><b>Mobile No.:</b></label>
+            </div>
+            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                <input type="text" class="k-textbox" id="MobileNumber" name="MobileNumber" maxlength="10" placeholder="Enter Your Mobile Number" style="width:100%" />
+            </div>
+        </div>
+        <div class="row row-for-password">
+            <div class="col-md-4 col-sm-6 col-xs-12 form-group" style="">
+                <label><b>Email Id:</b></label>
+            </div>
+            <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                <input type="text" class="k-textbox" id="Email" name="Email" maxlength="40" placeholder="Enter Your Email" style="width:100%" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <input type="hidden" id="txt-action-type" />
+            </div>
+        </div>
+
+        <div class="row" style="">
+            <div class="col-md-12 col-sm-12 col-xs-12 form-group text-center">
+                <input class="btn btn-success" type="submit" value="Login" id="btnSchemeLogin" />
+                <input class="btn btn-danger" type="button" value="Cancel" id="btnCancelLogin" />
+            </div>
+            <div class="col-md-12 col-sm-12 col-xs-12 form-group text-center">
+                <p class="message"><a href="#" id="ForgotPasswordWindow">Forgot Your Password?</a></p>
+                <p class="message"><a href="#" id="LoginWindow">Back to Login.</a></p>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<script type="text/javascript">
+    @{
+        if (TempData["PasswordMessage"] != null && TempData["PasswordMessage"] != "")
+        {
+            @:alertify.error('@TempData["PasswordMessage"]');
+        }
+        if (TempData["ErrorLoginMessage"] != null && TempData["ErrorLoginMessage"] != "")
+        {
+            @:alertify.error('@TempData["ErrorLoginMessage"]');
+        }
+    }
+
+
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+
+    var redirectType;
+    $(document).ready(function () {
+        //$("#ShowPasswordWindow").hide();
+        
+        $('#txt-action-type').val("Login");
+        $('.row-for-password').css("display", "none");
+        $("#ForgotPasswordWindow").show();
+        $('#LoginWindow').css("display", "none");
+
+        $('input[name=TRegisteredUser]').prop('checked', false);
+        $('input[name=OERegisteredUser]').prop('checked', false);
+        $('input[name=IPRegisteredUser]').prop('checked', false);
+
+        $('input:radio[name=OERegisteredUser]').on('click', function () {
+            var radiobtnVal = $('input[name=OERegisteredUser]:checked').val();
+            if (radiobtnVal == "OERegistered") {
+                $("#SchemeType").val('@OnlineSchemeType.OpenEnded');
+                $("#divLoginWindow").data("kendoWindow").center();
+                $("#divLoginWindow").data("kendoWindow").open();
+                $("#divLoginWindow").data("kendoWindow").pin();
+            }
+            else if (radiobtnVal == "OEUnRegistered") {
+                //alert("Open Ended Scheme has been closed on 31-Dec-2018");
+                window.location.href = '/Online/Industry/OpenEndSchemeForm';
+                //window.location.href = "/Online/Industry/OpenEndSchemeForm?id=" + $('#ApplicationFormId').val() + "&controlid=" + $('#NICControlId').val() + "&unitid=" + $('#NICUnitId').val() + "&serviceid=" + $('#NICServiceId').val()
+            }
+        });
+
+        $('input:radio[name=TRegisteredUser]').on('click', function () {
+            var radiobtnVal = $('input[name=TRegisteredUser]:checked').val();
+            if (radiobtnVal == "TRegistered") {
+                $("#SchemeType").val('@OnlineSchemeType.Transport');
+                $("#divLoginWindow").data("kendoWindow").center();
+                $("#divLoginWindow").data("kendoWindow").open();
+                $("#divLoginWindow").data("kendoWindow").pin();
+            }
+            else if (radiobtnVal == "TUnRegistered") {
+                //alert("Scheme has been closed on 31-03-2018");
+                window.location.href = '@Url.Action("TransportSchemeForm", "Industry", new { area = "Online" })';
+            }
+        });
+
+        $('input:radio[name=IPRegisteredUser]').on('click', function () {
+            var radiobtnVal = $('input[name=IPRegisteredUser]:checked').val();
+            if (radiobtnVal == "IPRegistered") {
+                $("#SchemeType").val('@OnlineSchemeType.IndustrialScheme');
+                $("#divLoginWindow").data("kendoWindow").center();
+                $("#divLoginWindow").data("kendoWindow").open();
+                $("#divLoginWindow").data("kendoWindow").pin();
+            }
+            else if (radiobtnVal == "IPUnRegistered") {
+                //alert("Scheme has been closed on 10-February-2020");
+                window.location.href = "/Online/Industry/SchemeForm";
+            }
+        });
+
+        $("#btnCancelLogin").click(function () {
+            $('input[name=TRegisteredUser]:checked').prop('checked', false);
+            $('input[name=OERegisteredUser]:checked').prop('checked', false);
+            $("#divLoginWindow").data("kendoWindow").close();
+        });
+
+        
+
+        $("#ForgotPasswordWindow").click(function () {
+            $('.row-for-login').css("display", "none");
+            $("#ForgotPasswordWindow").css("display", "none");
+            $('#txt-action-type').val("ForgotPassword");
+            $('.row-for-password').show();
+            $('#LoginWindow').show("");
+        });
+
+        $("#LoginWindow").click(function () {
+            $('.row-for-login').show();
+            $("#ForgotPasswordWindow").show();
+            $('#txt-action-type').val("Login");
+            $('.row-for-password').css("display", "none");
+            $('#LoginWindow').css("display", "none");
+        });
+
+        $('#btnResend').click(function () {
+            SendOTPtoUser();
+        });
+
+        $('#btnMobileOTP').click(function () {
+            ValidateOTP();
+        });
+
+        $('#divOTPwindow').kendoWindow({
+            modal: true,
+            title: "Online Form Payment",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "30%"
+            },
+            width: "40%", height: "35%"
+        });
+
+
+        $('#divLoginWindow').kendoWindow({
+            modal: true,
+            title: "Online Scheme Login",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "25%"
+            },
+            width: "50%", height: "40%"
+        });
+
+    });
+
+    function ValidateApplicationFormId(redirectType) {
+        var formId = $('#txtFormId').val();
+        if (formId.trim() != "" && formId.length == 8) {
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                data: { formNo: formId },
+                url: '/Online/Application/ValidateFormNumber',
+                success: function (result) {
+                    if (result == '@ReturnType.NotExist') {
+                        alertify.error("Form number doesn't exist.");
+                        $('#txtFormId').val('');
+                    }
+                    else {
+                        
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+        else {
+            alertify.error("Enter correct form number.");
+            return false;
+        }
+    }
+
+
+
+
+    function SendOTPtoUser() {
+        var formId = $('#txtFormId').val();
+        if (formId != "") {
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                data: { formId: $('#txtFormId').val() },
+                url: '/Online/Application/SendOTPforPayment',
+                success: function (result) {
+                    if (result != null) {
+                        //alertify.success("OTP has been sent successfuly.");
+                        return false;
+                    }
+                    else {
+
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+    }
+
+    function ValidateOTP() {
+        var formId = $('#txtFormId').val();
+        var otp_mobile = $('#txtotp').val();
+        var encryptedId = $('#hdnFormId').val();
+        if (otp_mobile != "") {
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                data: { otpMobile: otp_mobile },
+                url: '/Online/Application/ValidateOTP',
+                success: function (result) {
+                    if (result == '@ReturnType.Success') {
+                        if (redirectType == "Payment") {
+                            window.location.href = '@Url.Action("PreviewForm", "Application", new { area = "Online"})' + "?id=" + encryptedId;//formId;
+                        }
+                        if (redirectType == "Edit") {
+                            window.location.href = "/Online/Application/EditForm?id=" + encryptedId;//formId;
+                        }
+                        if (redirectType == "Upload") {
+                            @*window.location.href = '@Url.Action("UploadDocument", "Application", new { area = "Online"})' + "?id=" + encryptedId;*@
+                            window.location.href = '@Url.Action("UploadDocumentScrutiny", "Application", new { area = "Online" })' + "?id=" + encryptedId;
+                        }
+                    }
+                    else {
+                        //alertify.error("OTP mismatch");
+                        alertify.error("Mobile number mismatch with form no:" + formId);
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+    }
+
+
+    $("#txtFormId").blur(function () {
+        var formid = $("#txtFormId").val();
+        if (formid.trim() != "" && formid.trim().length == 8) {
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                data: { formId: formid },
+                url: '/Online/Application/EncryptFormId',
+                success: function (result) {
+                    if (result != null) {
+                        $('#hdnFormId').val(result);
+                    }
+                    else {
+                        $('#hdnFormId').val('');
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+        else {
+            $('#hdnFormId').val('');
+        }
+    })
+</script>

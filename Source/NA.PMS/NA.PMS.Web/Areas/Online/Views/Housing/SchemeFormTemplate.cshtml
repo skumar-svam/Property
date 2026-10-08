@@ -1,0 +1,905 @@
+﻿@using System.Web.Mvc.Html
+@using Kendo.Mvc.UI
+@model  NA.PMS.OnlineScheme.SchemeFormViewModel
+<style type="text/css">
+    #ApplicationDirectorGrid #gridDirectors table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid black;
+    }
+
+        #ApplicationDirectorGrid #gridDirectors table td, table th {
+            border: 1px solid black;
+        }
+
+        #ApplicationDirectorGrid #gridDirectors table tr:first-child th {
+            border-top: 0;
+        }
+
+        #ApplicationDirectorGrid #gridDirectors table tr:last-child td {
+            border-bottom: 0;
+        }
+
+        #ApplicationDirectorGrid #gridDirectors table tr td:first-child,
+        #ApplicationDirectorGrid #gridDirectors table tr th:first-child {
+            border-left: 0;
+        }
+
+        #ApplicationDirectorGrid #gridDirectors table tr td:last-child,
+        #ApplicationDirectorGrid #gridDirectors table tr th:last-child {
+            border-right: 0;
+        }
+
+    /*Kendo Grid*/
+    .k-grid-header th.k-header > .k-link {
+        font-weight: bold;
+        color: #484848;
+        pointer-events: none;
+        cursor: default;
+        text-decoration: none;
+    }
+
+    .k-filter-row th, .k-grid-header th.k-header {
+        overflow: hidden;
+        border-style: solid;
+        border-width: 0 0 1px 1px;
+        padding: .5em .6em .4em .6em;
+        font-weight: 400;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        text-align: left;
+        pointer-events: none;
+        cursor: default;
+    }
+</style>
+<html>
+<head>
+    <meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+    <meta name=Generator content="Microsoft Word 15 (filtered)">
+    <title></title>
+    <style>
+    </style>
+</head>
+<body lang=EN-US link=blue vlink=purple>
+    <div class=WordSection1>
+        <div align=center>
+            <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%" style='width:100.0%;border-collapse:collapse'>
+                <tr>
+                    <td width=708 valign=top style='width:531.0pt;padding:0in 5.4pt 0in 5.4pt'>
+                        <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt; text-align:right;line-height:normal'>
+                            <b>Application form No.</b>
+                            @Model.ApplicationFormId
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width=708 valign=top style='width:531.0pt;padding:0in 5.4pt 0in 5.4pt'>
+                        <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt; text-align:center;line-height:normal'><strong><span style='font-family:"Calibri",sans-serif'>&nbsp;</span></strong></p>
+                        <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt; text-align:center;line-height:normal'>
+                            <strong>
+                                <u>
+                                    <span style='font-family:"Calibri",sans-serif'>
+                                        SCHEME FOR ALLOTMENT OF HOUSING PROPERTY
+                                    </span><br />
+                                    <span style='font-family:  "Calibri",sans-serif'>@Model.SchemeName</span>
+                                </u>
+                            </strong>
+                        </p>
+                        <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;  text-align:center;line-height:normal'>&nbsp;</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width=708 valign=top style='width:531.0pt;padding:0in 2.4pt 0in 2.4pt'>
+                        <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt; text-align:center;line-height:normal'>
+                            <strong>
+                                <span style='font-family:"Calibri",sans-serif'>
+                                    Application for Allotment of Housing Property.
+                                </span>
+                            </strong>
+                        </p>
+                    </td>
+                </tr>
+            </table>
+
+        </div>
+
+        <p class=MsoNormal>&nbsp;</p>
+
+        <div align=center>
+
+            <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+                   style='width:100.0%;border-collapse:collapse'>
+                <tr>
+                    <td width=468 valign=top style='width:350.75pt;padding:0in 5.4pt 0in 5.4pt'>
+                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height: normal'>
+                            <span style='font-size:10.5pt;font-family:"Arial",sans-serif'>
+                                The
+                                Chief Executive Officer
+                            </span>
+                        </p>
+                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height: normal'>
+                            <span style='font-size:10.5pt;font-family:"Arial",sans-serif'>
+                                New Okhla Industrial Development Authority
+                            </span>
+                        </p>
+                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:  normal'>
+                            <span style='font-size:10.5pt;font-family:"Arial",sans-serif'>
+                                Main
+                                Administrative building,
+                            </span>
+                        </p>
+                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:  normal'>
+                            <span style='font-size:10.5pt;font-family:"Arial",sans-serif'>
+                                Sector-6,
+                                NOIDA
+                            </span>
+                        </p>
+                    </td>
+                    <td width=156 valign=top style='width:116.75pt;padding:0in 5.4pt 0in 5.4pt'>
+                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:  normal'>
+                            <img id="" src="@Model.UserImage" alt="your image" height="120px" width="100px" alt="Photograph of Authorised Signatory Duly Attested by BANK MANAGER" />
+                            <br /> <img id="signature" src="@Model.SignImage" alt="your sign" height="40px" width="140px" name="usersign" />
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width=623 colspan=2 valign=top style='width:467.5pt;padding:0in 5.4pt 0in 5.4pt'>
+                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:  normal'><span style='font-size:10.5pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:  justify;line-height:normal'>
+                            <span style='font-size:10.5pt;font-family:"Arial",sans-serif'>
+                                Sir/Madam,<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;I/We hereby submit our application form for allotment
+                                of housing property to establish
+                            </span>@if (Model.Gender != "Company")
+                            { <b>@Model.Applicant</b>
+                                <span style='font-size:10.5pt;font-family:"Arial",sans-serif'>
+                                    &nbsp;for the&nbsp; Project&nbsp;
+                                </span><b>@Model.SchemeProposedFirm.ProposedProject;</b><span style='font-size:10.5pt;font-family:"Arial",sans-serif'>
+                                    &nbsp;in
+                                    Applicant Category&nbsp;
+                                </span><b>@Model.ApplicationFormType</b> }
+                            else
+                            { <b>@Model.SigningAuthority</b>
+                                <span style='font-size:10.5pt;font-family:"Arial",sans-serif'>
+                                    &nbsp;(
+                                </span><b>@Model.SchemeProposedFirm.DirectorType</b><span style='font-size:10.5pt;font-family:"Arial",sans-serif'>
+                                    )
+                                    &nbsp;on the behalf of
+                                </span><b>@Model.Applicant</b><span style='font-size:10.5pt;font-family:"Arial",sans-serif'>
+                                    for the Project
+                                </span><b>;@Model.SchemeProposedFirm.ProposedProject</b><span style='font-size:10.5pt;font-family:"Arial",sans-serif'>
+                                    &nbsp;in Applicant
+                                    Category&nbsp;
+                                </span><b>@Model.ApplicationFormType</b> }
+
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width=623 colspan=2 valign=top style='width:467.5pt;padding:0in 5.4pt 0in 5.4pt'>
+                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:justify;line-height:normal'>
+                            <span style='font-size:10.5pt;font-family:"Arial",sans-serif'>
+                                on
+                                an area of <b>@Model.AreaRange</b> sq. mtr. approx. in Industrial Sectors <b>@Model.PropertyNo</b>
+                                of NOIDA. We hereby agree to pay within 30 days from the date of offer/letter
+                                of allotment the full/20% of the prevailing premium (After adjustment of
+                                registration money) as mentioned in the Brochure for allotment of land in
+                                Phase-II/III. As per terms &amp; conditions of the registration stated in
+                                Appendix-I, I/we are enclosing herewith the following documents:-
+                            </span>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width=623 colspan=2 valign=top style='width:467.5pt;padding:0in 5.4pt 0in 5.4pt'>
+                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:justify;line-height:normal'><span style='font-size:10.5pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:normal'></p>@if (Model.IsApplicationFeePaid == true)
+                        {
+                            <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%" style='width:100.0%;border-collapse:collapse'>
+                                <tr>
+                                    <td width=609 colspan=4 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+                                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;    text-align:justify;line-height:normal'>
+                                            <b>
+                                                <span style='font-size:10.5pt;font-family:"Arial",sans-serif'>Payment Information</span>
+                                            </b>
+                                        </p>
+
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+                                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:justify;line-height:normal'>
+                                            <b>
+                                                <span style='font-size:10.5pt;font-family:"Arial",sans-serif'>Form Fee (INR):</span>
+                                            </b>
+                                        </p>
+                                    </td>
+                                    <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+                                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:justify;line-height:normal'>
+                                            <span style='font-size:10.5pt;font-family:"Arial",sans-serif'>@Model.ApplicationFee</span>
+                                        </p>
+                                    </td>
+                                    <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+                                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:justify;line-height:normal'>
+                                            <b>
+                                                <span style='font-size:10.5pt;font-family:"Arial",sans-serif'>Processing Fee(INR):</span>
+                                            </b>
+                                        </p>
+                                    </td>
+                                    <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+                                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;    text-align:justify;line-height:normal'>
+                                            <span style='font-size:10.5pt;font-family:"Arial",sans-serif'>@Model.ProcessingCharge</span>
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+                                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:justify;line-height:normal'>
+                                            <b>
+                                                <span style='font-size:10.5pt;   font-family:"Arial",sans-serif'>GST(18%) on Form Fee:</span>
+                                            </b>
+                                        </p>
+                                    </td>
+                                    <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+                                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:justify;line-height:normal'>
+                                            <span style='font-size:10.5pt; font-family:"Arial",sans-serif'>@Model.FormFeeGST</span>
+                                        </p>
+                                    </td>
+                                    <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+                                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:justify;line-height:normal'>
+                                            <b>
+                                                <span style='font-size:10.5pt;font-family:"Arial",sans-serif'>GST(18%) on Processing Fee</span>
+                                            </b>
+                                        </p>
+                                    </td>
+                                    <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+                                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+                                            <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>@Model.ProcessingChargeGST</span>
+</p>
+</td>
+</tr>
+<tr>
+    <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:justify;line-height:normal'>
+            <b>
+                <span style='font-size:10.5pt;font-family:"Arial",sans-serif'>Earnest Money (INR):</span>
+            </b>
+        </p>
+    </td>
+    <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:justify;line-height:normal'>
+            <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>@Model.EarnestMoney</span>
+</p>
+</td>
+<td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+    <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:justify;line-height:normal'>
+        <b>
+            <span style='font-size:10.5pt;    font-family:"Arial",sans-serif'>Amount Payable (INR):</span>
+        </b>
+    </p>
+</td>
+<td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+    <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;    text-align:justify;line-height:normal'>
+        <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>@Model.TotalAmount</span>
+</p>
+</td>
+</tr>
+</table>
+                            <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align: justify;line-height:normal'><span style='font-size:10.5pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+                            <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%" style='width:100.0%;border-collapse:collapse'>
+                                <tr>
+                                    <td width=609 colspan=4 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+                                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;    text-align:justify;line-height:normal'>
+                                            <b>
+                                                <span style='font-size:10.5pt;    font-family:"Arial",sans-serif'>Payment Receipt</span>
+                                            </b>
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+                                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;  text-align:justify;line-height:normal'>
+                                            <b>
+                                                <span style='font-size:10.5pt;font-family:"Arial",sans-serif'>Form No:</span>
+                                            </b>
+                                        </p>
+                                    </td>
+                                    <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+                                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt; text-align:justify;line-height:normal'>
+                                            <span style='font-size:10.5pt; font-family:"Arial",sans-serif'>@Model.ApplicationFormId</span>
+                                        </p>
+                                    </td>
+                                    <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+                                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt; text-align:justify;line-height:normal'>
+                                            <b>
+                                                <span style='font-size:10.5pt;  font-family:"Arial",sans-serif'>Status:</span>
+                                            </b>
+                                        </p>
+                                    </td>
+                                    <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+                                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt; text-align:justify;line-height:normal'>
+                                            <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>@Model.SchemePayment.Status</span>
+</p>
+</td>
+</tr>
+<tr>
+    <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt; text-align:justify;line-height:normal'>
+            <b>
+                <span style='font-size:10.5pt; font-family:"Arial",sans-serif'>Consumer Name:</span>
+            </b>
+        </p>
+    </td>
+    <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt; text-align:justify;line-height:normal'>
+            <span style='font-size:10.5pt;font-family:"Arial",sans-serif'>@Model.Applicant</span>
+        </p>
+    </td>
+    <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:justify;line-height:normal'>
+            <b>
+                <span style='font-size:10.5pt;font-family:"Arial",sans-serif'>Amount:</span>
+            </b>
+        </p>
+    </td>
+    <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:justify;line-height:normal'>
+            <span style='font-size:10.5pt;ont-family:"Arial",sans-serif'>@Model.SchemePayment.Amount</span>
+        </p>
+    </td>
+</tr>
+@if (Model.PaymentMode != "Online")
+{
+    <tr>
+        <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+            <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:justify;line-height:normal'>
+                <b>
+                    <span style='font-size:10.5pt;font-family:"Arial",sans-serif'>Transaction Id:</span>
+                </b>
+            </p>
+        </td>
+        <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+            <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;  text-align:justify;line-height:normal'>
+                <span style='font-size:10.5pt;  font-family:"Arial",sans-serif'>@Model.SchemePayment.TransactionId</span>
+            </p>
+        </td>
+        <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+            <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;  text-align:justify;line-height:normal'>
+                <b>
+                    <span style='font-size:10.5pt; font-family:"Arial",sans-serif'>Method:</span>
+                </b>
+            </p>
+        </td>
+        <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+            <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;  text-align:justify;line-height:normal'>
+                <span style='font-size:10.5pt; font-family:"Arial",sans-serif'>@Model.SchemePayment.ProductInfo</span>
+            </p>
+        </td>
+    </tr>
+    <tr>
+        <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+            <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:justify;line-height:normal'>
+                <b>
+                    <span style='font-size:10.5pt; font-family:"Arial",sans-serif'>UTR No:</span>
+                </b>
+            </p>
+        </td>
+        <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+            <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;   text-align:justify;line-height:normal'>
+                <span style='font-size:10.5pt; font-family:"Arial",sans-serif'>@Model.SchemePayment.TransactionKey</span>
+            </p>
+        </td>
+        <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+            <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;  text-align:justify;line-height:normal'>
+                <b>
+                    <span style='font-size:10.5pt;font-family:"Arial",sans-serif'>Bank Name:</span>
+                </b>
+            </p>
+        </td>
+        <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+            <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt; text-align:justify;line-height:normal'>
+                <span style='font-size:10.5pt;font-family:"Arial",sans-serif'>@Model.SchemePayment.BankName</span>
+            </p>
+        </td>
+    </tr>
+}
+else
+{
+    <tr>
+        <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+            <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;  text-align:justify;line-height:normal'>
+                <b>
+                    <span style='font-size:10.5pt;  font-family:"Arial",sans-serif'>Transaction Id:</span>
+                </b>
+            </p>
+        </td>
+        <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+            <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt; text-align:justify;line-height:normal'>
+                <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>@Model.SchemePayment.TransactionId</span>
+</p>
+</td>
+<td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+    <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+        <b>
+            <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>Method:</span>
+        </b>
+    </p>
+</td>
+<td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+    <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+        <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>@Model.SchemePayment.ProductInfo</span>
+</p>
+</td>
+</tr>
+    <tr>
+        <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+            <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+                <b>
+                    <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>Bank Ref No:</span>
+                </b>
+            </p>
+        </td>
+        <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+            <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+                <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>@Model.SchemePayment.BankReferenceNo</span>
+</p>
+</td>
+<td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+    <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+        <b>
+            <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>Name on Card:</span>
+        </b>
+    </p>
+</td>
+<td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+    <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+        <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>@Model.SchemePayment.NameOnCard</span>
+</p>
+</td>
+</tr>
+    <tr>
+        <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+            <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+                <b>
+                    <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>Card Type:</span>
+                </b>
+            </p>
+        </td>
+        <td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+            <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+                <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>@Model.SchemePayment.CardType</span>
+</p>
+</td>
+<td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+    <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+        <b>
+            <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>Bank Transaction Id:</span>
+        </b>
+    </p>
+</td>
+<td width=609 valign=top style='width:456.5pt;padding:0in 5.4pt 0in 5.4pt'>
+    <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+        <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>@Model.SchemePayment.Mihpayid</span>
+</p>
+</td>
+</tr>
+}
+
+</table>
+                        }
+                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+  justify;line-height:normal'><span style='font-size:10.5pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+  justify;line-height:normal'><span style='font-size:10.5pt;font-family:"Arial",sans-serif'></span></p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width=623 colspan=2 valign=top style='width:467.5pt;padding:0in 5.4pt 0in 5.4pt'>
+                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+  justify;line-height:normal'>
+                            <span style='font-size:10.5pt;font-family:"Arial",sans-serif'>
+                                IV.
+                                Certificate of authorization in favour of Shri/Smt. @if (Model.Gender == "Company")
+                                {<b> @Model.SigningAuthority</b> }
+                                else
+                                { <b>
+                                    @Model.Applicant
+                                </b>
+                                }
+                                S/o/ D/o @if ((Model.FatherName) != "")
+                                { <b>
+                                    @Model.FatherName
+                                </b>
+                                }
+                                else
+                                { Convert.ToString("NA"); } as
+                                (status) ________________ on behalf of the applicant/company/registered
+                                partnership firm
+                                i.e. M/s. <b>@Model.Applicant</b> constituted under <b>@Model.CompanyType</b> Act of
+                                __________ Govt. of India/State Govt.
+                            </span>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width=623 colspan=2 valign=top style='width:467.5pt;padding:0in 5.4pt 0in 5.4pt'>
+                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+  justify;line-height:normal'>
+                            <span style='font-size:10.5pt;font-family:"Arial",sans-serif'>
+                                V.
+                                &nbsp;&nbsp;Project/Proposal details along with schedule of project
+                                implementation for which this application is being submitted.
+                            </span>
+                        </p>
+                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+  justify;line-height:normal'>
+                            <span style='font-size:10.5pt;font-family:"Arial",sans-serif'>
+                                VI.
+                                Terms &amp; Conditions (Appendix-I) of the above registration are enclosed
+                                herewith, duly signed as a token of acceptance of the terms &amp; conditions
+                                of the allotment of the industrial plot.
+                            </span>
+                        </p>
+                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+  justify;line-height:normal'>
+                            <span style='font-size:10.5pt;font-family:"Arial",sans-serif'>
+                                VII.
+                                The following Statutory Documents duly certified by C.A./Statutory Auditor
+                                are enclosed.
+                            </span>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width=623 colspan=2 valign=top style='width:467.5pt;padding:0in 5.4pt 0in 5.4pt'>
+
+                        <p align=right style='text-align:right'>
+                            <span style='font-size:10.5pt;
+  font-family:"Arial",sans-serif'>&nbsp;</span>
+                        </p>
+                        <p align=right style='text-align:right'>
+                            <img id="signature" src="@Model.SignImage" alt="your sign" height="40px" width="140px" name="usersign" /><br />
+                            <span style='font-size:10.5pt;
+  font-family:"Arial",sans-serif'>Signatures of the Authorized Signatory</span>
+                        </p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width=623 colspan=2 valign=top style='width:467.5pt;padding:0in 5.4pt 0in 5.4pt'>
+                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+  justify;line-height:normal'><span style='font-size:10.5pt;font-family:"Arial",sans-serif'>&nbsp;</span></p>
+                    </td>
+                </tr>
+            </table>
+            <div align=center style="page-break-before:always;"></div>
+            <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+                   style='width:100.0%;border-collapse:collapse'>
+                @*<tr>
+                    <td width=623 colspan=2 valign=top style='width:467.5pt;padding:0in 5.4pt 0in 5.4pt'>
+                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+                            <b>
+                                <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>Director Details</span>
+                            </b>
+                        </p>
+                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+  justify;line-height:normal'><div id="ApplicationDirectorGrid">$DirectorGrid$</div></p>
+                    </td>
+                </tr>*@
+            </table>
+            <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+                   style='width:100.0%;border-collapse:collapse'>
+                <tr>
+                    <td width=623 colspan=2 valign=top style='width:467.5pt;padding:0in 5.4pt 0in 5.4pt'>
+                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+  justify;line-height:normal'>
+                            The Applicants shall submit their documents as
+                            under: -
+                        </p>
+                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+  justify;line-height:normal'>$SchemeDoc$</p>
+                    </td>
+                </tr>
+                <tr>
+                    <td width=623 colspan=2 valign=top style='width:467.5pt;padding:0in 5.4pt 0in 5.4pt'>
+                        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+  justify;line-height:normal'>
+                            <b>
+                                <span style='font-size:10.5pt;font-family:
+  "Arial",sans-serif'>Refund account details</span>
+                            </b><span style='font-size:
+  10.5pt;font-family:"Arial",sans-serif'>
+                                (for the purpose of registration money
+                                of unsuccessful applicants)
+                            </span>
+                        </p>
+                        <table class=MsoNormalTable border=0 cellspacing=0 cellpadding=0 width="100%"
+                               style='width:100.0%;border-collapse:collapse'>
+                            <tr>
+                                <td width=304 valign=top style='width:228.1pt;padding:0in 5.4pt 0in 5.4pt'>
+                                    <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+                                        <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>Name of Bank and Branch:</span>
+                                    </p>
+                                </td>
+                                <td width=304 valign=top style='width:228.1pt;padding:0in 5.4pt 0in 5.4pt'>
+                                    <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+                                        <b>
+                                            <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>@Model.RefundBank</span>
+</b>
+</p>
+</td>
+</tr>
+<tr>
+    <td width=304 valign=top style='width:228.1pt;padding:0in 5.4pt 0in 5.4pt'>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+            <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>Bank Account No.</span>
+        </p>
+    </td>
+    <td width=304 valign=top style='width:228.1pt;padding:0in 5.4pt 0in 5.4pt'>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+            <b>
+                <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>@Model.RefundAccountNo</span>
+</b>
+</p>
+</td>
+</tr>
+<tr>
+    <td width=304 valign=top style='width:228.1pt;padding:0in 5.4pt 0in 5.4pt'>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+            <em>
+                <u>
+                    <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif;font-style:normal'>IFSC Code No.</span>
+                </u>
+            </em>
+        </p>
+    </td>
+    <td width=304 valign=top style='width:228.1pt;padding:0in 5.4pt 0in 5.4pt'>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+            <em>
+                <b>
+                    <u>
+                        <span style='font-size:
+    10.5pt;font-family:"Arial",sans-serif;font-style:normal'>@Model.IFSCCode</span>
+</u>
+</b>
+</em>
+</p>
+</td>
+</tr>
+<tr>
+    <td width=304 valign=top style='width:228.1pt;padding:0in 5.4pt 0in 5.4pt'>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+            <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>In favour of:</span>
+        </p>
+    </td>
+    <td width=304 valign=top style='width:228.1pt;padding:0in 5.4pt 0in 5.4pt'>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+            <b>
+                <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>@Model.RefundInfaverof</span>
+</b>
+</p>
+</td>
+</tr>
+<tr>
+    <td width=304 valign=top style='width:228.1pt;padding:0in 5.4pt 0in 5.4pt'>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+            <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>Date:</span>
+        </p>
+    </td>
+    <td width=304 valign=top style='width:228.1pt;padding:0in 5.4pt 0in 5.4pt'>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+            <b>
+                <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>@DateTime.Now.Date.ToString("dd/MM/YYYY")</span>
+</b>
+</p>
+</td>
+</tr>
+<tr>
+    <td width=304 valign=top style='width:228.1pt;padding:0in 5.4pt 0in 5.4pt'>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+            <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>&nbsp;</span>
+        </p>
+    </td>
+    <td width=304 valign=top style='width:228.1pt;padding:0in 5.4pt 0in 5.4pt'>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+            <b>
+                <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>&nbsp;</span>
+            </b>
+        </p>
+    </td>
+</tr>
+<tr>
+    <td width=304 valign=top style='width:228.1pt;padding:0in 5.4pt 0in 5.4pt'>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+            <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>Address of the Applicant:</span>
+        </p>
+    </td>
+    <td width=304 valign=top style='width:228.1pt;padding:0in 5.4pt 0in 5.4pt'>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+            <b>
+                <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>@Model.CorrespondingAddress</span>
+</b>
+</p>
+</td>
+</tr>
+<tr>
+    <td width=304 valign=top style='width:228.1pt;padding:0in 5.4pt 0in 5.4pt'>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+            <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>Phone/Mob No.:</span>
+        </p>
+    </td>
+    <td width=304 valign=top style='width:228.1pt;padding:0in 5.4pt 0in 5.4pt'>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+            <b>
+                <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>@Model.MobileNumber</span>
+</b>
+</p>
+</td>
+</tr>
+<tr>
+    <td width=304 valign=top style='width:228.1pt;padding:0in 5.4pt 0in 5.4pt'>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+            <em>
+                <u>
+                    <span style='font-size:10.5pt;
+    font-family:"Arial",sans-serif'>E-mail Id:</span>
+                </u>
+            </em>
+        </p>
+    </td>
+    <td width=304 valign=top style='width:228.1pt;padding:0in 5.4pt 0in 5.4pt'>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;
+    text-align:justify;line-height:normal'>
+            <em>
+                <b>
+                    <u>
+                        <span style='font-size:
+    10.5pt;font-family:"Arial",sans-serif'>@Model.Email</span>
+</u>
+</b>
+</em>
+</p>
+</td>
+</tr>
+</table>
+</td>
+</tr>
+<tr>
+    <td width=623 colspan=2 valign=top style='width:467.5pt;padding:0in 5.4pt 0in 5.4pt'>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+  justify;line-height:normal'>
+            <b>
+                <span style='font-size:10.5pt;font-family:
+  "Arial",sans-serif'>&nbsp;</span>
+            </b>
+        </p>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+  justify;line-height:normal'>
+            <b>
+                <span style='font-size:10.5pt;font-family:
+  "Arial",sans-serif'>&nbsp;</span>
+            </b>
+        </p>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+  justify;line-height:normal'>
+            <b>
+                <span style='font-size:10.5pt;font-family:
+  "Arial",sans-serif'>&nbsp;</span>
+            </b>
+        </p>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+  justify;line-height:normal'>
+            <b>
+                <span style='font-size:10.5pt;font-family:
+  "Arial",sans-serif'>&nbsp;</span>
+            </b>
+        </p>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+  justify;line-height:normal'>
+            <b>
+                <span style='font-size:10.5pt;font-family:
+  "Arial",sans-serif'>&nbsp;</span>
+            </b>
+        </p>
+        <p class=MsoNormal align=right style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:right;line-height:normal'>
+            <img id="signature" src="@Model.SignImage" alt="your sign" height="40px" width="140px" name="usersign" /><br />
+            <span style='font-size:10.5pt;
+  font-family:"Arial",sans-serif'>Signatures of the Authorized Signatory</span>
+        </p>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+  justify;line-height:normal'>
+            <b>
+                <span style='font-size:10.5pt;font-family:
+  "Arial",sans-serif'>&nbsp;</span>
+            </b>
+        </p>
+    </td>
+</tr>
+<tr>
+    <td width=623 colspan=2 valign=top style='width:467.5pt;padding:0in 5.4pt 0in 5.4pt'>
+        <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;text-align:
+  justify;line-height:normal'>
+            <b>
+                <span style='font-size:10.5pt;font-family:
+  "Arial",sans-serif'>&nbsp;</span>
+            </b>
+        </p>
+    </td>
+</tr>
+</table>
+
+</div>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<span style='font-size:11.0pt;line-height:106%;font-family:"Calibri",sans-serif'>
+    <br clear=all style='page-break-before:always'>
+</span>
+
+<p class=MsoNormal>&nbsp;</p>
+
+</div>
+
+</body>
+
+</html>

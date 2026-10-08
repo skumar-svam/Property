@@ -1,0 +1,55 @@
+﻿@using Kendo.Mvc.UI
+
+@{
+    ViewBag.Title = "Manage Possession Order Approval";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="ManagePossession">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Possession Order</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.Property.PropertyPossessionModel>()
+                .Name("gridFunctionals")
+               .Columns(columns =>
+                      {
+                          columns.Bound(c => c.Id).Title("Request No").ClientTemplate("<a href='" + "/Property/Possession/ViewPossessionRequestApprover/#= Id #'>#=Id#</a>");//.Width(130)
+                          columns.Bound(c => c.Rid).Title("Registration Id");//.Width(150);
+                          //columns.Bound(c => c.SectorName).Title("Sector").Width(100);
+                          //columns.Bound(c => c.BlockName).Title("Block").Width(100);
+                          //columns.Bound(c => c.PropertyNo).Title("Property No").Width(150);
+                          columns.Bound(c => c.PropertyNumber).Title("Property No.");
+                          columns.Bound(c => c.PossessionOrderDate).Title("Possession Order Date").Format("{0:dd/MM/yyyy}");
+                          columns.Bound(c => c.PossessionDate).Title("Possession Date").Format("{0:dd/MM/yyyy}");
+                          columns.Bound(c => c.AreaChange).Title("Area Change").ClientTemplate("#= AreaChange==null?'No':AreaChange #").Filterable(false).Sortable(false);//.Width(110)
+                          columns.Bound(c => c.Status).Title("Status");//.Width(150);
+                          columns.Bound(c => c.CreatedDate).Title("Request Date").Format("{0:dd-MM-yyyy}");
+                          columns.Bound(c => c.ApproveDate).Title("Approved Date").Format("{0:dd-MM-yyyy}");
+                      })
+        .Sortable()
+        .Filterable()
+                .Resizable(resize => resize.Columns(true))
+        .Pageable(pageable => pageable
+                                               .Enabled(true)
+                                               .Refresh(true)
+                                               .PageSizes(true)
+                                            )
+                                            .Groupable()
+        .DataSource(dataSource => dataSource
+        .Ajax().Model(model => model.Id(c => c.Id))
+                        .ServerOperation(true).Sort(sort => sort.Add("Id").Descending())
+                        .Read(read => read.Action("GetPossessionDataByApproverId", "Possession", new { area = "Property" })).PageSize(20)
+        )
+        )
+    </div>
+
+</div>
+

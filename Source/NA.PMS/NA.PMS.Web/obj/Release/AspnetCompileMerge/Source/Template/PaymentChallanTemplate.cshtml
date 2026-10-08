@@ -1,0 +1,471 @@
+﻿@using System.Web.Mvc.Html
+@model NA.PMS.Model.ChallanModel
+
+<style>
+    .panel-body.challan-body {
+        font-size: 11px;
+        font-family: Arial;
+        border: 1px solid black;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+
+    h4 {
+        margin: 0;
+        padding: 0;
+    }
+
+    br {
+        height: 2px;
+    }
+
+    hr.challan-line {
+        display: block;
+        margin-top: 0;
+        margin-bottom: 0;
+        margin-left: auto;
+        margin-right: auto;
+        border-style: inset;
+        border-width: 1px;
+    }
+
+    .lbl-seperator {
+        width: 100%;
+        font-family: Arial;
+        font-size: 11px;
+        text-align: center;
+    }
+
+    .tbl-challan {
+        width: 100%;
+        height: 290px;
+    }
+
+        .tbl-challan tr td {
+            /*height:20px;*/
+            font-size: 12px;
+            font-family: Arial;
+        }
+
+    .challan-table {
+        height: 100px;
+        width: 100%;
+        border-left: 0px solid black;
+        border-right: 1px solid black;
+        border-bottom: 1px solid black;
+        border-top: 1px solid black;
+    }
+
+    .challan-table-rt {
+        height: 100px;
+        width: 100%;
+        border-left: 0px solid black;
+        border-right: 0px solid black;
+        border-bottom: 1px solid black;
+        border-top: 1px solid black;
+    }
+
+    .challan-table tr {
+        border-bottom: 0px solid black;
+    }
+
+    .challan-table-rt tr {
+        border-bottom: 0px solid black;
+    }
+</style>
+
+<div class="container-fluid">
+
+    <div class="panel-body challan-body">
+        <table class="tbl-challan">
+            <tr>
+                <td colspan="2">Bank Name: <b>@Model.BankName</b></td>
+
+                <td>Date:<b> @DateTime.Now.ToString("MM/dd/yyyy")</b></td>
+                <td class="headertext"><b>Bank Copy</b></td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <center><h4><b>NEW OKHLA INDUSTRIAL DEVELOPMENT AUTHORITY</b></h4></center>
+                </td>
+            </tr>
+            <tr>
+                <td>Registration Id:&nbsp;<b>@Model.RID</b></td>
+                <td>Property Type: &nbsp; <b>@Model.PropertyTypeName</b></td>
+                <td>
+                    @*Challan No.:&nbsp;____________*@
+                    Challan No.:&nbsp; <b>@Model.ChallanId</b>
+                </td>
+
+            </tr>
+            <tr>
+                <td colspan="2">Property Location:<b>@Model.SectorName/ @Model.BlockName/ @Model.PropertyNumber</b></td>
+                <td colspan="2">Sector:<b>@Model.SectorName</b> &nbsp; Block:<b>@Model.BlockName</b> &nbsp; Property Id:<b>@Model.PropertyNumber</b></td>
+            </tr>
+
+            <tr>
+                <td colspan="2">
+                    @*<table class="challan-table">
+                            <tr>
+                                <td>Sno.</td>
+                                <td>Description</td>
+                                <td>Amount(Rs.)</td>
+                            </tr>
+                            <tr>
+                                <td>1</td>
+                                <td>@Model.AccountSubHeadName1</td>
+                                <td>@Model.Amount1</td>
+                            </tr>
+                            <tr>
+                                <td>2</td>
+                                <td>@Model.AccountSubHeadName2</td>
+                                <td>@Model.Amount2</td>
+                            </tr>
+                            <tr>
+                                <td>3</td>
+                                <td>@Model.AccountSubHeadName3</td>
+                                <td>@Model.Amount3</td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td>Total</td>
+                                <td>@Model.TotalAmount</td>
+                            </tr>
+                        </table>*@
+                    <table class="challan-table">
+                        <tr>
+                            <td>Sno.</td>
+                            <td>Description</td>
+                            <td>Amount(Rs.)</td>
+                        </tr>
+                        @{
+                            int count = 1;
+                            foreach (var item in Model.ModelHeadProperty)
+                            {
+                                <tr>
+                                    <td>@count</td>
+                                    <td>@item.AccountHeadName</td>
+                                    <td>@item.Amount</td>
+                                </tr>
+                                count++;
+                            }
+                        }
+                        <tr>
+                            <td></td>
+                            <td>Total</td>
+                            <td>@Model.TotalHeadAmount</td>
+                        </tr>
+                    </table>
+                </td>
+                <td colspan="2">
+                    <table class="challan-table-rt">
+                        <tr>
+                            <td>Applicant Name: <b>@Model.ApplicationForm.ApplicantName</b></td>
+                        </tr>
+
+                        <tr>
+                            <td>E-mail: <b>@Model.ApplicationForm.Email</b></td>
+                        </tr>
+                        <tr>
+                            <td>Mobile No.: <b>@Model.ApplicationForm.MobileNumber</b></td>
+                        </tr>
+
+                        <tr>
+                            <td>Address: <b>@Model.ApplicationForm.CorrespondingAddress</b></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <p>
+                        Please find enclosed herewith
+                        ____________
+                        &nbsp;
+                        Dated &nbsp;
+                        ____________
+                        for Rs.
+                        ____________
+                        Drawn On &nbsp;
+                        ____________ &nbsp; against <b>@Model.AccountHeadName</b> as <b> @Model.AccountSubHeadName</b>
+                        the payment of property Allotted / Leased / Subleased to me by Noida Authority.
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" style="height: 5px;"></td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <b>Bank Authorised Signatory</b>
+                </td>
+                <td colspan="2" style="text-align:right">
+                    <b>Depositors Signature</b>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <span style="font-size:11px;">Note:Payment alone will not secure any right to allottee.</span>
+    <hr class="challan-line" />
+    <br />
+    <div class="panel-body challan-body">
+        <table class="tbl-challan">
+            <tr>
+                <td colspan="2">Bank Name: <b>@Model.BankName</b></td>
+
+                <td>Date:<b> @DateTime.Now.ToString("MM/dd/yyyy")</b></td>
+                <td class="headertext"><b>Noida Copy</b></td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <center><h4><b>NEW OKHLA INDUSTRIAL DEVELOPMENT AUTHORITY</b></h4></center>
+                </td>
+            </tr>
+            <tr>
+                <td>Registration Id:&nbsp;<b>@Model.RID</b></td>
+                <td>Property Type: &nbsp; <b>@Model.PropertyTypeName</b></td>
+                <td>
+                    @*Challan No.:&nbsp;____________*@
+                    Challan No.:&nbsp; <b>@Model.ChallanId</b>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">Property Location:<b>@Model.SectorName/ @Model.BlockName/ @Model.PropertyNumber</b></td>
+                <td colspan="2">Sector:<b>@Model.SectorName</b> &nbsp; Block:<b>@Model.BlockName</b> &nbsp; Property Id:<b>@Model.PropertyNumber</b></td>
+            </tr>
+
+            <tr>
+                <td colspan="2">
+                    @*<table class="challan-table">
+                        <tr>
+                            <td>Sno.</td>
+                            <td>Description</td>
+                            <td>Amount(Rs.)</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>@Model.AccountSubHeadName1</td>
+                            <td>@Model.Amount1</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>@Model.AccountSubHeadName2</td>
+                            <td>@Model.Amount2</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>@Model.AccountSubHeadName3</td>
+                            <td>@Model.Amount3</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>Total</td>
+                            <td>@Model.TotalAmount</td>
+                        </tr>
+                    </table>*@
+                    <table class="challan-table">
+                        <tr>
+                            <td>Sno.</td>
+                            <td>Description</td>
+                            <td>Amount(Rs.)</td>
+                        </tr>
+                        @{
+                            int count2 = 1;
+                            foreach (var item in Model.ModelHeadProperty)
+                            {
+                                <tr>
+                                    <td>@count2</td>
+                                    <td>@item.AccountHeadName</td>
+                                    <td>@item.Amount</td>
+                                </tr>
+                                count2++;
+                            }
+                        }
+                        <tr>
+                            <td></td>
+                            <td>Total</td>
+                            <td>@Model.TotalHeadAmount</td>
+                        </tr>
+                    </table>
+                </td>
+                <td colspan="2">
+                    <table class="challan-table-rt">
+                        <tr>
+                            <td>Applicant Name: <b>@Model.ApplicationForm.ApplicantName</b></td>
+                        </tr>
+
+                        <tr>
+                            <td>E-mail: <b>@Model.ApplicationForm.Email</b></td>
+                        </tr>
+                        <tr>
+                            <td>Mobile No.: <b>@Model.ApplicationForm.MobileNumber</b></td>
+                        </tr>
+                        <tr>
+                            <td>Address: <b>@Model.ApplicationForm.CorrespondingAddress</b></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <p>
+                        Please find enclosed herewith
+                        ____________
+                        &nbsp;
+                        Dated &nbsp;
+                        ____________
+                        for Rs.
+                        ____________
+                        Drawn On &nbsp;
+                        ____________ &nbsp; against <b>@Model.AccountHeadName</b> as <b> @Model.AccountSubHeadName</b>
+                        the payment of property Allotted / Leased / Subleased to me by Noida Authority.
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" style="height: 5px;"></td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <b>Bank Authorised Signatory</b>
+                </td>
+                <td colspan="2" style="text-align:right">
+                    <b>Depositors Signature</b>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <span style="font-size:11px;">Note:Payment alone will not secure any right to allottee.</span>
+    <hr class="challan-line" />
+    <br />
+    <div class="panel-body challan-body">
+        <table class="tbl-challan">
+            <tr>
+                <td colspan="2">Bank Name: <b>@Model.BankName</b></td>
+
+                <td>Date:<b> @DateTime.Now.ToString("MM/dd/yyyy")</b></td>
+                <td class="headertext"><b>Applicant's Copy</b></td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <center><h4><b>NEW OKHLA INDUSTRIAL DEVELOPMENT AUTHORITY</b></h4></center>
+                </td>
+            </tr>
+            <tr>
+                <td>Registration Id:&nbsp;<b>@Model.RID</b></td>
+                <td>Property Type: &nbsp; <b>@Model.PropertyTypeName</b></td>
+                <td>
+                    @*Challan No.:&nbsp;____________*@
+                    Challan No.:&nbsp; <b>@Model.ChallanId</b>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">Property Location:<b>@Model.SectorName/ @Model.BlockName/ @Model.PropertyNumber</b></td>
+                <td colspan="2">Sector:<b>@Model.SectorName</b> &nbsp; Block:<b>@Model.BlockName</b> &nbsp; Property Id:<b>@Model.PropertyNumber</b></td>
+            </tr>
+
+            <tr>
+                <td colspan="2">
+                    @*<table class="challan-table">
+                        <tr>
+                            <td>Sno.</td>
+                            <td>Description</td>
+                            <td>Amount(Rs.)</td>
+                        </tr>
+                        <tr>
+                            <td>1</td>
+                            <td>@Model.AccountSubHeadName1</td>
+                            <td>@Model.Amount1</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>@Model.AccountSubHeadName2</td>
+                            <td>@Model.Amount2</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>@Model.AccountSubHeadName3</td>
+                            <td>@Model.Amount3</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td>Total</td>
+                            <td>@Model.TotalAmount</td>
+                        </tr>
+                    </table>*@
+                    <table class="challan-table">
+                        <tr>
+                            <td>Sno.</td>
+                            <td>Description</td>
+                            <td>Amount(Rs.)</td>
+                        </tr>
+                        @{
+                            int count3 = 1;
+                            foreach (var item in Model.ModelHeadProperty)
+                            {
+                                <tr>
+                                    <td>@count3</td>
+                                    <td>@item.AccountHeadName</td>
+                                    <td>@item.Amount</td>
+                                </tr>
+                                count3++;
+                            }
+                        }
+                        <tr>
+                            <td></td>
+                            <td>Total</td>
+                            <td>@Model.TotalHeadAmount</td>
+                        </tr>
+                    </table>
+                </td>
+                <td colspan="2">
+                    <table class="challan-table-rt">
+                        <tr>
+                            <td>Applicant Name: <b>@Model.ApplicationForm.ApplicantName</b></td>
+                        </tr>
+
+                        <tr>
+                            <td>E-mail: <b>@Model.ApplicationForm.Email</b></td>
+                        </tr>
+                        <tr>
+                            <td>Mobile No.: <b>@Model.ApplicationForm.MobileNumber</b></td>
+                        </tr>
+
+                        <tr>
+                            <td>Address: <b>@Model.ApplicationForm.CorrespondingAddress</b></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4">
+                    <p>
+                        Please find enclosed herewith
+                        ____________
+                        &nbsp;
+                        Dated &nbsp;
+                        ____________
+                        for Rs.
+                        ____________
+                        Drawn On &nbsp;
+                        ____________ &nbsp; against <b>@Model.AccountHeadName</b> as <b> @Model.AccountSubHeadName</b>
+                        the payment of property Allotted / Leased / Subleased to me by Noida Authority.
+                    </p>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="4" style="height: 5px;"></td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <b>Bank Authorised Signatory</b>
+                </td>
+                <td colspan="2" style="text-align:right">
+                    <b>Depositors Signature</b>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <span style="font-size:11px;">Note:Payment alone will not secure any right to allottee.</span>
+
+</div>

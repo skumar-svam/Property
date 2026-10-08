@@ -1,0 +1,622 @@
+﻿@model NA.PMS.Model.FunctionalModel
+@using Kendo.Mvc.UI;
+@using NA.PMS.Common;
+
+
+<h2 class="blck-heading">Applicant Details</h2>
+<div class="form-bx">
+    <div>
+        @Html.HiddenFor(m => m.PropertyNumber)
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Registration ID", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DropDownListFor(m => m.RId)
+            .Filter("contains")
+            .DataTextField("text")
+            .DataValueField("id")
+            .OptionLabel("Select")
+            .DataSource(source =>
+            {
+                source.Custom()
+                .ServerFiltering(true)
+                .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                .Transport(transport =>
+                {
+                    transport.Read(read => read.Action("GetRIDsForFunctional", "PropertyRegistration").Data("GetRid"));
+                }).Schema(schema =>
+                {
+                    schema.Data("Data")
+                    .Total("Total");
+                }).PageSize(100);
+            })
+            .Events(events => { events.Change("RIdChange"); })
+            .HtmlAttributes(new { @class = "schemeForms ddl-rid", style = "width:100%" })
+            )
+        </div>
+       
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.LabelFor(m => m.ReqRefNo, htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(model => model.ReqRefNo, new { @class = "form-control textBoxValueRightAlign", @maxlength = "8", onkeypress = "return IsNumeric(event);", @onchange = "RequestIdCheck();" })
+            @(Html.ValidationMessageFor(m => m.ReqRefNo))
+        </div>
+        @*<div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Property No")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span class="lbl-form-control">
+                <div id="lblPropNo">
+                    @Html.DisplayFor(m => m.PropertyNumber)
+                    @Html.HiddenFor(m => m.PropertyNumber)
+                </div>
+            </span>
+        </div>*@
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Scheme Name")
+            @Html.HiddenFor(m => m.Status)
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span class="lbl-form-control">
+                <div id="lblScNa">
+                    @Html.DisplayFor(m => m.SchemeName)
+                </div>
+            </span>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Department")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span class="lbl-form-control">
+                <div id="lblDeNa">
+                    @Html.DisplayFor(m => m.DepttName)
+                    @Html.HiddenFor(m => m.DepttId)
+                </div>
+            </span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Applicant Name")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <div id="lblApNa">
+                <span class="lbl-form-control">@Html.DisplayFor(m => m.ApplicationName)</span>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Property Type")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <div id="lblPropTy">
+                <span class="lbl-form-control">@Html.DisplayFor(m => m.PropertyType)</span>
+            </div>
+        </div>
+
+    </div>
+    @{
+        if (Model != null && Model.Gender.ToLower() != "company")
+        {
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Gender")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <div id="lblGender">
+                        <span class=" lbl-form-control">@Html.DisplayFor(m => m.Gender)</span>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Father's/Husband's Name")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <div id="lblReNa">
+                        <span class=" lbl-form-control">@Html.DisplayFor(m => m.RelationName, new { @id = "relationId" })</span>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    @*<div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @if (Model != null)
+            {
+                if (Model.Gender != "company")
+                {
+                    @Html.Label("Gender")
+                }
+            }           
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span class="lbl-form-control">
+                <div id="lblGender">
+                    @Html.DisplayFor(m => m.Gender)
+                </div>
+            </span>
+        </div>
+
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @if (Model != null) //Resolved Bug#225
+            {
+                if (Model.Gender != "company")
+                {
+                    @Html.Label("Father's/Husband's Name")
+                }
+            }
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+            @if (Model != null) //Resolved Bug#225
+            {
+                if (Model.Gender != "company")
+                {
+                    <span class="lbl-form-control">
+                        <div id="lblReNa">
+                            @Html.DisplayFor(m => m.RelationName, new { @id = "relationId" })
+                        </div>
+                    </span>
+                }
+            }
+        </div>        
+    </div>*@
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Area")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span class="lbl-form-control">
+                <div id="lblArea" readonly="readonly">
+                    @Html.DisplayFor(m => m.Area)
+                </div>
+            </span>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Floor/Area Range")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span class="lbl-form-control">
+                <div id="lblFloor">
+                    @Html.DisplayFor(m => m.Floor)
+                </div>
+            </span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Functional Due Date", new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group" id="lblFunctionalDueDate">
+            @(Html.Kendo().DatePickerFor(model => model.FunctionalDueDate).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+            @Html.ValidationMessageFor(model => model.FunctionalDueDate, "", new { @class = "text-danger" })
+        </div>
+        <div id="divFunctionalDate">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.Label("Actual Functional Date")
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group" id="lblFunctionalDate">
+                @(Html.Kendo().DatePickerFor(model => model.FunctionalDate).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+                @Html.ValidationMessageFor(model => model.FunctionalDate, "", new { @class = "text-danger" })
+            </div>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Functional Charge")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group" id="lblFunctionalDueDate">
+            @(Html.Kendo().NumericTextBoxFor(m => m.FunctionalCharge)
+            .Name("FunctionalCharge")
+            .Min(0)
+            .Max(99999999999999)
+            .Spinners(false).Step(0)
+            .Enable(true)
+            .HtmlAttributes(new { style = "width: 100%", @maxlength = "14", @class = "k-label schemeForms textBoxValueRightAlign" })
+            )
+            @Html.ValidationMessageFor(model => model.FunctionalCharge, "", new { @class = "text-danger" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+           
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group" id="lblReqRefNo">
+           
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Completion Date:")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DatePickerFor(model => model.CompletionDate).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Affidavit Date:")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DatePickerFor(model => model.AffidavitDate).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+        </div>
+    </div>
+</div>
+
+<h2 class="blck-heading">Documents</h2>
+<div class="form-bx">
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Meter sealing certificate by UPSEB")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group" id="lblMeterSealing">
+            @Html.CheckBoxFor(m => m.MeterSealing, new { value = "false" })<input type="file" onchange="MeterSealingFileSelection()" name="fileMeterSealing" id="fileMeterSealing" />
+
+            @if (Model != null)
+            {
+                if (Model.MeterSealingFile != null)
+                {
+                    <a href=@Model.MeterSealingFile
+                       target="_blank">
+                        View File
+                    </a>
+                }
+            }
+
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Affidavit")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group" id="lblAffidavit">
+            @Html.CheckBoxFor(m => m.Affidavit, new { value = "false" })<input type="file" onchange="AffidavitFileSelection()" name="fileAffidavit" id="fileAffidavit" />
+            @if (Model != null)
+            {
+                if (Model.AffidebitFile != null)
+                {
+                    <a href=@Model.AffidebitFile
+                       target="_blank">
+                        View File
+                    </a>
+                }
+            }
+            @*@if (Model != null)
+                {
+                if (Model.AffidebitFile != null)
+                {
+                foreach (var file in Model.AffidebitFile)
+                {
+                <a href="@file.FullName"
+                   title="@file.FullName" target="_blank">
+                    View File
+                </a>
+                }
+                }
+                }*@
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Registration Certificate of trade tax dept")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group" id="lblTrNa1">
+            @Html.CheckBoxFor(m => m.RegistrationCertificate, new { value = "false" })<input type="file" onchange="RegistrationCertificateFileSelection()" name="fileRegistrationCertificate" id="fileRegistrationCertificate" />
+            @if (Model != null)
+            {
+                if (Model.RegistrationCertificateFile != null)
+                {
+                    <a href=@Model.RegistrationCertificateFile
+                       target="_blank">
+                        View File
+                    </a>
+                }
+            }
+            @*@if (Model != null)
+                {
+                if (Model.RegistrationCertificateFile != null)
+                {
+                foreach (var file in Model.RegistrationCertificateFile)
+                {
+                <a href="@file.FullName"
+                   title="@file.FullName" target="_blank">
+                    View File
+                </a>
+                }
+                }
+                }*@
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("NDC from Account")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group" id="lblTrGender1">
+            @Html.CheckBoxFor(m => m.NDCAccount, new { value = "false" })<input type="file" onchange="NDCAccountFileSelection()" name="fileNDCAccount" id="fileNDCAccount" />
+            @if (Model != null)
+            {
+                if (Model.NDCAccountFile != null)
+                {
+                    <a href=@Model.NDCAccountFile
+                       target="_blank">
+                        View File
+                    </a>
+                }
+            }
+            @*@if (Model != null)
+                {
+                if (Model.NDCAccountFile != null)
+                {
+                foreach (var file in Model.NDCAccountFile)
+                {
+                <a download="@file.FullName"
+                   title="@file.FullName">
+                    View File
+                </a>
+                }
+                }
+                }*@
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    function GetRid() {
+        var regId = $("#hdnRId").val();
+        if (regId == "" || regId == undefined) { regId = 0; }
+        return {
+            Rid: regId
+        };
+    }
+
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+
+    function MeterSealingFileSelection() {
+        var fileMeterSealing = $("#fileMeterSealing").val();
+        var arrayFileMeterSealing = fileMeterSealing.split('.');
+        if (arrayFileMeterSealing[1] != "pdf") {
+            alert("Only pdf files are allowed");
+            $("#fileMeterSealing").val('');
+            $("#MeterSealing").prop('checked', false);
+            $("#MeterSealing").prop('disabled', false);
+            return false;
+        }
+        else {
+            $("#MeterSealing").prop('checked', true);
+            $("#MeterSealing").prop('disabled', true);
+        }
+    }
+    function AffidavitFileSelection() {
+        var fileAffidavit = $("#fileAffidavit").val();
+        var arrayFileAffidavit = fileAffidavit.split('.');
+        if (arrayFileAffidavit[1] != "pdf") {
+            alert("Only pdf files are allowed");
+            $("#fileAffidavit").val('');
+            $("#Affidavit").prop('checked', false);
+            $("#Affidavit").prop('disabled', false);
+            return false;
+        }
+        else {
+            $("#Affidavit").prop('checked', true);
+            $("#Affidavit").prop('disabled', true);
+        }
+    }
+    function RegistrationCertificateFileSelection() {
+        var fileRegistrationCertificate = $("#fileRegistrationCertificate").val();
+        var arrayFileRegistrationCertificate = fileRegistrationCertificate.split('.');
+        if (arrayFileRegistrationCertificate[1] != "pdf") {
+            alert("Only pdf files are allowed");
+            $("#fileRegistrationCertificate").val('');
+            $("#RegistrationCertificate").prop('checked', false);
+            $("#RegistrationCertificate").prop('disabled', false);
+            return false;
+        }
+        else {
+            $("#RegistrationCertificate").prop('checked', true);
+            $("#RegistrationCertificate").prop('disabled', true);
+        }
+    }
+    function NDCAccountFileSelection() {
+        var fileNDCAccount = $("#fileNDCAccount").val();
+        var arrayFileNDCAccount = fileNDCAccount.split('.');
+        if (arrayFileNDCAccount[1] != "pdf") {
+            alert("Only pdf files are allowed");
+            $("#fileNDCAccount").val('');
+            $("#NDCAccount").prop('checked', false);
+            $("#NDCAccount").prop('disabled', false);
+            return false;
+        }
+        else {
+            $("#NDCAccount").prop('checked', true);
+            $("#NDCAccount").prop('disabled', true);
+        }
+    }
+    $("#MeterSealing").click(function () {
+        if ($(this).is(":checked")) {
+            $("#MeterSealing").val(true);
+        }
+        else {
+            $("#MeterSealing").val(false);
+        }
+
+    });
+    $("#Affidavit").click(function () {
+        if ($(this).is(":checked")) {
+            $("#Affidavit").val(true);
+        }
+        else {
+            $("#Affidavit").val(false);
+        }
+
+    });
+    $("#RegistrationCertificate").click(function () {
+        if ($(this).is(":checked")) {
+            $("#RegistrationCertificate").val(true);
+        }
+        else {
+            $("#RegistrationCertificate").val(false);
+        }
+
+    });
+    $("#NDCAccount").click(function () {
+        if ($(this).is(":checked")) {
+            $("#NDCAccount").val(true);
+        }
+        else {
+            $("#NDCAccount").val(false);
+
+        }
+
+    });
+
+    function RIdChange() {
+        var rId = $("#RId").val();
+        if (rId == '') {
+            ClearValues();
+            alertify.error("Please select an RID");
+
+            return false;
+        }
+        //GetKYADetails(rId);
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rId: rId }),
+            url: '/PropertyRegistration/GetFunctionalTransferDetailsByRID',
+            success: function (result) {
+                if (result != null) {
+
+                    //$("#lblPropNo").html(result.PropertyNumber);
+                    $("#PropertyNumber").val(result.PropertyNumber);
+                    $("#lblScNa").html(result.SchemeName);
+                    $("#lblDeNa").html(result.DepttName);
+                    $("#lblApNa").html(result.ApplicationName);
+                    $("#lblGender").html(result.Gender);
+                    $("#lblReNa").html(result.RelationName);
+                    $("#lblPropTy").html(result.PropertyType);
+                    $("#lblArea").html(result.Area);
+                    $("#lblFloor").html(result.Floor);
+
+                    //$("#FunctionalDueDate").data("kendoDatePicker").value(result.FunctionalDueDate);
+
+                    //$("#lblTrGender").html(result.TransfereeGender);
+                    //$("#lblTrReNa").html(result.TransfereeRelationName);
+                    //$("#lblTransTy").html(result.TransferType);
+                    //$("#TransferDate").data("kendoDatePicker").value(result.TransferDate);
+                    //$("#ReqNo").val(result.ReqNo);
+
+                    $("#DepttId").val(result.DepttId);
+                    //$("#PropertyNumber").var(result.PropNo);
+                    if (result.Gender == "company") {
+                        $('label[for="Father_s_Husband_s_Name"]').hide();
+                    }
+                    else {
+                        $('label[for="Father_s_Husband_s_Name"]').show();
+                    }
+                }
+                else {
+                    ClearValues();
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            },
+            error: function (obj) {
+                ClearValues();
+                alertify.error("Some error occured. Please try again later.");
+            }
+        });
+    }
+
+    function GetKYADetails(rId) {
+        //var rId = $("#RId").val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ RegistrationId: rId }),
+            url: '/Property/PropertyRegistration/GetKYADetailsForRid',
+            success: function (result) {
+                if (result != null) {
+                    if (result.StatusId == "2") {
+                        alertify.error("Your KYA has been Rejected. Please Complete your KYA again.");
+                        $('#btnSubmitForApprovallink').attr('disabled', 'disabled');
+                        return false;
+                    }
+                    else if (result.StatusId == "" || result.StatusId == null) {
+                        alertify.error("Please Complete your KYA.");
+                        $('#btnSubmitForApprovallink').prop('disabled', true);
+                        return false;
+                    }
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+
+    function ToJavaScriptDate(value) {
+        var pattern = /Date\(([^)]+)\)/;
+        var results = pattern.exec(value);
+        if (results != null) {
+            var dt = new Date(parseFloat(results[1]));
+            return (dt.getMonth() + 1) + "/" + dt.getDate() + "/" + dt.getFullYear();
+        }
+    }
+
+    function RequestIdCheck() {
+        var request = $("#ReqRefNo").val();
+        rModel = {
+            RequestId: $("#ReqRefNo").val(),
+            RegistrationId: $("#RId").val(),
+            ServiceId: "10"
+        }
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ model: rModel }),
+            url: '/Property/PropertyRegistration/IsRequestIdIsExist',
+            success: function (result) {
+                if (result != '@ReturnType.Exist') {
+                    if (result == '@NAStatusId.Completed') {
+                        alertify.error("This Request is Completed");
+                    }
+                    else if (result == '@NAStatusId.Initiated') {
+                        alertify.error("This Request is in Initiated State. Please Forward this request first.");
+                    }
+                    else if (result == '@NAStatusId.Objection') {
+                        alertify.error("This Request in Objection State.");
+                    }
+                    else if (result == '@NAStatusId.Rejected') {
+                        alertify.error("This Request is Rejected");
+                    }
+                    else if (result == '@NAStatusId.Cancelled') {
+                        alertify.error("This Request is cancelled");
+                    }
+                    else if (result == '@NAStatusId.Withdrawn') {
+                        alertify.error("This Request is Withdrawn by Allottee.");
+                    }
+                    else {
+                        alertify.error("Request no. mismatch. Please enter a valid Request No.");
+                    }
+                    $("#ReqRefNo").val('');
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+</script>

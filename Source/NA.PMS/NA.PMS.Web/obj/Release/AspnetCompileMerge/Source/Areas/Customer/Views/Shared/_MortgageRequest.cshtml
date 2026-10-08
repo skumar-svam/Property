@@ -1,0 +1,119 @@
+﻿@model NA.PMS.Model.ServiceRequestViewModel
+@using Kendo.Mvc.UI;
+
+<div id="divMortgagePartial">
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="required">Bank Name</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(model => model.MortgageModel.BankName, new { @maxlength = "70", @class = "k-textbox", style = "width:100%" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="required">Branch Address</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(model => model.MortgageModel.BranchAddress, new { @maxlength = "150", @class = "k-textbox", style = "width:100%" })
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="required">Mortgage Type</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DropDownListFor(model => model.MortgageModel.MortgageTypeId)
+            .DataTextField("Text")
+            .DataValueField("Id")
+            .OptionLabel("---Select---")
+            .DataSource(source => source.Read(read => read.Action("GetMortgageTypeList", "Property", new { area="Customer"})))
+            .HtmlAttributes(new { style = "width:100%;" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="required">Previous NOC</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DropDownListFor(model => model.MortgageModel.PreviousLoanNoc)
+            .DataTextField("Text")
+            .DataValueField("Id")
+            .OptionLabel("---Select---")
+            .DataSource(source => source.Read(read => read.Action("GetNOCStatusList", "Property", new { area="Customer"})))
+            .HtmlAttributes(new { style = "width:100%;" })
+            )
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <label class="required">Sanction Amount</label>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(model => model.MortgageModel.SanctionedAmount, new { @maxlength = "13", @class = "k-textbox", style = "width:100%" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"></div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"></div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+    function SaveMortgageRequest() {
+        var bankname = $("input[name='MortgageModel.BankName']").val();
+        var branchAddress = $("input[name='MortgageModel.BranchAddress']").val();
+        var mortgageType = $("input[name='MortgageModel.MortgageTypeId']").val();
+        var previousLoanNoc = $("input[name='MortgageModel.PreviousLoanNoc']").val();
+        var sanctionedAmount = $("input[name='MortgageModel.SanctionedAmount']").val();
+        var description = $("#ServiceModel_Description").val();
+
+        if (bankname == "") {
+            alertify.error("Please enter Bank Name.");
+            return false;
+        }
+        if (branchAddress == "") {
+            alertify.error("Please enter Branch Address.");
+            return false;
+        }
+        if (mortgageType == "") {
+            alertify.error("Please select Mortgage Type.");
+            return false;
+        }
+        if (previousLoanNoc == "") {
+            alertify.error("Please enter Previous Loan NOC.");
+            return false;
+        }
+        if (sanctionedAmount == "") {
+            alertify.error("Please enter Sanctioned Amount.");
+            return false;
+        }
+        if (isNaN(sanctionedAmount)) {
+            alertify.error("Sanctioned Amount should be number.");
+            return false;
+        }
+        if (description == "") {
+            alertify.error("Please write description.");
+            return false;
+        }
+        else {
+            //if (CheckFileToUpload() && CheckFileSize()) {
+            //    $('#ServiceRequestForm').submit();
+            //}
+            //else {
+            //    alertify.error("Form field error.");
+            //    return false;
+            //}
+            //$('#ServiceRequestForm').submit();
+            SubmitServiceRequestForm();
+        }
+    }
+
+
+    function ClearMortgageFields() {
+        $('#MortgageModel_BankName').val();
+        $('#MortgageModel_BranchAddress').val();
+        $('#MortgageModel_SanctionedAmount').val();
+        $('#MortgageModel_MortgageTypeId').data("kendoDropDownList").value('');
+        $('#MortgageModel_PreviousLoanNoc').data("kendoDropDownList").value('');
+    }
+
+</script>
+

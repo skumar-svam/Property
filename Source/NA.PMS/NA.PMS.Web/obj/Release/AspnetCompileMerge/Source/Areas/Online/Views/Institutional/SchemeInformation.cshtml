@@ -1,0 +1,259 @@
+﻿@using NA.PMS.OnlineScheme
+@model NA.PMS.OnlineScheme.SchemeFormViewModel
+
+@{
+    ViewBag.Title = "Institutional Scheme";
+    Layout = "~/Areas/Online/Views/Shared/_LayoutOnlineScheme.cshtml";
+}
+
+<style type="text/css">
+    .btn {
+        padding: 4px 18px;
+    }
+
+    .gridTitle {
+        margin-bottom: 5px;
+    }
+
+    .lbl-header-btn-nw:hover {
+        cursor: pointer;
+    }
+
+    .lbl-header-btn-ex:hover {
+        cursor: pointer;
+    }
+
+    .lbl-header-btn-nw {
+        padding: 6px;
+        background: #c0c0c0;
+        /*background-image: linear-gradient(to button, #fff 0, #c0c0c0 100%) ;*/
+    }
+
+    .lbl-header-btn-ex {
+        padding: 6px;
+        background: #f0ad4e;
+        /*background: green;*/
+    }
+
+    .form-group label {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    div.k-window-content{
+        padding:0;
+    }
+    .form-bx label{padding-left:50px;}
+    .btn{
+        border-radius:0;
+    }
+</style>
+
+<div class="scheme-dashboard">
+    <div class="col-md-12 content-top-spce">
+        <div class="inr-bx">
+            <div class="form-bx">
+                <div>
+                    @Html.HiddenFor(m => m.Id)
+                    @Html.HiddenFor(m => m.ApplicationFormId)
+                    @Html.HiddenFor(m => m.SchemeId)
+                    @Html.HiddenFor(m => m.DepartmentId)
+                    @Html.HiddenFor(m => m.AreaRange)
+                    @Html.HiddenFor(m => m.SchemeType)
+                    @Html.HiddenFor(m => m.ApplicationFormType)
+                    @Html.HiddenFor(m => m.ApplicantType)
+                    @Html.HiddenFor(m => m.FormType, htmlAttributes: new { @id = "hdnFormType" })
+                    @Html.HiddenFor(m => m.AppType)
+                    @Html.HiddenFor(m => m.NICApplicationId)
+                    @Html.HiddenFor(m => m.NICControlId)
+                    @Html.HiddenFor(m => m.NICServiceId)
+                    @Html.HiddenFor(m => m.NICProcessIndustryId)
+                    @Html.HiddenFor(m => m.NICUnitId)
+                    @Html.HiddenFor(m => m.IsFromNIC)
+
+                </div>
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12 form-group" style="text-align:center">
+                        <h4 style="background:#008069;color:#fff;padding:6px 0;">Institutional/OES/2020-21(01)</h4>
+                    </div>
+                    <div class="col-md-12 col-sm-12 col-xs-12 form-group" style="text-align:center;">
+                        <label class="lbl-header-btn-nw"> <input type="radio" group="OESGroup" class="" name="OES" value="NewSchemeForm" /> <b> New Application Form</b></label>
+                        <label class="lbl-header-btn-ex"> <input type="radio" group="OESGroup" class="" name="OES" value="ExistingForm" /><b> Existing Application Form</b></label>
+                    </div>
+                </div>
+
+            </div>
+            <h2 class="blck-heading" style="margin-bottom:6px; background:#d8b1b1; color:#fff;display:none;">Terms and conditions for Allotment of Industrial Plot</h2>
+            <div class="form-bx" style="display:none;">
+                @{Html.RenderPartial("_SchemeInformation");}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="col-md-12" id="divLoginWindow">
+    <form id="SchemeLoginForm" method="post" enctype="multipart/form-data">
+        <div class="form-bx" style="min-height:250px;">
+            <div class="row" style="padding-top:25px;">
+                <div class="col-md-4 col-sm-6 col-xs-12 form-group" style="">
+                    <label><b>Username/Form No:</b></label>
+                </div>
+                <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                    <input type="text" class="k-textbox" id="TxtSchemeFormNo" name="TxtSchemeFormNo" maxlength="10" placeholder="Enter Your User Name/Form No" style="width:100%" />
+                </div>
+            </div>
+            <div class="row row-login">
+                <div class="col-md-4 col-sm-6 col-xs-12 form-group" style="">
+                    <label><b>Password:</b></label>
+                </div>
+                <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                    <input type="password" class="k-textbox" id="TxtPassword" name="TxtPassword" maxlength=" 10" placeholder="Enter Your Password" style="width:100%" />
+                </div>
+            </div>
+            <div class="row row-password">
+                <div class="col-md-4 col-sm-6 col-xs-12 form-group" style="">
+                    <label><b>Mobile No:</b></label>
+                </div>
+                <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                    <input type="text" class="k-textbox" id="TxtMobileNo" name="TxtMobileNo" maxlength="10" placeholder="Enter Your Mobile Number" style="width:100%" />
+                </div>
+            </div>
+            <div class="row row-password">
+                <div class="col-md-4 col-sm-6 col-xs-12 form-group" style="">
+                    <label><b>Email Id:</b></label>
+                </div>
+                <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                    <input type="text" class="k-textbox" id="TxtEmail" name="TxtEmail" maxlength="40" placeholder="Enter Your Email" style="width:100%" />
+                </div>
+            </div>
+            <div class="row" style="">
+                <div class="col-md-4 col-sm-6 col-xs-12 form-group">
+                    <input type="hidden" id="TxtActionType" name="TxtActionType" value="SchemeLogin" />
+                </div>
+                <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                    <input class="btn btn-success" type="button" value="Login" id="btn-scheme-login" />
+                    <input class="btn btn-danger" type="button" value="Cancel" id="btn-cancel-login" />
+                </div>
+                <div class="col-md-12 col-sm-12 col-xs-12 form-group text-center">
+                    <p class="message"><a href="#" id="a-password-window">Forgot Your Password?</a></p>
+                    <p class="message"><a href="#" id="a-login-window">Back to Login.</a></p>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<script type="text/javascript">
+
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+
+    var redirectType;
+    $(document).ready(function () {
+        $(".row-password").hide();
+        $("#a-login-window").hide();
+
+        $('input[name=OES]').prop('checked', false);
+
+        $('input:radio[name=OES]').on('click', function () {
+            var radiobtnVal = $('input[name=OES]:checked').val();
+            if (radiobtnVal == "ExistingForm") {
+                $("#divLoginWindow").data("kendoWindow").center();
+                $("#divLoginWindow").data("kendoWindow").open();
+                $("#divLoginWindow").data("kendoWindow").pin();
+            }
+            else if (radiobtnVal == "NewSchemeForm") {
+                //alert("Open Ended Scheme has been closed on 31-Dec-2018");
+                window.location.href = '/Online/Institutional/OpenEndSchemeForm';
+            }
+        });
+
+        $('#btn-scheme-login').click(function () {
+            var formId = $("#TxtSchemeFormNo").val();
+            var passwd = $("#TxtPassword").val();
+            var mobile = $("#TxtMobileNo").val();
+            var email = $("#TxtEmail").val();
+            var actionType = $("#TxtActionType").val();
+            var smodel = {
+                ApplicationFormId: formId,
+                UserPassword: passwd,
+                DepartmentId: 1,
+                MobileNo: mobile,
+                Email: email,
+                ActionType: actionType
+            };
+            ValidateSchemeUser(smodel);
+        });
+
+        $("#btn-cancel-login").click(function () {
+            $("#divLoginWindow").data("kendoWindow").close();
+        });
+
+        $("#a-password-window").click(function () {
+            $('.row-password').show();
+            $('.row-login').hide();
+            $("#a-password-window").hide();
+            $("#a-login-window").show();
+            $('#btn-scheme-login').val("Reset Password");
+            $('#TxtActionType').val("ResetPassword");
+        });
+
+        $("#a-login-window").click(function () {
+            $('.row-password').hide();
+            $('.row-login').show()
+            $("#a-password-window").show();
+            $("#a-login-window").hide();
+            $('#btn-scheme-login').val("Login");
+            $('#TxtActionType').val("SchemeLogin");
+        });
+
+        $('#divLoginWindow').kendoWindow({
+            modal: true,
+            title: "Online Scheme Login",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "25%"
+            },
+            width: "50%", height: "auto"
+        });
+
+    });
+
+    function ValidateSchemeUser(smodel) {
+        if (smodel != undefined) {
+            $.ajax({
+                url: '/Online/Institutional/ValidateSchemeForm',
+                type: 'POST',
+                data: { model: smodel },
+                success: function (result) {
+                    if (result != null && result.ActionType == "SchemeLogin") {
+                        if (result.ReturnTypeId == '@OSReturnTypeId.Success') {
+                            window.location.href = '/Online/Institutional/OpenEndSchemeForm?ApplicationFormId=' + result.ApplicationFormId;
+                        }
+                        else {
+                            alertify.error("please enter valid credentials.");
+                        }
+                    }
+                    if (result != null && result.ActionType == "ResetPassword") {
+                        if (result.ReturnTypeId == '@OSReturnTypeId.Success') {
+                            alertify.success("Password has been sent to your registed mobile no.");
+                            window.location.reload(true);
+                        }
+                        else {
+                            alertify.error("Invalid Scheme Form No.");
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+</script>

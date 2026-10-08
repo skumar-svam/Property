@@ -1,0 +1,163 @@
+﻿@model NA.PMS.Model.PropertyDocument
+@using Kendo.Mvc.UI;
+@using NA.PMS.Common;
+
+<style>
+    .more-less {
+        float: right;
+        color: #212121;
+    }
+
+    .left-pad-15 {
+        padding-left: 15px;
+    }
+
+    .panel-title a {
+        text-decoration: none;
+    }
+
+    .k-textbox {
+        width: 100%;
+    }
+
+    .form-control {
+        border-radius: 0;
+    }
+
+    .panel-body {
+        padding-bottom: 0;
+    }
+
+    .updatebtn {
+        width: 50%;
+        padding-right: 30px;
+    }
+</style>
+@using (Html.BeginForm("SaveUploadedDocument", "PropertyAllotment", new { area = "Property" }, FormMethod.Post, new { enctype = "multipart/form-data", id = "uploaddocform" }))
+{ 
+<div class="col-md-12 divHeaderClass" id="divPropertyDetailHeader2">
+    <h4 class="PropertyDetailHeader alot-prop-header">Add other Documents</h4>
+</div>
+
+<div class="col-md-12">
+    <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="headingOne">
+            <h4 class="panel-title">
+                <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                    <i class="more-less glyphicon glyphicon-plus"></i>
+                    Upload Document
+                </a>
+            </h4>
+        </div>
+        <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+            <div class="panel-body">
+                <div class="row row-file" style="background:#fff;">
+                    <div class="col-md-3 col-sm-6 col-xs-12 form-group col-file">
+                        @Html.Label("Document Type", htmlAttributes: new { @class = "required" })
+                    </div>
+                    <div class="col-md-3 col-sm-6 col-xs-12 form-group col-file">
+                        @(Html.Kendo().DropDownListFor(model => model.DocumentType)
+                        .DataTextField("Text")
+                        .DataValueField("Id")
+                        .OptionLabel("--select--")
+                        .DataSource(source =>
+                        {
+                            source.Custom()
+                            .ServerFiltering(true)
+                            .ServerPaging(true)
+                            .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                            .Transport(transport => transport.Read(read => read.Action("GetDocumentTypeListByDepartmentId", "PropertyAllotment", new { area = "Property" }).Data("FilterDocumentType")))
+                            .Schema(schema => schema.Data("Data").Total("Total"))
+                            .PageSize(100);
+                        })
+                        .HtmlAttributes(new { style = "width:100%" })
+                        )
+                    </div>
+                    <div class="col-md-3 col-sm-6 col-xs-12 form-group col-file" style="padding-left:30px;">
+                        <input type="file" name="docfile" id="doc-file" class="file-upload" />
+                    </div>
+                    <div class="col-md-3 col-sm-6 col-xs-12 form-group col-file" style="text-align:right;">
+                        <input type="button" class="k-button updatebtn" id="btnUploadDoc" value="Upload" />
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+}
+
+<script>
+    $(document).ready(function () {
+        $("#doc-file").change(function () {
+            readURL(this);
+        });
+
+        $('#btnUploadDoc').click(function () {
+            debugger;
+            var docType = $('#DocumentType').val();
+            var rid = $("#hdnRID").val();
+            var formData = new FormData($('form#uploaddocform').get(0));
+            formData.append("RID", rid);
+            //formData.append("DocumentType", docType);
+            //formData.append("docfile",)
+            if (docType == "" || docType == null) {
+                alertify.error("Please select Document Type");
+                return false;
+            }
+            if (docType != "") {
+                if ($('#doc-file').val() == "") {
+                    alertify.error("Please select Document File");
+                    flag = false;
+                }
+            }
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: false, // Not to set any content header
+                processData: false, // Not to process data
+                //contentType: "application/json; charset=utf-8",
+                data: formData,
+                url: '@Url.Action("SaveUploadedDocument", "PropertyAllotment", new { area = "Property" })',
+                success: function (result) {
+                    if (result == '@ReturnType.Saved') {
+                        alertify.success("Document Uploaded successfully.");
+                        $("#gridPropertyDocument").data("kendoGrid").datasource.read();
+                    }
+                    else {
+                        alertify.error("Document Upload Fail.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error. Try again later.");
+                }
+            });
+        });
+    });
+    function FilterDocumentType() {
+        return {
+            deptId: $("#hdnDeptId").val()
+        }
+    }
+
+    function readURL(input) {
+        if (input.files && input.files[0]) {
+            var imgsize = input.files[0].size / 1024;
+            if (imgsize < 20) {
+                alertify.error(" Min 20kb file size is allowed");
+                $('#doc-file').val('');
+                return false;
+            }
+            else if (imgsize / 1024 > 5) {
+                alertify.error(" Max 5Mb file size is allowed");
+                $('#doc-file').val('');
+                return false;
+            }
+        }
+        else {
+            $('#doc-file').val('');
+        }
+    }
+
+</script>

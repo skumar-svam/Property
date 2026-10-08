@@ -1,0 +1,215 @@
+﻿@using Kendo.Mvc.UI
+@{
+    ViewBag.Title = "Completion Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="ManageCompletion">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Completion Report</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                @*<a href="#" id="btnRequest" class="" onclick="javascript: AddCompletionReq(event);">Add Request</a>*@
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12">
+        <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            <h2 class="blck-heading">Search Property</h2>
+            <div class="" style="">
+                <div class="row">
+
+                    <div class="col-md-2 col-sm-2 col-xs-12 form-group" style="padding-left:10px;">
+                        @Html.Label("Department")
+                        @(Html.Kendo().DropDownList()
+                             .Name("ddlDepartment")
+                            .DataTextField("text")
+                            .DataValueField("id")
+                            .OptionLabel("--Select--")
+                            .Filter("contains")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetDepartmentListForLoginUser", "Report");
+                                });
+                            })
+                            .HtmlAttributes(new { style = "width:96%;margin-right:10px;" })
+                            .Events(e => e.Change("FilterCompletionReport"))
+                        )
+                    </div>
+                    @Html.Hidden("ddlScheme", "")
+                    @*<div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Scheme")
+                            @(Html.Kendo().DropDownList()
+                                 .Name("ddlScheme")
+                                .DataTextField("text")
+                                .DataValueField("text")
+                                .OptionLabel("--Select--")
+                                .Filter("contains")
+                                .DataSource(source =>
+                                {
+                                    source.Read(read =>
+                                    {
+                                        read.Action("GetCompletedSchemeToSearch", "Report");
+                                    });
+                                })
+                                .HtmlAttributes(new { style = "width:96%;" })
+                                        .Events(e => e.Change("FilterCompletionReport"))
+                            )
+                        </div>*@
+                    <div class="col-md-2 col-sm-2 col-xs-12 form-group">
+                        @Html.Label("Completion status")
+                        @(Html.Kendo().DropDownList()
+                             .Name("ddlCompletionStatus")
+                            .DataTextField("text")
+                            .DataValueField("text")
+                            .OptionLabel("--Select--")
+                            .Filter("contains")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetPropertyCompletionStatus", "Report");
+                                });
+                            })
+                            .HtmlAttributes(new { style = "width:96%;" })
+                                    .Events(e => e.Change("FilterCompletionReport"))
+                        )
+                    </div>
+                    
+                    <div class="col-md-2 col-sm-2 col-xs-12 form-group">
+                        @Html.Label("Sector")
+                        @Html.Kendo().TextBox().Name("SectorName").HtmlAttributes(new { style = "width:96%", @maxlength = "10" })
+                    </div>
+                    <div class="col-md-2 col-sm-2 col-xs-12 form-group">
+                        <label>Date From</label>
+                        @(Html.Kendo().DatePicker().Name("kendoStartDate").HtmlAttributes(new { style = "width:96%;" }).Events(e => e.Change("FilterCompletionReport")))
+                    </div>
+                    <div class="col-md-2 col-sm-2 col-xs-12 form-group">
+                        <label>Date To</label>
+                        @(Html.Kendo().DatePicker().Name("kendoEndDate").HtmlAttributes(new { style = "width:96%;" }).Events(e => e.Change("FilterCompletionReport")))
+                    </div>
+                    <div class="col-md-2 col-sm-2 col-xs-12 form-group">
+                        @Html.Label("")<br />
+                        <input type="button" id="btnAdvanceSearch" class="btn btn-add" value="Search" />
+                        <input type="button" id="btnClear" class="btn btn-default" value="Clear" style="margin-right:10px;" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.PropertyCompletionModel>()
+                .Name("gridCompletionReport")
+                .ToolBar(tools => tools.Excel())
+                .ToolBar(tools => tools.Pdf())
+                .Pdf(pdf => pdf
+                    .AllPages()
+                    .AvoidLinks()
+                    .PaperSize("A4")
+                    .Scale(0.8)
+                    .Margin("2cm", "1cm", "1cm", "1cm")
+                    .Landscape()
+                    .RepeatHeaders()
+                    .TemplateId("page-template")
+                    .FileName("FunctionalReport.pdf")
+                    .ProxyURL(Url.Action("Pdf_Export_Save", "Report"))
+                )
+                .Excel(excel => excel
+                    .FileName("FunctionalReport.xlsx")
+                    .AllPages(true)
+                    .Filterable(true)
+                    .ProxyURL(Url.Action("Excel_Export_Save", "Report"))
+                )
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.PropertyId).Width(10).Title("").Hidden(true);
+                    columns.Bound(c => c.SchemeId).Width(10).Title("").Hidden(true);
+                    columns.Bound(c => c.DepttId).Width(10).Title("").Hidden(true);
+                    columns.Bound(c => c.ReqNo).Title("Request No").Hidden(true);
+                    columns.Bound(c => c.RId).Title("Registration Id").Width(150);
+                    columns.Bound(c => c.DepttName).Title("Department");
+                    columns.Bound(c => c.PropNo).Title("Property No");
+                    columns.Bound(c => c.Applicant).Title("Applicant");
+                    columns.Bound(c => c.CompletionDate).Title("Completion Date").Format("{0:dd/MM/yyyy}");                  
+                })
+                .Sortable()
+                .Filterable()
+                .Groupable()
+                .Resizable(resize => resize.Columns(true))
+                .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .Model(model => model.Id(c => c.RId))
+                        .ServerOperation(true)
+                        //.Read(read => read.Action("GetCompletionData", "Completion", new { area="Property"})).PageSize(20)
+                       .Read(read => read.Action("SearchCompletionReportData", "Report").Data("FilterSearchField")).PageSize(20)
+                )
+        )
+    </div>
+</div>
+
+<script type="text/javascript">
+    function FilterCompletionReport() {
+        $('#gridCompletionReport').data("kendoGrid").dataSource.read();
+    }
+    function FilterSearchField() {
+        return {
+            completion: $('#ddlCompletionStatus').val(),
+            department: $('#ddlDepartment').val(),
+            scheme: $('#ddlScheme').val(),
+            sector: $('#SectorName').val(),
+            startDate: $('#kendoStartDate').val(),
+            endDate: $('#kendoEndDate').val()
+        }
+    }
+    function ClearFields() {
+        $('#ddlCompletionStatus').data("kendoDropDownList").value('');
+        $('#ddlDepartment').data("kendoDropDownList").value('');
+        //$('#ddlScheme').data("kendoDropDownList").value('');
+        $('#ddlScheme').val('');
+        $('#SectorName').val('');
+        $('#kendoStartDate').data("kendoDatePicker").value('');
+        $('#kendoEndDate').data("kendoDatePicker").value('');
+        $('#gridCompletionReport').data("kendoGrid").dataSource.read();
+    }
+
+
+    $('#btnAdvanceSearch').click(function () {
+        var completion = $('#ddlCompletionStatus').val();
+        var department = $('#ddlDepartment').val();
+        var schemeName = $('#ddlScheme').val();
+        var sectorName = $('#SectorName').val();
+        var startDate = $('#kendoStartDate').val();
+        var endDate = $('#kendoEndDate').val();
+
+        if (completion == "" && department == "" && schemeName == "" && sectorName == "" && startDate == "" && endDate == "") {
+            alertify.error("Please select at least one field");
+        }
+        else {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ completion: completion, department: department, sector: sectorName, scheme: schemeName, startDate: startDate, endDate: endDate }),
+                url: '@Url.Action("SearchFunctionalReport", "Report")',
+                success: function (result) {
+                    if (result != null) {
+                        $('#gridCompletionReport').data("kendoGrid").dataSource.read();
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Something is wrong, try again later");
+                }
+            });
+        }
+    });
+
+    $('#btnClear').click(function () {
+        ClearFields();
+    });
+
+</script>

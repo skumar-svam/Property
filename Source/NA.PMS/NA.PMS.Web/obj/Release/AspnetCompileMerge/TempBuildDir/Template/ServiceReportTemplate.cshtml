@@ -1,0 +1,649 @@
+﻿@model NA.PMS.Model.ServiceReportDepartmentWiseVM
+
+<style>
+
+    .text-position {
+        text-align: center;
+    }
+
+    .panel-body.challan-body {
+        font-size: 11px;
+        font-family: Arial;
+        border: 1px solid black;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+
+    h4 {
+        margin: 0;
+        padding: 0;
+    }
+
+    br {
+        height: 2px;
+    }
+
+    th {
+        text-align: center;
+        font-size: 12px;
+        font-family: Arial;
+    }
+
+    td {
+        margin: 0px;
+    }
+
+    hr.challan-line {
+        display: block;
+        margin-top: 0;
+        margin-bottom: 0;
+        margin-left: auto;
+        margin-right: auto;
+        border-style: inset;
+        border-width: 1px;
+    }
+
+    .lbl-seperator {
+        width: 100%;
+        font-family: Arial;
+        font-size: 11px;
+        text-align: center;
+    }
+
+    .tbl-challan {
+        width: 100%;
+        height: 290px;
+    }
+
+    .tbl-challan_one {
+        width: 100%;
+        /*height: 290px;*/
+    }
+
+    .tbl-challan tr td {
+        height: 5px;
+        font-size: 12px;
+        font-family: Arial;
+    }
+
+    .challan-table {
+        height: 100px;
+        width: 100%;
+        /*border:1px;*/
+        border-left: 1px solid black;
+        border-right: 1px solid black;
+        border-bottom: 1px solid black;
+        border-top: 1px solid black;
+    }
+
+    .challan-table-rt {
+        height: 100px;
+        width: 100%;
+        border-left: 0px solid black;
+        border-right: 1px solid black;
+        border-bottom: 1px solid black;
+        border-top: 1px solid black;
+    }
+
+    .challan-table tr {
+        border-bottom: 0px solid black;
+    }
+
+    .challan-table-rt tr {
+        border-bottom: 0px solid black;
+    }
+
+    .digit-right {
+        text-align: right;
+        padding: 2px;
+    }
+
+    .padd-left {
+        padding-left: 2px;
+    }
+</style>
+
+<div class="container-fluid">
+    <div class="panel-body challan-body">
+        <table class="tbl-challan">
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="4">
+                                <center><h5><b>NEW OKHLA INDUSTRIAL DEVELOPMENT AUTHORITY</b></h5></center>
+                            </td>
+                        </tr>
+                        <tr><td></td></tr>
+                        <tr>
+                            <td colspan="4"><center><h5><b>STATUS OF SERVICES UNDER JANHIT GUARANTEE ADHINIYAM 2011</b></h5></center></td>
+                        </tr>
+                        <tr>
+                            <td colspan="4"><center><h5><b>LAND ALLOTMENT</b></h5></center></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class=MsoTableGrid border=1 cellspacing=0 cellpadding=0
+                           style='border-collapse:collapse;border:none'>
+                        <tr style='height:10.2pt'>
+                            <td width=163 rowspan=3 valign=top style='width:122.1pt;border:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'></p>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><b>S. No.</b></p>
+                            </td>
+                            <td style="width:30%;border: solid 1px black;" width=163 rowspan=3 valign=top style='width:122.1pt;border:solid windowtext 1.0pt;
+  border-left:none;padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>&nbsp;</p>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><b>SERVICE NAME</b></p>
+                            </td>
+                            <td width=814 colspan=7 valign=top style='width:610.8pt;border:solid windowtext 1.0pt;
+  border-left:none;padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'>
+                                    <b>Date</b> @Model.StartDate.Value.ToString("dd MMM yyyy") <b>to</b> @Model.EndDate.Value.ToString("dd MMM yyyy")
+                                </p>
+                            </td>
+                        </tr>
+                        <tr style='height:16.15pt'>
+                            <td width=326 colspan=4 valign=top style='width:244.2pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:16.15pt'>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><b>RECEIVED APPLICATIONS</b></p>
+                            </td>
+                            <td width=163 rowspan=2 valign=top style='width:122.1pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:16.15pt'>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><b>&nbsp;</b></p>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><b>DISPOSED</b></p>
+                            </td>
+                            <td width=163 rowspan=2 valign=top style='width:122.15pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:16.15pt'>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><b>&nbsp;</b></p>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><b>PENDING</b></p>
+                            </td>
+                            <td width=163 rowspan=2 valign=top style='width:122.35pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:16.15pt'>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><b>&nbsp;</b></p>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><b>PENDING %</b></p>
+                            </td>
+                        </tr>
+                        <tr style='height:16.1pt'>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:16.1pt'>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><b>NOIDA WEBSITE</b></p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:16.1pt'>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><b>E-DISTRICT PROTAL</b></p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:16.1pt'>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><b>JANSUVIDHA KENDRA/OFFLINE</b></p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:16.1pt'>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><b>TOTAL</b></p>
+                            </td>
+                        </tr>
+                        <tr style='height:10.2pt'>
+                            <td width=163 valign=top style='width:122.1pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><center><b>1</b></center></p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><center><b>2</b></center></p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><center><b>3</b></center></p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><center><b>4</b></center></p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><center><b>5</b></center></p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><center><b>6=3+4+5</b></center></p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><center><b>7 </b></center></p>
+                            </td>
+                            <td width=163 valign=top style='width:122.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><center><b>8 </b></center></p>
+                            </td>
+                            <td width=163 valign=top style='width:122.35pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><center><b>9=8/6*100</b></center></p>
+                            </td>
+                        </tr>
+
+                        <tr style='height:10.2pt'>
+                            <td width=163 valign=top style='width:122.1pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>1</p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>Land Allotment Letter</p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>0</p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>0</p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>0</p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>0</p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>0</p>
+                            </td>
+                            <td width=163 valign=top style='width:122.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>0</p>
+                            </td>
+                            <td width=163 valign=top style='width:122.35pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>0</p>
+                            </td>
+                        </tr>
+                        <tr style='height:10.2pt'>
+                            <td width=163 valign=top style='width:122.1pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>2</p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>Approval of maps</p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>0</p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>0</p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>0</p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>0</p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>0</p>
+                            </td>
+                            <td width=163 valign=top style='width:122.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>0</p>
+                            </td>
+                            <td width=163 valign=top style='width:122.35pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>0</p>
+                            </td>
+                        </tr>
+                        <tr style='height:10.2pt'>
+                            <td width=163 valign=top style='width:122.1pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>3</p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>Completion Certificate</p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>0</p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>0</p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>0</p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>0</p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>0</p>
+                            </td>
+                            <td width=163 valign=top style='width:122.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>0</p>
+                            </td>
+                            <td width=163 valign=top style='width:122.35pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>0</p>
+                            </td>
+                        </tr>
+                    </table>
+                    <small style="margin-top:5px;float:right;">(Last updated on @DateTime.Now.ToString("dd MMM yyyy"))</small>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class="tbl-challan_one">
+                        <tr>
+                            <td colspan="4"><center><h5><b>STATUS OF SERVICES IN @Model.DepartmentName DEPARTMENT</b></h5></center></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <table class=MsoTableGrid border=1 cellspacing=0 cellpadding=0
+                           style='border-collapse:collapse;border:none'>
+                        <tr style='height:10.2pt'>
+                            <td width=163 rowspan=3 valign=top style='width:122.1pt;border:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'></p>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><b>S. No.</b></p>
+                            </td>
+                            <td style="width:30%;border: solid 1px black;" width=163 rowspan=3 valign=top style='width:122.1pt;border:solid windowtext 1.0pt;
+  border-left:none;padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>&nbsp;</p>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><b>SERVICE NAME</b></p>
+                            </td>
+                            <td width=814 colspan=7 valign=top style='width:610.8pt;border:solid windowtext 1.0pt;
+  border-left:none;padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'>
+                                    <b>Date</b> @Model.StartDate.Value.ToString("dd MMM yyyy") <b>to</b> @Model.EndDate.Value.ToString("dd MMM yyyy")
+                                </p>
+                            </td>
+                        </tr>
+                        <tr style='height:16.15pt'>
+                            <td width=326 colspan=4 valign=top style='width:244.2pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:16.15pt'>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><b>RECEIVED APPLICATIONS</b></p>
+                            </td>
+                            <td width=163 rowspan=2 valign=top style='width:122.1pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:16.15pt'>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><b>&nbsp;</b></p>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><b>DISPOSED</b></p>
+                            </td>
+                            <td width=163 rowspan=2 valign=top style='width:122.15pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:16.15pt'>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><b>&nbsp;</b></p>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><b>PENDING</b></p>
+                            </td>
+                            <td width=163 rowspan=2 valign=top style='width:122.35pt;border-top:none;
+  border-left:none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:16.15pt'>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><b>&nbsp;</b></p>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><b>PENDING %</b></p>
+                            </td>
+                        </tr>
+                        <tr style='height:16.1pt'>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:16.1pt'>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><b>NOIDA WEBSITE</b></p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:16.1pt'>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><b>E-DISTRICT PROTAL</b></p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:16.1pt'>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><b>JANSUVIDHA KENDRA/OFFLINE</b></p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:16.1pt'>
+                                <p class=MsoNormal align=center style='margin-bottom:0in;margin-bottom:.0001pt;
+  text-align:center;line-height:normal'><b>TOTAL</b></p>
+                            </td>
+                        </tr>
+                        <tr style='height:10.2pt'>
+                            <td width=163 valign=top style='width:122.1pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><center><b>1</b></center></p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><center><b>2</b></center></p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><center><b>3</b></center></p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><center><b>4</b></center></p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><center><b>5</b></center></p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><center><b>6=3+4+5</b></center></p>
+                            </td>
+                            <td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><center><b>7 </b></center></p>
+                            </td>
+                            <td width=163 valign=top style='width:122.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><center><b>8 </b></center></p>
+                            </td>
+                            <td width=163 valign=top style='width:122.35pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                <p class=MsoNormal style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'><center><b>9=8/6*100</b></center></p>
+                            </td>
+                        </tr>
+                        @for (int i = 0; i < Model.ServiceList.Count(); i++)
+                        {
+                            <tr style='height:10.2pt'>
+                                <td width=163 valign=top style='width:122.1pt;border:solid windowtext 1.0pt;
+  border-top:none;padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+                                    <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>@(i + 1)</p>
+</td>
+<td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+    <p class='MsoNormal' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>@Model.ServiceList[i].ServiceName</p>
+</td>
+<td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+    <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>0</p>
+</td>
+<td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+    <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>0</p>
+</td>
+<td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+    <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>@Model.ServiceList[i].TotalRequest</p>
+</td>
+<td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+    <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>@Model.ServiceList[i].TotalRequest</p>
+</td>
+<td width=163 valign=top style='width:122.1pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+    <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>@Model.ServiceList[i].Completed</p>
+</td>
+<td width=163 valign=top style='width:122.15pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+    <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>@Model.ServiceList[i].Pending</p>
+</td>
+<td width=163 valign=top style='width:122.35pt;border-top:none;border-left:
+  none;border-bottom:solid windowtext 1.0pt;border-right:solid windowtext 1.0pt;
+  padding:0in 5.4pt 0in 5.4pt;height:10.2pt'>
+    <p class='MsoNormal text-position' style='margin-bottom:0in;margin-bottom:.0001pt;line-height:
+  normal'>@( Model.ServiceList[i].InProgessPercentage )</p>
+</td>
+</tr>
+}
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>

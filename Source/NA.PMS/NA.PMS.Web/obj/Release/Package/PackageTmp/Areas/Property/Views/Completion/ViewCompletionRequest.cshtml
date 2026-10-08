@@ -1,0 +1,66 @@
+﻿@model NA.PMS.Model.PropertyCompletionModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@{
+    ViewBag.Title = "ViewCompletionRequest";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">View Completion Request</h1></div>
+                @*<div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>*@
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+
+                @{Html.RenderPartial("_PartialCompletion", Model);}
+
+            </div>
+            <div class="box-button text-center">
+                <input type="button" id="btnBack" value="Back" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@*<h3></h3>
+    <hr />
+    @{Html.RenderPartial("_PartialCompletion", Model);}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-7"></div>
+            <div class="col-md-5">
+                <input type="button" value="Back" id="btnBack" />
+            </div>
+        </div>
+    </div>*@
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        //Disable fields in the case of View Request
+        $('#CompletionDueDate').data('kendoDatePicker').enable(false);
+        $('#CompletionExecutionDate').data('kendoDatePicker').enable(false);
+        $('#PartCompletionPercentage').attr("disabled", true);
+        $('#PartCompletionArea').attr("disabled", true);
+        $("#RId").data("kendoDropDownList").enable(false);
+        $("#CompletionType").data("kendoDropDownList").enable(false);
+        $('#CompletionCharges').attr("disabled", true);
+    });
+
+    $("#btnBack").click(function () {
+        var PendencyReq = '@Request.QueryString["pr"]';
+        if (PendencyReq == 'true') {
+            window.location.href = '@Url.Action("PendencyReport", "Report", new { Area = "Reports" })';
+        }
+        else {
+            window.location.href = '@Url.Action("ManageCompletion", "Completion")';
+        }
+    });
+
+</script>
+

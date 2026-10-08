@@ -1,0 +1,51 @@
+﻿@using Kendo.Mvc.UI
+@{
+    ViewBag.Title = "Transfer History";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="col-md-12">
+    <div class="row rw-spce">
+        <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Transfer History</h1></div>
+    </div>
+</div>
+<div class="col-md-12 blnk-rw"></div>
+<div class="col-md-12 k-grid-content">
+
+    @(Html.Kendo().Grid<NA.PMS.Model.TransferModel>()
+        .Name("gridTransfers")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.ReqNo).Title("Request No").Width(130).ClientTemplate("<a href=\"/Property/PropertyRegistration/GetTransfereeDetailByReqID/#= ReqNo#\" id='v_#=ReqNo#'  style = 'width: 30px;' >#=ReqNo#</a>");
+            columns.Bound(c => c.RId).Title("Registration Id").Width(150);
+            columns.Bound(c => c.DepttName).Title("Department");
+            columns.Bound(c => c.Sector).Title("Sector").Width(100);
+            columns.Bound(c => c.Block).Title("Block").Width(100);
+            columns.Bound(c => c.PropertyNo).Title("Property No").Width(150);
+            columns.Bound(c => c.ReqDate).Title("Request Date").Format("{0:dd/MM/yyyy}");
+            columns.Bound(c => c.ApprovedDate).Title("Approved/Rejected Date").Format("{0:dd/MM/yyyy}");
+            columns.Bound(c => c.AssignedTo).Title("Assigned To");
+            columns.Bound(c => c.Status).Title("Status").Width(100);
+            columns.Bound(c => c.ApprovedYear).Title("Year").Width(50);
+        })
+        .Sortable()
+        .Filterable()
+                .Resizable(resize => resize.Columns(true))
+            //.ToolBar(toolBar =>
+            //{
+            //    toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Add Request").HtmlAttributes(new { onclick = "javascript:AddTransferReq(event);", @class = "k-button", id = "btnRequest" });
+            //})
+        .Pageable(pageable => pageable
+                                               .Enabled(true)
+                                               .Refresh(true)
+                                               .PageSizes(true)
+                                            )
+                                            .Groupable()
+        .DataSource(dataSource => dataSource
+        .Ajax().Model(model => model.Id(c => c.ReqNo))
+        .ServerOperation(true)
+        .Read(read => read.Action("GetTransferHistory", "PropertyRegistration")).PageSize(20)
+        )
+    )
+</div>
+

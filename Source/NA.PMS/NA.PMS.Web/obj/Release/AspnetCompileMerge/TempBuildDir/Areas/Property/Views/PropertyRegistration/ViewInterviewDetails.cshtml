@@ -1,0 +1,88 @@
+﻿@model NA.PMS.Model.InterviewDetailsModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@{
+    ViewBag.Title = "View Interview Details ";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .hide {
+        display: none !important;
+    }
+
+    .show {
+        display: block !important;
+    }
+
+    .disable_a_href {
+        pointer-events: none;
+    }
+</style>
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">View Interview Details</h1></div>
+                <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                    
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                @{Html.RenderPartial("_InterviewDetails", Model);}
+            </div>
+            <div class="box-button text-center">
+                <input type="button" id="btnBack" value="Cancel" class="btn btn-default" />
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#lblDepartmentDrop").addClass("hide");
+        $("#lblDepartmentId").addClass("show");
+      
+        $("#lblSchemeNameDrop").addClass("hide");
+        $("#lblSchemeName").addClass("show");
+
+        $("#lblFormDrop").addClass("hide");
+        $("#lblForm").addClass("show");
+
+        $('#InterviewDate').data('kendoDatePicker').enable(false);
+         var dropDown = $("#SchemeId").data("kendoDropDownList");
+        dropDown.enable(false);
+        var editor = $('#InterviewDetails').data('kendoEditor');
+        editor.body.contentEditable = false;
+        $('#fileUploadId').enable(false);
+
+        var dropdownlist = $("#lblDepartmentId").data("kendoDropDownList");
+        //dropdownlist.wrapper.hide();
+        $("#lblDepartmentId").closest(".k-widget").hide();
+       
+        var dropDown2 = $("#FormNo").data("kendoDropDownList");
+        dropDown2.wrapper.hide();
+        //dropDown2.enable(false);
+
+        //$("#lblDepartmentId").html("ANuj");
+    });
+    $("#btnBack").click(function () {
+        window.location.href = '@Url.Action("ManageInterviewDetails", "PropertyRegistration")';
+    });
+    var ds = this.dataSource.data();
+    if (ds.length == 0) {
+        this.enable(false);
+    }
+    //var dropDown1 = $("#DepartmentId").data("kendoDropDownList");
+    //alert("LEngth="+dropDown1.length)
+    //var p = $("#DepartmentId").dataSource.data();
+    //alert("LEngth=" + p.length)
+    //dropDown1.enable(false);
+    //var dropDown2 = $("#FormNo").data("kendoDropDownList");
+    //dropDown2.enable(false);
+    </script>

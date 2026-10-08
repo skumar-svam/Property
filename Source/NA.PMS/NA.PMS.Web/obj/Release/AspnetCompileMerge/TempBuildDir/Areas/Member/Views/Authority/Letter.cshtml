@@ -1,0 +1,567 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@model NA.PMS.Model.LetterViewModel
+
+@{
+    ViewBag.Title = "Authority Letter";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    /** {
+        color: #7F7F7F;
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+        font-weight: normal;
+    }*/
+
+    #config {
+        overflow: auto;
+        margin-bottom: 10px;
+    }
+
+    .config {
+        float: left;
+        margin-left: 10px;
+    }
+
+        .config .title {
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .config .barcode2D, #miscCanvas {
+            display: none;
+        }
+
+    #submit {
+        clear: both;
+    }
+
+    #barcodeTarget {
+        width: 30%;
+        margin-left: 35%;
+    }
+
+    #divBarcode {
+        width: 100%;
+        text-align: center;
+    }
+</style>
+<link href="http://www.jqueryscript.net/css/jquerysctipttop.css" rel="stylesheet" type="text/css">
+@*<script type="text/javascript" src="jquery-barcode.js"></script>*@
+<script src="~/Scripts/jquery-barcode.js"></script>
+@*<script src="~/Scripts/jquery-barcode-manual.js"></script>*@
+<script src="~/Scripts/BarcodeJS.js"></script>
+@*<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.3.4/jspdf.debug.js"></script>*@
+<script type="text/javascript">
+
+    function generateBarcode() {
+        var value = $("#barcodeValue").val();
+        //var value = $("#Rid").val();
+        //alert(value);
+        var btype = $("#code128").val();
+
+        //alert(btype);
+        var renderer = $("#renderer").val();
+
+        var quietZone = false;
+        if ($("#quietzone").is(':checked') || $("#quietzone").attr('checked')) {
+            quietZone = true;
+        }
+
+        var settings = {
+            output: renderer,
+            bgColor: $("#bgColor").val(),
+            color: $("#color").val(),
+            barWidth: $("#barWidth").val(),
+            barHeight: $("#barHeight").val(),
+            moduleSize: $("#moduleSize").val(),
+            posX: $("#posX").val(),
+            posY: $("#posY").val(),
+            addQuietZone: $("#quietZoneSize").val()
+        };
+        if ($("#rectangular").is(':checked') || $("#rectangular").attr('checked')) {
+            value = { code: value, rect: true };
+        }
+        if (renderer == 'canvas') {
+            clearCanvas();
+            $("#barcodeTarget").hide();
+            $("#canvasTarget").show().barcode(value, btype, settings);
+        } else {
+            $("#canvasTarget").hide();
+            $("#barcodeTarget").html("").show().barcode(value, btype, settings);
+        }
+    }
+
+    function showConfig1D() {
+        $('.config .barcode1D').show();
+        $('.config .barcode2D').hide();
+    }
+
+    function showConfig2D() {
+        $('.config .barcode1D').hide();
+        $('.config .barcode2D').show();
+    }
+
+    function clearCanvas() {
+        var canvas = $('#canvasTarget').get(0);
+        var ctx = canvas.getContext('2d');
+        ctx.lineWidth = 1;
+        ctx.lineCap = 'butt';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.strokeStyle = '#000000';
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.strokeRect(0, 0, canvas.width, canvas.height);
+    }
+
+    $(function () {
+        $('input[name=btype]').click(function () {
+            if ($(this).attr('id') == 'datamatrix') showConfig2D(); else showConfig1D();
+        });
+        $('input[name=renderer]').click(function () {
+            if ($(this).attr('id') == 'canvas') $('#miscCanvas').show(); else $('#miscCanvas').hide();
+        });
+        generateBarcode();
+    });
+
+</script>
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Generate Letter</h1></div>
+            <div class="col-md-6 col-sm-6 col-xs-12 mandatory"></div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 content-top-spce">
+        <div id="DivPropertyInformation" class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            <h2 class="blck-heading">Property Information</h2>
+            <div class="form-bx">
+                <div class="row">
+                    @Html.HiddenFor(model => model.DepartmentId)
+                </div>
+                <div class="row">
+                    <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                        @Html.Label("Registration Id:", htmlAttributes: new { @class = "required" })
+                        @(Html.Kendo().DropDownListFor(m => m.RegistrationId)
+                                .Filter("contains")
+                                .DataTextField("Text")
+                                .DataValueField("Id")
+                                .OptionLabel("---Select---")
+                                .DataSource(source =>
+                                {
+                                    source.Custom()
+                                    .ServerFiltering(true)
+                                    .ServerPaging(true)
+                                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                    .Transport(transport => transport.Read(read => read.Action("GetRegistrationIdListAsDataSource", "Authority", new { area = "Member" })))
+                                    .Schema(schema => schema.Data("Data").Total("Total"))
+                                    .PageSize(100);
+                                })
+                               .Events(events => { events.Change("GetAllotteeDetails"); })
+                               .HtmlAttributes(new { @class = "ddl-rid", style = "width:92%; float:right;" })
+                        )
+                    </div>
+                    <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                        @Html.Label("Department:", htmlAttributes: new { })
+                        @Html.TextBoxFor(model => model.Department, htmlAttributes: new { @class = "form-control", @Readonly = "readonly", style = "width:92%;float:right;" })
+                    </div>
+                    <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                        @Html.Label("Property No:", htmlAttributes: new { @class = "" })
+                        @Html.TextBoxFor(model => model.PropertyNo, htmlAttributes: new { @class = "form-control", @Readonly = "readonly", style = "width:92%;float:right;" })
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                        @Html.Label("Allottee:", htmlAttributes: new { @class = "" })
+                        @Html.TextAreaFor(model => model.Applicant, htmlAttributes: new { @class = "form-control", style = "width:95%;float:right;height:34px;" })
+                    </div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                        @Html.Label("Correspond Address:", htmlAttributes: new { @class = "" })
+                        @Html.TextAreaFor(model => model.CorrespondAddress, htmlAttributes: new { @class = "form-control", style = "width:95%;float:right;height:34px;" })
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                        @Html.Label("Mobile No:", htmlAttributes: new { @class = "" })
+                        @Html.TextBoxFor(model => model.MobileNo, htmlAttributes: new { @class = "form-control",  style = "width:92%;float:right;" })
+                    </div>
+                    <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                        @Html.Label("Letter Date:")
+                        @(Html.Kendo().DatePickerFor(model => model.LetterDate).HtmlAttributes(new { style = "width:92%;float:right;" }))
+                    </div>
+                    <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                        @Html.Label("Letter Type:")
+                        @(Html.Kendo().DropDownListFor(model => model.LetterId)
+                            .Filter("contains")
+                            .DataTextField("Text")
+                            .DataValueField("Id")
+                            .OptionLabel(" -- Select --")
+                            //.CascadeFromField("DepartmentId")
+                            .DataSource(source =>
+                            {
+                                source.Custom()
+                                .ServerFiltering(true)
+                                .ServerPaging(true)
+                                .Type("aspnetmvc-ajax")
+                                .Transport(transport => transport.Read(read => read.Action("GetLetterTemplateListByDepartmentAsDataSource", "Authority", new { area = "Member" }).Data("FilterDepartment")))
+                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                .PageSize(100);
+                            })
+                            .HtmlAttributes(new { style = "width: 92%; float:right;" })
+                            //.CascadeFrom("DepartmentId")
+                            .Events(e => e.Change("GetServiceRequestStatusForLetter"))
+                        )
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+        <div class="box-button text-center">
+            @*@Html.ActionLink("Back", "ManageRentPermission", "PropertyRegistration", new { @class = "btn btn-default" })*@
+            <input type="button" id="btnBack" value="Back" class="btn btn-default" onclick="javascript:window.history.back()" />
+            <input type="button" id="btnGenerateLetter" value="Generate Letter" class="btn btn-add" />
+        </div>
+    </div>
+
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.LetterViewModel>()
+            .Name("gridGeneratedLetter") // template expression, to be evaluated in the master context
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Title("Letter Id").Width(130);
+                columns.Bound(o => o.Template).Title("Template");
+                //columns.Bound(o => o.BarcodeValue);
+                columns.Bound(o => o.CreatedBy);
+                columns.Bound(o => o.CreatedDate).Format("{0:dd/MM/yyyy}").Width(130);               
+                columns.Bound(o => o.BarcodeValue).Width(200).Title("Barcode").ClientTemplate("<label class='hyperlink' onclick='javascript:OpenLetterWindow(this)'>#=BarcodeValue#</label>");
+                columns.Bound(c => c.LetterContent).Hidden(true);
+            })
+            .DataSource(dataSource => dataSource
+                .Ajax()
+                .Model(model => model.Id(c => c.Id))
+                .ServerOperation(true)
+                .PageSize(10)
+                .Read(read => read.Action("GetGeneratedLetterListById", "Authority", new { area = "Member" }).Data("FilterRegistrationId"))
+                .Sort(s => s.Add(r => r.Id).Descending())
+            )
+        )
+    </div>
+</div>
+
+
+<div id="divLetterBodyModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="padding-top:20px;">
+    <div class="modal-dialog" style="width: 65%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title"><b><span id="LetterHeading"></span></b></h4>
+            </div>
+            <div class="modal-body" id="divmodalbody" style="overflow:auto; height:480px;">
+                <div>
+                    <input type="hidden" name="btype" id="code128" value="code128">
+                    <input type="hidden" id="bgColor" value="#FFFFFF" size="7">
+
+                    <input type="hidden" id="color" value="#000000" size="7">
+
+                    <input type="hidden" id="barWidth" value="1" size="3">
+
+                    <input type="hidden" id="barHeight" value="50" size="3">
+
+                    <input type="hidden" id="moduleSize" value="5" size="3">
+
+                    <input type="hidden" id="quietZoneSize" value="1" size="3">
+
+                    <input type="hidden" name="rectangular" id="rectangular">
+                    <input type="hidden" id="posX" value="10" size="3">
+
+                    <input type="hidden" id="posY" value="20" size="3">
+                    <input type="hidden" id="css" name="renderer" value="css" checked="checked">
+
+                </div>
+                @*<div id="barcodeTarget" class="barcodeTarget"></div>*@
+                <canvas id="canvasTarget" width="100" height="100"></canvas>
+                <div id="divLetterBody"></div>
+
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="submit" id="btnPrintLetter" class="k-button" data-dismiss="modal" onclick="PrintDiv();">Print</button>
+                @*<input type="button" onclick="generateBarcode();" value="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Generate the barcode&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;">*@
+                <button type="button" id="downloadLetter" class="k-button">Download</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    var _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-36251023-1']);
+    _gaq.push(['_setDomainName', 'jqueryscript.net']);
+    _gaq.push(['_trackPageview']);
+
+    (function () {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+    })();
+
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $(".num-only").keydown(function (e) {
+            // Allow: backspace, delete, tab, escape, enter and .
+            if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
+                // Allow: Ctrl+A, Command+A
+                (e.keyCode === 65 && (e.ctrlKey === true || e.metaKey === true)) ||
+                // Allow: home, end, left, right, down, up
+                (e.keyCode >= 35 && e.keyCode <= 40)) {
+                // let it happen, don't do anything
+                return;
+            }
+            // Ensure that it is a number and stop the keypress
+            if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                e.preventDefault();
+            }
+        });
+
+        $('#RegistrationId').change(function () {
+            var rid = $('#RegistrationId').val();
+            if (rid == "" || rid.length != 8) {
+                alertify.error("Please enter Registration id.");
+                return false;
+            }
+            else {
+                GetAllotteeDetails();
+                //$("#gridGeneratedLetter").data("kendoGrid").dataSource.read();
+                //$("#LetterId").data("kendoDropDownList").dataSource.read();
+            }
+        });
+
+        $('#btnGenerateLetter').click(function () {
+            GenerateLetterByTemplate();
+        });
+    });
+
+    function FilterRegistrationId() {
+        return { rid: $('#RegistrationId').val() }
+    }
+
+    function FilterDepartment() {
+        return { departmentId: $('#DepartmentId').val() }
+    }
+    function FilterTemplateDepartment() {
+        return {
+            departmentId: $('#DepartmentId').val(),
+            templateId: 0
+            //templateId: $('#LetterId').val()
+        }
+    }
+    function FilterForServiceRequest() {
+        return {
+            rid: $('#RegistrationId').val()
+        }
+    } function OpenLetterWindow(row) {
+        var tr = $(row).parent().parent();
+        var content = $(tr).children("td:eq(5)").text();
+        //alert(content);
+        $("#divLetterBody").html(content);
+        $("#divLetterBodyModal").modal('show');
+        generateBarcode();
+        $('#divBarcode').html($('#inputdata').html());
+        $('#inputdata').css("display", "none");
+        $("#divLetterBodyModal").modal('show');
+
+        //$(".popup-window").data("kendoWindow").open();
+        //$(".popup-window").data("kendoWindow").center();
+    }
+
+
+   
+    function GetServiceRequestStatusForLetter() {
+        var rid = $('#RegistrationId').val();
+        var letterId = $('#LetterId').val();
+        if (rid != "" && letterId != "") {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify({ rid: rid, letterId: letterId }),
+                url: '@Url.Action("GetServiceRequestValidationForLetter", "Authority", new { area = "Member" })',
+                success: function (result) {
+                    if (result == 0) {
+                        alertify.error("Service is not validated.");
+                        return false;
+                    }
+                    else {
+                        alertify.success("validated");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Something is wrong, try again later.");
+                }
+            });
+        }
+    }
+
+    function GetAllotteeDetails() {
+        var rid = $('#RegistrationId').val();
+        if (rid != "") {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify({ rid: rid }),
+                url: '@Url.Action("GetAllottedPropertyDetailByRegistrationId", "Authority", new { area="Member"})',
+                success: function (result) {
+                    if (result != null) {
+                        $('#Applicant').val(result.Applicant);
+                        $('#PropertyNo').val(result.PropertyNo);
+                        $('#CorrespondAddress').val(result.CorresspondentAddress);
+                        $('#DepartmentId').val(result.DepartmentId);
+                        $('#Department').val(result.Department);
+                        $('#MobileNo').val(result.MobileNo);
+                        $('#CorrespondAddress').val(result.CorrespondAddress);
+
+                        $("#gridGeneratedLetter").data("kendoGrid").dataSource.read();
+                        $("#LetterId").data("kendoDropDownList").dataSource.read();
+                    }
+                    else {
+                        alertify.error("There is some error, try again");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Something is wrong, try again later.");
+                }
+            });
+        }
+    }
+
+
+    function GenerateLetterByTemplate() {
+        var rid = $('#RegistrationId').val();
+        
+        $('#LetterHeading').text($('#LetterId').data("kendoDropDownList").text());
+        if (rid == "" || rid.length != 8) {
+            alertify.error("Please select Registration no");
+            return false;
+        }
+        else if ($('#DepartmentId').val() == "") {
+            alertify.error("Please select Department");
+            return false;
+        }
+        else if ($('#LetterDate').val() == "") {
+            alertify.error("Please enter letter date");
+            return false;
+        }
+        else if ($('#LetterId').val() == "") {
+            alertify.error("Please select letter type.");
+            return false;
+        }
+        else {
+            var letterModel = {
+                RegistrationId: $('#RegistrationId').val(),
+                DepartmentId: $('#DepartmentId').val(),
+                TemplateId: $('#LetterId').val(),
+                LetterDate: $('#LetterDate').val()
+            };
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ model:letterModel }),
+                url: '/Member/Authority/GenerateAuthorizedLetterById',
+                success: function (result) {
+                    if (result.LetterContent == 0) {
+                        $("#divLetterBody").html("Service is not approved");
+                        $("#divLetterBodyModal").modal('show');
+                    }
+                    else {
+                        $("#divLetterBody").html(result.LetterContent);
+                        //$("#inputdata").before("<div id='divBarcode' class='font-barcode' style='text-align:center;'></div>");
+                        generateBarcode();
+                        $('#divBarcode').html($('#inputdata').html());
+                        $('#inputdata').css("display", "none");
+                        $("#divLetterBodyModal").modal('show');
+                    }
+                    //alertify.success(result);
+                },
+                error: function (obj) {
+                    alertify.error("Network error. Please try again later.");
+                }
+            });
+        }
+    }
+
+
+    function PrintDiv() {
+        //generateBarcode();
+        //var contents = document.getElementById("divmodalbody").innerHTML;
+        var contents = document.getElementById("divLetterBody").innerHTML;
+        //var contents = document.getElementById("divBarcode").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('<style>#barcodeTarget{ width:30%; margin-left:35%; } #divBarcode{ width:100%; text-align:center; }</style>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+    $('#downloadLetter').click(function () {
+        var rid = $("#Rid").val();
+        var departmentId = $("#DepartmentId").val();
+        var serviceId = null; //$('#ServiceId').val();
+        var letterId = $('#LetterId').val();
+        var letterDate = $('#LetterDate').val();
+        if (letterDate == "") {
+            alertify.error("Please enter letter date.");
+            return false;
+        }
+        else if (letterId == "") {
+            alertify.error("Please select letter type.");
+            return false;
+        }
+        else {
+            window.location = "/Report/DownloadLetter?rid=" + rid + "&departmentId=" + departmentId + "&serviceId=" + serviceId + "&letterId=" + letterId + "&letterDate=" + letterDate;
+        }
+    });
+
+</script>
+<script type="text/javascript">
+
+    function get_object(id) {
+        var object = null;
+        if (document.layers) {
+            object = document.layers[id];
+        } else if (document.all) {
+            object = document.all[id];
+        } else if (document.getElementById) {
+            object = document.getElementById(id);
+        }
+        return object;
+    }
+    get_object("inputdata").innerHTML = DrawCode39Barcode(get_object("inputdata").innerHTML, 1);
+
+</script>
+

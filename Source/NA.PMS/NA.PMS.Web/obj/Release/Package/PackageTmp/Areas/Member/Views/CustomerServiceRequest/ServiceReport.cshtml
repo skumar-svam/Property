@@ -1,0 +1,194 @@
+﻿@using Kendo.Mvc.UI;
+@{
+    ViewBag.Title = "ServiceReport";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .top-margin {
+        margin-top: 6px;
+    }
+
+    .col-md-2.pad-left {
+        margin-left: 12px;
+    }
+</style>
+<div class="row" id="divServiceReports">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Service Report</h1></div>
+            <div class="col-md-6 col-sm-6 col-xs-12 col-btn">
+                @*@Html.ActionLink("Create Challan", "CitizenChallan", new { controller = "CitizenRequests", area = "Member" })*@
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12" style="border-left:1px solid #abc;border-right:1px solid #abc ;padding-bottom:15px;">
+        <div class="row">
+            <div class="col-md-2 pad-left">
+                @Html.Label("Department")
+                @(Html.Kendo().DropDownList()
+                    .Name("ddlDepartment")
+                    .Filter("contains")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel(" -- Please Select --")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetDepartmentList", "CustomerServiceRequest");
+                        });
+                    })
+                   .Events(e => e.Change("ChangeDepartmentEvent"))
+                   .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" })
+                )
+            </div>
+            <div class="col-md-2 pad-left">
+                @Html.Label("Request Status")
+                @(Html.Kendo().DropDownList()
+                    .Name("ddlStatus")
+                    .Filter("contains")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel(" -- Please Select --")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetServiceRequestStatusList", "CustomerServiceRequest");
+                        });
+                    })
+                    .Events(e => e.Change("ChangeDepartmentEvent"))
+                    .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" })
+                )
+            </div>
+            <div class="col-md-2 pad-left">
+                @Html.Label("Start Date")
+                @(Html.Kendo().DatePicker().Name("kendoFromDate").Events(e => e.Change("ChangeDepartmentEvent")).HtmlAttributes(new { style = "width:100%;" }))
+            </div>
+            <div class="col-md-2 pad-left">
+                @Html.Label("End Date")
+                @(Html.Kendo().DatePicker().Name("kendoToDate").Events(e => e.Change("ChangeDepartmentEvent")).HtmlAttributes(new { style = "width:100%;" }))
+            </div>
+            <div class="col-md-2" style="text-align:right;">
+                <label style="width:100%;"> </label>
+                <button type="button" id="btnSearch" class="k-button top-margin" value="Search">Search</button>
+                <button type="button" id="btnClear" class="k-button top-margin" value="Clear">Clear</button>
+                @*<button type="submit" id="btnPrintDiv" class="k-button" onclick="PrintDiv();">Print Report</button>*@
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="row" id="divServiceReport">
+            <div class="col-md-12" style="padding:0 0 20px 0">
+                <div class="k-grid-content" style="overflow-y:hidden;">
+                    @(Html.Kendo().Grid<NA.PMS.Model.ServiceReportModel>()
+                        .Name("gridServiceReport")
+                        .Excel(excel => excel.AllPages(true).Filterable(true).FileName("ServiceReport.xlsx"))
+                        .ToolBar(toolsExcel => toolsExcel.Excel())
+
+                          .Columns(columns =>
+                          {
+                              columns.Bound(c => c.Id).Title("Request No").Width(80);//.ClientTemplate("<a href='" + "/Customer/ViewRequestDetail/#= RefNo #'>#= RefNo #</a>").Filterable(false);
+                              columns.Bound(c => c.RegistrationNo).Title("Registration ID");
+                              columns.Bound(c => c.ApplicantName).Title("Applicant");
+                              columns.Bound(c => c.Sector).Title("Sector");
+                              columns.Bound(c => c.Block).Title("Block");
+                              columns.Bound(c => c.PropertyNo).Title("Plot/Shop/Space No");
+                              columns.Bound(c => c.MobileNo).Title("Mobile");
+                              //columns.Bound(c => c.Email).Title("Email");
+                              columns.Bound(c => c.DepartmentName).Title("Department");
+                              columns.Bound(c => c.SubDepartment).Title("Sub Department");
+                              columns.Bound(c => c.ServiceName).Title("Service Request Type");
+                              //columns.Bound(c => c.Description).Title("Description");
+                              columns.Bound(c => c.Status).Title("Status");
+                              columns.Bound(c => c.CreatedDate).Title("Receiving Date").Format("{0:dd/MM/yyyy}");
+                          })
+                          .Sortable()
+                          .Filterable()
+                          .Resizable(resize => resize.Columns(true))
+                          .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                          .DataSource
+                          (
+                              dataSource => dataSource
+                                  .Ajax()
+                                  .Sort(x => x.Add("CreatedDate").Descending())
+                                  .Model(model => model.Id(p => p.Id))
+                                  .ServerOperation(true)
+                                  .Read(read => read.Action("GetServiceRequestReport", "CustomerServiceRequest").Data("FilterSearchParameter"))
+                                  .PageSize(10)
+                          )
+                    )
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    function PrintDiv() {
+        var contents = document.getElementById("divServiceReport").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+    function FilterSearchParameter() {
+        return {
+            departmentId: $('#ddlDepartment').val(),
+            startDate: $('#kendoFromDate').val(),
+            endDate: $('#kendoToDate').val(),
+            status: $('#ddlStatus').val()
+        };
+    }
+    function ChangeDepartmentEvent() {
+        $("#gridServiceReport").data("kendoGrid").dataSource.read();
+    }
+
+    $('#btnSearch').click(function () {
+        var dept = $('#ddlDepartment').val();
+        var fdate = $('#kendoFromDate').val();
+        var tdate = $('#kendoToDate').val();
+        var stats = $('#ddlStatus').val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ departmentId: dept, startDate: fdate, endDate: tdate, status: stats }),
+            url: '/CustomerServiceRequest/GetServiceRequestReport',
+            success: function (result) {
+                $("#gridServiceReport").data("kendoGrid").dataSource.read();
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Something is wrong, try again later");
+            }
+        });
+    });
+
+    $('#btnClear').click(function () {
+        $('#ddlDepartment').data("kendoDropDownList").value("");
+        $('#kendoFromDate').data("kendoDatePicker").value("");
+        $('#kendoToDate').data("kendoDatePicker").value("");
+        $('#ddlStatus').data('kendoDropDownList').value("");
+        $("#gridServiceReport").data("kendoGrid").dataSource.read();
+    });
+</script>
+

@@ -1,0 +1,356 @@
+﻿@model NA.PMS.NICServices.SWPEpassViewModel
+@using Kendo.Mvc.UI;
+@using NA.PMS.Common;
+@using NA.PMS.Model;
+@using System.Web.Mvc;
+
+@{
+    ViewBag.Title = "SearchEpass";
+    Layout = "~/Views/Shared/_Blank.cshtml";
+}
+
+<style>
+    #divotp{
+        display:none;
+    }
+   
+    #btnprint{
+        display:none;
+    }
+    #divPartialContent{
+        display:none;
+    }
+</style>
+
+<div class="online-epass" style="margin-top:25px;margin-left:15%;margin-right:15%;">
+    <div class="col-md-12">
+        <div class="row" style="margin-top:6px;">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Online E-Pass Form</h1></div>
+            <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 content-top-spce">
+        <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            <h2 class="blck-heading" style="margin-bottom:6px;">
+                Search e-pass
+            </h2>
+            <div class="form-bx">
+                <div class="row" style="padding-top:20px;">
+                    <div class="col-md-2 col-sm-3 col-xs-12 form-group ">
+                        <label class="required">E-Pass No</label>
+                    </div>
+                    <div class="col-md-4 col-sm-3 col-xs-12 form-group ">
+                        <input id="EpassNo" type="text" class="form-control numeric" maxlength="20" onchange="CheckNumericDigits(this)" />
+                    </div>
+                    <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                        <input type="hidden" id="hdn-mbl-no" />
+                        <input type="hidden" id="hdn-email" />
+                    </div>
+                    <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                        <input type="button" class="btn btn-default" id="btn-validate-epass" value="Search" />
+                    </div>
+                    <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                        <input type="button" class="btn btn-default" id="btn-clear-epass" value="Clear" />
+                    </div>
+                </div>
+                
+                <div class="row" id="divotp">
+                    <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                        <label class="required">Enter OTP</label>
+                    </div>
+                    <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                        <input type="text" class="k-textbox" id="text-otp" maxlength="10" placeholder="123" style="width:100%" />
+                    </div>
+                    <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                        <input type="hidden" id="hdn-otp" />
+                    </div>
+                    <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                        <input type="button" class="btn btn-default" id="btn-validate-otp" value="Submit" />
+                    </div>
+                </div>
+            </div>
+
+            <div id="divPartialContent" class="form-bx" style="margin-top: 25px;background:#fff;">
+                <div class="row" style="margin-left:12%;margin-right:12%;">
+                    @{Html.RenderPartial("_PartialPrintEpass");}
+                </div>
+            </div>
+            <div id="divbtnprint" style="margin-top: 20px;">
+                <div class="row">
+                    <div class="col-md-6 col-md-offset-3" style="text-align:center;">
+                        <input id="btnprint" type="button" class="btn btn-default" value="Print" />
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        
+        $('#div-otp-popup-window').kendoWindow({
+            modal: true,
+            title: "Online E-Pass validation",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "30%"
+            },
+            width: "40%", height: "210px" //"35%"
+        });
+
+        $('#btn-validate-epass').click(function () {
+            ValidateEpass();
+            //$('#div-otp-popup-window').data("kendoWindow").open();
+        });
+
+        $('#btn-validate-otp').click(function () {
+            ValidateOtpOnPage();
+            //$('#div-otp-popup-window').data("kendoWindow").close();
+        });
+
+        $('#btnprint').click(function () {
+            PrintDiv();
+        });
+
+        $('#btn-clear-epass').click(function () {
+            $('#EpassNo').val('');
+            $('#hdn-mbl-no').val('');
+            $('#hdn-email').val('');
+            $('#hdn-otp').val('');
+            $('#divotp').css("display", "none");
+            $('#divPartialContent').css("display", "none");
+            $('#btnprint').css("display", "none");
+            $('#btn-validate-epass').prop("disabled", false);
+            $('#btn-validate-otp').prop("disabled", false);
+        });
+    });
+
+    //function CheckNumericDigits(e) {
+    //    if (e.value != "") {
+    //        if (isNaN(e.value)) {
+    //            e.value = "";
+    //            alertify.error("Only numeric allowed.");
+    //        }
+    //    }
+
+    //    //if ($('#EpassNo').val() != "") {
+    //    //    if (isNaN($('#EpassNo').val())) {
+    //    //        $('#EpassNo').val('');
+    //    //        alertify.error("Only numeric allowed.");
+    //    //    }
+    //    //}
+    //}
+
+    function ValidateEpass() {
+        var epass = $('#EpassNo').val();
+        if (epass != "") {
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                data: { EpassNo: epass },
+                url: '/NIC/OnlineEpass/GetEpassFormDetailById',
+                success: function (result) {
+                    if (result != null && result.StatusId == 1) {
+                        $('#hdn-mbl-no').val(result.MobileNo);
+                        $('#hdn-email').val(result.Email);
+
+                        SendOTP()
+                    }
+                    else if (result != null && result.StatusId == 0) {
+                        $('#divPartialContent').css("display", "none");
+                        $('#btnprint').css("display", "none");
+                        $('#divotp').css("display", "none");
+                        alertify.error("E-Pass is not approved.");
+                    }
+                    else if (result != null && result.StatusId == 4) {
+                        $('#divPartialContent').css("display", "none");
+                        $('#btnprint').css("display", "none");
+                        $('#divotp').css("display", "none");
+                        alertify.error("E-Pass does not exist.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+        else {
+            alertify.error("Please enter e-pass No");
+        }
+    }
+
+    function SendOTP() {
+        var mobile = $('#hdn-mbl-no').val();
+        var mailId = $('#hdn-email').val();
+        if (mobile != "") {
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                data: { mobileNo: mobile, email: mailId },
+                url: '/NIC/OnlineEpass/SendOTP',  //GetEpassFormDetailById
+                success: function (result) {
+                    if (result != null) {
+                        $('#hdn-otp').val(result);
+                        $('#divotp').show();
+                        alertify.success("OTP has been sent on your mobile and email id successfuly.");
+                        return false;
+                    }
+                    else {
+
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+        else {
+            alertify.error("Please enter Mobile No");
+        }
+    }
+
+    function ValidateOtpOnPage() {
+        var otp_sent = $('#text-otp').val();
+        var otp_return = $('#hdn-otp').val();
+        if (otp_sent != "") {
+            if (otp_sent == otp_return) {
+                GetEpassUserDetail();
+            }
+            else {
+                
+                alertify.error("OTP mismatch");
+            }
+        }
+    }
+
+    //function GetEpassUserDetail() {
+    //    var epass = $('#EpassNo').val();
+    //    $.ajax({
+    //        type: 'POST',
+    //        dataType: 'json',
+    //        data: { EpassNo: epass },
+    //        url: '/NIC/OnlineEpass/GetEpassFormDetailById',
+    //        success: function (result) {
+    //            if (result != null) {
+    //                $('#Applicant').html(result.Applicant);
+    //                $('#MobileNo').html(result.MobileNo);
+    //                $('#Email').html(result.Email);
+    //                $('#State').html(result.State);
+    //                $('#City').html(result.City);
+    //                $('#LocalPlace').html(result.LocalPlace);
+    //                $('#PIN').html(result.PIN);
+    //                $('#FromAddress').html(result.FromAddress);
+    //                $('#ToAddress').html(result.ToAddress);
+    //                //$('#StartDate').html(result.StartDate);
+    //                $('#StartDate').html(ToJavaScriptDate(result.StartDate));
+    //                //$('#EndDate').html(result.EndDate);
+    //                $('#EndDate').html(ToJavaScriptDate(result.EndDate));
+    //                $('#Purpose').html(result.Purpose);
+                    
+    //                $('#divprintcontent').show();
+                    
+    //                //$('#ppdiv').html($('#divprintcontent').html());
+    //                //$('#div-otp-popup-window').data("kendoWindow").open();
+    //                $('#btnprint').show();
+    //            }
+    //            else {
+    //                alertify.error("E-Pass does not exist.");
+    //            }
+    //        },
+    //        error: function (ajaxRequest, strError) {
+    //            var respText = ajaxRequest.responseText;
+    //            //alert(respText);
+    //        }
+    //    });
+    //}
+
+    function GetEpassUserDetail() {
+        var epass = $('#EpassNo').val();
+        $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            data: { EpassNo: epass },
+            url: '/NIC/OnlineEpass/GetEpassFormDetailById',
+            success: function (result) {
+                if (result != null) {
+                    $('#E-PassNo').html(result.EpassNo);
+                    $('#Applicant').html(result.Applicant);
+                    $('#MobileNo').html(result.MobileNo);
+                    $('#ApplicantIdNo').html(result.EPDIII);
+                    $('#IdType').html(result.EPDV);
+                    $('#VehicleNo').html(result.VehicleNo);
+                    $('#VehicleType').html(result.VehicleType);
+                    
+                    $('#ApprovalDate').html(ToJavaScriptDate(result.ApprovalDate));
+                    $('#ValidTillDate').html(ToJavaScriptDate(result.ValidTillDate));
+                    $('#Purpose').html(result.Purpose);
+                    $('#Remark').html(result.Comment);
+                    $('#userImage').attr('src', result.ApplicantImage);
+                    $('#EpassBarcode').html('');
+                    $("#EpassBarcode").kendoBarcode({
+                        value: result.EpassNo,
+                        text: {  visible: false },
+                        height: 40,
+                        width: 196
+                    });
+
+                    $('#divPartialContent').show();
+                    $('#btnprint').show();
+                    $('#btn-validate-epass').prop("disabled", true);
+                    $('#btn-validate-otp').prop("disabled", true);
+                }
+                else {
+                    alertify.error("E-Pass does not exist.");
+                    $('#btn-validate-epass').prop("disabled", false);
+                    $('#btn-validate-otp').prop("disabled", false);
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+
+    function ToJavaScriptDate(value) {
+        var pattern = /Date\(([^)]+)\)/;
+        var results = pattern.exec(value);
+        //return value;
+        if (results != null) {
+            var dt = new Date(parseFloat(results[1]));
+            //return (dt.getMonth() + 1) + "/" + dt.getDate() + "/" + dt.getFullYear();
+            return dt.getDate() + "/" + (dt.getMonth() + 1) + "/" + dt.getFullYear();
+        }
+    }
+    
+    function PrintDiv() {
+        //var contents = document.getElementById("divprintcontent").innerHTML;
+        var contents = document.getElementById("divPartialContent").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        //frameDoc.document.write('<style>.td-amount {padding-right: 30px;}#divPrintBody {padding: 5px;font-size:10pt;}#authorityChallan {border: 1px solid black;padding: 5px;} .h4-dept{margin-top:0px; margin-bottom:0px;}.h4-noida{margin-bottom:2px;}</style>');
+        //frameDoc.document.write('<style>tr{width:100%;}td {padding-bottom: 8px;width:50%;}#divPrintBody {width:100%;}</style>');
+        frameDoc.document.write('</head><body style="font-size:10pt;">');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+</script>

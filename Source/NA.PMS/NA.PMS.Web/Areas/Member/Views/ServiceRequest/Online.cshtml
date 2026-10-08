@@ -1,0 +1,542 @@
+﻿@model NA.PMS.Model.ServiceViewModel
+@using Kendo.Mvc.UI;
+@using NA.PMS.Common;
+
+@{
+    ViewBag.Title = "Online Services";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .top-margin {
+        margin-top: 6px;
+        width: 80px;
+    }
+
+    .lbl-status-action {
+        cursor: pointer;
+        color: blue;
+    }
+
+    .glyphicon-print {
+        cursor: pointer;
+    }
+    #divStatusMaster{
+        display:none;
+    }
+    #AcknowledgementContent{
+        display:none;
+    }
+</style>
+
+<div class="ManageRequestServices">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Manage Online Requests</h1></div>
+            <div class="col-md-6 col-sm-6 col-xs-12 col-btn">
+                @*@Html.ActionLink("Request Service", "Index", new { controller = "ServiceRequest", area = "Member" }, htmlAttributes: new { target = "_blank" })*@
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12" style="border-left:1px solid #abc;border-right:1px solid #abc;">
+        <div class="row form-group">
+            <div class="col-md-2 pad-left">
+                @Html.Label("Department")
+                @(Html.Kendo().DropDownListFor(model => model.DepartmentId)
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel(" -- Select --")
+                    //.DataSource(source => source.Read(read => read.Action("GetDepartmentList", "ServiceRequest")))
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetUsersDepartmentListAsDataSource", "ServiceRequest", new { area = "Member" })))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(100);
+                    })
+                    .Events(e => e.Change("ChangeDepartmentEvent"))
+                   .HtmlAttributes(new { style = "width:95%;float:right;", @class = "input-disabled" })
+                )
+            </div>
+            <div class="col-md-2 pad-left">
+                @Html.Label("Start Date")
+                @(Html.Kendo().DatePickerFor(model => model.StartDate).Events(e => e.Change("ChangeDepartmentEvent")).HtmlAttributes(new { style = "width:95%;float:right;" }))
+            </div>
+            <div class="col-md-2 pad-left">
+                @Html.Label("End Date")
+                @(Html.Kendo().DatePickerFor(model => model.EndDate).Events(e => e.Change("ChangeDepartmentEvent")).HtmlAttributes(new { style = "width:95%;float:right;" }))
+            </div>
+            <div class="col-md-2 pad-left">
+                <label>Status</label>
+                @(Html.Kendo().DropDownListFor(m => m.ServiceStatusId)
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel(" -- Select --")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetStatusMasterAsDataSource", "ServiceRequest", new { area = "Member" })))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(100);
+                    })
+                    .Events(events => { events.Change("ChangeDepartmentEvent"); })
+                    .HtmlAttributes(new { @class = "input-disabled", style = "width:95%;float:right;" })
+                )
+            </div>
+            <div class="col-md-2 pad-left">
+                <label>Service Name</label>
+                @(Html.Kendo().DropDownListFor(model => model.ServiceId)
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel("---select---")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        //.Transport(transport => transport.Read(read => read.Action("GetServiceListAsDataSource", "ServiceRequest", new { area = "Member" })))
+                        .Transport(transport => transport.Read(read => read.Action("GetServicesByDepartmentAsDataSource", "ServiceRequest", new { area = "Member" }).Data("FilterDepartmentForServices")))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(100);
+                    })
+                    .HtmlAttributes(new { style = "width:95%;float:right;" })
+                    .Events(e => e.Change("ChangeDepartmentEvent"))
+                )
+            </div>
+            <div class="col-md-2" style="text-align:center;">
+                <label style="width:100%;"> </label>
+                <button type="button" id="btnSearch" class="k-button top-margin" value="Search">Search</button>
+                <button type="button" id="btnClear" class="k-button top-margin" value="Clear">Clear</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.ServiceViewModel>()
+                .Name("GridServiceRequest")
+                .ToolBar(tools => tools.Excel())
+                .Excel(excel => excel
+                    .FileName("ServiceRequestList.xlsx")
+                    .AllPages(true)
+                    .Filterable(true)
+                    .ProxyURL(Url.Action("Excel_Export_Save", "Report"))
+                )
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.EncryptedId).Hidden();
+                    columns.Bound(c => c.DepartmentId).Hidden();
+                    columns.Bound(c => c.IsUploaded).Hidden();
+                    columns.Bound(c => c.ServiceId).Hidden();
+                    columns.Bound(c => c.RequestId).Title("Ref No").Width(100).ClientTemplate("<a href='" + "/Member/ServiceRequest/RequestDetail/#= Id #" + "' target='_blank'>#=Id#</a>");
+                    columns.Bound(c => c.RegistrationNo).Title("RId").Width(120).ClientTemplate("<a target='_blank' href='/Property/PropertyAllotment/PropertyDetails/#=RegistrationNo#'>#=RegistrationNo#</a>").Sortable(false);//.ClientTemplate("<label class='hyperlinkcss' onclick='javascript:RedirectForServices(#=ServiceId#, #=RId#)'>#=RId#</label>");
+                    columns.Bound(c => c.Department).Title("Department").Width(130).Sortable(false);
+                    columns.Bound(c => c.PropertyNo).Title("Property").Width(110).Sortable(false);
+                    //columns.Bound(c => c.Sector).Title("Sector").Width(110).Sortable(false);
+                    //columns.Bound(c => c.Block).Title("Block").Width(110).Sortable(false);
+                    //columns.Bound(c => c.PlotNo).Title("PlotNo").Width(110).Sortable(false);
+                    columns.Bound(c => c.ServiceName).Title("Service Name");
+                    columns.Bound(c => c.RequestDate).Title("Request Date").Width(140).Format("{0:dd/MM/yyyy}").Sortable(false);
+                    columns.Bound(c => c.Status).Title("Status").Width(100).Sortable(false);
+                    //columns.Bound(c => c.RId).Title("Action").ClientTemplate("<a href='" + "/Member/CitizenRequests/ViewRequestDetails/#= Id #" + "'>View</a>").Sortable(false).Filterable(false);
+                    //columns.Bound(c => c.RId).Title("").ClientTemplate("<a href='" + "/Member/CitizenRequests/CitizenChallan?regId=#= EncryptedRId #" + "&refid=#=EncryptedId#" + "'>Create Challan</a>").Sortable(false).Filterable(false);
+                    columns.Bound(c => c.RequestDate).Title("Print").ClientTemplate("<a  onclick='javascript:OpenFile(this);'><center><span class='glyphicon glyphicon-print'></span></center></a>").Width(100).Filterable(false).Sortable(false);
+                    columns.Bound(c => c.Applicant).Hidden();
+                    columns.Bound(c => c.MobileNo).Hidden();
+                    columns.Bound(c => c.SubDepartment).Hidden();
+                    columns.Bound(c => c.Description).Hidden();
+                    columns.Bound(c => c.Approver).Title("Forwarded To").Sortable(false).Width(140);
+                    columns.Bound(c => c.Status).Title("Letter").Width(120).ClientTemplate("#if(StatusId == 9 && IsUploaded==true){# <center><a onclick='javascript:ViewLetter(#=Id#,#=RegistrationNo#);'style='font-weight:bold;cursor:pointer;'>view</a></center> #}#");
+                })
+                .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .ClientDetailTemplateId("template")
+                .AutoBind(true)
+                .DataSource(dataSource => dataSource
+                    .Ajax()
+                    .Model(model => model.Id(c => c.Id))
+                    .ServerOperation(true)
+                    .Read(read => read.Action("GetOnlineCustomerServiceRequestAsDataSource", "ServiceRequest", new { area = "Member" }).Data("FilterSearchParameter")).PageSize(10)
+                    .Sort(s => s.Add(r => r.RequestDate).Descending())
+                )
+        )
+    </div>
+
+</div>
+
+<div class="col-md-12 status-window" id="divStatusMaster" style="min-height:250px;background:url(/Content/Images/boxed-bg.jpg) repeat;">
+    <div class="row form-group" style="padding-top:15px;">
+        <div class="col-md-3">
+            <label>Service Status</label>
+        </div>
+        <div class="col-md-6">
+            @(Html.Kendo().DropDownListFor(model => model.StatusId)
+                .Filter("contains")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .OptionLabel(" -- Select --")
+                .DataSource(source =>
+                {
+                    source.Custom()
+                    .ServerFiltering(true)
+                    .ServerPaging(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    .Transport(transport => transport.Read(read => read.Action("GetStatusMasterAsDataSource", "ServiceRequest", new { area = "Member" })))
+                    .Schema(schema => schema.Data("Data").Total("Total"))
+                    .PageSize(100);
+                })
+                .Events(events => { events.Change("ChangeDepartmentEvent"); })
+                .HtmlAttributes(new { @class = "input-disabled", style = "width:100%; float:right;" })
+            )
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-3">
+            <label>Comment</label>
+        </div>
+        <div class="col-md-9">
+            @Html.TextAreaFor(model => model.Comment, htmlAttributes: new { @class = "k-textbox", style = "width:93%;height:70px;" })
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-3">
+            @Html.HiddenFor(model => model.RequestId)
+        </div>
+        <div class="col-md-3">
+            <input type="button" class="k-button" id="btnStatusSubmit" value="Submit" style="width:98%;" />
+        </div>
+        <div class="col-md-3" style="text-align:right;">
+            <input type="button" class="k-button" id="btnStatusClose" value="Close" style="width:98%;" />
+        </div>
+    </div>
+</div>
+
+<div class="col-md-12 popup-window" id="AcknowledgementContent" style="min-height:300px;background:url(/Content/Images/boxed-bg.jpg) repeat;">
+    <div class="" id="divAcknowledgementReceiptBody">
+        <div class="row">
+            <div class="col-md-12">
+                <h2 style="text-align:center;padding:0;margin-bottom:4px;">NEW OKHLA INDUSTRIAL DEVELOPMENT AUTHORITY</h2>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <h4 style="text-align:center;padding:0;margin-bottom:4px;">Sector-6 Administrator Office, NOIDA</h4>
+            </div>
+        </div>
+        <div class="row ">
+            <div class="col-md-12">
+                <h5 style="text-align:center;padding:0;margin-top:4px;">Acknowledgement Receipt </h5>
+            </div>
+        </div>
+        <div class="row row-pad">
+            <div class="col-md-12">
+                <span style="width:50%;text-align:right;float:right"> <b>Date: <span id="CreatedDate">["CreatedDate"]</span></b></span>
+            </div>
+        </div>
+        <div class="row row-pad">
+            <div class="col-md-12">
+                <span style="width:50%;float:left"><b> Acknowledgement No: &nbsp;<span id="RequestId">["RequestId"]</span></b></span>
+                <span style="width:50%;text-align:right;float:right"><b>Registration Id: &nbsp;<span id="RegistrationNo">["RegistrationId"]</span></b></span>
+            </div>
+        </div>
+        <div class="row row-pad">
+            <div class="col-md-12">
+                <span style="width:70%;float:left"><b> Applicant Name: &nbsp;<span id="Name">["Name"]</span></b></span>
+                <span style="width:30%;text-align:right;float:right"><b>Property No: &nbsp;<span id="PropertyNo">["PropertyNo"]</span></b></span>
+            </div>
+        </div>
+        <div class="row row-pad">
+            <div class="col-md-12">
+                <span style="width:50%;float:left"><b> Department: &nbsp;<span id="Department">["Department"]</span></b> &nbsp;&nbsp;( <span id="SubDepartment">["SubDepartment"]</span> )</span>
+                <span style="width:50%;text-align:right;float:right"><b>Mobile No.: &nbsp;<span id="Mobile">["Mobile"]</span></b></span>
+            </div>
+        </div>
+        <div class="row row-pad">
+            <div class="col-md-12">
+                <b> Request Type: &nbsp;<span id="ServiceName">["ServiceName"]</span></b>
+            </div>
+        </div>
+        <div class="row row-pad">
+            <div class="col-md-12">
+                <b> Subject: &nbsp; <label id="Description">["Description"]</label></b>
+            </div>
+        </div>
+        <div class="row row-pad">
+            <div class="col-md-12" style="text-align:justify;text-justify:inter-word">
+                <p>
+                    <b> Note:</b> The information provided in application shall be validated against the available information with the department.
+                    In case where addition information like payment info addition supporting document etc.is required, the same shall be communicated on registered
+                    mobile number and mail You can also track the status of service request on <b> http://www.mynoida.in </b>,Please quote this service request number for any
+                    communication regarding the application.
+                </p>
+            </div>
+        </div>
+        <div class="row row-pad">
+            <div class="col-md-12">
+                <b>
+                    Thanks for using services online.<br />
+                    Your Thankfully<br />
+                    NOIDA
+                </b>
+            </div>
+        </div>
+        <div class="row row-pad row-btn">
+            <div class="col-md-12" style="text-align: center; padding:15px 0 15px 0;">
+                <button type="button" id="btnPrintDiv" class="btn btn-success" onclick=" PrintAcknowledgementReciept();">Print</button>
+                <button type="submit" id="btnClose" class="btn btn-danger">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script id="template" type="text/kendo-tmpl">
+    @(Html.Kendo().Grid<NA.PMS.Model.ServiceViewModel>()
+            .Name("grid_#=Id#") // template expression, to be evaluated in the master context
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Hidden(true);
+                columns.Bound(o => o.Applicant);//.ClientTemplate("<span>#= ServiceName #<br/><small ><b>Receiving Date:</b>&nbsp;#= CreatedDate#</small></span>");
+                columns.Bound(o => o.Description);
+                columns.Bound(o => o.Comment);//.ClientTemplate("<label>#=Comment#</label>");
+                //columns.Bound(o => o.Status).Width(120).Title("Status").ClientTemplate("<label>#=Status#</label>");
+                //columns.Bound(o => o.Status).Width(120).Title("Update Status").ClientTemplate("<label class='lbl-status-action' onclick='javascript:OpenStatusWindow(this)'>#=Status#</label>");
+                //columns.Bound(o => o.RequestDate).Format("{0:dd/MM/yyyy}").Width(120);
+            })
+            .DataSource(dataSource => dataSource
+                .Ajax().Read(read => read.Action("GetCustomerServiceRequestListById", "ServiceRequest", new { Id = "#=Id#" }))
+            )
+            .ToClientTemplate()
+    )
+</script>
+<script>
+    function dataBound() {
+        this.expandRow(this.tbody.find("tr.k-master-row").first());
+    }
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.popup-window').kendoWindow({
+            modal: true,
+            title: "Service Acknowledgement",
+            actions: false, // [ "Minimize", "Maximize"],
+            visible: false,
+            width: "70%",
+            //height: "60%",
+        });
+
+        $('#btnClose').click(function () {
+            $(".popup-window").data("kendoWindow").close();
+            //ClearFields();
+        });
+
+        $('#divStatusMaster').kendoWindow({
+            modal: true,
+            title: "Service Status",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "15%"
+            },
+            width: "40%"
+        });
+
+        $('#btnStatusSubmit').click(function () {
+            UpdateServiceStatus();
+        });
+        $("#btnStatusClose").click(function () {
+            $(".status-window").data("kendoWindow").close();
+        });
+
+
+        $('#btnSearch').click(function () {
+            ChangeDepartmentEvent();
+        });
+
+        $('#btnClear').click(function () {
+            $('#DepartmentId').data("kendoDropDownList").value("");
+            $('#ServiceId').data("kendoDropDownList").value("");
+            $('#ServiceStatusId').data("kendoDropDownList").value("");
+            $('#StartDate').data("kendoDatePicker").value("");
+            $('#EndDate').data("kendoDatePicker").value("");
+            $("#GridServiceRequest").data("kendoGrid").dataSource.read();
+        });
+
+    })
+
+    function FilterDepartmentForServices() {
+        return { DepartmentId: $('#DepartmentId').val() }
+    }
+
+    function FilterDepartment() {
+        return { departmentId: $('#DepartmentId').val() }
+    }
+
+    function FilterSearchParameter() {
+        return {
+            DepartmentId: $('#DepartmentId').val(),
+            ServiceId: $('#ServiceId').val(),
+            ServiceStatusId: $('#ServiceStatusId').val(),
+            StartDate: $('#StartDate').val(),
+            EndDate: $('#EndDate').val()
+        };
+    }
+    function ChangeDepartmentEvent() {
+        $('#ServiceId').data("kendoDropDownList").dataSource.read();
+        $("#GridServiceRequest").data("kendoGrid").dataSource.read();
+    }
+
+    function RedirectForServices(serviceid, rid) {
+        if (serviceid == 1) {
+           // window.location.href = "/Property/PropertyRegistration/AddRentRequest" + "?id=" + rid;
+        }
+        if (serviceid == 2) {
+            window.location.href = "/Property/PropertyRegistration/AddRentRequest" + "?id=" + rid;
+        }
+        if (serviceid == 3) {
+
+        }
+    }
+
+    function OpenStatusWindow(row) {
+        var tr = $(row).parent().parent();
+        var id = $(tr).children("td:eq(0)").text();
+        $('#RequestId').val(id);
+        $('#divStatusMaster').data("kendoWindow").center();
+        $('#divStatusMaster').data("kendoWindow").open();
+    }
+
+    function UpdateServiceStatus() {
+        var model = {
+            Id: $('#RequestId').val(),
+            StatusId: $('#StatusId').val(),
+            Comment: $('#Comment').val()
+        };
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ model: model }),
+            url: '/Member/ServiceRequest/UpdateCustomerServiceRequestStatus',
+            success: function (result) {
+                if (result == '@ReturnType.Updated') {
+                    alertify.success("Data updated successfully.");
+                }
+                $("#GridServiceRequest").data("kendoGrid").dataSource.read();
+                $('.status-window').data("kendoWindow").close();
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Something is wrong, try again later");
+            }
+        });
+    }
+
+
+
+    function OpenFile(row) {
+        //$("#windowDiv").empty();
+        var tr = $(row).parent().parent();
+        var RequestId = $(tr).children("td:eq(4)").text();
+        var RegistrationNo = $(tr).children("td:eq(5)").text();
+        var Department = $(tr).children("td:eq(6)").text();
+        var PropertyNo = $(tr).children("td:eq(7)").text();
+        var ServiceName = $(tr).children("td:eq(8)").text();
+        var CreatedDate = $(tr).children("td:eq(9)").text();
+        var Applicant = $(tr).children("td:eq(12)").text();
+        var MobileNo = $(tr).children("td:eq(13)").text();
+        var SubDepartment = $(tr).children("td:eq(14)").text();
+        var Description = $(tr).children("td:eq(15)").text();
+        RegistrationNo = RegistrationNo != "" ? RegistrationNo : "NA";
+        $('#CreatedDate').text(CreatedDate);
+        $('#RequestId').text(RequestId);
+        $('#RegistrationNo').text(RegistrationNo);
+        $('#Name').text(Applicant);
+        $('#PropertyNo').text(PropertyNo);
+        $('#Department').text(Department);
+        $('#SubDepartment').text(SubDepartment);
+        $('#Mobile').text(MobileNo);
+        $('#ServiceName').text(ServiceName);
+        $('#Description').text(Description);
+
+        $('.popup-window').data("kendoWindow").center();
+        $('.popup-window').data("kendoWindow").open();
+    }
+
+    function PrintAcknowledgementReciept() {
+        var contents = document.getElementById("AcknowledgementContent").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('<style>.row-btn{display:none;}</style>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+    //function PrintAcknowledgementReciept() {
+    //    var contents = document.getElementById("divAcknowledgementReceiptBody").innerHTML;
+    //    var frame1 = document.createElement('iframe');
+    //    frame1.name = "frame1";
+    //    frame1.style.position = "absolute";
+    //    frame1.style.top = "-1000000px";
+    //    document.body.appendChild(frame1);
+    //    var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+    //    frameDoc.document.open();
+    //    frameDoc.document.write('<html><head><title></title>');
+    //    frameDoc.document.write('</head><body>');
+    //    frameDoc.document.write(contents);
+    //    frameDoc.document.write('</body></html>');
+    //    frameDoc.document.close();
+    //    setTimeout(function () {
+    //        window.frames["frame1"].focus();
+    //        window.frames["frame1"].print();
+    //        document.body.removeChild(frame1);
+    //    }, 500);
+    //    return false;
+    //}
+
+    function ViewLetter(row, rid) {
+        var actionType = "Complete";
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ Id: row, Rid: rid, ActionType: actionType }),
+            url: '/Member/ServiceRequest/GetUploadedDocumentByServiceId',
+            success: function (result) {
+                if (result != "" || result != null) {
+                    window.location.href = result;
+                }
+                else {
+                    alertify.error("File Not Found.");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+            }
+        });
+    }
+</script>
+

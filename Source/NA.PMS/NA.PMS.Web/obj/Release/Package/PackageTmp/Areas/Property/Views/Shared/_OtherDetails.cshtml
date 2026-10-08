@@ -1,0 +1,110 @@
+﻿@model NA.PMS.Model.OtherDetails
+@using Kendo.Mvc.UI;
+
+<div class="row">
+    <div class="row blck-heading-grid">
+        <div class="col-md-6 col-sm-6 col-xs-12">
+            <span>Rent Permission</span>
+        </div>
+    </div>
+    <div class="col-md-12 k-grid-content">
+        @Html.HiddenFor(m => m.RId)
+        @(Html.Kendo().Grid<NA.PMS.Model.RentModel>()
+        .Name("RentGrid")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.SchemeName).Title("Scheme");
+            columns.Bound(c => c.Department).Title("Department");
+            columns.Bound(c => c.Status).Title("Status");
+            columns.Bound(c => c.RequestDate).Title("Request Date").Format("{0:dd-MM-yyyy}"); ;
+            columns.Bound(c => c.ApplicantName).Title("Applicant's Name");
+            columns.Bound(c => c.TenantName).Title("Tenant Name");
+        })
+        .Sortable()
+        .Filterable()
+        .Resizable(resize => resize.Columns(true))
+        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+        .DataSource(dataSource => dataSource
+                    .Ajax().Model(model => model.Id(p => p.RequestNo))
+                    .ServerOperation(true).Sort(sort => sort.Add("RequestNo").Descending())
+                    .Read(read => read.Action("GetPropertyRentListByRid", "PropertyRegistration").Data("additionalPropInfo")).PageSize(10)
+                    .Model(model => model.Id(backup => backup.RID))
+                    )
+        )
+    </div>
+</div><br />
+<div class="row">
+    <div class="row blck-heading-grid">
+        <div class="col-md-6 col-sm-6 col-xs-12">
+            <span>Mortgage</span>
+        </div>
+    </div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.MortgageModel>()
+              .Name("gridMortgage")
+              .Columns(columns =>
+              {
+                  columns.Bound(c => c.SchemeName).Title("Scheme Name");
+                  columns.Bound(c => c.DepartmentName).Title("Department Name");
+                  columns.Bound(c => c.ApproveDate).Title("Approved/Rejected Date").Format("{0:dd/MM/yyyy}");
+                  columns.Bound(c => c.MortgageDate).Title("Request Date").Format("{0:dd/MM/yyyy}");
+                  columns.Bound(c => c.StatusName).Title("Status");
+                  columns.Bound(c => c.ApplicantName).Title("Applicant's Name");
+                  columns.Bound(c => c.MortgageType).Title("Mortgage Type");
+              })
+              .Sortable()
+              .Filterable()
+              .Resizable(resize => resize.Columns(true))
+              .Pageable
+              (
+                pageable => pageable
+                .Enabled(true)
+                .Refresh(true)
+                .PageSizes(true)
+              )
+              .DataSource
+              (
+                dataSource => dataSource
+                .Ajax().Model(model => model.Id(p => p.RequestNo))
+                                .ServerOperation(true).Sort(sort => sort.Add("RequestNo").Descending()).Read(read => read.Action("GetAllMortgageByRid", "PropertyRegistration").Data("additionalPropInfo"))
+                .PageSize(10)
+              )
+        )
+    </div>
+</div><br />
+<div class="row">
+    <div class="row blck-heading-grid">
+        <div class="col-md-6 col-sm-6 col-xs-12">
+            <span>Extension</span>
+        </div>
+    </div>
+    <div class=" col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.ExtensionDetails>()
+                .Name("gridExtensionDetails")
+                .Columns(columns =>
+                {                  
+                    columns.Bound(c => c.DepartmentName).Title("Department");
+                    columns.Bound(c => c.SectorName).Title("Sector").Width(100);
+                    columns.Bound(c => c.BlockName).Title("Block").Width(100);
+                    columns.Bound(c => c.PropertyNo).Title("Property No").Width(150);
+                    columns.Bound(c => c.Created_Date).Title("Requested Date").Format("{0:dd/MM/yyyy}");
+                    columns.Bound(c => c.StatusName).Title("Status").Width(130);
+                })
+        .Sortable()
+        .Filterable()
+        .Resizable(resize => resize.Columns(true))
+        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+        .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .Model(model => model.Id(p => p.Id))
+                                .ServerOperation(true).Sort(sort => sort.Add("Id").Descending())
+                                .Read(read => read.Action("GetExtensionDetailsByRid", "PropertyAllotment").Data("additionalPropInfo")).PageSize(20)
+                    )
+        )
+    </div>
+</div>
+<script type="text/javascript">
+    function additionalPropInfo() {
+        return { rid: $('#Rid').val() };
+    }
+</script>

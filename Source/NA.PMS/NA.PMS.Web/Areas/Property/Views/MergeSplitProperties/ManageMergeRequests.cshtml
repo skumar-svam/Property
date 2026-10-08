@@ -1,0 +1,72 @@
+﻿@model NA.PMS.Model.Property.MergeSplitPropModel
+
+@using Kendo.Mvc.UI;
+@using NA.PMS.Model
+@using NA.PMS.Model.Property
+
+@{
+    ViewBag.Title = "Merge Properties";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<style>
+    .bulkDialog {
+        display: none;
+    }
+
+    .disable_a_href {
+        pointer-events: none;
+    }
+</style>
+
+<div class="ApplicationForm">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Amalgamation</h1></div>
+            @*<div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                <a href="#" id="btnGeneratePaymentChallan" class="" onclick="javascript: GeneratePaymentChallan(event);">Generate Payment Challan</a>
+                <a href="#" id="btnAddMergeRequest" class="" onclick="javascript: AddMergeRequest(event);">Add Merge Request</a>
+            </div>*@
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="k-grid-content">
+        @(Html.Kendo().Grid<MergeSplitPropModel>()
+                .Name("gridMProperties")
+                .Columns(columns =>
+                {
+
+                    columns.Bound(c => c.Id).Title("Request No.").ClientTemplate("<a href='/Property/MergeSplitProperties/ViewApproverMergeRequest/#=Id#'>#=Id#</a>").Width(150);
+                    //columns.Bound(c => c.Rid).Title("RID").Width(100);
+                    columns.Bound(c => c.DepartmentName).Title("Department");
+                    columns.Bound(c => c.PropertyNumber).Title("Property No");
+                    columns.Bound(c => c.AssignedTo).Title("Assigned To");
+                    columns.Bound(c => c.RequestDate).Title("Requested Date").Format("{0:dd/MM/yyyy}");
+                    columns.Bound(c => c.ApprovedDate).Title("Approved Date").Format("{0:dd/MM/yyyy}");
+                    columns.Bound(c => c.Status).Title("Status").Width(130);
+                    //columns.Bound(c => c.Id).ClientTemplate("<a class='gridEdit' href='" + "/Property/MergeSplitProperties/EditMergeRequest/#= Id #'> Edit </a>").Width(80).Title("Action").Filterable(false);
+                })
+                .Sortable()
+                .Filterable()
+                .Pageable
+                    (
+                         pageable => pageable
+                        .Enabled(true)
+                        .Refresh(true)
+                        .PageSizes(true)
+                    )
+                .DataSource
+                (
+                     dataSource => dataSource
+                    .Ajax().Model(model => model.Id(p => p.Rid))
+                                    .ServerOperation(true).Sort(sort => sort.Add("Id").Descending())
+                    .Read(read => read.Action("GetAllMergeRequests", "MergeSplitProperties")).PageSize(20)
+                 )
+        )
+    </div>
+</div>
+
+

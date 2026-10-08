@@ -1,0 +1,213 @@
+﻿@model NA.PMS.Model.PropertyModel
+@using Kendo.Mvc.UI
+@using NA.PMS.Model
+
+@{
+    ViewBag.Title = "Add Property Bank";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@using (Html.BeginForm("SavePropertyBankDetail", "ManageProperty", FormMethod.Post, new { enctype = "multipart/form-data", id = "propertyform" }))
+{
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Add Property Bank</h1></div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+                </div>
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="col-md-12 content-top-spce">
+                @{Html.RenderPartial("_PropertyBank");}
+
+                <div class="box-button text-center">
+                    <input type="button" id="btnClear" value="Cancel" style="display:none" class="btn btn-default" />
+                    <input value="Add" type="button" id="btnSubmit" class="btn btn-add" />
+                </div>
+                <br />
+                <br />
+                <br />
+                <div class="col-md-12 blnk-rw"></div>
+                <div class="col-md-12 k-grid-content">
+                    @(Html.Kendo().DataSource<PropertyModel>()
+    .Name("dtPropDetail")
+    .Ajax(dataSource => dataSource
+               .Read(read => read.Action("GetPropertyBankDetailAdd", "ManageProperty")).PageSize(20)
+       .ServerOperation(false)
+    )
+                    )
+                    @(Html.Kendo().Grid<PropertyModel>()
+        .Name("gvPropertyBank")
+        .Columns(columns =>
+{
+    columns.Bound(c => c.departmentName).Title("Department Name");
+    columns.Bound(c => c.propertyType).Title("Property Type");
+    columns.Bound(c => c.sectorName).Title("Sector");
+    columns.Bound(c => c.blockName).Title("Block");
+    columns.Bound(c => c.floorName).Title("Floor/Area Range");
+    if (@ViewBag.ReadOnlyMenu != null && @ViewBag.ReadOnlyMenu == true)
+    {
+        columns.Bound(c => c.plotProperty).Title("Property/Plot No").ClientTemplate("<a href='/Master/ManageProperty/ViewPropertyDetail/#=refId#'>#=plotProperty#</a>");
+    }
+    else
+    {
+        columns.Bound(c => c.plotProperty).Title("Property/Plot No");
+    }
+
+    columns.Bound(c => c.totalArea).Title("Total Area");
+    columns.Bound(c => c.refId).Visible(false);
+
+
+    columns.Bound(c => c.refId).HeaderHtmlAttributes(new { style = "text-align:center;" }).HtmlAttributes(new { style = "text-align:center;" }).ClientTemplate("# {#<a class='gridEdit' href='" + "/Master/ManageProperty/EditPropertyBankDetail/#= refId #'> Edit </a>#} #").Title("Edit").Filterable(false);
+
+    columns.Bound(c => c.refId).Title("Remove").HeaderHtmlAttributes(new { style = "text-align:center;" }).HtmlAttributes(new { style = "text-align:center;" }).ClientTemplate("# {#<a onclick='javascript:RemovePropertyBank(#=refId#)' id='RemovePropertyTag' class='gridRemove text-center'>Remove</a>#} #").Filterable(false);
+
+
+})
+
+            .DataSource("dtPropDetail").Pageable()
+            .Sortable()
+            .Filterable()
+
+//(
+        //     dataSource => dataSource
+        //.Ajax().Model(model => model.Id(p => p.propertyTypeId))
+        //.ServerOperation(true)
+        ////.Group(groups => groups.Add(p => p.schemeName))
+        //.Read(read => read.Action("GetPropertyDetailSearch", "ManageProperty").Data("FilterData")).PageSize(20)
+        //                                         )
+
+        //.Groupable()
+                    )
+
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+}
+<script type="text/javascript">
+    //$('#btnClear').click(function () {
+    //    var departmentId = $("#departmentId").data("kendoDropDownList");
+    //    departmentId.value("0");
+    //    var propertyTypeId = $("#propertyTypeId").data("kendoDropDownList");
+    //    propertyTypeId.value("0");
+    //    var sectorId = $("#sectorId").data("kendoDropDownList");
+    //    sectorId.value("0");
+    //    var blockId = $("#blockId").data("kendoDropDownList");
+    //    blockId.value("0");
+    //    var floorId = $("#floorId").data("kendoDropDownList");
+    //    floorId.value("0");
+    //    $("#plotNo").val('');
+    //});
+    $('#btnSubmit').click(function () {
+        if ($("#departmentId").val() == "") {
+            alertify.error("Please select Department.");
+            return false;
+        }
+        if ($("#propertyTypeId").val() == "") {
+            alertify.error("Please select Property Type.");
+            return false;
+        }
+        if ($("#sectorId").val() == "") {
+            alertify.error("Please select Sector.");
+            return false;
+        }
+        if ($("#blockId").val() == "") {
+            alertify.error("Please select Block.");
+            return false;
+        }
+        if ($("#floorId").val() == "") {
+            alertify.error("Please select Floor/Area Range.");
+            return false;
+        }
+        if ($("#totalArea").val() == "") {
+            alertify.error("Please select Total Area.");
+            return false;
+        }
+        if ($("#plotProperty").val().trim() == '') {
+            alertify.error("Please enter Property/Plot No Number");
+            $("#plotProperty").val('');
+            return false;
+        }
+        else {
+            if (!isNaN(parseFloat($("#plotProperty").val().trim()))) {
+                if ((parseFloat($("#plotProperty").val().trim())) == 0) {
+                    alertify.error("Please enter Property/Plot No other than 0");
+                    $("#plotProperty").val('');
+                    return false;
+                }
+            }
+        }
+
+        //function TotalAreaChange() {
+        var dropdownlist = $("#floorId").data("kendoDropDownList");
+        var totalArea = $("#totalArea").val();
+        var totalAreaNum = $("#totalArea").data("kendoNumericTextBox");
+        if ($("#departmentId").val() != 5) {
+            if (dropdownlist.text().includes(">")) {
+                var areaRange = dropdownlist.text().split(">");
+                if (totalArea <= parseInt(areaRange[1].trim())) {
+                    alertify.error("Please enter Total Area greater than Area Range.");
+                    totalAreaNum.value('');
+                    return false;
+                }
+            }
+            else {
+                var areaRange = dropdownlist.text().split("-");
+                if (totalArea < parseFloat(areaRange[0].trim()) || totalArea > parseFloat(areaRange[1].trim())) {
+                    alertify.error("Please enter Total Area within Area Range.");
+                    totalAreaNum.value('');
+                    return false;
+                }
+            }
+        }
+        //}
+
+        $.ajax({
+            url: '@(Url.Action("CheckDuplicateProperty", "ManageProperty"))',
+            type: 'POST',
+            dataType: 'json',
+            data: { secotrId: $("#sectorId").val(), blockId: $("#blockId").val(), plotNo: $("#plotProperty").val(), refId: 0 },
+            success: function (result) {
+                if (result == true) {
+                    alertify.error("Property already exists");
+                    //document.getElementById("btnSubmit").disabled = false;
+                    return false;
+                }
+                else {
+                    $('#propertyform').submit();
+                    alertify.success("Property added successfully.")
+                }
+            }
+        });
+    });
+
+    function RemovePropertyBank(refId) {
+        var flag = confirm('Are you sure you want to remove Property?');
+        if (flag) {
+            $.ajax({
+                url: '@(Url.Action("RemovePropertyBank", "ManageProperty"))',
+                type: 'POST',
+                data: { propertyId: refId },
+                success: function (result) {
+                    if (result == true) {
+                        alertify.success("Property successfully removed"); //location.reload();
+                        $('#gvPropertyBank').data('kendoGrid').dataSource.read();
+                        $('#gvPropertyBank').data('kendoGrid').refresh();
+                    }
+                    else {
+                        alertify.error("Property not removed");
+                        return false;
+                    }
+                }
+            });
+        }
+        else {
+            return false;
+        }
+    }
+</script>

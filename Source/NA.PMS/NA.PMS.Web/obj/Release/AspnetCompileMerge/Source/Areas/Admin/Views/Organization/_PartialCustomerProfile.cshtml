@@ -1,0 +1,254 @@
+﻿@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions
+
+<div class="panel-body">
+    <div class="row form-group">
+        <div class="col-md-12" id="Application" style="text-align:center">
+            <input type="radio" name="user-action" value="Employee" />Employee &nbsp;&nbsp;
+            <input type="radio" name="user-action" value="Customer" />Allottee &nbsp;&nbsp;
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-3">
+            <label>User Name/RId</label>
+        </div>
+        <div class="col-md-3">
+            @(Html.Kendo().DropDownList()
+                .Name("ddl-username")
+                .OptionLabel("---select---")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .Filter("contains")
+                .DataSource(source =>
+                {
+                    source.Custom()
+                    .ServerFiltering(true)
+                    .ServerPaging(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    //.Transport(transport =>transport.Read("GetUserNameListAsDataSource", "Application", new { area="Admin"}))
+                    .Transport(transport => transport.Read(read => read.Action("GetUserNameListAsDataSource", "Application", new { area = "Admin" }).Data("FilterUserType")))
+                    .Schema(schema => schema.Data("Data").Total("Total"))
+                    .PageSize(100);
+                }
+                )
+                //.Enable(false)
+                .HtmlAttributes(new { style = "width:100%;" })
+                .Events(e => e.Change("UserNameChangeEvent"))
+            )
+        </div>
+        
+    </div>
+    <div class="row form-group">
+        <div class="col-md-3">
+            <label>UserName :</label>
+        </div>
+        <div class="col-md-3">
+            <input type="text" maxlength="20" id="txt-username" class="k-textbox" />
+        </div>
+        <div class="col-md-3">
+            <label>Department</label>
+        </div>
+        <div class="col-md-3">
+            @(Html.Kendo().DropDownList()
+                .Name("ddl-department")
+                .OptionLabel("---select---")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                    //.DataSource(source => source.Read(read => read.Action("GetDepartmentList", "Application", new { area = "Admin" })))
+                .DataSource(source =>
+                {
+                    source.Custom()
+                    .ServerFiltering(true)
+                    .ServerPaging(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    .Transport(transport => transport.Read("GetDeparmentListAsDataSource", "Application", new { area = "Admin" }))
+                    .Schema(schema => schema.Data("Data").Total("Total"))
+                    .PageSize(100);
+                }
+                )
+                .HtmlAttributes(new { style = "width:100%;" })
+            )
+        </div>
+    </div>
+    <div class="row form-group row-customer">
+        <div class="col-md-3">
+            <label>RegistrationId :</label>
+        </div>
+        <div class="col-md-3">
+            <input type="text" maxlength="8" id="txt-registrationid" class="k-textbox" />
+        </div>
+        <div class="col-md-3">
+            <label>Property Id:</label>
+        </div>
+        <div class="col-md-3">
+            <input type="text" maxlength="8" id="txt-propertyid" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-3">
+            <label>First Name:</label>
+        </div>
+        <div class="col-md-3">
+            <input type="text" maxlength="499" id="txt-firstname" class="k-textbox" />
+        </div>
+        <div class="col-md-3">
+            <label>Last Name:</label>
+        </div>
+        <div class="col-md-3">
+            <input type="text" maxlength="499" id="txt-lastname" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-3">
+            <label>Mobile No:</label>
+        </div>
+        <div class="col-md-3">
+            <input type="text" maxlength="10" id="txt-mobileno" class="k-textbox" />
+        </div>
+        <div class="col-md-3">
+            <label>User Email:</label>
+        </div>
+        <div class="col-md-3">
+            <input type="text" maxlength="40" id="txt-email" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row form-group" style="text-align:right;">
+        <div class="col-md-12">
+            <input type="button" id="btn-update-user" class="k-button" value="Update" style="min-width:80px;" />
+            <input type="button" id="btn-clear-user-fields" class="k-button" value="Clear" />
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('input[type="radio"][name="user-action"]').change(function () {
+            ClearProfileInputFields();
+            var usertype = $('input[type="radio"][name="user-action"]:checked').val();
+            if (usertype == "Customer") {
+                 $('.row-customer').show();
+            }
+            else {
+                $('.row-customer').css("display", "none");
+            }
+            $('#ddl-username').data("kendoDropDownList").dataSource.read();
+        });
+        $('#btn-update-user').click(function () {
+            UpdateUserProfile();
+        });
+
+        $('#btn-clear-user-fields').click(function () {
+            ClearProfileInputFields();
+        });
+    });
+
+    function FilterUserType() {
+        return { FilterType: $('input[type="radio"][name="user-action"]:checked').val() }
+    }
+
+    function UserNameChangeEvent() {
+        var id = $('#ddl-username').val();
+        var usertype = $('input[type="radio"][name="user-action"]:checked').val();
+        if (id != "" && usertype != undefined) {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ Id: id, FilterType: usertype }),
+                url: "/Admin/Application/GetUsersDetailById",
+                success: function (result) {
+                    if (result != null) {
+                        ClearProfileInputFields();
+                        if (usertype == "Customer") {
+                            $('#ddl-department').data("kendoDropDownList").value(result.DepartmentId);
+                            $('#txt-registrationid').val(result.RegistrationId);
+                            $('#txt-propertyid').val(result.PropertyId);
+                            $('#txt-registrationid').attr("readonly", false);
+                            $('#txt-propertyid').attr("readonly", false);
+                        }
+                        else {
+                            $('#ddl-department').data("kendoDropDownList").enable = false;
+                            $('#txt-registrationid').attr("readonly", true);
+                            $('#txt-propertyid').attr("readonly", true);
+                        }
+                        $('#txt-username').val(result.UserName);
+                        $('#txt-firstname').val(result.FirstName);
+                        $('#txt-lastname').val(result.LastName);
+                        $('#txt-mobileno').val(result.MobileNo);
+                        $('#txt-email').val(result.Email);
+                    }
+                    if (result == '@ReturnType.NotExist') {
+                        alertify.error("PropertyId Id doesn't exist");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Please try again.");
+                }
+            });
+        }
+        else {
+            alertify.error("Please select user name and type.");
+            $('#ddl-username').data("kendoDropDownList").value('');
+            ClearProfileInputFields();
+        }
+    }
+
+    function UpdateUserProfile() {
+        var id = $('#ddl-username').val();
+        var usertype = $('input[type="radio"][name="user-action"]:checked').val();
+        if (id != "" && usertype != undefined) {
+            var user = {
+                FilterType: $('input[type="radio"][name="user-action"]:checked').val(),
+                Id: $('#ddl-username').val(),
+                DepartmentId: $('#ddl-department').val(),
+                RegistrationId: $('#txt-registrationid').val(),
+                PropertyId: $('#txt-propertyid').val(),
+                UserName: $('#txt-username').val(),
+                FirstName: $('#txt-firstname').val(),
+                LastName: $('#txt-lastname').val(),
+                MobileNo: $('#txt-mobileno').val(),
+                Email: $('#txt-email').val()
+            };
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ model: user }),
+                url: "/Admin/Application/SaveUserDetailById",
+                success: function (result) {
+                    if (result == '@ReturnType.Updated') {
+                        alertify.success("User data updated successfully");
+                        ClearProfileInputFields();
+                    }
+                    if (result == '@ReturnType.None') {
+                        alertify.error("User doesn't exist");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Please try again.");
+                }
+            });
+        }
+        else {
+            alertify.error("Please select user name and type.");
+        }
+    }
+
+
+    function ClearProfileInputFields() {
+        //$('input[type="radio"][name="user-action"]:checked').val();
+        //$('#ddl-username').data("kendoDropDownList").value('');
+        $('#ddl-department').data("kendoDropDownList").value('');
+        $('#txt-username').val('');
+        $('#txt-registrationid').val('');
+        $('#txt-propertyid').val('');
+        $('#txt-firstname').val('');
+        $('#txt-lastname').val('');
+        $('#txt-mobileno').val('');
+        $('#txt-email').val('');
+    }
+
+</script>

@@ -1,0 +1,131 @@
+﻿@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions
+
+
+<div class="panel-body">
+    <div class="row form-group">
+        <div class="col-md-12" id="Application" style="text-align:center">
+            <input type="radio" name="application-action" value="AddApplication" />Add &nbsp;&nbsp;
+            <input type="radio" name="application-action" value="UpdateApplication" />Update
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-2">
+            <label>Ex Application:</label>
+        </div>
+        <div class="col-md-3">
+            @(Html.Kendo().DropDownList()
+                  .Name("ddlApplication")
+                  .OptionLabel("---select---")
+                  .DataTextField("Text")
+                  .DataValueField("Id")
+                  .DataSource(source => source.Read(read => read.Action("GetApplicationList", "Application", new { area = "Admin" })))
+                  .HtmlAttributes(new { style="width:100%;"})
+            )
+        </div>
+        <div class="col-md-2">
+            <label>New Application:</label>
+        </div>
+        <div class="col-md-3">
+            <input type="text" maxlength="30" id="txtApplication" class="k-textbox" />
+        </div>
+        <div class="col-md-2" style="text-align:right;">
+            <input type="button" id="btnSaveApplication" class="k-button" value="Update" style="min-width:80px;"/>
+            <input type="button" id="btnClearApplication" class="k-button" value="Clear" />
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+       
+        $('input[type="radio"][name="application-action"]').on("change", function () {
+            var action = $('input[type="radio"][name="application-action"]:checked').val();
+            if (action == "AddApplication") {
+                $('#btnSaveApplication').val("Add");
+                $('#ddlApplication').data("kendoDropDownList").value('');
+                $('#ddlApplication').data("kendoDropDownList").enable(false);
+            }
+            else {
+                $('#btnSaveApplication').val("Update");
+                $('#ddlApplication').data("kendoDropDownList").enable(true);
+            }
+        });
+
+        $('#btnSaveApplication').click(function () {
+            SubmitApplicationForm();
+        });
+
+        $('#btnClearApplication').click(function () {
+            ClearApplicationFields();
+        });
+    });
+
+
+    function SubmitApplicationForm() {
+        var flag = true;
+        var actiontype = $('input[type="radio"][name="application-action"]:checked').val();
+        var appId = $('#ddlApplication').data("kendoDropDownList").value();
+        var app = $('#txtApplication').val();
+        if (actiontype == "" || actiontype == undefined) {
+            flag = false;
+            alertify.error("Select Action type.");
+            return false;
+        }
+        if (actiontype == "AddApplication") {
+            if (app == "") {
+                alertify.error("Enter Application name");
+                flag = false;
+            }
+            actiontype = "Add";
+        }
+        if (actiontype == "UpdateApplication") {
+            if (appId == "") {
+                alertify.error("Select Application");
+                flag = false;
+            }
+            else if (app == "") {
+                alertify.error("Enter Application name");
+                flag = false;
+            }
+            actiontype = "Update";
+        }
+        if (flag) {
+            var ApplicationModel = {
+                //ActionType: $('input[type="radio"][name="application-action"]:checked').val(),
+                ActionType: actiontype,
+                ApplicationId: $('#ddlApplication').data("kendoDropDownList").value(),
+                Name: $('#ddlApplication').data("kendoDropDownList").text(),
+                Application: $('#txtApplication').val()
+            };
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ model: ApplicationModel }),
+                url: '@Url.Action("SaveApplication", "Application", new { area="Admin"})',
+                success: function (result) {
+                    if ((result == '@ReturnType.Saved') || (result == '@ReturnType.Updated')) {
+                        alertify.success("Application saved successfully.");
+                        ClearApplicationFields();
+                        $('#ddlApplication').data("kendoDropDownList").dataSource.read();
+                    }
+                    else if (result == '@ReturnType.None') {
+                        alertify.error("Application doesn't exist.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again");
+                }
+            });
+        }      
+    }
+
+    function ClearApplicationFields() {
+        $('#ddlApplication').data("kendoDropDownList").value('');
+        $('#txtApplication').val('')
+    }
+
+</script>

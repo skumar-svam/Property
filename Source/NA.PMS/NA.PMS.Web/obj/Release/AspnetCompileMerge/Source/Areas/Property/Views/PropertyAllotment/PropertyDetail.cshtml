@@ -1,0 +1,121 @@
+﻿@model NA.PMS.Model.AllottedPropertyViewModel
+@using NA.PMS.Model
+@{
+    ViewBag.Title = "Property Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .nav-sub-group .nav-tabs li a {
+        margin-left: 2px;
+        margin-right: 0;
+        /*line-height: 1.42857143;
+    border: 1px solid transparent;
+    border-radius: 4px 4px 0 0;*/
+    }
+
+    .nav-sub-group .nav.nav-tabs.content-tabs li.active>a {
+        background: #fff;
+        color: #000;
+    }
+</style>
+
+
+<div class="PropertyDetails col-lg-12 col-md-12 col-sm-12">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Property Details</h1></div>
+                <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                    <h1 class="gridTitle">Registration Id: @Model.Property.RegistrationId</h1>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 allotmentProperty" style="padding-top:5px;">
+            <div class="row">
+                @Html.HiddenFor(model => model.Property.RegistrationId)
+                @Html.HiddenFor(model => model.Property.DepartmentId)
+                @Html.HiddenFor(model => model.Property.PropertyId)
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <ul class="nav nav-tabs content-tabs" id="ulProperty" role="tablist">
+                        <li class="active"><a href="#one" role="tab" data-toggle="tab">Property</a></li>
+                        <li><a href="#two" role="tab" data-toggle="tab">Documents</a></li>
+                        <li><a href="#three" role="tab" data-toggle="tab">History</a></li>
+                        <li><a href="#four" role="tab" data-toggle="tab">Payment</a></li>
+                        <li><a href="#five" role="tab" data-toggle="tab">Service Request</a></li>
+                        <li><a href="#six" role="tab" data-toggle="tab">Noting</a></li>
+                        <li><a href="#seven" role="tab" data-toggle="tab">Other</a></li>
+                    </ul>                  
+                </div>
+                <div class="col-md-12 tabbable " id="divProperty">
+
+                    <div class="tab-content">
+                        <div class="tab-pane fade in active" id="one">
+                            @{
+                                Html.RenderPartial("_PartialPropertyInfo");
+                            }
+                        </div>
+                        <div class="tab-pane fade" id="two">
+                            @{
+                                Html.RenderPartial("_PartialDocumentInfo");
+                            }
+                        </div>
+                        <div class="tab-pane fade" id="three">
+                            @{
+                                Html.RenderPartial("_PartialHistoryInfo");
+                            }
+                        </div>
+                        <div class="tab-pane fade" id="four">
+                            @{
+                                Html.RenderPartial("_PartialPaymentInfo");
+                            }
+                        </div>
+                       
+                        <div class="tab-pane fade" id="five">                            
+                            @{
+                                Html.RenderPartial("_PartialServiceInfo");
+                            }
+                        </div>
+                        <div class="tab-pane fade" id="six">
+                            @{
+                                Html.RenderPartial("_PartialNotingFileInfo");
+                            }
+                        </div>
+                        <div class="tab-pane fade" id="seven">
+                            @{
+                                //Html.RenderPartial("_OtherDetails", Model.OtherDetails);
+                            }
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        //Reschedule Payment
+        $("#hdnRescheduleGrid").hide();
+        if ($("#isReschedule").val() == "True") {
+            $("#hdnRescheduleGrid").show();
+        }
+
+        $('.nav-tabs a').click(function (e) {
+            e.preventDefault();
+            // $(this).tab('show');
+        });
+    });
+
+    function FilterRegistrationId() {
+        //return rid = $('#Property_RegistrationId').val();
+        return { rid: 10001141 };
+    }
+</script>

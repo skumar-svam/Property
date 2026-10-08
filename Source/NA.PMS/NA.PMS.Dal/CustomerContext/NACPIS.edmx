@@ -1,0 +1,583 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="CustomerModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="Customer_Feedback">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Registration_No" Type="varchar" MaxLength="20" />
+          <Property Name="Feedback" Type="varchar" MaxLength="500" />
+          <Property Name="Service_Request" Type="varchar" MaxLength="500" />
+          <Property Name="Created_Date" Type="datetime" />
+          <Property Name="Created_By" Type="int" />
+          <Property Name="Modified_Date" Type="datetime" />
+          <Property Name="Modified_By" Type="int" />
+          <Property Name="Request_Status" Type="int" />
+        </EntityType>
+        <EntityType Name="LookupDepartment">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="NAME" Type="varchar" MaxLength="200" />
+          <Property Name="CreatedOn" Type="datetime" />
+          <Property Name="ConstructionPeriodAllowed" Type="int" />
+        </EntityType>
+        <EntityType Name="Menus">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="MenuId" Type="int" Nullable="false" />
+          <Property Name="ParentMenuId" Type="int" Nullable="false" />
+          <Property Name="MenuType" Type="nvarchar" MaxLength="50" Nullable="false" />
+          <Property Name="MenuName" Type="nvarchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Property_Remarks">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Registration_No" Type="varchar" MaxLength="20" />
+          <Property Name="Remarks" Type="varchar" MaxLength="500" />
+          <Property Name="Created_Date" Type="datetime" />
+          <Property Name="Created_By" Type="int" />
+          <Property Name="Modified_Date" Type="datetime" />
+          <Property Name="Modified_By" Type="int" />
+        </EntityType>
+        <EntityType Name="Role_Menu_Mapping">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="MenuId" Type="int" Nullable="false" />
+          <Property Name="RoleId" Type="int" Nullable="false" />
+          <Property Name="CreatedOn" Type="datetime" Nullable="false" />
+          <Property Name="CreatedBy" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="ModifiedBy" Type="uniqueidentifier" />
+          <Property Name="ModifiedOn" Type="datetime" />
+        </EntityType>
+        <EntityType Name="Role_Users">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="UserId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="RoleId" Type="int" Nullable="false" />
+          <Property Name="CreatedOn" Type="datetime" Nullable="false" />
+          <Property Name="CreatedBy" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="ModifiedBy" Type="uniqueidentifier" />
+          <Property Name="ModifiedOn" Type="datetime" />
+        </EntityType>
+        <EntityType Name="Roles">
+          <Key>
+            <PropertyRef Name="RoleId" />
+          </Key>
+          <Property Name="RoleId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="RoleName" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="CreatedOn" Type="datetime" Nullable="false" />
+          <Property Name="CreatedBy" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="ModifiedBy" Type="uniqueidentifier" />
+          <Property Name="ModifiedOn" Type="datetime" />
+        </EntityType>
+        <EntityType Name="Users">
+          <Key>
+            <PropertyRef Name="UserId" />
+          </Key>
+          <Property Name="UserId" Type="uniqueidentifier" Nullable="false" />
+          <Property Name="UserName" Type="nvarchar" MaxLength="256" Nullable="false" />
+          <Property Name="Pasword" Type="varchar" MaxLength="200" />
+          <Property Name="FirstName" Type="varchar" MaxLength="50" />
+          <Property Name="LastName" Type="varchar" MaxLength="50" />
+          <Property Name="Status" Type="bit" />
+          <Property Name="IsLockedOut" Type="bit" />
+          <Property Name="CreatedOn" Type="datetime" />
+          <Property Name="CreatedBy" Type="uniqueidentifier" />
+          <Property Name="ModifiedBy" Type="uniqueidentifier" />
+          <Property Name="ModifiedOn" Type="datetime" />
+          <Property Name="RoleId" Type="int" />
+          <Property Name="LastPasswordChangeDate" Type="datetime" />
+          <Property Name="PropertyId" Type="nvarchar" MaxLength="255" />
+          <Property Name="MobileNo" Type="nvarchar" MaxLength="15" />
+          <Property Name="DeptId" Type="int" />
+          <Property Name="CustomerIdFileName" Type="varchar" MaxLength="50" />
+          <Property Name="CustomerIdFileType" Type="varchar" MaxLength="50" />
+          <Property Name="CustomerLetterFileName" Type="varchar" MaxLength="50" />
+          <Property Name="CustomerLetterType" Type="varchar" MaxLength="50" />
+          <Property Name="OTP" Type="int" />
+          <Property Name="Sector" Type="nvarchar" MaxLength="10" />
+          <Property Name="Block" Type="nvarchar" MaxLength="10" />
+          <Property Name="Property" Type="nvarchar" MaxLength="50" />
+          <Property Name="IsRejected" Type="bit" />
+          <Property Name="Remarks" Type="varchar" MaxLength="200" />
+          <Property Name="IsFirstTimeActivated" Type="bit" />
+          <Property Name="UserEmail" Type="varchar" MaxLength="100" />
+          <Property Name="Question" Type="varchar" MaxLength="200" />
+          <Property Name="Answer" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <!--Errors Found During Generation:
+warning 6002: The table/view 'NoidaDashboardDev.dbo.view_property' does not have a primary key defined. The key has been inferred and the definition was created as a read-only table/view.-->
+        <EntityType Name="view_property">
+          <Key>
+            <PropertyRef Name="PRDVREGISTRATION_ID" />
+            <PropertyRef Name="BLOCK" />
+            <PropertyRef Name="PropertyType" />
+            <PropertyRef Name="AreaSqm" />
+            <PropertyRef Name="AreaId" />
+            <PropertyRef Name="STATUS" />
+            <PropertyRef Name="AllotmentStatus" />
+            <PropertyRef Name="AllotmentStatusId" />
+          </Key>
+          <Property Name="PRDVREGISTRATION_ID" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="PLDIPROPERTY_ID" Type="int" />
+          <Property Name="PLDIPROPERTY_NO" Type="nvarchar" MaxLength="255" />
+          <Property Name="BLOCK" Type="nchar" MaxLength="10" Nullable="false" />
+          <Property Name="PLDVSECTOR_ID" Type="nvarchar" MaxLength="255" />
+          <Property Name="PLDVSUBSCHEME_ID" Type="nvarchar" MaxLength="255" />
+          <Property Name="SECTOR" Type="varchar" MaxLength="10" />
+          <Property Name="PLDVDISP_PROP_TYPE_ID" Type="nvarchar" MaxLength="255" />
+          <Property Name="PLDVDISP_PROP_SUBTYPE_ID" Type="nvarchar" MaxLength="255" />
+          <Property Name="PLDVLAND_USE_TYPE_ID" Type="nvarchar" MaxLength="255" />
+          <Property Name="PropertyType" Type="varchar" MaxLength="13" Nullable="false" />
+          <Property Name="PRDVREGIST_APPLICANT_NAME" Type="nvarchar" MaxLength="255" />
+          <Property Name="PRDVAPPLICANT_FATHER_NAME" Type="nvarchar" MaxLength="255" />
+          <Property Name="PRDVREGIST_APPLICANT_ADDRESS" Type="nvarchar" MaxLength="255" />
+          <Property Name="PRDVSUCC_MUT_TRANS_FLAG" Type="nvarchar" MaxLength="255" />
+          <Property Name="PLDRACTUAL_LAND_AREA" Type="float" />
+          <Property Name="AreaSqm" Type="varchar" MaxLength="13" Nullable="false" />
+          <Property Name="AreaId" Type="int" Nullable="false" />
+          <Property Name="PRDDALLOTMENT_DATE" Type="date" />
+          <Property Name="PRDDACTUAL_FUNCTIONAL_DATE" Type="date" />
+          <Property Name="PRDVPRODUCT_NAME" Type="nvarchar" MaxLength="255" />
+          <Property Name="PRDDREGISTRY_DONE_DATE" Type="date" />
+          <Property Name="PRDDPOSSESSION_DATE" Type="date" />
+          <Property Name="PRDDMUTATION_DATE" Type="date" />
+          <Property Name="STATUS" Type="varchar" MaxLength="8" Nullable="false" />
+          <Property Name="AllotmentStatus" Type="varchar" MaxLength="8" Nullable="false" />
+          <Property Name="AllotmentStatusId" Type="int" Nullable="false" />
+          <Property Name="PlotNumber" Type="varchar" MaxLength="100" />
+          <Property Name="Prop_Type" Type="int" />
+          <Property Name="ConstructionPeriodAllowed" Type="int" />
+          <Property Name="mobile_no" Type="varchar" MaxLength="10" />
+          <Property Name="PLDVLAND_USE_SUBTYPE_ID" Type="nvarchar" MaxLength="255" />
+          <Property Name="Expr1" Type="nvarchar" MaxLength="255" />
+        </EntityType>
+        <EntityContainer Name="CustomerModelStoreContainer">
+          <EntitySet Name="Customer_Feedback" EntityType="Self.Customer_Feedback" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="LookupDepartment" EntityType="Self.LookupDepartment" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Menus" EntityType="Self.Menus" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Property_Remarks" EntityType="Self.Property_Remarks" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Role_Menu_Mapping" EntityType="Self.Role_Menu_Mapping" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Role_Users" EntityType="Self.Role_Users" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Roles" EntityType="Self.Roles" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Users" EntityType="Self.Users" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="view_property" EntityType="Self.view_property" store:Type="Views" store:Schema="dbo">
+            <DefiningQuery>SELECT 
+    [view_property].[PRDVREGISTRATION_ID] AS [PRDVREGISTRATION_ID], 
+    [view_property].[PLDIPROPERTY_ID] AS [PLDIPROPERTY_ID], 
+    [view_property].[PLDIPROPERTY_NO] AS [PLDIPROPERTY_NO], 
+    [view_property].[BLOCK] AS [BLOCK], 
+    [view_property].[PLDVSECTOR_ID] AS [PLDVSECTOR_ID], 
+    [view_property].[PLDVSUBSCHEME_ID] AS [PLDVSUBSCHEME_ID], 
+    [view_property].[SECTOR] AS [SECTOR], 
+    [view_property].[PLDVDISP_PROP_TYPE_ID] AS [PLDVDISP_PROP_TYPE_ID], 
+    [view_property].[PLDVDISP_PROP_SUBTYPE_ID] AS [PLDVDISP_PROP_SUBTYPE_ID], 
+    [view_property].[PLDVLAND_USE_TYPE_ID] AS [PLDVLAND_USE_TYPE_ID], 
+    [view_property].[PropertyType] AS [PropertyType], 
+    [view_property].[PRDVREGIST_APPLICANT_NAME] AS [PRDVREGIST_APPLICANT_NAME], 
+    [view_property].[PRDVAPPLICANT_FATHER_NAME] AS [PRDVAPPLICANT_FATHER_NAME], 
+    [view_property].[PRDVREGIST_APPLICANT_ADDRESS] AS [PRDVREGIST_APPLICANT_ADDRESS], 
+    [view_property].[PRDVSUCC_MUT_TRANS_FLAG] AS [PRDVSUCC_MUT_TRANS_FLAG], 
+    [view_property].[PLDRACTUAL_LAND_AREA] AS [PLDRACTUAL_LAND_AREA], 
+    [view_property].[AreaSqm] AS [AreaSqm], 
+    [view_property].[AreaId] AS [AreaId], 
+    [view_property].[PRDDALLOTMENT_DATE] AS [PRDDALLOTMENT_DATE], 
+    [view_property].[PRDDACTUAL_FUNCTIONAL_DATE] AS [PRDDACTUAL_FUNCTIONAL_DATE], 
+    [view_property].[PRDVPRODUCT_NAME] AS [PRDVPRODUCT_NAME], 
+    [view_property].[PRDDREGISTRY_DONE_DATE] AS [PRDDREGISTRY_DONE_DATE], 
+    [view_property].[PRDDPOSSESSION_DATE] AS [PRDDPOSSESSION_DATE], 
+    [view_property].[PRDDMUTATION_DATE] AS [PRDDMUTATION_DATE], 
+    [view_property].[STATUS] AS [STATUS], 
+    [view_property].[AllotmentStatus] AS [AllotmentStatus], 
+    [view_property].[AllotmentStatusId] AS [AllotmentStatusId], 
+    [view_property].[PlotNumber] AS [PlotNumber], 
+    [view_property].[Prop_Type] AS [Prop_Type], 
+    [view_property].[ConstructionPeriodAllowed] AS [ConstructionPeriodAllowed], 
+    [view_property].[mobile_no] AS [mobile_no], 
+    [view_property].[PLDVLAND_USE_SUBTYPE_ID] AS [PLDVLAND_USE_SUBTYPE_ID], 
+    [view_property].[Expr1] AS [Expr1]
+    FROM [dbo].[view_property] AS [view_property]</DefiningQuery>
+          </EntitySet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="CustomerModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="Customer_Feedback">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Registration_No" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Feedback" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="Service_Request" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="Created_Date" Type="DateTime" Precision="3" />
+          <Property Name="Created_By" Type="Int32" />
+          <Property Name="Modified_Date" Type="DateTime" Precision="3" />
+          <Property Name="Modified_By" Type="Int32" />
+          <Property Name="Request_Status" Type="Int32" />
+        </EntityType>
+        <EntityType Name="Menu">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="MenuId" Type="Int32" Nullable="false" />
+          <Property Name="ParentMenuId" Type="Int32" Nullable="false" />
+          <Property Name="MenuType" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="MenuName" Type="String" MaxLength="50" FixedLength="false" Unicode="true" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Property_Remarks">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Registration_No" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Remarks" Type="String" MaxLength="500" FixedLength="false" Unicode="false" />
+          <Property Name="Created_Date" Type="DateTime" Precision="3" />
+          <Property Name="Created_By" Type="Int32" />
+          <Property Name="Modified_Date" Type="DateTime" Precision="3" />
+          <Property Name="Modified_By" Type="Int32" />
+        </EntityType>
+        <EntityType Name="Role_Menu_Mapping">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="MenuId" Type="Int32" Nullable="false" />
+          <Property Name="RoleId" Type="Int32" Nullable="false" />
+          <Property Name="CreatedOn" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreatedBy" Type="Guid" Nullable="false" />
+          <Property Name="ModifiedBy" Type="Guid" />
+          <Property Name="ModifiedOn" Type="DateTime" Precision="3" />
+        </EntityType>
+        <EntityType Name="Role_Users">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserId" Type="Guid" Nullable="false" />
+          <Property Name="RoleId" Type="Int32" Nullable="false" />
+          <Property Name="CreatedOn" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreatedBy" Type="Guid" Nullable="false" />
+          <Property Name="ModifiedBy" Type="Guid" />
+          <Property Name="ModifiedOn" Type="DateTime" Precision="3" />
+        </EntityType>
+        <EntityType Name="Role">
+          <Key>
+            <PropertyRef Name="RoleId" />
+          </Key>
+          <Property Name="RoleId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="RoleName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="CreatedOn" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreatedBy" Type="Guid" Nullable="false" />
+          <Property Name="ModifiedBy" Type="Guid" />
+          <Property Name="ModifiedOn" Type="DateTime" Precision="3" />
+        </EntityType>
+        <EntityType Name="User">
+          <Key>
+            <PropertyRef Name="UserId" />
+          </Key>
+          <Property Name="UserId" Type="Guid" Nullable="false" />
+          <Property Name="UserName" Type="String" MaxLength="256" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Pasword" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="FirstName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="LastName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Status" Type="Boolean" />
+          <Property Name="IsLockedOut" Type="Boolean" />
+          <Property Name="CreatedOn" Type="DateTime" Precision="3" />
+          <Property Name="CreatedBy" Type="Guid" />
+          <Property Name="ModifiedBy" Type="Guid" />
+          <Property Name="ModifiedOn" Type="DateTime" Precision="3" />
+          <Property Name="RoleId" Type="Int32" />
+          <Property Name="LastPasswordChangeDate" Type="DateTime" Precision="3" />
+          <Property Name="PropertyId" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="MobileNo" Type="String" MaxLength="15" FixedLength="false" Unicode="true" />
+          <Property Name="DeptId" Type="Int32" />
+          <Property Name="CustomerIdFileName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="CustomerIdFileType" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="CustomerLetterFileName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="CustomerLetterType" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="OTP" Type="Int32" />
+          <Property Name="Sector" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+          <Property Name="Block" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+          <Property Name="Property" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="IsRejected" Type="Boolean" />
+          <Property Name="Remarks" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="IsFirstTimeActivated" Type="Boolean" />
+          <Property Name="UserEmail" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Question" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="Answer" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="view_property">
+          <Key>
+            <PropertyRef Name="PRDVREGISTRATION_ID" />
+            <PropertyRef Name="BLOCK" />
+            <PropertyRef Name="PropertyType" />
+            <PropertyRef Name="AreaSqm" />
+            <PropertyRef Name="AreaId" />
+            <PropertyRef Name="STATUS" />
+            <PropertyRef Name="AllotmentStatus" />
+            <PropertyRef Name="AllotmentStatusId" />
+          </Key>
+          <Property Name="PRDVREGISTRATION_ID" Type="String" MaxLength="255" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="PLDIPROPERTY_ID" Type="Int32" />
+          <Property Name="PLDIPROPERTY_NO" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="BLOCK" Type="String" MaxLength="10" FixedLength="true" Unicode="true" Nullable="false" />
+          <Property Name="PLDVSECTOR_ID" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="PLDVSUBSCHEME_ID" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="SECTOR" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="PLDVDISP_PROP_TYPE_ID" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="PLDVDISP_PROP_SUBTYPE_ID" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="PLDVLAND_USE_TYPE_ID" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="PropertyType" Type="String" MaxLength="13" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="PRDVREGIST_APPLICANT_NAME" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="PRDVAPPLICANT_FATHER_NAME" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="PRDVREGIST_APPLICANT_ADDRESS" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="PRDVSUCC_MUT_TRANS_FLAG" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="PLDRACTUAL_LAND_AREA" Type="Double" />
+          <Property Name="AreaSqm" Type="String" MaxLength="13" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="AreaId" Type="Int32" Nullable="false" />
+          <Property Name="PRDDALLOTMENT_DATE" Type="DateTime" Precision="0" />
+          <Property Name="PRDDACTUAL_FUNCTIONAL_DATE" Type="DateTime" Precision="0" />
+          <Property Name="PRDVPRODUCT_NAME" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="PRDDREGISTRY_DONE_DATE" Type="DateTime" Precision="0" />
+          <Property Name="PRDDPOSSESSION_DATE" Type="DateTime" Precision="0" />
+          <Property Name="PRDDMUTATION_DATE" Type="DateTime" Precision="0" />
+          <Property Name="STATUS" Type="String" MaxLength="8" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="AllotmentStatus" Type="String" MaxLength="8" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="AllotmentStatusId" Type="Int32" Nullable="false" />
+          <Property Name="PlotNumber" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="Prop_Type" Type="Int32" />
+          <Property Name="ConstructionPeriodAllowed" Type="Int32" />
+          <Property Name="mobile_no" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="PLDVLAND_USE_SUBTYPE_ID" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="Expr1" Type="String" MaxLength="255" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityContainer Name="CustomerContext" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="Customer_Feedback" EntityType="Self.Customer_Feedback" />
+          <EntitySet Name="Menus" EntityType="Self.Menu" />
+          <EntitySet Name="Property_Remarks" EntityType="Self.Property_Remarks" />
+          <EntitySet Name="Role_Menu_Mapping" EntityType="Self.Role_Menu_Mapping" />
+          <EntitySet Name="Role_Users" EntityType="Self.Role_Users" />
+          <EntitySet Name="Roles" EntityType="Self.Role" />
+          <EntitySet Name="Users" EntityType="Self.User" />
+          <EntitySet Name="view_property" EntityType="Self.view_property" />
+          <EntitySet Name="LookupDepartments" EntityType="CustomerModel.LookupDepartment" />
+        </EntityContainer>
+        <EntityType Name="LookupDepartment">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="NAME" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="CreatedOn" Type="DateTime" Precision="3" />
+          <Property Name="ConstructionPeriodAllowed" Type="Int32" />
+        </EntityType>
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="CustomerModelStoreContainer" CdmEntityContainer="CustomerContext">
+          <EntitySetMapping Name="Customer_Feedback">
+            <EntityTypeMapping TypeName="CustomerModel.Customer_Feedback">
+              <MappingFragment StoreEntitySet="Customer_Feedback">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Registration_No" ColumnName="Registration_No" />
+                <ScalarProperty Name="Feedback" ColumnName="Feedback" />
+                <ScalarProperty Name="Service_Request" ColumnName="Service_Request" />
+                <ScalarProperty Name="Created_Date" ColumnName="Created_Date" />
+                <ScalarProperty Name="Created_By" ColumnName="Created_By" />
+                <ScalarProperty Name="Modified_Date" ColumnName="Modified_Date" />
+                <ScalarProperty Name="Modified_By" ColumnName="Modified_By" />
+                <ScalarProperty Name="Request_Status" ColumnName="Request_Status" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Menus">
+            <EntityTypeMapping TypeName="CustomerModel.Menu">
+              <MappingFragment StoreEntitySet="Menus">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="MenuId" ColumnName="MenuId" />
+                <ScalarProperty Name="ParentMenuId" ColumnName="ParentMenuId" />
+                <ScalarProperty Name="MenuType" ColumnName="MenuType" />
+                <ScalarProperty Name="MenuName" ColumnName="MenuName" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Property_Remarks">
+            <EntityTypeMapping TypeName="CustomerModel.Property_Remarks">
+              <MappingFragment StoreEntitySet="Property_Remarks">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="Registration_No" ColumnName="Registration_No" />
+                <ScalarProperty Name="Remarks" ColumnName="Remarks" />
+                <ScalarProperty Name="Created_Date" ColumnName="Created_Date" />
+                <ScalarProperty Name="Created_By" ColumnName="Created_By" />
+                <ScalarProperty Name="Modified_Date" ColumnName="Modified_Date" />
+                <ScalarProperty Name="Modified_By" ColumnName="Modified_By" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Role_Menu_Mapping">
+            <EntityTypeMapping TypeName="CustomerModel.Role_Menu_Mapping">
+              <MappingFragment StoreEntitySet="Role_Menu_Mapping">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="MenuId" ColumnName="MenuId" />
+                <ScalarProperty Name="RoleId" ColumnName="RoleId" />
+                <ScalarProperty Name="CreatedOn" ColumnName="CreatedOn" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="ModifiedOn" ColumnName="ModifiedOn" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Role_Users">
+            <EntityTypeMapping TypeName="CustomerModel.Role_Users">
+              <MappingFragment StoreEntitySet="Role_Users">
+                <ScalarProperty Name="Id" ColumnName="Id" />
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="RoleId" ColumnName="RoleId" />
+                <ScalarProperty Name="CreatedOn" ColumnName="CreatedOn" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="ModifiedOn" ColumnName="ModifiedOn" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Roles">
+            <EntityTypeMapping TypeName="CustomerModel.Role">
+              <MappingFragment StoreEntitySet="Roles">
+                <ScalarProperty Name="RoleId" ColumnName="RoleId" />
+                <ScalarProperty Name="RoleName" ColumnName="RoleName" />
+                <ScalarProperty Name="CreatedOn" ColumnName="CreatedOn" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="ModifiedOn" ColumnName="ModifiedOn" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Users">
+            <EntityTypeMapping TypeName="CustomerModel.User">
+              <MappingFragment StoreEntitySet="Users">
+                <ScalarProperty Name="UserId" ColumnName="UserId" />
+                <ScalarProperty Name="UserName" ColumnName="UserName" />
+                <ScalarProperty Name="Pasword" ColumnName="Pasword" />
+                <ScalarProperty Name="FirstName" ColumnName="FirstName" />
+                <ScalarProperty Name="LastName" ColumnName="LastName" />
+                <ScalarProperty Name="Status" ColumnName="Status" />
+                <ScalarProperty Name="IsLockedOut" ColumnName="IsLockedOut" />
+                <ScalarProperty Name="CreatedOn" ColumnName="CreatedOn" />
+                <ScalarProperty Name="CreatedBy" ColumnName="CreatedBy" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="ModifiedOn" ColumnName="ModifiedOn" />
+                <ScalarProperty Name="RoleId" ColumnName="RoleId" />
+                <ScalarProperty Name="LastPasswordChangeDate" ColumnName="LastPasswordChangeDate" />
+                <ScalarProperty Name="PropertyId" ColumnName="PropertyId" />
+                <ScalarProperty Name="MobileNo" ColumnName="MobileNo" />
+                <ScalarProperty Name="DeptId" ColumnName="DeptId" />
+                <ScalarProperty Name="CustomerIdFileName" ColumnName="CustomerIdFileName" />
+                <ScalarProperty Name="CustomerIdFileType" ColumnName="CustomerIdFileType" />
+                <ScalarProperty Name="CustomerLetterFileName" ColumnName="CustomerLetterFileName" />
+                <ScalarProperty Name="CustomerLetterType" ColumnName="CustomerLetterType" />
+                <ScalarProperty Name="OTP" ColumnName="OTP" />
+                <ScalarProperty Name="Sector" ColumnName="Sector" />
+                <ScalarProperty Name="Block" ColumnName="Block" />
+                <ScalarProperty Name="Property" ColumnName="Property" />
+                <ScalarProperty Name="IsRejected" ColumnName="IsRejected" />
+                <ScalarProperty Name="Remarks" ColumnName="Remarks" />
+                <ScalarProperty Name="IsFirstTimeActivated" ColumnName="IsFirstTimeActivated" />
+                <ScalarProperty Name="UserEmail" ColumnName="UserEmail" />
+                <ScalarProperty Name="Question" ColumnName="Question" />
+                <ScalarProperty Name="Answer" ColumnName="Answer" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="view_property">
+            <EntityTypeMapping TypeName="CustomerModel.view_property">
+              <MappingFragment StoreEntitySet="view_property">
+                <ScalarProperty Name="PRDVREGISTRATION_ID" ColumnName="PRDVREGISTRATION_ID" />
+                <ScalarProperty Name="PLDIPROPERTY_ID" ColumnName="PLDIPROPERTY_ID" />
+                <ScalarProperty Name="PLDIPROPERTY_NO" ColumnName="PLDIPROPERTY_NO" />
+                <ScalarProperty Name="BLOCK" ColumnName="BLOCK" />
+                <ScalarProperty Name="PLDVSECTOR_ID" ColumnName="PLDVSECTOR_ID" />
+                <ScalarProperty Name="PLDVSUBSCHEME_ID" ColumnName="PLDVSUBSCHEME_ID" />
+                <ScalarProperty Name="SECTOR" ColumnName="SECTOR" />
+                <ScalarProperty Name="PLDVDISP_PROP_TYPE_ID" ColumnName="PLDVDISP_PROP_TYPE_ID" />
+                <ScalarProperty Name="PLDVDISP_PROP_SUBTYPE_ID" ColumnName="PLDVDISP_PROP_SUBTYPE_ID" />
+                <ScalarProperty Name="PLDVLAND_USE_TYPE_ID" ColumnName="PLDVLAND_USE_TYPE_ID" />
+                <ScalarProperty Name="PropertyType" ColumnName="PropertyType" />
+                <ScalarProperty Name="PRDVREGIST_APPLICANT_NAME" ColumnName="PRDVREGIST_APPLICANT_NAME" />
+                <ScalarProperty Name="PRDVAPPLICANT_FATHER_NAME" ColumnName="PRDVAPPLICANT_FATHER_NAME" />
+                <ScalarProperty Name="PRDVREGIST_APPLICANT_ADDRESS" ColumnName="PRDVREGIST_APPLICANT_ADDRESS" />
+                <ScalarProperty Name="PRDVSUCC_MUT_TRANS_FLAG" ColumnName="PRDVSUCC_MUT_TRANS_FLAG" />
+                <ScalarProperty Name="PLDRACTUAL_LAND_AREA" ColumnName="PLDRACTUAL_LAND_AREA" />
+                <ScalarProperty Name="AreaSqm" ColumnName="AreaSqm" />
+                <ScalarProperty Name="AreaId" ColumnName="AreaId" />
+                <ScalarProperty Name="PRDDALLOTMENT_DATE" ColumnName="PRDDALLOTMENT_DATE" />
+                <ScalarProperty Name="PRDDACTUAL_FUNCTIONAL_DATE" ColumnName="PRDDACTUAL_FUNCTIONAL_DATE" />
+                <ScalarProperty Name="PRDVPRODUCT_NAME" ColumnName="PRDVPRODUCT_NAME" />
+                <ScalarProperty Name="PRDDREGISTRY_DONE_DATE" ColumnName="PRDDREGISTRY_DONE_DATE" />
+                <ScalarProperty Name="PRDDPOSSESSION_DATE" ColumnName="PRDDPOSSESSION_DATE" />
+                <ScalarProperty Name="PRDDMUTATION_DATE" ColumnName="PRDDMUTATION_DATE" />
+                <ScalarProperty Name="STATUS" ColumnName="STATUS" />
+                <ScalarProperty Name="AllotmentStatus" ColumnName="AllotmentStatus" />
+                <ScalarProperty Name="AllotmentStatusId" ColumnName="AllotmentStatusId" />
+                <ScalarProperty Name="PlotNumber" ColumnName="PlotNumber" />
+                <ScalarProperty Name="Prop_Type" ColumnName="Prop_Type" />
+                <ScalarProperty Name="ConstructionPeriodAllowed" ColumnName="ConstructionPeriodAllowed" />
+                <ScalarProperty Name="mobile_no" ColumnName="mobile_no" />
+                <ScalarProperty Name="PLDVLAND_USE_SUBTYPE_ID" ColumnName="PLDVLAND_USE_SUBTYPE_ID" />
+                <ScalarProperty Name="Expr1" ColumnName="Expr1" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="LookupDepartments">
+            <EntityTypeMapping TypeName="CustomerModel.LookupDepartment">
+              <MappingFragment StoreEntitySet="LookupDepartment">
+                <ScalarProperty Name="ConstructionPeriodAllowed" ColumnName="ConstructionPeriodAllowed" />
+                <ScalarProperty Name="CreatedOn" ColumnName="CreatedOn" />
+                <ScalarProperty Name="NAME" ColumnName="NAME" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

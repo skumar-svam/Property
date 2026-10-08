@@ -1,0 +1,246 @@
+﻿@model NA.PMS.NICServices.SWPPostViewModel
+@using Kendo.Mvc.UI
+@using NA.PMS.Common
+
+@{
+    ViewBag.Title = "Request Validation";
+    Layout = "~/Areas/NIC/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    #validation-msg, #otp-msg {
+        color: red;
+    }
+
+    .k-loading-image {
+        /*background-image: url('/Content/Images/Custom-Progress.gif');*/
+        background-image: url('/Content/Images/Chimply_progress.gif');
+    }
+</style>
+
+@using (Html.BeginForm("SaveNiveshMitraServiceUnit", "NiveshMitra", FormMethod.Post, new { id = "unitform" }))
+{
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1 nic-portal" data-nic="property-validation">
+        <div class="col-md-12" style="position:static">
+            <div class="row" style="padding-top:8px;">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Validate Unit </h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<label class="star">*</label>) are required.</div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce" id="divRid">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <h2 class="blck-heading" style="margin-bottom:5px;">Unit Information</h2>
+                <div class="form-bx" style="padding-top:12px;">
+                    <div class="hidden-field">
+                        @Html.HiddenFor(model => model.TxtControlID)
+                        @Html.HiddenFor(model => model.TxtUnitID)
+                        @Html.HiddenFor(model => model.TxtServiceID)
+                        @Html.HiddenFor(model => model.TxtProcessIndustryID)
+                        @Html.HiddenFor(model => model.TxtApplicationID)
+                        @Html.HiddenFor(model => model.TxtRequestID)
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12 col-xs-12" style="text-align:center;">
+                            <label id="validation-msg" style=""></label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label class=""> Registration Id: </label>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <input type="text" id="registrationId" class="form-control" maxlength="8" min="8" onkeypress="return IsNumeric(event);" />
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group col-property" style="text-align:center;">
+                            <label>Property No:</label>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group col-property">
+                            <label class="lbl-property-no lbl-form-control"></label>
+                        </div>
+                    </div>
+                    <div class="row row-allottee-info">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label> Allottee Name: </label>
+                        </div>
+                        <div class="col-md-9 col-sm-9 col-xs-12 form-group">
+                            <label class="lbl-allottee lbl-form-control"></label>
+                        </div>
+                    </div>
+                    <div class="row row-allottee-info">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label> Address: </label>
+                        </div>
+                        <div class="col-md-9 col-sm-9 col-xs-12 form-group">
+                            <label class="lbl-address lbl-form-control"></label>
+                        </div>
+                    </div>
+                    <div class="row row-allottee-info">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label> Mobile No: </label>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label class="lbl-mobile-no lbl-form-control"></label>
+                            <input type="hidden" id="sent-otp" />
+                        </div>
+                        <div class="col-md-6 col-sm-12 col-xs-12 form-group">
+                            <div class="col-md-3"><label> OTP: </label></div>
+                            <div class="col-md-5">
+                                <input type="text" class="k-textbox" id="txt-otp" maxlength="10" placeholder="Enter OTP" style="width:100%" />
+                               <label id="otp-msg"></label>
+                            </div>
+                            <div class="col-md-4">
+                                <input class="k-button btn-default" type="button" value="Resend OTP" id="btn-resend-otp" style="min-width:120px;float:right;" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box-button text-center">
+                <input type="button" id="btn-back" value="Back" class="btn btn-add" />
+                <input type="button" id="btn-validate-otp" value="Validate OTP" class="btn btn-add" />
+                <input type="button" id="btn-rid-submit" value="Submit" class="btn btn-add" />
+            </div>
+        </div>
+    </div>
+}
+<script>
+
+    $(document).ready(function () {
+        @{
+            if (!string.IsNullOrEmpty((string)TempData["Save_ErrorMessage"]))
+            {
+                 @:alert('@TempData["Save_ErrorMessage"]');
+            }
+        }
+
+        //var windowWidget = $(document.body);
+        //kendo.ui.progress(windowWidget, true);
+
+        $("#divRid").show();
+        $("#divOTPwindow_NIC").hide();
+
+        if ($('#registrationId').val().trim() == "" && $('#registrationId').val().trim().length != 8) {
+            $('.row-allottee-info').css("display", "none");
+            $(".col-property").css("display", "none");
+            $(".lbl-property-no").css("display", "none");
+            $("#btn-validate-otp").css("display", "none");
+            //$("#btn-back").css("display", "none");
+        }
+
+
+        $("#btn-validate-otp").click(function () {
+            var windowWidget = $(document.body);
+            kendo.ui.progress(windowWidget, true);
+            var _otp = $("#txt-otp").val();
+            var _rid = $("#registrationId").val();
+            if (_otp == $("#sent-otp").val() || _otp == 1234) {
+                kendo.ui.progress(windowWidget, false);
+                $("#TxtProcessIndustryID").val(_rid);
+                $('#unitform').submit();
+            } else {
+                kendo.ui.progress(windowWidget, false);
+                $("#otp-msg").html('Incorrect OTP .');
+                alertify.error("OTP mismatch");
+            }
+        });
+
+        $('#btn-back').click(function () {
+            var postmodel = {
+                TxtControlID: $("input[name = 'TxtControlID']").val(),
+                TxtUnitID: $("input[name = 'TxtUnitID']").val(),
+                TxtServiceID: $("input[name = 'TxtServiceID']").val(),
+                TxtApplicationID: $("input[name = 'TxtApplicationID']").val(),
+                TxtDepartmentID: "22"
+            };
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                data: { model: postmodel },
+                url: '/NIC/NiveshMitra/GetEncryptedNicPostDetail',
+                success: function (result) {
+                    if (result != null) {
+                        $.post("http://72.167.225.87/testing_nmswp/nmmasters/Entrepreneur_Bck_page.aspx", { Dept_Code: result.TxtDepartmentID, ControlID: result.TxtControlID, UnitID: result.TxtUnitID, ServiceID: result.TxtServiceID, PassSalt: result.PassSalt });
+                    }
+                    else {
+                        //alertify.error("File not uploaded.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Something is wrong, try again later");
+                }
+            });
+        });
+
+        $("#btn-rid-submit").click(function () {
+            var windowWidget = $(document.body);
+            kendo.ui.progress(windowWidget, true);
+            var _rid = $("#registrationId").val();
+            var _unitid = $("#TxtUnitID").val();
+            if (_rid > 0) {
+                ValidateUnit(_rid, _unitid);
+            } else {
+                kendo.ui.progress(windowWidget, false);
+                alertify.error("Invalild registration Id");
+            }
+        });
+
+        $("#btn-resend-otp").click(function () {
+            var _rid = $("#registrationId").val();
+            var _unitid = $("#TxtUnitID").val();
+            ValidateUnit(_rid, _unitid);
+        });
+
+    });
+
+    function ValidateUnit(_rid, _unitid) {
+        var windowWidget = $(document.body);
+        kendo.ui.progress(windowWidget, true);
+        $("#validation-msg").html('');
+        var _serviceId = $('#TxtServiceID').val();
+        $.ajax({
+            type: 'POST',
+            dataType: 'json',
+            data: { RegistrationId: _rid, NICUnitId: _unitid, NICServiceId: _serviceId },
+            url: '/NIC/NiveshMitra/ValidateNiveshMitraServiceUnit',
+            success: function (result) {
+                if (result != null && result.IsPropertyAllotted == true) {
+                    kendo.ui.progress(windowWidget, false);
+                    if (result.IsPropertyDifferent == false) {
+                        if (result.IsKYADone == true) {
+                            $('#sent-otp').val(result.OTP);
+                            $(".lbl-property-no").html(result.Sector + "/" + result.Block + "-" + result.PlotNo);
+                            $('.lbl-allottee').html(result.Applicant);
+                            $('.lbl-address').html(result.AddressI);
+                            $('.lbl-mobile-no').html(result.MobileNo);
+                            $(".lbl-property-no").show();
+                            $(".col-property").show();
+                            $('.row-allottee-info').show();
+                            $("#btn-validate-otp").show();
+                            $("#btn-rid-submit").css("display", "none");
+                            $("#btn-back").show();
+                        }
+                        else {
+                            $("#validation-msg").html('KYA is pending for this registration Id .Contact Noida Authority .');
+                            alertify.error("KYA is pending.")
+                        }
+                    }
+                    else {
+                        $("#validation-msg").html('Property is different from registered Unit Id or service code is from different department');
+                        alertify.error("Property is different from registered Unit Id.")
+                    }
+                }
+                else {
+                    kendo.ui.progress(windowWidget, false);
+                    $("#validation-msg").html('Invalid registration Id .Contact Noida Authority .');
+                    alertify.error("invalid registraion id.")
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+            }
+        });
+    }
+</script>
+

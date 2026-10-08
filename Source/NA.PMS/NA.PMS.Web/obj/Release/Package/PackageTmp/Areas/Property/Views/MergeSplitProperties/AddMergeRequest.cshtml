@@ -1,0 +1,732 @@
+﻿@model NA.PMS.Model.Property.AddMergeSplitRequestModel
+
+@using Kendo.Mvc.UI
+@using NA.PMS.Model.Property
+
+@{
+    ViewBag.Title = "Amalgamation Request";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    #gridProperties {
+        margin-left: 30px;
+    }
+</style>
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12">
+                    <h1 class="gridTitle">Amalgamation Request</h1>
+                </div>
+                @*<div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>*@
+            </div>
+        </div>
+        @Html.HiddenFor(m => m.PropertyNumber)
+        @Html.HiddenFor(m => m.SchemeName)
+        @Html.HiddenFor(m => m.BlockName)
+        @Html.HiddenFor(m => m.SectorName)
+
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border: solid #e2e3e4; border-width: 0 1px 1px">
+                <h2 class="blck-heading">Filter Property</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+                            @Html.LabelFor(m => m.DepartmentName)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(m => m.DepartmentId)
+                                  .Filter("contains")
+                                  .OptionLabel("-Select-")
+                                  .DataTextField("Text")
+                                  .DataValueField("Value")
+                                  .BindTo(Model.DepartmentCollection)
+                                  .Events(events => { events.Change("DepartmentSelection"); })
+                                  .HtmlAttributes(new { style = "width: 100%", TabIndex = 1 })
+                            )
+                        </div>
+
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+                            @Html.LabelFor(m => m.SectorName)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(m => m.SectorId)
+                                  .Filter("contains")
+                                  .CascadeFrom("DepartmentId")
+                                  .CascadeFromField("DepartmentId")
+                                  .DataTextField("text")
+                                  .DataValueField("id")
+                                  .OptionLabel("-Select-")
+                                  .Events(events => { events.Change("SectorSelection"); })
+                                  .DataSource(source =>
+                                  {
+                                      source.Custom()
+                                   .ServerFiltering(true)
+                                   .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                   .Transport(transport =>
+                                   {
+                                       transport.Read(read => read.Action("GetSectorsByDeptIdReq", "MergeSplitProperties"));
+                                   }).Schema(schema =>
+                                   {
+                                       schema.Data("Data")
+                                       .Total("Total");
+                                   }).PageSize(100);
+                                  })
+                                  .HtmlAttributes(new { style = "width: 100%", TabIndex = 4 })
+                                  .Enable(true)
+                                  .AutoBind(false)
+                            )
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+                            @Html.LabelFor(m => m.BlockName)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(m => m.BlockId)
+                                              .Filter("contains")
+                                              .CascadeFrom("SectorId")
+                                      .CascadeFromField("sectorId")
+                                      .DataTextField("text")
+                                      .DataValueField("id")
+                                      .OptionLabel("-Select-")
+                                      .Events(events => { events.Change("BlockSelection"); })
+                                      .DataSource(source =>
+                                      {
+                                          source.Custom()
+                                          .ServerFiltering(true)
+                                          .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                          .Transport(transport =>
+                                          {
+                                              transport.Read(read => read.Action("GetBlocksByDeptAndSectorIdReq", "MergeSplitProperties").Data("FilterBlockBySector"));
+                                          }).Schema(schema =>
+                                          {
+                                              schema.Data("Data")
+                                              .Total("Total");
+                                          }).PageSize(100);
+                                      })
+                                      .HtmlAttributes(new { style = "width: 100%", TabIndex = 5 })
+
+                                              .Enable(true)
+                                      .AutoBind(false)
+                            )
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+                            @Html.Label("Registration Id")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(m => m.Rid)
+                                  .Filter("contains")
+                                  .CascadeFrom("BlockId")
+                                  .CascadeFromField("BlockId")
+                                  .DataTextField("text")
+                                  .DataValueField("id")
+                                  .OptionLabel("-Select-")
+                                  .Events(events => { events.Change("RidSelection"); })
+                                  .DataSource(source =>
+                                  {
+                                      source.Custom()
+                                     .ServerFiltering(true)
+                                     .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                     .Transport(transport =>
+                                     {
+                                         transport.Read(read => read.Action("GetAllRIDsForSplitMergeReq", "MergeSplitProperties").Data("FilterRIDs"));
+                                     }).Schema(schema =>
+                                     {
+                                         schema.Data("Data")
+                                         .Total("Total");
+                                     }).PageSize(100);
+                                  })
+                                  .HtmlAttributes(new { style = "width: 100%", TabIndex = 5 })
+
+                                          .Enable(true)
+                                  .AutoBind(false)
+                            )
+                        </div>
+                    </div>
+
+                </div>
+                <h2 class="blck-heading">Property Detail</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+                            @Html.LabelFor(m => m.ApplicantName)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.ApplicantName, new { @Readonly = "readonly", @class = "form-control" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+                            @Html.LabelFor(m => m.DepartmentName)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.DepartmentName, new { @Readonly = "readonly", @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+                            @Html.LabelFor(m => m.PropertyType)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.PropertyType, new { @Readonly = "readonly", @class = "form-control" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+                            @Html.LabelFor(m => m.TotalArea)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.TotalArea, new { @Readonly = "readonly", @class = "form-control" })
+                        </div>
+                    </div>
+                    @Html.HiddenFor(m => m.CoveredArea)
+                    @Html.HiddenFor(m => m.ActualArea)
+                    @Html.HiddenFor(m => m.TotalPropertyCost)
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <input type="button" id="btnAddProperty" style="float: right" value="Add Property" class="btn btn-default" />
+                        </div>
+                    </div>
+                    <div id="gridProperties"></div>
+                    @*<div class="row">
+                            <div class="k-grid-content">
+                                @(Html.Kendo().Grid<NA.PMS.Model.Property.AddMergeSplitRequestModel>()
+                                      .Name("gridMergeProperties")
+                                      .AutoBind(true)
+                                      .Columns(columns =>
+                                      {
+                                          columns.Bound(c => c.SchemeName).Hidden(true);
+                                          columns.Bound(c => c.PropertyType).Hidden(true);
+                                          columns.Bound(c => c.SectorName).Hidden(true);
+                                          columns.Bound(c => c.BlockName).Hidden(true);
+                                          columns.Bound(c => c.CoveredArea).Hidden(true);
+                                          columns.Bound(c => c.ActualArea).Hidden(true);
+                                          columns.Bound(c => c.TotalArea).Hidden(true);
+                                          columns.Bound(c => c.TotalPropertyCost).Hidden(true);
+
+                                          columns.Bound(c => c.Rid).Title("RID");
+                                          columns.Bound(c => c.DepartmentName).Title("Department");
+                                          columns.Bound(c => c.PropertyNumber).Title("Property Number");
+                                          columns.Command(command => { command.Destroy(); }).Width(250).Title("Action");
+                                      })
+                                      .Sortable()
+                                      .Filterable()
+                                      .Resizable(resize => resize.Columns(true))
+                                      .Pageable(pageable => pageable
+                                          .Enabled(true)
+                                          .Refresh(true)
+                                          .PageSizes(true)
+                                      )
+                                      .DataSource(dataSource => dataSource
+                                          .Ajax().Model(model => model.Id(c => c.Rid))
+                                          .ServerOperation(true)
+                                          .Read(read => read.Action("GetPropertiesToMerge", "MergeSplitProperties")).PageSize(20)
+                                        .Destroy(update => update.Action("RemovePropertyFromMergeSplit", "MergeSplitProperties"))
+                                      )
+                                )
+
+                            </div>
+                        </div>*@
+                    <br />
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <input type="button" id="btnAmalgamateProp" style="float: right" value="Amalgamate Properties" class="btn btn-default" />
+                        </div>
+                    </div>
+                </div>
+                <h2 class="blck-heading">New Property Detail</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+                            @Html.LabelFor(m => m.PropertyNumber)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.PropertyNumber, new { @Readonly = "readonly", @id = "txtPropertyNumber", @class = "form-control" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+                            @Html.LabelFor(m => m.SchemeName)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.SchemeName, new { @Readonly = "readonly", @class = "form-control", @id = "txtSchemeName" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+                            @Html.LabelFor(m => m.DepartmentName)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.DepartmentName, new { @Readonly = "readonly", @class = "form-control", @id = "txtDepartmentName" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+                            @Html.LabelFor(m => m.PropertyType)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.PropertyType, new { @Readonly = "readonly", @class = "form-control", @id = "txtPropertyType" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+                            @Html.LabelFor(m => m.SectorName)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.SectorName, new { @Readonly = "readonly", @class = "form-control", @id = "txtSectorName" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+                            @Html.LabelFor(m => m.BlockName)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.BlockName, new { @Readonly = "readonly", @class = "form-control", @id = "txtBlockName" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12  col-for-label form-group">
+                            @Html.LabelFor(m => m.CoveredArea)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.CoveredArea, new { @Readonly = "readonly", @class = "form-control", @id = "txtCoveredArea" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12  col-for-label form-group">
+                            @Html.LabelFor(m => m.ActualArea)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.ActualArea, new { @Readonly = "readonly", @class = "form-control", @id = "txtActualArea" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12  col-for-label form-group">
+                            @Html.LabelFor(m => m.TotalArea)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.TotalArea, new { @Readonly = "readonly", @class = "form-control", @id = "txtTotalArea" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12  col-for-label form-group">
+                            @Html.LabelFor(m => m.TotalPropertyCost)
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.TotalPropertyCost, new { @Readonly = "readonly", @class = "form-control", @id = "txtTotalPropertyCost" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12  col-for-label form-group">
+                            @Html.LabelFor(m => m.Charges, htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @*@Html.TextBoxFor(m => m.Charges, new { @class = "form-control", @maxlength = "12", onkeypress = "return isNumberKey(event,this);" })*@
+                            @Html.TextBoxFor(m => m.Charges, new { @class = "form-control", @maxlength = "12" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12  col-for-label form-group">
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box-button text-center">
+                <input type="button" id="btnCancel" value="Back" class="btn btn-default" />
+                <input type="button" id="btnSubmit" class="btn btn-add" value="Submit for Approval" />
+            </div>
+            @Html.HiddenFor(m => m.PropertyId)
+            @*@Html.HiddenFor(m => m.DepartmentId)*@
+        </div>
+    </div>
+
+    <input type="hidden" id="hdnAllRids" />
+</div>
+
+
+@(Html.Kendo().Window().Name("assignToWindow").Title("Assign To").Modal(true).Visible(false).Content(@<text>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-3 col-sm-offset-1">
+                    @Html.Label("Assign To: ")
+                </div>
+                <div class="col-sm-6">
+                    @(Html.Kendo().DropDownListFor(model => model.User)
+                      .Name("User")
+                      .DataTextField("text")
+                      .DataValueField("id")
+                      .OptionLabel("Select").Filter("contains").AutoBind(false)
+                      .DataSource(source =>
+                      {
+                          source.Read(read =>
+                          {
+                              read.Action("GetAssineToByDepttId", "PropertyRegistration").Data("AdditionalData");
+                          });
+                      })
+                    )
+                </div>
+            </div>
+            <script>
+                function AdditionalData() {
+                    return {
+                        depttId: $("#DepartmentId").val()
+                    };
+                }
+            </script>
+
+            <div class="row" style="padding-top:20px;">
+                <div class="col-sm-12" style="text-align:center">
+                    <input type="submit" class="btn btn-default" id="btnPopupSubmit" value="Submit" />
+                    <input type="button" class="btn btn-default closePopup" value="Close" />
+                </div>
+            </div>
+        </div>
+</text>)
+.Draggable()
+.Resizable()
+//.Width(400)
+.Actions(actions => actions.Close())
+)
+
+
+<script>
+    function isNumberKey(event, element) {
+        //var charCode = (event.which) ? event.which : event.keyCode;
+        //if (charCode > 31 && (charCode < 48 || charCode > 57) && !(charCode == 46 || charcode == 8))
+        //    return false;
+        //else {
+        //    var len = $(element).val().length;
+        //    var index = $(element).val().indexOf('.');
+        //    if (index > 0 && charCode == 46) {
+        //        return false;
+        //    }
+        //    if (index > 0) {
+        //        var CharAfterdot = (len + 1) - index;
+        //        if (CharAfterdot > 3) {
+        //            return false;
+        //        }
+        //    }
+
+        //}
+        //return true;
+        if (!event)
+            event = window.event;
+
+        if (event.keyCode > 47 && event.keyCode < 58) {
+            return true;
+        }
+        if (event.keyCode == 8 || event.keyCode == 46) {
+            return true;
+        }
+        return false;
+    }
+    $(document).ready(function () {
+
+        $(".closePopup").click(function () {
+            $("#assignToWindow").data("kendoWindow").close();
+        });
+
+        $("#btnAddProperty").hide();
+        $("#btnAmalgamateProp").hide();
+        $('#btnSubmit').attr('disabled', 'disabled');
+
+        var grid = $("#gridProperties").kendoGrid({
+            dataSource: [],
+            //pageable: true,
+            //toolbar: ["create", "save", "cancel"],
+            columns: [
+                { field: "Rid", title: "Registration Id", width: "200px" },
+                { field: "Department", title: "Department", width: "200px" },
+                { field: "PropertyNumber", title: "PropertyNumber", width: "120px" },
+                { field: "CoveredArea", hidden: true, width: "120px" },
+                { field: "ActualArea", hidden: true, width: "120px" },
+                { field: "TotalArea", hidden: true, width: "120px" },
+                { field: "TotalPropertyCost", hidden: true, width: "120px" },
+                { field: "PropertyType", title: "Property Type", hidden: false, width: "120px" },
+                { command: ["destroy"], title: "Action", width: "200px" }
+            ],
+            editable: {
+                mode: "inline",
+                confirmation: false
+            }
+        });
+
+        $("#btnPopupSubmit").click(function () {
+
+            var charge = $("#Charges").val();
+            var rids = $("#hdnAllRids").val().slice(0, $("#hdnAllRids").val().length - 1);
+
+            $.ajax({
+                dataType: 'json',
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                url: '/MergeSplitProperties/SubmitRequestForApproval',
+                data: JSON.stringify({ allRids: rids, userId: $("#User").val(), charge: charge }),
+                success: function (result) {
+                    if (result == true) {
+                        $("#assignToWindow").data("kendoWindow").close();
+                        alertify.success("Data saved successfully.");
+                        window.location.href = '@Url.Action("MergeProperties", "MergeSplitProperties")';
+                    } else {
+                        alert("There is some error.");
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+
+        });
+    });
+    var PropertyData = [];
+    $("#btnAddProperty").click(function () {
+        var gridData = $("#gridProperties").data("kendoGrid").dataSource.data();
+        if (gridData.length > 0) {
+            var type = gridData[0].PropertyType;
+            if (type.toLowerCase() != $("#PropertyType").val().toLowerCase()) {
+                alertify.error("Only properties with same Property Type can be amalgmated");
+                return false;
+            }
+        }
+
+        var found = PropertyData.some(function (el) {
+            return el.Rid === $("#Rid").val();
+        });
+        if (!found) {
+            PropertyData.push({
+                Rid: $("#Rid").val(),
+                Department: $("#DepartmentName").val(),
+                PropertyNumber: $("#PropertyNumber").val(),
+                CoveredArea: $("#CoveredArea").val(),
+                ActualArea: $("#ActualArea").val(),
+                TotalArea: $("#TotalArea").val(),
+                TotalPropertyCost: $("#TotalPropertyCost").val(),
+                PropertyType: $("#PropertyType").val()
+            });
+        }
+
+        localStorage["grid_data"] = JSON.stringify(PropertyData);
+
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: function (options) {
+                    var localData = JSON.parse(localStorage["grid_data"]);
+                    options.success(localData);
+                },
+                destroy: function (options) {
+                    var localData = JSON.parse(localStorage["grid_data"]);
+
+                    for (var i = 0; i < localData.length; i++) {
+                        if (localData[i].Rid === options.data.Rid) {
+                            localData.splice(i, 1);
+                            break;
+                        }
+                    }
+                    localStorage["grid_data"] = JSON.stringify(localData);
+                    options.success(localData);
+                    //e.success();
+                }
+            },
+            pageSize: 20
+        });
+
+        var grid = $("#gridProperties").kendoGrid({
+            dataSource: dataSource,
+            //pageable: true,
+            //toolbar: ["create", "save", "cancel"],
+            columns: [
+                { field: "Rid", title: "Rid", width: "200px" },
+                { field: "Department", title: "Department", width: "200px" },
+                { field: "PropertyNumber", title: "PropertyNumber", width: "120px" },
+                { field: "CoveredArea", hidden: true, width: "120px" },
+                { field: "ActualArea", hidden: true, width: "120px" },
+                { field: "TotalArea", hidden: true, width: "120px" },
+                { field: "TotalPropertyCost", hidden: true, width: "120px" },
+                { field: "PropertyType", title: "Property Type", hidden: false, width: "120px" },
+                { command: ["destroy"], title: "Action", width: "200px" }
+            ],
+            editable: {
+                mode: "inline",
+                confirmation: false
+            }
+        });//.true("kendoGrid");
+
+        $("#btnAmalgamateProp").show();
+
+
+    });
+
+    function DepartmentSelection(e) {
+        var dataItem = this.dataItem(e.item);
+        $("#DepartmentId").val(dataItem.Value);
+        $("#btnAddProperty").hide();
+        PropertyData = [];
+        $("#gridProperties").data("kendoGrid").dataSource.data([]);
+    }
+
+    function SectorSelection(e) {
+        var dataItem = this.dataItem(e.item);
+        $("#SectorId").val(dataItem.id);
+        $("#btnAddProperty").hide();
+        PropertyData = [];
+        //$("#gridProperties").data("kendoGrid").dataSource.data([]);
+    }
+
+    function BlockSelection(e) {
+        var dataItem = this.dataItem(e.item);
+        $("#BlockId").val(dataItem.id);
+        $("#btnAddProperty").hide();
+        PropertyData = [];
+        $("#gridProperties").data("kendoGrid").dataSource.data([]);
+    }
+
+    function RidSelection(e) {
+        var dataItem = this.dataItem(e.item);
+        //$("#DepartmentId").val(dataItem.Value);
+        var rId = dataItem.id;
+        if (rId != "") {
+            $("#Rid").val(rId);
+            $.ajax({
+                url: '@(Url.Action("GetPropertyDetailsByRid", "MergeSplitProperties"))',
+                type: 'POST',
+                dataType: 'json',
+                data: { rId: rId },
+                success: function (result) {
+                    if (result != null) {
+                        $("#ApplicantName").val(result.ApplicantName);
+                        $("#DepartmentName").val(result.DepartmentName);
+                        $("#PropertyType").val(result.PropertyTypeName);
+                        $("#TotalArea").val(result.TotalArea);
+                        $("#SchemeName").val(result.SchemeName);
+                        $("#PropertyNumber").val(result.PropertyNo);
+                        $("#PropertyId").val(result.PropertyId);
+
+                        $("#SectorName").val(result.SectorName);
+                        $("#BlockName").val(result.BlockName);
+                        $("#CoveredArea").val(result.CoveredArea);
+                        $("#ActualArea").val(result.ActualArea);
+                        $("#TotalArea").val(result.TotalArea);
+                        $("#TotalPropertyCost").val(result.TotalPropertyCost);
+                        //alert(result.CoveredArea + ":" + result.ActualArea + ":" + result.TotalArea + ":" + result.TotalPropertyCost);
+
+                        $("#btnAddProperty").show();
+
+                    } else {
+                        alert("There is some error.");
+                    }
+                }
+            });
+        }
+    }
+
+    function FilterSectorValuesByDeptId() {
+        return {
+            departmentId: $("#DepartmentId").val()
+        };
+    }
+
+    function FilterBlockBySector() {
+        return {
+            departmentId: $("#DepartmentId").val(),
+            sectorId: $("#SectorId").val()
+        };
+    }
+
+    function FilterRIDs() {
+        return {
+            departmentId: $("#DepartmentId").val(),
+            sectorId: $("#SectorId").val(),
+            blockId: $("#BlockId").val()
+        };
+    }
+
+    $("#btnCancel").click(function () {
+        window.location.href = '@Url.Action("MergeProperties", "MergeSplitProperties")';
+    });
+    $("#btnAmalgamateProp").click(function () {
+        var dataSource = $("#gridProperties").data("kendoGrid").dataSource;
+
+        // Gets the filter from the dataSource
+        var filters = dataSource.filter();
+
+        // Gets the full set of data from the data source
+        var allData = dataSource.data();
+
+        // Applies the filter to the data
+        var query = new kendo.data.Query(allData);
+        var filteredData = query.filter(filters).data;
+        var allRIDs = "";
+        var newPropertyNumber = "";
+        var newSchemeName = "";
+        var newDepartment = "";
+        var newPropertyType = "";
+        var newSector = "";
+        var newBlock = "";
+        var newCoveredArea = 0;
+        var newActualArea = 0;
+        var newTotalArea = 0;
+        var newTotalPropertyCost = 0;
+
+        if (filteredData.length == 0) {
+            //alert("Please add some properties to amalgamate.");
+            alertify.error("Please add some properties to amalgamate.");
+            return false;
+        }
+
+        if (filteredData.length == 1) {
+            alertify.error("Please add atleast two properties to amalgamate.");
+            return false;
+        }
+
+        $.each(filteredData, function (index, item) {
+
+            allRIDs = allRIDs + item.Rid + ",";
+            newPropertyNumber = newPropertyNumber + item.PropertyNumber + "-";
+
+            newCoveredArea = parseInt(newCoveredArea) + parseInt(item.CoveredArea);
+            newActualArea = parseInt(newActualArea) + parseInt(item.ActualArea);
+            newTotalArea = parseInt(newTotalArea) + parseInt(item.TotalArea);
+            newTotalPropertyCost = parseInt(newTotalPropertyCost) + parseInt(item.TotalPropertyCost);
+        });
+        $("#hdnAllRids").val(allRIDs);
+        //alert(newPropertyNumber);
+        newSchemeName = $("#SchemeName").val();
+        newDepartment = $("#DepartmentName").val();
+        newPropertyType = $("#PropertyType").val();
+        newSector = $("#SectorName").val();
+        newBlock = $("#BlockName").val();
+
+        //$("#ApplicantName").val(result.ApplicantName);
+        $("#txtPropertyNumber").val(newPropertyNumber.slice(0, newPropertyNumber.length - 1));
+        $("#txtSchemeName").val(newSchemeName);
+        $("#txtDepartmentName").val(newDepartment);
+        $("#txtPropertyType").val(newPropertyType);
+        $("#txtSectorName").val(newSector);
+        $("#txtBlockName").val(newBlock);
+        $("#txtCoveredArea").val(newCoveredArea);
+        $("#txtActualArea").val(newActualArea);
+        $("#txtTotalArea").val(newTotalArea);
+        $("#txtTotalPropertyCost").val(newTotalPropertyCost);
+
+        //$('#btnSubmit').attr('disabled', 'disabled');
+        $('#btnSubmit').removeAttr('disabled');
+    });
+    $('#btnSubmit').click(function () {
+        if ($("#Charges").val() == "") {
+            alertify.error("Please enter Charges.");
+            $("#Charges").focus();
+            return false;
+        }
+
+        $("#assignToWindow").data("kendoWindow").center();
+        $("#User").data("kendoDropDownList").dataSource.read();
+        $("#assignToWindow").data("kendoWindow").open();
+    });
+
+
+</script>

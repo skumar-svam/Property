@@ -1,0 +1,82 @@
+﻿@model NA.PMS.Model.OnlineApplicationFormModel
+@{
+    ViewBag.Title = "OTP Details";
+    Layout = "~/Views/Shared/_OnlineRequestLayout.cshtml";
+}
+
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12 content-top-spce">
+            @Html.HiddenFor(model=> model.ApplicationId)
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <h2 class="blck-heading">Verify OTP</h2>
+                <div class="row">
+                    <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                       Enter OTP:
+                    </div>
+                    <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                        <input type="text" id="txtOTP" value="" /> &nbsp; <input type="button" id="btnOTP" value="Verify" />
+                    </div>
+                    <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+
+                    </div>
+                    <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                        <input type="button" id="btnSubmitPayment" value="Proceed to Payment" class="btn btn-add" />
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12 text-center" id="textId">
+                        <h4>
+                            Thank you! Your mobile number is authenticated.To Preview the details on the application form, click <a href="ViewOnlineDetails/@Model.ApplicationId.ToString()">here</a>
+                            <br /> OR <br />Proceed to Payment
+                        </h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#btnSubmitPayment").attr("disabled", "disabled");
+        $("#textId").hide();
+        $("#btnSubmitPayment").click(function () {
+            var appId = $("#ApplicationId").val();
+            window.location = "/Property/Allotment/PaymentDetails/" + appId;
+            @*window.location.href = '@Url.Action("PaymentDetails", "Allotment")';*@
+        });
+        $("#btnOTP").click(function () {
+            VerifyOTP();
+        });
+    });
+
+    function VerifyOTP() {
+        if ($("#txtOTP").val().trim() == "") {
+            alertify.error("Please enter OTP.");
+        }
+        else {
+            $.ajax({
+                url: '@(Url.Action("VerifyOTP", "Allotment"))',
+                type: 'POST',
+                dataType: 'json',
+                data: { otp: $("#txtOTP").val().trim() },
+                success: function (result) {
+                    if (result == true) {
+                        alertify.success("OTP Verified.");
+                        $("#btnSubmitPayment").removeAttr("disabled");
+                        $("#txtOTP").attr("disabled", "disabled");
+                        $("#btnOTP").attr("disabled", "disabled");
+                        $("#textId").show();
+                        return false;
+                    }
+                    else {
+                        alertify.error("OTP not Verified.");
+                        return false;
+                    }
+                }
+            });
+        }
+    }
+</script>

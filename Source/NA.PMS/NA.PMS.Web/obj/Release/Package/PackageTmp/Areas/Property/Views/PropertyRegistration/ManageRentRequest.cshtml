@@ -1,0 +1,67 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@{
+    ViewBag.Title = "ManageRentRequest";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .k-grid-content{
+        overflow-y:hidden;
+    }
+</style>
+
+<div id="divManageRentRequest">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Rent Request</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.RentModel>()
+        .Name("RentGrid")
+        .Columns(columns =>
+        {
+            //columns.Bound(c => c.RentRequestId).Title("RentRequestId").Hidden(true);
+            columns.Bound(c => c.IsActive).Hidden(true).Title("Is Active?");
+            columns.Bound(c => c.EncryptedRequestNo).Hidden(true);
+            columns.Bound(c => c.RequestNo).Title("Request No").ClientTemplate("<a href='/Property/PropertyRegistration/RentRequest/#= EncryptedRequestNo#'>#=RequestNo#</a>").Filterable(false).Sortable(false);
+            columns.Bound(c => c.RID).Title("Registration Id");
+            columns.Bound(c => c.SchemeName).Title("Scheme");
+            columns.Bound(c => c.Department).Title("Department");
+            columns.Bound(c => c.Status).Title("Status");
+            columns.Bound(c => c.RequestDate).Title("Request Date").Format("{0:dd-MM-yyyy}"); ;
+            columns.Bound(c => c.ApplicantName).Title("Applicant's Name");
+            columns.Bound(c => c.TenantName).Title("Tenant Name");
+            //columns.Bound(c => c.RentRequestId).Title("Action").ClientTemplate("<a href=\"/Property/PropertyRegistration/ViewRent/#= RentRequestId#\" id='e_#=AllotmentId#'>View</a>").Filterable(false).Sortable(false);
+            //columns.Bound(c => c.AllotmentId).Title("Lock/Unlock").ClientTemplate("#if(isActive == true){#  <a onclick='javascript:LockUnlockToggle(this);'><i class='fa fa-lock' aria-hidden='true'></i> Lock</a> #} else{#<a  onclick='javascript:LockUnlockToggle(this);'> <i class='fa fa-unlock' aria-hidden='true'></i> Unlock</a>#}#").Filterable(false).Sortable(false);
+        })
+        .Sortable()
+        .Filterable()
+        .Resizable(resize => resize.Columns(true))
+                //.ToolBar(toolBar =>
+                //{
+                //    toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Add Rent Request").HtmlAttributes(new { onclick = "javascript:AddRentRequest(event);", @class = "k-button", id = "AddRentRequest" });
+                //})
+        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+        .Groupable()
+        .DataSource(dataSource => dataSource
+                                .Ajax().Model(model => model.Id(p => p.RequestNo))
+                                        .ServerOperation(true).Sort(sort => sort.Add("RequestNo").Descending())
+                                .Read(read => read.Action("GetRentRequestsList", "PropertyRegistration")).PageSize(20)
+                    )
+        )
+    </div>
+
+</div>
+
+<script>
+    function AddRentRequest(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("AddRentRequest", "PropertyRegistration")';
+    }
+</script>

@@ -1,0 +1,1440 @@
+﻿@model NA.PMS.Model.OnlineFormViewModel
+@using Kendo.Mvc.UI;
+@using NA.PMS.Common;
+@using NA.PMS.Model;
+@using System.Web.Mvc;
+
+@{
+    ViewBag.Title = "Industrial Open End Scheme";
+    Layout = "~/Views/Shared/_LayoutNIC.cshtml";
+}
+
+<style>
+    .divCompanyInfo {
+        display: none;
+    }
+
+    .row-rent {
+        display: none;
+    }
+
+    .col-rent {
+        display: none;
+    }
+
+    .k-button.k-upload-button {
+        margin: 0;
+    }
+
+    .k-upload-files {
+        margin: 0;
+    }
+
+    #userphoto {
+        display: none;
+    }
+
+        #userphoto:hover {
+            cursor: pointer;
+        }
+
+    .glyphicon-user:hover {
+        cursor: pointer;
+    }
+
+    #signature {
+        display: none;
+    }
+
+        #signature:hover {
+            cursor: pointer;
+        }
+
+    .img-upld-bx:hover {
+        cursor: pointer;
+    }
+
+    #loader {
+        display: none;
+    }
+
+    .text-red {
+        color: red;
+    }
+
+    .upload-user-image {
+        width: 140px;
+        height: 140px;
+        padding-top: 60px;
+    }
+
+    .upload-sign-image {
+        width: 140px;
+        height: 55px;
+        line-height: 14px;
+        padding-top: 5px;
+    }
+
+    .upload-image {
+        background: #fff;
+        border: 1px solid #ccc;
+        font-size: 11px;
+        text-align: center;
+        float: right;
+    }
+
+    .area-form-fee {
+        display: none;
+    }
+
+    #btn-download-form {
+        /*display: none;*/
+    }
+
+    #form-download-href {
+        display: none;
+    }
+
+    #btn-skip-form {
+        display: none;
+    }
+</style>
+
+@using (Html.BeginForm("SaveOpenSchemeFormDetail", "OnlineProperty", FormMethod.Post, new { enctype = "multipart/form-data", id = "applicationform" }))
+{
+    <div class="online-registration">
+        <div class="col-md-12">
+            <div class="row" style="margin-top:6px;">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Online Application Form</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce" id="first-form">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px" id="divApplicantInformation">
+                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                <h2 class="blck-heading" style="margin-bottom:6px;">
+                    Applicant Information
+                    @{
+                        if (Model.ApplicationFormId != null)
+                        {
+                            <span class="pull-right">Form No: @Html.DisplayFor(model => model.ApplicationFormId)</span>
+                        }
+                    }
+                </h2>
+                <div class="form-bx">
+                    <div class="hidden-field">
+                        @Html.HiddenFor(model => model.Id)
+                        @*@Html.HiddenFor(model => model.ApplicationFormId)*@
+                        @Html.HiddenFor(model => model.SchemeId)
+                        @Html.HiddenFor(model => model.DepartmentId)
+                        @Html.HiddenFor(model => model.AreaRange)
+                        @Html.HiddenFor(model => model.SchemeType)
+                        @Html.HiddenFor(model => model.ApplicationFormType)
+                        @Html.HiddenFor(model => model.ApplicantType)
+                        @Html.HiddenFor(model => model.AppType)
+                        @Html.HiddenFor(model => model.FormType, htmlAttributes: new { @id = "hdnFormType" })
+
+                        @Html.HiddenFor(model => model.ApplicationFee)
+                        @Html.HiddenFor(model => model.EarnestMoney)
+                        @Html.HiddenFor(model => model.ProcessingCharge)
+                        @Html.HiddenFor(model => model.FormFeeGST)
+                        @Html.HiddenFor(model => model.FormFeeWithGST)
+                        @Html.HiddenFor(model => model.ProcessingChargeGST)
+                        @Html.HiddenFor(model => model.TotalAmount)
+
+                        @Html.HiddenFor(model => model.NICApplicationId)
+                        @Html.HiddenFor(model => model.NICControlId)
+                        @Html.HiddenFor(model => model.NICServiceId)
+                        @Html.HiddenFor(model => model.NICProcessIndustryId)
+                        @Html.HiddenFor(model => model.NICUnitId)
+                        @Html.HiddenFor(model => model.IsFromNIC)
+
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Annual_Turnover)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.ApplicationID)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Company_Name)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Control_ID)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.ControlID)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Expected_date_construction)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Expected_date_production)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Fee_Amount)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Fee_Status)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Industry_Address)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Industry_District)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Industry_District_Id)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Industry_Type_ID)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Industry_Type_Name)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Installed_Capacity)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Occupier_Name)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Occupier_PAN)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Occupier_Pin_Code)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Occupier_Mobile_No)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Occupier_Email_ID)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Occupier_Address)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Occupier_DOB)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Occupier_District_ID)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.OnlineApplicationId)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Unit_Id)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Nature_of_Activity)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Employees)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Project_Cost)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Nature_of_Operation)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Organization_Type_ID)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Organization_Type)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Unit_Category)
+                        @Html.HiddenFor(model => model.BasicDetailsGetModel.Table.Items_Manufactured)
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-4 col-sm-6 col-xs-12 form-group">
+                                    @Html.Label("Scheme Name", htmlAttributes: new { @class = "required" })
+                                </div>
+                                <div class="col-md-8 col-sm-6 col-xs-12 form-group">
+                                    @Html.TextBoxFor(model => model.SchemeName, new { @readonly = "readonly", @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 col-sm-6 col-xs-12 form-group">
+                                    @Html.Label("Department", htmlAttributes: new { @class = "required" })
+                                </div>
+                                <div class="col-md-8 col-sm-6 col-xs-12 form-group">
+                                    @Html.TextBoxFor(model => model.Department, new { @readonly = "readonly", @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 col-sm-6 col-xs-12 form-group">
+                                    <label>Scheme Form Type</label>
+                                </div>
+                                <div class="col-md-8 col-sm-6 col-xs-12 form-group">
+                                    @(Html.Kendo().DropDownListFor(model => model.ApplicationFormType)
+                                        .Name("DDLApplicationFormType")
+                                        .DataTextField("Text")
+                                        .DataValueField("Text")
+                                        .OptionLabel(" -- Select --")
+                                        .Filter("contains")
+                                        .AutoBind(true)
+                                        .Enable(false)
+                                        .DataSource(source =>
+                                        {
+                                            source.Custom()
+                                           .ServerFiltering(true)
+                                           .ServerPaging(true)
+                                           .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                           .Transport(transport => transport.Read(read => read.Action("GetDropDownListByTypeAsDataSource", "OnlineProperty", new { area = "NIC" }).Data("FilterByFormType")))
+                                           .Schema(schema => schema.Data("Data").Total("Total"))
+                                           .PageSize(100);
+                                        })
+                                        .HtmlAttributes(new { style = "width:100%", @class = "input-disabled" })
+                                    )
+                                </div>
+                            </div>
+                            <div class="row row-expansion">
+                                <div class="col-md-4 col-sm-6 col-xs-12 form-group">
+                                    <label>Expansion Type</label>
+                                </div>
+                                <div class="col-md-8 col-sm-6 col-xs-12 form-group">
+                                    @(Html.Kendo().DropDownListFor(model => model.ExpansionType)
+                                        .DataTextField("Text")
+                                        .DataValueField("Text")
+                                        .OptionLabel(" -- Select --")
+                                        .Enable(true)
+                                        .AutoBind(true)
+                                        .Filter("contains")
+                                        .CascadeFrom("DDLApplicationFormType")
+                                        //.DataSource(source => source.Read(read => read.Action("GetFormSubTypeList", "Application", new { area="Online"}).Data("FilterFormType")).ServerFiltering(true))
+                                        .DataSource(source =>
+                                        {
+                                            source.Custom()
+                                           .ServerFiltering(true)
+                                           .ServerPaging(true)
+                                           .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                           .Transport(transport => transport.Read(read => read.Action("GetDropDownListByTypeAsDataSource", "OnlineProperty", new { area = "NIC" }).Data("FilterBySubFormType")))
+                                           .Schema(schema => schema.Data("Data").Total("Total"))
+                                           .PageSize(100);
+                                        })
+                                        .Events(e => e.Change("ToggleExpansionTypeField"))
+                                        .HtmlAttributes(new { style = "width:100%", @class = "input-disabled" })
+                                    )
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 col-sm-6 col-xs-12 form-group">
+                                    <label>Applicant Type</label>
+                                </div>
+                                <div class="col-md-8 col-sm-6 col-xs-12 form-group">
+                                    @(Html.Kendo().DropDownListFor(model => model.ApplicantType)
+                                        .Name("DDLApplicantType")
+                                        .DataTextField("Text")
+                                        .DataValueField("Text")
+                                        .OptionLabel(" -- Select --")
+                                        .Enable(true)
+                                        .AutoBind(true)
+                                        .Filter("contains")
+                                        //.DataSource(source => source.Read(read => read.Action("GetApplicantTypeList", "Application", new { area="Online"})))
+                                        .DataSource(source =>
+                                        {
+                                            source.Custom()
+                                           .ServerFiltering(true)
+                                           .ServerPaging(true)
+                                           .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                           .Transport(transport => transport.Read(read => read.Action("GetDropDownListByTypeAsDataSource", "OnlineProperty", new { area = "NIC" }).Data("FilterApplicantType")))
+                                           .Schema(schema => schema.Data("Data").Total("Total"))
+                                           .PageSize(100);
+                                        })
+                                        .Events(e => e.Change("ToggleApplicantType"))
+                                        .HtmlAttributes(new { style = "width:100%", @class = "input-disabled" })
+                                    )
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 col-sm-6 col-xs-12 form-group">
+                                    @Html.Label("Applicant Constitution", htmlAttributes: new { @class = "required" })
+                                </div>
+                                <div class="col-md-8 col-sm-6 col-xs-12 form-group">
+                                    @(Html.Kendo().DropDownListFor(model => model.CompanyTypeId)
+                                    .DataTextField("Text")
+                                    .DataValueField("Id")
+                                    .OptionLabel(" -- Select --")
+                                    .Enable(true)
+                                    .AutoBind(true)
+                                    .Filter("contains")
+                                    .CascadeFrom("DDLApplicantType")
+                                    //.DataSource(source => source.Read(read => read.Action("GetCompanyTypeList", "Application", new { area="Online"}).Data("FilterApplicantType")).ServerFiltering(true))
+                                    .DataSource(source =>
+                                    {
+                                        source.Custom()
+                                       .ServerFiltering(true)
+                                       .ServerPaging(true)
+                                       .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                       .Transport(transport => transport.Read(read => read.Action("GetDropDownListByTypeAsDataSource", "OnlineProperty", new { area = "NIC" }).Data("FilterCompanyType")))
+                                       .Schema(schema => schema.Data("Data").Total("Total"))
+                                       .PageSize(100);
+                                    })
+                                    .HtmlAttributes(new { style = "width:100%", @class = "input-disabled" })
+                                    )
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 col-sm-6 col-xs-12 form-group">
+                                    @Html.Label("Area Range (acre)", htmlAttributes: new { @class = "required" })
+                                </div>
+                                <div class="col-md-8 col-sm-6 col-xs-12 form-group">
+                                    @(Html.Kendo().DropDownListFor(model => model.AreaRangeId)
+                                    .DataValueField("Id")
+                                    .DataTextField("Text")
+                                    .OptionLabel("--Select--")
+                                    .AutoBind(true).Enable(true)
+                                    .Filter("contains")
+                                    //.CascadeFrom("DepartmentId")
+                                    //.DataSource(source => source.Read(read => read.Action("GetFloorAreaList", "Application", new { area="Online"}).Data("FilterIdForAreaRange")).ServerFiltering(true))
+                                    .DataSource(source =>
+                                    {
+                                        source.Custom()
+                                       .ServerFiltering(true)
+                                       .ServerPaging(true)
+                                       .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                       .Transport(transport => transport.Read(read => read.Action("GetDropDownListByTypeAsDataSource", "OnlineProperty", new { area = "NIC" }).Data("FilterAreaRangeType")))
+                                       .Schema(schema => schema.Data("Data").Total("Total"))
+                                       .PageSize(100);
+                                    })
+                                    .Events(events => { events.Change("ApplicationFeeAndCharges"); })
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                    )
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-4 col-sm-6 col-xs-12">
+                                    
+                                   
+                                </div>
+                                <div class="col-md-8 col-sm-6 col-xs-12 form-group">
+                                    <div class="row">
+                                        @{
+                                            if (Model.UserImage != null && Model.SignImage != null)
+                                            {
+                                                <div class="col-md-12 text-right" style="margin-bottom:5px;">
+                                                    <img id="userphoto1" src="@Model.UserImage" alt="your image" height="150" width="140" name="userImage2" />
+                                                </div>
+                                                <div class="col-md-12 text-right">
+                                                    <img id="signature1" src="@Model.SignImage" alt="your sign" height="40" width="140" name="usersign" />
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="col-md-12 text-right" style="margin-bottom:5px;">
+                                                    <div id="userid" class="img-upld-bx upload-image upload-user-image" style=""> Upload your image <small class="text-red"> User Image Size Min(10kb) and Max(50kb)</small></div>
+                                                    <img id="userphoto" src="#" alt="your image" height="150" width="140" name="userImage2" />
+                                                    <input type='file' id="imguser" name="userImage" accept="image/jpg" style="display:none" />
+                                                </div>
+                                                <div class="col-md-12 text-right">
+                                                    <div id="signatureid" class="img-upld-bx upload-image upload-sign-image" style=""> Upload your signature <small class="text-red"> Signature Image Min(5kb) and Max(20kb)</small></div>
+                                                    <img id="signature" src="#" alt="your sign" height="40" width="140" name="usersign" />
+                                                    <input type='file' id="imgsign" name="signatureImage" accept="image/jpg" style="display:none" />
+                                                </div>
+                                            }
+                                        }
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row divCompanyInfo" id="divCompanyInfo">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.LabelFor(m => m.Applicant, htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.Applicant, htmlAttributes: new { @class = "form-control", placeholder = "full name " })
+                            @Html.ValidationMessageFor(model => model.Applicant, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-company">
+                            @Html.Label("Authorized Signatory", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-company">
+                            @Html.TextBoxFor(model => model.SigningAuthority, new { @class = "form-control", @maxlength = "150", placeholder = "signing authority" })
+                            @Html.ValidationMessageFor(model => model.SigningAuthority, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="row divCompanyInfo" id="">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Signatory's Father Name", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.ApplicantMaster, htmlAttributes: new { @class = "form-control", placeholder = "father's name " })
+                            @Html.ValidationMessageFor(model => model.ApplicantMaster, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-company">
+                            @Html.Label("Signatory Status", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-company">
+                            @(Html.Kendo().DropDownListFor(model => model.SigningAuthorityId)
+                            .DataTextField("Text")
+                            .DataValueField("Id")
+                            .OptionLabel("--Select--")
+                            .Filter("contains")
+                            //.DataSource(source => source.Read(read => read.Action("GetDirectorTypeList", "Application", new { area = "Online" })))
+                            .DataSource(source =>
+                            {
+                                source.Custom()
+                               .ServerFiltering(true)
+                               .ServerPaging(true)
+                               .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                               .Transport(transport => transport.Read(read => read.Action("GetDropDownListByTypeAsDataSource", "OnlineProperty", new { area = "NIC" }).Data("FilterDirectorType")))
+                               .Schema(schema => schema.Data("Data").Total("Total"))
+                               .PageSize(100);
+                            })
+                            .HtmlAttributes(new { @class = "", style = "width:100%;" })
+                            )
+                        </div>
+                    </div>
+
+                    <div class="row" id="divIndividualInfo">
+                        @{Html.RenderPartial("_IndividualForm", Model);}
+                    </div>
+                </div>
+                <div id="CommonInfo" class="form-bx">
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Permanent Address", htmlAttributes: new { @class = "required lbl-permanent-address" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextAreaFor(model => model.PermanentAddress, new { @class = "form-control", @maxlength = "500", placeholder = "address" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Correspond Address", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextAreaFor(model => model.CorrespondingAddress, new { @class = "form-control", @maxlength = "500", placeholder = "address" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Email", htmlAttributes: new { @class = "required lbl-Email" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @(Html.EditorFor(model => model.Email, new { htmlAttributes = new { @editable = "true", @class = "form-control", @maxlength = "150", placeholder = "skumar@svam.com" } }))
+                            @Html.ValidationMessageFor(model => model.Email, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Mobile Number", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.MobileNumber, new { @class = "form-control", @minlength = "10", @maxlength = "10", onkeypress = "return IsNumeric(event);", placeholder = "1234567899" })
+                            @Html.ValidationMessageFor(model => model.MobileNumber, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Phone Number")
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.PhoneNumber, new { @class = "form-control", @maxlength = "14", placeholder = "011 29968337" })
+                            @Html.ValidationMessageFor(model => model.PhoneNumber, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Aadhar Number", htmlAttributes: new { @class = "required", @id = "lblPanNumber" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.AadharNumber, new { @class = "form-control", @minlength = "12", @maxlength = "12", onkeypress = "return IsNumeric(event);", placeholder = "0000 1111 2222" })
+                            @Html.ValidationMessageFor(model => model.AadharNumber, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("PAN", htmlAttributes: new { @class = "required lbl-PAN" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.PanNumber, new { @class = "form-control", placeholder = "AAAAA1111A", @onchange = "PanNumberChange();", @maxlength = "10" })
+                            @Html.ValidationMessageFor(model => model.PanNumber, "", new { @class = "text-danger" })
+                            <small class="text-info">PANCARD Format Like AAAAA1111A</small>
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Annual Income", htmlAttributes: new { @class = "required lbl-annnual-income" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.AnnualIncome, new { @class = "form-control textBoxValueRightAlign", @maxlength = "15", onkeypress = "return IsNumeric(event);" })
+                            <small class="text-info">Value in Rupees.</small>
+                            @Html.ValidationMessageFor(model => model.AnnualIncome, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="row row-rent" id="divRentPermission">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Rent Letter Date", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DatePickerFor(model => model.LetterDate).HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" }))
+                            @Html.ValidationMessageFor(model => model.LetterDate, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Rent Letter No", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.LetterCode, new { @class = "form-control", @maxlength = "11", placeholder = "" })
+                            @Html.ValidationMessageFor(model => model.LetterCode, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+
+                    <div class="row row-ex-alotee" id="divExistingAllottee">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Existing Property", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.ExistingProperty, new { @class = "form-control", @maxlength = "11", placeholder = "sector/block-plot" })
+                            @Html.ValidationMessageFor(model => model.ExistingProperty, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Allotment Date", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DatePickerFor(model => model.AllottmentDate).HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" }))
+                            @Html.ValidationMessageFor(model => model.AllottmentDate, "", new { @class = "text-danger" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("GST Number", htmlAttributes: new { @class = "", @id = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.ApplicantGSTNumber, new { @class = "form-control", placeholder = "", @maxlength = "15" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-rent">
+                            @Html.Label("Rented Property", htmlAttributes: new { @class = "", @id = "lblSector" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-rent">
+                            @Html.TextBoxFor(model => model.PropertyNo, new { @class = "form-control", placeholder = "sector/block-plot", @maxlength = "10" })
+                        </div>
+                    </div>
+                </div>
+
+
+                <h2 class="blck-heading" style="margin-bottom:6px;">DECLARATION BY THE APPLICANT</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-12 form-group">
+                            <p>
+                                <label>
+                                    <input type="checkbox" required name="checkbox-declaration" id="checkbox-declaration" />
+                                    I/We hereby declare that the information, submitted with application form, are true to the best of our knowledge. Nothing
+                                    has been concealed and no part of it is false. I/We further declare that we have carefully read and understood the terms and conditions
+                                    for allotment of industrial plot and do hereby abide by the same. I/We are aware, if allotment is obtained on the basis of false
+                                    information, the NOIDA may cancel our allotment at any stage and forfeit all the deposits made by me/us.
+                                </label>
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <h2 class="blck-heading area-form-fee">Scheme Application Form Payment</h2>
+                <div class="form-bx  area-form-fee">
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Form No", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.ApplicationFormId, new { @readonly = "readonly", @class = "form-control textBoxValueRightAlign", @maxlength = "15", onkeypress = "return IsNumeric(event);" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Form Fee (INR)", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.FormFeeWithGST, new { @id = "schemeformfee", @readonly = "readonly", @class = "form-control textBoxValueRightAlign", @maxlength = "15", onkeypress = "return IsNumeric(event);" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="box-button text-center" id="div-box-button">
+                @if (Model.AppType == Constants.AppType || Model.IsFromNIC == true)
+                {
+                    if (Model.IsApplicationFeePaid == true)
+                    {
+                        <a class="btn btn-primary" id="form-download-href" href="http://pims.mynoida.in/Template/Brochure2019-20above5acre.pdf" target="_blank" download>Download Application Form</a>
+                        @*<a id="form-download-href" href="http://localhost:53000/Template/Brochure2019-20above5acre.pdf" target="_blank" download>Download Application Form</a>*@
+                        <input type="button" class="btn btn-default" id="btn-skip-form" value="Skip" />
+                    }
+                    else if (Model.ApplicationFormId != null)
+                    {
+                        if (Model.SchemeEndDate != null && Model.SchemeEndDate.Value.AddHours(30) >= DateTime.Now)
+                        {
+                            <input type="button" class="btn btn-default" id="btn-pay-form-fee" value="Validate Fee Payment" style="float:right;" />
+                        }
+                    }
+                    else
+                    {
+                        if (Model.SchemeEndDate != null && Model.SchemeEndDate.Value.AddHours(30) >= DateTime.Now)
+                        {
+                            <input type="button" value="Submit & Proceed to Payment" id="btn-form-submit" class="btn btn-add" />
+                        }
+                    }
+                }
+            </div>
+
+        </div>
+
+    </div>
+}
+
+<div class="col-md-12" id="div-otp-popup-window">
+    <div class="row" style="margin-top:25px;">
+        <div class="col-md-4 col-sm-4 col-xs-12 form-group" style="text-align:center">
+            <label>OTP</label>
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+            <input type="text" class="k-textbox" id="text-otp" maxlength="10" placeholder="enter otp here" style="width:100%" />
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+            <input class="k-button" type="button" value="Resend" id="btn-otp-resend" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-4 col-xs-12 form-group">
+            <input type="hidden" id="hdn-otp" />
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+            <input type="button" class="k-button" id="btn-validate-otp" value="Submit" style="width:100%" />
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+            <input type="button" class="k-button" id="btn-cancel-otp" value="Cancel" style="width:100%" />
+        </div>
+    </div>
+</div>
+
+<div id="progressbar" style="width:100%; text-align:center;">
+    <div id="loader" style="position: fixed;top:210px; left:0;  width:100%; height: 100%;  ">
+        <img src="~/Content/Images/ajax_loader_red.gif" style="width:200px;height:200px;" />
+    </div>
+</div>
+
+
+<script>
+   
+    $(document).ready(function () {
+        $('.header-title-main').html("INDUSTRIAL OPEN END SCHEME : NOIDA/IP/2019-20/OES/01");
+        $('#Applicant').attr("readonly", "readonly");
+        $('.row-expansion').css("display", "none");
+        $('.row-ex-alotee').css("display", "none");
+        
+        $('#DDLApplicationFormType').data('kendoDropDownList').value('General');
+
+        $('#btn-skip-form').click(function (e) {
+            e.preventDefault();  //stop the browser from following
+            window.location.href = window.location.href = "/NIC/OnlineProperty/IndustrialProposedProject?id=" + $('#ApplicationFormId').val() + "&controlid=" + $('#NICControlId').val() + "&unitid=" + $('#NICUnitId').val() + "&serviceid=" + $('#NICServiceId').val();
+        });
+
+        if ($('#ApplicationFormId').val() != "") {
+            $('#checkbox-declaration').attr("checked", "checked");
+            $('#checkbox-declaration').attr("disabled", "disabled");
+            $(".area-form-fee").show();
+            //$('#div-box-button').css("display", "none");
+        }
+        else {
+            $(".area-form-fee").css("display", "none");
+            //$('#div-box-button').show();
+        }
+
+        if ($('#ApplicantType').val() != "") {
+            var radiobtnVal = $('#ApplicantType').val();
+            if (radiobtnVal == "Company") {
+                $('.lbl-permanent-address').text("Registered Office");
+                $('.lbl-annnual-income').text("Annual Turnover");
+                $('.lbl-Email').text("Company Email");
+                $('.lbl-PAN').text("Company PAN");
+                $('#divIndividualInfo').css("display", "none");
+                $('.divCompanyInfo').show();
+                $('#Applicant').attr("readonly", false);
+                $("label[for='Applicant']").html("Company");
+                $('.col-company').show();
+            }
+            else if (radiobtnVal == "Individual") {
+                $('.lbl-permanent-address').text("Permanent Address");
+                $('.lbl-annnual-income').text("Annual Income");
+                $('.lbl-Email').text("Email");
+                $('.lbl-PAN').text("PAN");
+                $('#divIndividualInfo').show();
+                $('.divCompanyInfo').css("display", "none");
+                $('.col-company').css("display", "none");
+            }
+        }
+
+        $('form').submit(function () {
+            $('#loader').show();
+        })
+
+        $('.helpsupport').click(function () {
+            window.location.href = '@Url.Action("HelpOnline", "Application", new {area="Online", target="_blank"})';
+        });
+
+        $("#btn-cancel-otp").click(function () {
+            $('#text-otp').val('');
+            $('#div-otp-popup-window').data("kendoWindow").close();
+        });
+
+        $(".k-i-close").click(function () {
+            $('#div-otp-popup-window').data("kendoWindow").close();
+        });
+
+        $('#div-otp-popup-window').kendoWindow({
+            modal: true,
+            title: "Online Form validation",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "30%"
+            },
+            width: "40%", height: "210px" //"35%"
+        });
+
+        $('#DDLApplicantType').change(function () {
+            ToggleApplicantType();
+        });
+
+        $('#DDLApplicationFormType').change(function () {
+            ToggleFormType();
+        });
+
+        $('#AnnualIncome').change(function () {
+            CheckAnnualIncome();
+        });
+
+        $("#btn-form-submit").click(function () {
+            //$('#loader').show();
+            if ($("#applicationform").valid()) {
+                ValidateFormFields();
+            } else {
+                alertify.error("Please check required field validations.");
+            }
+        });
+
+        $('#btn-validate-otp').click(function () {
+            //ValidateOTP();
+            ValidateOtpOnPage();
+        });
+
+        $('#btn-otp-resend').click(function () {
+            SendOTPtoUser();
+        });
+
+        $('#btn-pay-form-fee').click(function () {
+            var nicmodel = {
+                ApplicationFormId: $('#ApplicationFormId').val(),
+                NICApplicationId: $('#ApplicationFormId').val(),
+                NICControlId: $('#NICControlId').val(),
+                NICUnitId: $('#NICUnitId').val(),
+                NICServiceId: $('#NICServiceId').val(),
+                NICProcessIndustryId: $('#NICProcessIndustryId').val()
+            };
+            $.ajax({
+                url: '/Online/Application/ValidateOESpaymentFromNIC',
+                type: 'POST',
+                dataType: 'json',
+                data: { model: nicmodel },
+                success: function (result) {
+                    if (result == true) {
+                        alertify.success("Form fee paid.");
+                        $('#form-download-href').show();
+                        $('#btn-skip-form').show();
+                        $('#div-box-button').css("display", "none");
+                    }
+                    else {
+                        alertify.error("Form fee not paid.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+
+            //$('#applicationform').submit();
+        });
+
+
+        $('#btn-download-form').click(function (e) {
+            e.preventDefault();  //stop the browser from following
+            window.location.href = 'http://localhost:53000/Template/Brochure2019-20above5acre.pdf';
+        });
+
+        $('#btn-skip-form').click(function (e) {
+            e.preventDefault();  //stop the browser from following
+            window.location.href = window.location.href = "/Online/Application/ProjectAndRefund?id=" + $('#ApplicationFormId').val() + "&controlid=" + $('#NICControlId').val() + "&unitid=" + $('#NICUnitId').val() + "&serviceid=" + $('#NICServiceId').val();
+        });
+    });
+
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+
+    function FilterByFormType() {
+        return { FilterType: "FormType" };
+    }
+    function FilterBySubFormType() {
+        return {
+            FilterType: "SubFormType",
+            ActionType: $('DDLApplicationFormType').val()
+        };
+    }
+    function FilterApplicantType() {
+        return { FilterType: "ApplicantType" };
+    }
+    function FilterCompanyType() {
+        return {
+            FilterType: "CompanyType",
+            ActionType: $('#DDLApplicantType').val()
+        };
+    }
+    function FilterAreaRangeType() {
+        return {
+            FilterType: "AreaRange",
+            ActionType: '@OnlineSchemeType.OpenEnded',
+            SchemeId: $("#SchemeId").val(),
+            DepartmentId: $("#DepartmentId").val() //18
+        }
+    }
+    function FilterDirectorType() {
+        return { FilterType: "DirectorType" };
+    }
+
+
+    function ToggleApplicantType() {
+        var radiobtnVal = $('#DDLApplicantType').val();
+        if (radiobtnVal == "Company") {
+            ClearUserImages();
+            ClearCommonFields();
+            //ClearPaymentFields();
+            $('.lbl-permanent-address').text("Registered Office");
+            $('.lbl-annnual-income').text("Annual Turnover");
+            $('.lbl-Email').text("Company Email");
+            $('.lbl-PAN').text("Company PAN");
+            $('#divIndividualInfo').css("display", "none");
+            $('.divCompanyInfo').show();
+            $('#Applicant').val('');
+            $('#Applicant').attr("readonly", false);
+            $("label[for='Applicant']").html("Company");
+            $('.col-company').show();
+            //$('#RefundInfaverof').attr("readonly", true);
+            $('#CompanyTypeId').data("kendoDropDownList").dataSource.read();
+        }
+        else if (radiobtnVal == "Individual") {
+            ClearIndividualField();
+            ClearCommonFields();
+            ClearUserImages();
+            //ClearPaymentFields();
+            $('.lbl-permanent-address').text("Permanent Address");
+            $('.lbl-annnual-income').text("Annual Income");
+            $('.lbl-Email').text("Email");
+            $('.lbl-PAN').text("PAN");
+            $('#divIndividualInfo').show();
+            $('.divCompanyInfo').css("display", "none");
+            $('#Applicant').val('');
+            $('#SigningAuthority').val('');
+            $('#Applicant').attr("readonly", "readonly");
+            $("label[for='Applicant']").html("Applicant");
+            $('.col-company').css("display", "none");
+            //$('#RefundInfaverof').attr("readonly", false);
+            $('#CompanyTypeId').data("kendoDropDownList").dataSource.read();
+        }
+    }
+
+    function ToggleFormType() {
+        var formType = $('#DDLApplicationFormType').val();
+        if (formType.trim() == "Expansion") {
+            //$('#divExpansionType').show();
+            $('.row-expansion').show();
+            //ToggleExpansion();
+        }
+        else {
+            $('.row-expansion').css("display", "none");
+            $('.row-rent').css("display", "none");
+            $('.col-rent').css("display", "none");
+            $('#divExistingAllottee').css("display", "none");
+            $('#ExistingProperty').val('');
+            $('#AllottmentDate').data("kendoDatePicker").value('');
+            $('#LetterCode').val('');
+            $('#LetterDate').data("kendoDatePicker").value('');
+        }
+    }
+
+    function ToggleExpansionTypeField() {
+        var formType = $('#ExpansionType').val();
+        if (formType.trim() == "Rent Permission") {
+            $('.row-rent').show();
+            $('.col-rent').show();
+            $('.row-ex-alotee').css("display", "none");
+            $('#ExistingProperty').val('');
+            $('#AllottmentDate').data("kendoDatePicker").value('');
+        }
+        if (formType.trim() == "Existing Allottee") {
+            $('.row-rent').css("display", "none");
+            $('.col-rent').css("display", "none");
+            $('.row-ex-alotee').show();
+            $('#LetterCode').val('');
+            $('#LetterDate').data("kendoDatePicker").value('');
+        }
+    }
+
+    function ApplicationFeeAndCharges() {
+        $('#PanNumber').val('');
+        var schemeId = $('#SchemeId').val();
+        var departmentId = $('#DepartmentId').val();
+        var propertyTypeId = $('#PropertyTypeId').val();
+        var areaTypeId = $('#AreaRangeId').val();
+        if (areaTypeId != "") {
+            $.ajax({
+                url: '/Online/Application/GetApplicationFeeAndCharges',
+                type: 'POST',
+                dataType: 'json',
+                data: { schemeId: schemeId, departmentId: departmentId, propertyTypeId: propertyTypeId, areaTypeId: areaTypeId },
+                success: function (result) {
+                    if (result != null) {
+                        //$("#ApplicationFee").val(result.ApplicationFee);
+                        //$("#EarnestMoney").val(result.EarnestMoney);
+                        //$("#ProcessingCharge").val(result.ProcessingCharge);
+                        $("#ApplicationFee").val(5000);
+                        $('#EarnestMoney').val(5000000);
+                        $("#ProcessingCharge").val(25000);
+
+                        CalculateAmount();
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+        else {
+            ClearPaymentFields();
+        }
+    }
+
+    function ValidateFormFields() {
+        //var applicantType = $('input[name=ApplicantType]:checked', '#applicationform').val();
+        var applicantType = $("#DDLApplicantType").val();
+        //if ($("#Applicant").val() == "") {
+        //    alertify.error("Please enter Applicant Name");
+        //    return false;
+        //}
+        if ($('#ApplicationFormId').val() == "") {
+            if ($('#imguser').val() == '' || $('#imguser').val() == null) {
+                alertify.error("Please upload a Photograph.");
+                return false;
+            }
+            if ($('#imgsign').val() == '' || $('#imgsign').val() == null) {
+                alertify.error("Please upload signature image.");
+                return false;
+            }
+        }
+
+        //var formType = $('input[name=ApplicationFormType]:checked', '#applicationform').val();
+        var formType = $('#DDLApplicationFormType').val();
+        if (formType.trim() == "Expansion") {
+            var expansionType = $('#ExpansionType').val();
+            if (expansionType.trim() == "Rent Permission") {
+                if ($("#LetterDate").val() == "") {
+                    alertify.error("Please enter Renting letter date");
+                    return false;
+                }
+                if ($("#LetterCode").val() == "") {
+                    alertify.error("Please enter Renting Letter No");
+                    return false;
+                }
+            }
+            if (expansionType.trim() == "Existing Allottee") {
+                if ($("#ExistingProperty").val() == "") {
+                    alertify.error("Please enter Existing property");
+                    return false;
+                }
+                if ($("#AllottmentDate").val() == "") {
+                    alertify.error("Please enter Allottment Date");
+                    return false;
+                }
+            }
+        }
+
+        if (applicantType == "Individual") {
+            var iflag = ValidateIndividualFields();
+            var cflag = ValidateCommonFields();
+            //var pflag = ValidateProposedCompany();
+            if (iflag == true && cflag == true) {
+                SendOTPtoUser();
+                $("#div-otp-popup-window").data("kendoWindow").center();
+                $("#div-otp-popup-window").data("kendoWindow").open();
+                $("#div-otp-popup-window").data("kendoWindow").pin();
+            }
+
+        }
+        if (applicantType == "Company") {
+            if ($("#Applicant").val() == "") {
+                alertify.error("Please enter Applicant Name");
+                return false;
+            }
+            if ($("#SigningAuthority").val() == "") {
+                alertify.error("Please enter Signing Authority");
+                return false;
+            }
+            if ($("#PermanentAddress").val() == "") {
+                alertify.error("Please enter Signing Authority");
+                return false;
+            }
+            if ($("#SigningAuthorityId").val() == "") {
+                alertify.error("Please select signatory type");
+                return false;
+            }
+            var cflag = ValidateCommonFields();
+            //var pflag = ValidateProposedCompany();
+            if (cflag == true) {
+                SendOTPtoUser();
+                $("#div-otp-popup-window").data("kendoWindow").center();
+                $("#div-otp-popup-window").data("kendoWindow").open();
+                $("#div-otp-popup-window").data("kendoWindow").pin();
+            }
+        }
+
+    }
+
+    function ValidateCommonFields() {
+        var bflag = true;
+        if ($("#PermanentAddress").val() == "") {
+            alertify.error("Please enter Permanent Address.");
+            bflag = false;
+        }
+        if ($("#CorrespondingAddress").val() == "") {
+            alertify.error("Please enter Corresponding Address.");
+            bflag = false;
+        }
+        if ($("#Email").val() == "") {
+            alertify.error("Please enter email address.");
+            bflag = false;
+        }
+        if ($("#MobileNumber").val() == "") {
+            alertify.error("Please enter Mobile Number.");
+            bflag = false;
+        }
+        if ($("#MobileNumber").val() != "") {
+            if ($("#MobileNumber").val().length != 10) {
+                alertify.error("Please enter correct Mobile Number.");
+                bflag = false;
+            }
+        }
+        if ($("#AadharNumber").val() == "") {
+            alertify.error("Please enter Aadhar Number.");
+            bflag = false;
+        }
+        if ($("#AadharNumber").val() != "") {
+            if ($("#AadharNumber").val().length != 12) {
+                alertify.error("Please enter correct Aadhar Number.");
+                bflag = false;
+            }
+        }
+        if ($("#PanNumber").val() == "") {
+            alertify.error("Please enter PAN.");
+            bflag = false;
+        }
+        if ($("#AnnualIncome").val() == "") {
+            alertify.error("Please enter Annual Income.");
+            bflag = false;
+        }
+        if ($("#AreaRangeId").val() == "") {
+            alertify.error("Please select Area range.");
+            bflag = false;
+        }
+
+        var dflag = $("#checkbox-declaration").prop("checked");
+        if (dflag == false) {
+            alertify.error("Please check Declaration .");
+            bflag = false;
+        }
+        
+        return bflag;
+
+    }
+
+    function CheckAnnualIncome() {
+        var annualIncome = $("#AnnualIncome").val();
+        if (annualIncome != '') {
+            if (annualIncome < 50000) {
+                alertify.error("Annual Income should be graeter than 50000");
+                $("#AnnualIncome").val('')
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+    }
+
+    //function ValidateEmail(email) {
+    //    var expr = /^([\w-\.]+)@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
+    //    return expr.test(email);
+    //};
+
+    function CalculateAmount() {
+        var applicationFrom = (isNaN(parseFloat($('#ApplicationFee').val()))) ? 0 : parseFloat($('#ApplicationFee').val());
+        var earnestMoney = (isNaN(parseFloat($('#EarnestMoney').val()))) ? 0 : parseFloat($('#EarnestMoney').val());
+        var processingFee = (isNaN(parseFloat($('#ProcessingCharge').val()))) ? 0 : parseFloat($('#ProcessingCharge').val());
+        var processingGST = CalculateGST(processingFee);
+        var formFeeGST = CalculateGST(applicationFrom);
+        $('#FormFeeGST').val(formFeeGST);
+        $('#ProcessingChargeGST').val(processingGST);
+        $('#FormFeeWithGST').val((parseFloat(applicationFrom) + parseFloat(formFeeGST)));
+        var totalAmount = parseFloat((parseFloat(applicationFrom) + parseFloat(earnestMoney) + parseFloat(processingFee) + parseFloat(processingGST) + parseFloat(formFeeGST)).toFixed(2));
+        $("#TotalAmount").val(totalAmount);
+    }
+
+    function CalculateGST(amount) {
+        if ((amount != null || amount != "") && amount > 0) {
+            var gst = (amount * 18) / 100;
+            return gst;
+        }
+        else return 0;
+    }
+
+    function PanNumberChange() {
+        if ($("#PanNumber").val().trim() == '') {
+            $("#PanNumber").val('');
+        }
+        var bool = CheckPanNoFormat();
+        if (bool == false) {
+            alertify.error("Pan Number format is wrong.");
+            $("#PanNumber").val('');
+            return false;
+        }
+        else {
+            ValidatePanNumber();
+        }
+    }
+
+    function CheckPanNoFormat() {
+        var value = $("#PanNumber").val().trim();
+        var regex1 = /^[A-Z]{5}\d{4}[A-Z]{1}$/;
+        if (!regex1.test(value) || value.length != 10) {
+            return false;
+        }
+        return true;
+    }
+
+    function ValidatePanNumber() {
+        var flag = false;
+        var pan = $('#PanNumber').val();
+        var areaId = $('#AreaRangeId').val();
+        if (areaId != "" && areaId != null) {
+            $.ajax({
+                url: '/Online/Application/ValidatePANnumber',
+                type: 'POST',
+                dataType: 'json',
+                data: { pan: pan, areaId: areaId },
+                success: function (result) {
+                    if (result == '@ReturnType.Exist') {
+                        alertify.error("This PAN no " + pan + " already exist for this property.");
+                        $("#PanNumber").val('');
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+        else {
+            alertify.error("Please select area applied for");
+            $("#PanNumber").val('');
+        }
+    }
+
+    function SendOTPtoUser() {
+        var mobile = $('#MobileNumber').val();
+        var mailId = $('#Email').val();
+        if (mobile != "") {
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                data: { mobileNo: mobile, email: mailId },
+                url: '/Online/Application/SendOTP',
+                success: function (result) {
+                    if (result != null) {
+                        $('#hdn-otp').val(result);
+                        alertify.success("OTP has been sent on your mobile and email id successfuly.");
+                        return false;
+                    }
+                    else {
+
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+    }
+
+    function ValidateOTP() {
+        //var formId = $('#ApplicationFormId').val();
+        var otp_mobile = $('#text-otp').val();
+        if (otp_mobile != "") {
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                data: { otpMobile: otp_mobile },
+                url: '/Online/Application/ValidateOTP',
+                success: function (result) {
+                    if (result == '@ReturnType.Success') {
+                        $('#div-otp-popup-window').data("kendoWindow").close();
+                        $('#AreaRange').val($('#AreaRangeId').data("kendoDropDownList").text());
+                        //$('#applicationform').submit();
+                        SubmitOpenSchemeForm();
+                    }
+                    else {
+                        alertify.error("OTP mismatch");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+    }
+
+    function ValidateOtpOnPage() {
+        var otp_sent = $('#text-otp').val();
+        var otp_return = $('#hdn-otp').val();
+        if (otp_sent != "") {
+            if (otp_sent == otp_return) {
+                $('#AreaRange').val($('#AreaRangeId').data("kendoDropDownList").text());
+                $('#div-otp-popup-window').data("kendoWindow").close();
+                SubmitOpenSchemeForm();
+            }
+            else {
+                alertify.error("OTP mismatch");
+            }
+        }
+    }
+
+    function SubmitOpenSchemeForm() {
+        $('#btn-form-submit').prop("disabled",true);
+        var atype = $('#DDLApplicantType').val();
+        var ftype = $('#DDLApplicationFormType').val();
+        $('#hdnFormType').val("Online"); //$('#hdnFormType').val(form);
+        $('#ApplicantType').val(atype);
+        $('#ApplicationFormType').val(ftype);
+
+        var formData = new FormData($('form').get(0));
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: false, // Not to set any content header
+            processData: false, // Not to process data
+            data: formData,
+            url: '/NIC/OnlineProperty/SaveOpenSchemeFormDetail',
+            success: function (result) {
+                if (result != null) {
+                    $("#ApplicationFormId").val(result.ApplicationFormId);
+                    var gst = CalculateGST(result.ApplicationFee);
+                    var totalAmount = parseFloat((parseFloat(result.ApplicationFee) + parseFloat(gst)).toFixed(2));
+                    $("#schemeformfee").val(totalAmount);
+                    $("#FormFeeWithGST").val(totalAmount);
+                    $(".area-form-fee").show();
+                    //$('#div-box-button').css("display", "none");
+                    alert("Pay form fee via nivesh mitra portal then proceed further action.");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                alertify.error("Network error, try again later");
+                $('#btn-form-submit').prop("disabled", false);
+            }
+        });
+    }
+
+    function ClearPaymentFields() {
+        $('#ApplicationFee').val('');
+        $('#ProcessingCharge').val('')
+        $('#EarnestMoney').val('');
+        $('#FormFeeGST').val('');
+        $('#ProcessingChargeGST').val('');
+        $("#TotalAmount").val('');
+    }
+
+    function ClearCommonFields() {
+        //$('#SchemeId').data("kendoDropDownList").value('');
+        $('#CompanyTypeId').data("kendoDropDownList").value('');
+        $('#PermanentAddress').val('');
+        $('#CorrespondingAddress').val('');
+        $('#Email').val('');
+        $('#PhoneNumber').val('');
+        $('#MobileNumber').val('');
+        $('#FaxNumber').val('');
+        $('#PanNumber').val('');
+        $('#AnnualIncome').val('');
+        $('#AreaRangeId').data("kendoDropDownList").value('');
+        
+        $('#AadharNumber').val('');
+        $('#ExistingProperty').val('');
+        $('#AllottmentDate').data("kendoDatePicker").value('');
+        $('#LetterCode').val('');
+        $('#LetterDate').data("kendoDatePicker").value('');
+        $('#ApplicantGSTNumber').val('');
+        $('#PropertyNo').val('');
+    }
+
+</script>
+
+
+<script>
+    var imagetype;
+    $('#userphoto').click(function () {
+        $("#imguser").click();
+    });
+
+    $("#imguser").change(function () {
+        readURL(this);
+    });
+
+    $('#userid').click(function () {
+        $("#imguser").click();
+    });
+
+    //$('.img-upld-bx').click(function () {
+    //    $("#imguser").click();
+    //});
+
+    $('#signatureid').click(function () {
+        $('#imgsign').click();
+    });
+
+    $('#signature').click(function () {
+        $('#imgsign').click();
+    });
+
+    $('#imgsign').change(function () {
+        displaySignatueImage(this);
+    });
+
+    function readURL(input) {
+        if (CheckUserImage(input)) {
+            if (input.files && input.files[0]) {
+                var imgsize = input.files[0].size / 1024;
+                if (imgsize > 11 && imgsize < 51) {
+                    var reader = new FileReader();
+                    $('#userid').css("display", "none");
+                    reader.onload = function (e) {
+                        $('#userphoto').attr('src', e.target.result);
+                    }
+                    $('#userphoto').show();
+                    reader.readAsDataURL(input.files[0]);
+                }
+                else {
+                    alertify.error("user image min(10kb) and max(50kb)");
+                    $('#imguser').val('');
+                }
+            }
+        }
+        else {
+            $('#imguser').val('');
+        }
+    }
+
+    function displaySignatueImage(input) {
+        if (CheckUserImage(input)) {
+            if (input.files && input.files[0]) {
+                var imgsize = input.files[0].size / 1024;
+                if (imgsize > 5 && imgsize < 20) {
+                    var reader = new FileReader();
+                    $('#signatureid').css("display", "none");
+                    reader.onload = function (e) {
+                        $('#signature').attr('src', e.target.result);
+                    }
+                    $('#signature').show();
+                    reader.readAsDataURL(input.files[0]);
+                }
+                else {
+                    alertify.error("Signature image min(5kb) and max(20kb)");
+                    $('#imgsign').val('');
+                }
+            }
+        }
+        else {
+            $('#imgsign').val('');
+        }
+    }
+
+    function CheckUserImage(input) {
+        var file = input.files[0].name;
+        var count = file.lastIndexOf('.') + 1;
+        var ext = file.substr(count);
+        if (ext.toLowerCase() == "jpg") {
+            return true;
+        }
+        else {
+            alertify.error("Only jpg file allowed.");
+            return false;
+        }
+    }
+
+    function ClearUserImages() {
+        $('#imguser').val('');
+        $('#imgsign').val('');
+        $('#userphoto').css("display", "none");
+        $('#userid').show();
+        $('#signature').css("display", "none");
+        $('#signatureid').show();
+    }
+
+    function CheckImageSize(input, imagetype) {
+
+    }
+</script>
+
+
+

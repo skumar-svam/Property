@@ -1,0 +1,174 @@
+﻿@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions
+
+
+<div class="panel-body">
+    <div class="row form-group">
+        <div class="col-md-12" id="Application" style="text-align:center">
+            <input type="radio" name="arearange-action" value="AddAreaRange" />Add &nbsp;&nbsp;
+            <input type="radio" name="arearange-action" value="UpdateAreaRange" />Update
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-3">
+            <label>Department</label>
+        </div>
+        <div class="col-md-3">
+            @(Html.Kendo().DropDownList()
+                  .Name("ddlARDepartment")
+                  .OptionLabel("---select---")
+                  .DataTextField("Text")
+                  .DataValueField("Id")
+                  .DataSource(source => source.Read(read => read.Action("GetDepartmentList", "Application", new { area = "Admin" })))
+                  .HtmlAttributes(new { style = "width:100%;" })
+            )
+        </div>
+        <div class="col-md-3">
+            <label>Category</label>
+        </div>
+        <div class="col-md-3">
+            <input type="text" maxlength="30" id="txtAreaCategory" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-3">
+            <label>Ex Area Range:</label>
+        </div>
+        <div class="col-md-3">
+            @(Html.Kendo().DropDownList()
+                  .Name("ddlAreaRange")
+                  .OptionLabel("---select---")
+                  .DataTextField("Text")
+                  .DataValueField("Id")
+                  .CascadeFrom("ddlARDepartment")
+                  .DataSource(source => source.Read(read => read.Action("GetAreaRangeList", "Application", new { area = "Admin" }).Data("FilterARDepartment")).ServerFiltering(true))
+                  .HtmlAttributes(new { style = "width:100%;" })
+            )
+        </div>
+        <div class="col-md-3">
+            <label>New Area Range:</label>
+        </div>
+        <div class="col-md-3">
+            <input type="text" maxlength="8" id="txtAreaRange" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row form-group" style="text-align:right;">
+        <div class="col-md-12">
+            <input type="button" id="btnARRequest" class="k-button" value="Update" style="min-width:80px;" />
+            <input type="button" id="btnARClear" class="k-button" value="Clear" />
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+
+        $('input[type="radio"][name="arearange-action"]').on("change", function () {
+            var action = $('input[type="radio"][name="arearange-action"]:checked').val();
+            if (action == "AddAreaRange") {
+                $('#btnARRequest').val("Add");
+                //$('#ddlApplication').data("kendoDropDownList").value('');
+                //$('#ddlApplication').data("kendoDropDownList").enable(false);
+            }
+            else {
+                $('#btnARRequest').val("Update");
+                //$('#ddlApplication').data("kendoDropDownList").enable(true);
+            }
+        });
+
+        $('#btnARRequest').click(function () {
+            SubmitAreaRangeForm();
+        });
+
+        $('#btnARClear').click(function () {
+            ClearAreaRangeFields();
+        });
+    });
+
+    function FilterARDepartment() {
+        return { departmentId: $('#ddlARDepartment').val() };
+    }
+
+
+    function SubmitAreaRangeForm() {
+        var flag = true;
+        var actiontype = $('input[type="radio"][name="arearange-action"]:checked').val();
+        var departmentId = $('#ddlARDepartment').data("kendoDropDownList").value();
+        var category = $('#txtAreaCategory').val();
+        var areaRangeId = "";
+        var arearange = $('#txtAreaRange').val();
+        if (actiontype == "" || actiontype == undefined) {
+            flag = false;
+            alertify.error("Select Action type.");
+            return false;
+        }
+        if (departmentId == "") {
+            flag = false;
+            alertify.error("Select Department.");
+            return false;
+        }
+        //if (category == "") {
+        //    flag = false;
+        //    alertify.error("Enter Category.");
+        //    return false;
+        //}
+        if (actiontype == "AddAreaRange") {
+            if (arearange == "") {
+                alertify.error("Enter Area Range");
+                flag = false;
+            }
+            actiontype = "Add";
+        }
+        if (actiontype == "UpdateAreaRange") {
+            areaRangeId = $('#ddlAreaRange').data("kendoDropDownList").value();
+            if (areaRangeId == "") {
+                alertify.error("Select existing Area Range");
+                flag = false;
+            }
+            else if (arearange == "") {
+                alertify.error("Enter Property Area Range");
+                flag = false;
+            }
+            actiontype = "Update";
+        }
+        if (flag) {
+            var RangeModel = {
+                ActionType: actiontype,
+                DepartmentId: $('#ddlARDepartment').data("kendoDropDownList").value(),
+                Category: category,
+                AreaType: category,
+                AreaRange: $('#txtAreaRange').val(),
+                AreaRangeId: $('#ddlAreaRange').data("kendoDropDownList").value()
+            };
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ model: RangeModel }),
+                url: '@Url.Action("SavePropertyAreaRange", "Application", new { area = "Admin" })',
+                success: function (result) {
+                    if ((result == '@ReturnType.Saved') || (result == '@ReturnType.Updated')) {
+                        alertify.success("Area Range saved successfully.");
+                        ClearAreaRangeFields();
+                        $('#ddlAreaRange').data("kendoDropDownList").dataSource.read();
+                    }
+                    else if (result == '@ReturnType.None') {
+                        alertify.error("Area Range doesn't exist.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again");
+                }
+            });
+        }
+    }
+
+    function ClearAreaRangeFields() {
+        $('#ddlAreaRange').data("kendoDropDownList").value('');
+        $('#txtAreaCategory').val('');
+        $('#txtAreaRange').val('')
+    }
+
+</script>

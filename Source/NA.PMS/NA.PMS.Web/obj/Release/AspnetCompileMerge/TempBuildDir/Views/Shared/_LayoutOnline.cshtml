@@ -1,0 +1,183 @@
+﻿@using System.Web.Optimization;
+@using NA.PMS.Common.Helpers;
+@using NA.PMS.Web.Models;
+@using System.Web.Mvc;
+@using NA.PMS.Model;
+@using NA.PMS.Common;
+
+@{
+    var displayMiniProfiler = SettingsHelper.IsMiniProfilerEnabled;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="template">
+    <title>@ViewBag.Title</title>
+
+    @Styles.Render("~/Content/others")
+    @Styles.Render("~/bundles/KendoCSS")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/others")
+    @Scripts.Render("~/bundles/KendoJS")
+
+    <link href="~/Content/CSS/style-new.css" rel="stylesheet" />
+    <link href="~/Content/CSS/responsive.css" rel="stylesheet" />
+    <link href="~/Content/CSS/open-top-bx.css" rel="stylesheet" />
+    <script src="~/Scripts/kendo.aspnetmvc.min.js"></script>
+
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script>
+        $(document).ready(function () {
+            $(".mbl-menu-btn").click(function () {
+                $(".menu-wrapper").toggle("slide");
+            });
+            //Disable Keyboard for Kendo Date Picker
+            $(".DisableKeyboardInput").keypress(function () {
+                return false;
+            });
+            $(".input-disabled").keypress(function () {
+                return false;
+            });
+        });
+    </script>
+    <style type="text/css">
+        .navbar-collapse.collapse {
+            display: block !important;
+        }
+
+        .navbar-nav > li, .navbar-nav {
+            float: left !important;
+        }
+
+            .navbar-nav.navbar-right:last-child {
+                /*margin-right: -15px !important;*/
+            }
+
+        .navbar-right {
+            float: right !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="mainWrapper" class="grad1">
+        <nav id="header-full" class="navbar navbar-default navbar-fixed-top nav-bg">
+            <div class="container-fluid">
+                <!-- Brand and toggle get grouped for better mobile display -->
+                <div class="navbar-header">
+                    <div class="brand-wrap">
+                        <a class="navbar-brand" href="#"></a>
+                    </div>
+                </div>
+                <div class="collapse navbar-collapse" id="mainNav">
+                    @{if (Session["SchemeUserLoginDetails"] != null)
+                    {
+                        var dataUser = (OnlineFormViewModel)Session["SchemeUserLoginDetails"];
+                        <ul class="nav navbar-nav  top-links hidden-xs" style="padding-left:135px;margin-top:25px;">@*navbar-right*@
+                            <li><h2 class="header-title-main" style=" color:#fff;text-align:center; font-weight:700;"><b>SCHEME FOR ALLOTMENT OF INDUSTRIAL PLOTS</b></h2></li>
+                            @*<li><h2 class="header-title-main" style=" color:green"><b>NOIDA/IP/2017-18/OES/02</b></h2></li>*@
+                            <li class="dropdown">
+                                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                                    <i class="fa fa-user" aria-hidden="true"></i>
+                                    <span class="caret"></span>
+                                </a>
+                                <ul class="dropdown-menu" style="display: none;">
+                                    <li>
+                                        <span>
+                                            Welcome @dataUser.FirstName <br> @if (dataUser.SchemeType == "OE")
+                                            { <b>Open Ended Scheme</b> }
+                                            else if (dataUser.SchemeType == "T")
+                                            {
+                                                <b>Transport Scheme</b> }
+                                        </span>
+                                    </li>
+                                    @if (dataUser.SchemeType == "T")
+                                    {
+                                        <li><a href="/Online/Application/TransportSchemeForm">Application</a></li>}
+                                    else if (dataUser.SchemeType == "OE")
+                                    {
+                                        <li><a href="/Online/Application/OpenSchemeForm">Application</a></li>}
+                                    <li class="divider"></li>
+                                    <li><a href="/Online/Application/ChangePassword">Change Password</a></li>
+                                    <li class="divider"></li>
+                                    <li><a href="/Online/Application/SchemeLogOut/">Logout</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    }
+                    else
+                    {
+                        <h2 class="header-title-main" style="margin-top:25px; color:green;padding-left:25%;font-weight:700;"><b>SCHEME FOR ALLOTMENT OF INDUSTRIAL PLOTS</b></h2>                       
+                    }
+                    }
+                </div>
+                <!-- /.navbar-collapse -->
+            </div><!-- /.container-fluid -->
+            <div class="row" style="text-align:center">
+                <label style="padding-left:15px; color:yellow;">Help line No: 9205691009 (10:00 AM - 5:00 PM, Saturday & Sunday off)</label>
+                @*<label style="padding-left:15px; color:blue;">For Incomplete form upload document till 02-12-2017 5:00 PM</label>*@
+            </div>
+            @{
+                if (Session["CurrentUser"] != null)
+                {
+                    var usr = (CurrentUserDetail)Session["CurrentUser"];
+                    if (usr.RoleMaster.RoleName.ToLower() == "consultant")
+                    {
+                        <div class="container-fluid nav-wrap">
+                            @Html.MvcSiteMap().Menu("_PartialSiteMapMenu")
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="row" style="text-align:center;position:relative;background-image:url(/Content/Images/boxed-bg.jpg)">
+                        <label style="color:red;font:bolder"><blink>Note* 1-All affidavit should be on Rs 10 stamp paper duly notarised. 2- Indemnity Bond should be Rs 100 stamp paper duly notarised. </blink></label>
+                        @*&nbsp;&nbsp;&nbsp;<label style="color:green; text-decoration:underline;">Scheme Last Date: 03-Oct-2017</label>*@
+                        @*@if (Session["SchemeUserLoginDetails"] != null)
+                            { <label><a href="/Online/Application/SchemeLogOut">Logout</a></label>}*@
+                    </div>
+                }
+            }
+
+        </nav>
+        <br />
+        <div class="container-fluid contentWrapper main" id="mainMaster" style="padding-top:110px;">
+            @RenderBody()
+        </div>
+        <footer>
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-12 col-xs-12 copyright text-center">
+                        Copyright © @DateTime.Now.Year <b>NOIDA</b>. Developed and Maintained by <a href="http://www.svam.com">North Shore Technologies</a>
+
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+    $(function () {
+        $(".dropdown").hover(
+            function () {
+                $('.dropdown-menu', this).stop(true, true).fadeIn("fast");
+                $(this).toggleClass('open');
+            },
+            function () {
+                $('.dropdown-menu', this).stop(true, true).fadeOut("fast");
+                $(this).toggleClass('open');
+            }
+		);
+    });
+
+    $(document).ready(function () {
+        $("#cssmenu > ul > li:last-child").addClass("last-child");
+    });
+</script>

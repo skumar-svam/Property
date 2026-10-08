@@ -1,0 +1,181 @@
+﻿@model NA.PMS.Model.ServiceViewModel
+@using Kendo.Mvc.UI;
+@using NA.PMS.Common;
+
+
+<div class="col-md-12 k-grid-content">
+    @*<h2 class="blck-heading-grid">Service Requests</h2>*@
+    @Html.HiddenFor(m=>m.RegistrationId)
+    @(Html.Kendo().Grid<NA.PMS.Model.ServiceViewModel>()
+                .Name("GridServiceRequestHistory")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.DepartmentId).Hidden();
+                    columns.Bound(c => c.ServiceId).Hidden();
+                    columns.Bound(c => c.RegistrationNo).Hidden();
+                    columns.Bound(c => c.RequestId).Title("Ref No").ClientTemplate("<a href='" + "/Member/ServiceRequest/RequestDetail/#= Id #" + "' target='_blank'>#=Id#</a>");//.Width(100)
+                    columns.Bound(c => c.Department).Title("Department").Sortable(false);//.Width(130)
+                    columns.Bound(c => c.PropertyNo).Title("Property").Sortable(false);//.Width(110)
+                    columns.Bound(c => c.ServiceName).Title("Service Name");
+                    columns.Bound(c => c.RequestDate).Title("Request Date").Format("{0:dd/MM/yyyy}").Sortable(false);//.Width(140)
+                    columns.Bound(c => c.Status).Title("Status").Sortable(false);//.Width(100)
+                    //columns.Bound(c => c.RequestDate).Title("Print").ClientTemplate("<a  onclick='javascript:OpenAcknowledgementFile(this);'><center><span class='glyphicon glyphicon-print'></span></center></a>").Width(100).Filterable(false).Sortable(false);
+                    columns.Bound(c => c.Applicant).Hidden();
+                    columns.Bound(c => c.MobileNo).Hidden();
+                    columns.Bound(c => c.SubDepartment).Hidden();
+                    columns.Bound(c => c.Description).Hidden();
+                    columns.Bound(c => c.Approver).Title("Forwarded To").Sortable(false);//.Width(140);
+                    columns.Bound(c => c.RequestThrough).Title("Request Through").Sortable(false);//.Width(140);
+                    //columns.Bound(c => c.Status).Title("Letter").ClientTemplate("#if(StatusId == 9 && IsUploaded == true){# <center><a onclick='javascript:ViewLetter(#=Id#,#=RegistrationNo#);'style='font-weight:bold;cursor:pointer;'>view</a></center> #}#");//.Width(120)
+                    columns.Bound(c => c.Status).Title("Letter").ClientTemplate("#if(StatusId == 9 && IsUploaded == true){# <center><a onclick='javascript:ViewAServiceApprovedLetter(this);'style='font-weight:bold;cursor:pointer;'>view</a></center> #}#");//.Width(120)
+                    columns.Bound(c => c.UploadedDocument).Hidden();
+                    columns.Bound(c => c.DispatchedDocument).Hidden();
+                })
+                .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                //.ClientDetailTemplateId("template")
+                .AutoBind(true)
+                .DataSource(dataSource => dataSource
+                    .Ajax()
+                    //.Model(model => model.Id(c => c.Id))
+                    .ServerOperation(true)
+                    .Read(read => read.Action("GetCustomerServiceRequestListByRid", "ServiceRequest", new { area = "Member" }).Data("FilterparamForService"))//.PageSize(10)
+                    .Sort(s => s.Add(r => r.RequestDate).Descending())
+                )
+    )
+</div>
+
+<script id="template" type="text/kendo-tmpl">
+    @(Html.Kendo().Grid<NA.PMS.Model.ServiceViewModel>()
+            .Name("grid_#=Id#") // template expression, to be evaluated in the master context
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Hidden(true);
+                columns.Bound(o => o.Applicant).Width(300);
+                columns.Bound(o => o.Description);
+                columns.Bound(o => o.Comment);
+            })
+            .DataSource(dataSource => dataSource
+                .Ajax().Read(read => read.Action("GetCustomerServiceRequestListById", "ServiceRequest", new { Id = "#=Id#" }))
+            )
+            .ToClientTemplate()
+    )
+</script>
+<script>
+    function dataBound() {
+        this.expandRow(this.tbody.find("tr.k-master-row").first());
+    }
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.popup-window').kendoWindow({
+            modal: true,
+            title: "Service Acknowledgement",
+            actions: false, // [ "Minimize", "Maximize"],
+            visible: false,
+            width: "70%",
+            //height: "60%",
+        });
+
+        $('#btnClose').click(function () {
+            $(".popup-window").data("kendoWindow").close();
+            //ClearFields();
+        });
+    });
+
+    function FilterparamForService() {
+        var Rid = $('#hdnRID').val();//$('#RegistrationId').val();
+        return { rId: Rid };
+    }
+
+    function OpenAcknowledgementFile(row) {
+        //$("#windowDiv").empty();
+        var tr = $(row).parent().parent().parent();
+        var RequestId = $(tr).children("td:eq(4)").text();
+        var RegistrationNo = $(tr).children("td:eq(3)").text();
+        var Department = $(tr).children("td:eq(5)").text();
+        var PropertyNo = $(tr).children("td:eq(6)").text();
+        var ServiceName = $(tr).children("td:eq(7)").text();
+        var CreatedDate = $(tr).children("td:eq(8)").text();
+        var Applicant = $(tr).children("td:eq(11)").text();
+        var MobileNo = $(tr).children("td:eq(12)").text();
+        var SubDepartment = $(tr).children("td:eq(13)").text();
+        var Description = $(tr).children("td:eq(14)").text();
+        RegistrationNo = RegistrationNo != "" ? RegistrationNo : "NA";
+        $('#CreatedDate').text(CreatedDate);
+        $('#RequestId').text(RequestId);
+        $('#RegistrationNo').text(RegistrationNo);
+        $('#Name').text(Applicant);
+        $('#PropertyNo').text(PropertyNo);
+        $('#Department').text(Department);
+        $('#SubDepartment').text(SubDepartment);
+        $('#Mobile').text(MobileNo);
+        $('#ServiceName').text(ServiceName);
+        $('#Description').text(Description);
+
+        $('.popup-window').data("kendoWindow").center();
+        $('.popup-window').data("kendoWindow").open();
+    }
+
+    function PrintAcknowledgementReciept() {
+        var contents = document.getElementById("AcknowledgementContent").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('<style>.row-btn{display:none;}</style>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+    function ViewLetter(row, rid) {
+        var actionType = "Complete";
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ Id: row, Rid: rid, ActionType: actionType }),
+            url: '/Member/ServiceRequest/GetUploadedDocumentByServiceId',
+            success: function (result) {
+                if (result != "" || result != null) {
+                    window.location.href = result;
+                }
+                else {
+                    alertify.error("File Not Found.");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+            }
+        });
+    }
+
+    function ViewAServiceApprovedLetter(row) {
+        var actionType = null; 
+        var tr = $(row).parent().parent().parent();
+        var req = $(tr).children("td:eq(14)").text();
+        var Document = $(tr).children("td:eq(16)").text();
+        var NICDoc = $(tr).children("td:eq(17)").text();
+        var reqId = $(tr).children("td:eq(3)").text();
+        var rid = $(tr).children("td:eq(2)").text();
+
+        if (req == '@Constants.NIC_NiveshMitra') {
+            window.location.href = NICDoc;
+        }
+        else {
+            window.location.href = Document;
+        }
+    }
+</script>

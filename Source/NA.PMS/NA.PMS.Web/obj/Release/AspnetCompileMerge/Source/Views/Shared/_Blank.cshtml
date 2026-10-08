@@ -1,0 +1,78 @@
+﻿@using System.Web.Optimization;
+@using NA.PMS.Common.Helpers;
+@{
+    var displayMiniProfiler = SettingsHelper.IsMiniProfilerEnabled;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>@ViewBag.Title</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    @*<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>*@
+
+    @Styles.Render("~/Content/others")
+    @Styles.Render("~/bundles/KendoCSS")
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/others")
+    @Scripts.Render("~/bundles/KendoJS")
+
+
+    <link href="~/Content/CSS/style-new.css" rel="stylesheet" />
+    <link href="~/Content/CSS/responsive.css" rel="stylesheet" />
+    <script src="~/Scripts/kendo.aspnetmvc.min.js"></script>
+
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    
+    <style>
+        #loginPad {
+            padding-top: 80px;
+        }
+
+        @@media (max-width:360px) {
+            #loginPad {
+                padding-top: 20px;
+            }
+
+            #tblLogin > h1 {
+                font-size: medium;
+            }
+        }
+    </style>
+    <script>
+        $(document).ready(function () {
+
+            $(".input-disabled").keypress(function () {
+                return false;
+            });
+
+            //called when key is pressed in textbox
+            $(".numeric").keypress(function (e) {
+                //if the letter is not digit then display error and don't type anything
+                if (e.which != 8 && e.which != 0 && (e.which < 48 || e.which > 57)) {
+                    return false;
+                }
+            });
+        });
+        function CheckNumericDigits(e) {
+            if (e.value != "") {
+                if (isNaN(e.value)) {
+                    e.value = "";
+                    alertify.error("Only numeric allowed.");
+                }
+            }
+        }
+    </script>
+</head>
+<body>
+
+    @RenderBody()
+
+</body>
+</html>

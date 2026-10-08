@@ -1,0 +1,552 @@
+﻿@using Kendo.Mvc.UI
+
+@using NA.PMS.Common
+
+@model NA.PMS.Model.Property.PropertyPossessionModel
+@{
+    ViewBag.Title = "Add Possession Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@*<h3>Add Possession Entry</h3>
+<hr />*@
+@using (Html.BeginForm("AddPossessionEntry", "Possession", FormMethod.Post, new { enectype = "multipart/form-data", id = "PossessionForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Add Possession Entry</h1></div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+                </div>
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="col-md-12 content-top-spce">
+                <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+
+                    <h2 class="blck-heading">Select Registration Id</h2>
+                    <div class="form-bx">
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Registration Id", htmlAttributes: new { @class = "required" })</div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(x => x.Rid)
+                  .Filter("contains")
+                  .DataTextField("Text")
+                  .DataValueField("Value")
+                  .OptionLabel("Select")
+                  .DataSource(source =>
+                  {
+                      //source.Read(read =>
+                      //{
+                      //    read.Action("GetAllPossLeaseDeedDoneRIDs", "Possession");
+                      //});
+                      source.Custom()
+                        .ServerFiltering(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport =>
+                        {
+                            transport.Read("GetAllPossLeaseDeedDoneRIDs", "Possession");
+                        }).Schema(schema =>
+                        {
+                            schema.Data("Data")
+                            .Total("Total");
+                        }).PageSize(100);
+                  })
+                  .Events(events => { events.Change("GetRIdDetails"); })
+.HtmlAttributes(new { style = "width:100%", @class = "schemeForms" })
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Property Number", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.PropertyNumber, new { @Readonly = "readonly", @class = "form-control" })
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <h2 class="blck-heading">Applicant Details</h2>
+                    <div class="form-bx">
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Scheme Name")  </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.SchemeName, new { @Readonly = "readonly", @class = "form-control" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Department")</div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.DepartmentName, new { @Readonly = "readonly", @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Applicant's Name")  </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.ApplicantName, new { @Readonly = "readonly", @class = "form-control" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Gender")  </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.Gender, new { @Readonly = "readonly", @class = "form-control" })
+                            </div>
+                        </div>
+
+                        <div class="row" id="divSigningAuthority">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Authorized Signatory")
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.SigningAuthority, new { @Readonly = "readonly", @class = "form-control" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Registered Office")
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.RegisteredOffice, new { @Readonly = "readonly", @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="row" id="divParentsName">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Father's/Husband's Name")
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.FatherName, new { @Readonly = "readonly", @class = "form-control" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Mother's Name")
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.MotherName, new { @Readonly = "readonly", @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Property Type")
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.PropertyType, new { @Readonly = "readonly", @class = "form-control" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Corresponding Address")
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.CorrespondAdd, new { @Readonly = "readonly", @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Area")
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.Area, new { @Readonly = "readonly", @class = "form-control" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("AreaRange/Floor")
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.FloorAreaRange, new { @Readonly = "readonly", @class = "form-control" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Lease Deed Due Date")
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <div id="lblLeaseDueDt">
+                                    @(Html.Kendo().DatePickerFor(m => m.LeaseDeedDueDate).HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput", @Readonly="readonly" }))
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Lease Deed Execution Date")
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <div id="lblLeaseExecDt">
+                                    @(Html.Kendo().DatePickerFor(m => m.LeaseDeedExecutionDate).HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" ,@Readonly="readonly"}))
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Possession Due Date")
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <div id="lblPossDueDt">
+                                    @(Html.Kendo().DatePickerFor(m => m.PossessionDueDate).HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput"}))
+                                </div>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Possession Order Date")
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <div id="lblLeaseExecDt">
+                                    @(Html.Kendo().DatePickerFor(m => m.PossessionOrderDate).HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" }))
+                                </div>
+                            </div>
+                        </div>
+                        @Html.HiddenFor(m => m.PropertyId)
+                    </div>
+
+                    <h2 class="blck-heading">Possession Details</h2>
+                    <div class="form-bx" id="divPossessionDetails">
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Possession Date", htmlAttributes: new { @class = "required" }) </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Kendo().DatePickerFor(m => m.PossessionDate).HtmlAttributes(new { style = "width:100%;padding:0;marging:0;", @class = "DisableKeyboardInput" })
+
+                                @Html.ValidationMessageFor(m => m.PossessionDate, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Possession By", htmlAttributes: new { @class = "required" })  </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.PossessionBy, new { @class = "form-control", @maxlength = "100" })
+                                @Html.ValidationMessageFor(m => m.PossessionBy, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("North", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.North, new { @class = "form-control", @maxlength = "100" })
+                                @Html.ValidationMessageFor(m => m.North, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("South", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.South, new { @class = "form-control", @maxlength = "100" })
+                                @Html.ValidationMessageFor(m => m.South, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("East", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.East, new { @class = "form-control", @maxlength = "100" })
+                                @Html.ValidationMessageFor(m => m.East, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("West", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.West, new { @class = "form-control", @maxlength = "100" })
+                                @Html.ValidationMessageFor(m => m.West, "", new { @class = "text-danger" })
+                            </div>
+                        </div>
+                        
+                            <div class="row" id="divAreaChangeRadio">
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Area Change")
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    <label>@Html.RadioButtonFor(m => m.AreaChange, "Yes", new { @name = "AreaChange" }) Yes</label>
+                                    <label> @Html.RadioButtonFor(m => m.AreaChange, "No", new { @name = "AreaChange", @checked = "checked" }) No</label>
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group  divAreaChange">
+                                    @Html.Label("Change Type", htmlAttributes: new { @class = "required" })
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group  divAreaChange">
+                                    <input id="dropdownlist" style="width: 100%;" />
+                                    @*@Html.Kendo().DropDownListFor(m => m.AreaChangeType).Name("dropdownlist").BindTo(new string[] {"Increase in Area", "Decrease in Area"}).HtmlAttributes(new {style = "width:100%"})*@
+
+                                </div>
+                            </div>
+                            <div class="row  divAreaChange">
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Total New Area(Sqmt)", htmlAttributes: new { @class = "required" })
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    @Html.TextBoxFor(m => m.ChnagedArea, new { @class = "form-control", @maxlength = "15" })
+                                    @Html.ValidationMessageFor(m => m.ChnagedArea, "", new { @class = "text-danger" })
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("One Time Excess Charge (INR)")
+                                </div>
+                                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    @Html.TextBoxFor(m => m.OneTimeExcessCharge, new { @class = "form-control" })
+
+                                </div>
+                            </div>
+                        
+                    </div>
+                    @Html.ValidationMessage("ErrorMessage", new { @class = "ErrorText" })
+                    @Html.HiddenFor(m => m.IsPossessionEntryDone)
+                    @Html.HiddenFor(m => m.AreaChangeType)
+                    @Html.HiddenFor(m => m.OneTimeExcessCharge)
+                </div>
+                <div class="box-button text-center">
+                    <input type="button" class="btn btn-default" value="Back" id="btnBack" onclick="window.history.back();" />
+                    <input type="button" class="btn btn-add" value="Add" id="btnAdd" />
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+}
+<script>
+
+    $(document).ready(function () {
+        $("#divPossessionDetails").hide();
+        $("#btnAdd").hide();
+
+        $("#divSigningAuthority").css("display", "none");
+        $("input[type=submit]").attr('disabled', 'disabled');
+        //$("#LeaseDeedDueDate").data("kendoDatePicker").enable(false);
+        //$("#PossessionDueDate").data("kendoDatePicker").enable(false);
+        //$("#LeaseDeedExecutionDate").data("kendoDatePicker").enable(false);
+        //$("#PossessionOrderDate").data("kendoDatePicker").enable(false);
+        $("input#OneTimeExcessCharge").attr('readonly', 'readonly');
+        $(".divAreaChange").hide();
+
+        var dropdownData = [
+            {
+                text: '-Select-',
+                value: '0'
+            },
+            {
+                text: 'Increase in Area',
+                value: '1'
+            },
+        {
+            text: 'Decrease in Area',
+            value: '2'
+        }];
+        $('#dropdownlist').kendoDropDownList({
+            //optionLabel: 'Select option...',
+            dataTextField: 'text',
+            dataValueField: 'value',
+            dataSource: dropdownData
+        });
+
+    });
+
+    $('input:radio').click(function () {
+        var radioVal = $('input:radio[name=AreaChange]:checked').val();
+        if (radioVal === 'Yes') {
+            $(".divAreaChange").show();
+        }
+        else {
+            $(".divAreaChange").hide();
+            $("input#OneTimeExcessCharge").val("");
+            $("#ChnagedArea").val("");
+            $('#dropdownlist').data('kendoDropDownList').value(0);
+        }
+
+    });
+
+
+    $('#btnAdd').click(function () {
+
+        var radioVal = $('input:radio[name=AreaChange]:checked').val();
+        if (radioVal == 'Yes') {
+            var area = $('#ChnagedArea').val();
+            if (ValidateChangedArea(area)) {
+                if ($('#dropdownlist').val() == '0') {
+                    alertify.error("Please select Area Changed Type.");
+                    return false;
+                }
+
+                var ddlVal = $('#dropdownlist').val() == '1' ? 'Increase in Area' : $('#dropdownlist').val() == '2' ? 'Decrease in Area' : '0';
+                $('#AreaChangeType').val(ddlVal);
+               // $("#OneTimeExcessCharge").val();
+
+                $('#PossessionForm').submit();
+            }
+        }
+        else {
+            $('#PossessionForm').submit();
+        }
+    });
+
+    function ValidateChangedArea(area) {
+        if (area >= 0 && area <= 999999999999.99) {
+            $('#ChnagedArea').val(parseFloat($('#ChnagedArea').val()).toFixed(2));
+            return true;
+        }
+        else {
+            alertify.error("Area should not be more than max[12,2]");
+            return false;
+        }
+    }
+
+    $("input#ChnagedArea").focusout(function () {
+        var inputArea = parseInt($("input#ChnagedArea").val());
+        var actualArea = parseInt($("#Area").val());
+        if ($("input#ChnagedArea").val() > 0) {
+            if ($('#dropdownlist').val() == '1' && (inputArea <= actualArea)) {
+                alertify.error("Entered New area should be greater than Actual area.");
+                return false;
+            }
+            if ($('#dropdownlist').val() == '2' && (inputArea >= actualArea)) {
+                alertify.error("Entered New area should be less than Actual area.");
+                return false;
+            }
+            var changedArea = $("input#ChnagedArea").val() - $("#Area").val();
+            var propertyId = $("#PropertyId").val();
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ changedArea: changedArea, propertyId: propertyId }),
+                url: '/Possession/GetOneTimeExcessCharge',
+                success: function (result) {
+                    var roundedVal = parseFloat(result).toFixed(2);
+                    $('#OneTimeExcessCharge').val(roundedVal);
+                    //$('#OneTimeExcessCharge').val(parseFloat($('#OneTimeExcessCharge').val()).toFixed(2));
+                },
+                error: function (obj) {
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            });
+        } else {
+            alertify.error("Please enter Total New Area.");
+        }
+    });
+
+    function GetRIdDetails() {
+        var rId = $("#Rid").val();
+        //GetKYADetails(rId);
+        if (rId != "") {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ rId: rId }),
+                url: '/Possession/GetPossEntryDetailsByRID',
+                success: function (result) {
+                    if (result.PropertyId != null) {
+                        if (result.IsPossessionEntryDone == true) {
+                            alertify.error("Possession Entry already added for this RID.");
+                            return false;
+
+                        } else {
+                            $("input[type=submit]").removeAttr('disabled');
+                        }
+                        //$("input[type=submit]").removeAttr('disabled');
+                        if (result.Gender == "company") {
+                            $("#divSigningAuthority").show();
+                            $('#divParentsName').hide();
+                        }
+                        else {
+                            $("#divSigningAuthority").hide();
+                            $('#divParentsName').show();
+                        }
+
+                        if ($('#divAreaChangeRadio').val() == "Housing") {
+                            $('#divAreaChangeRadio').css("display", "none");
+                            $(".divAreaChange").hide();
+                            $('#OneTimeExcessCharge').val('');
+                            $('#ChnagedArea').val('');
+                        }
+                        else {
+                            $('#divAreaChangeRadio').show();
+                        }
+                        $("#PropertyId").val(result.PropertyId);
+                        $("#SchemeName").val(result.SchemeName);
+                        $("#ApplicantName").val(result.ApplicantName);
+                        $("#FatherName").val(result.FatherName);
+                        $("#MotherName").val(result.MotherName);
+                        $('#SigningAuthority').val(result.SigningAuthority);
+                        $('#RegisteredOffice').val(result.RegisteredOffice);
+                        $('#CorrespondAdd').val(result.CorrespondAdd);
+                        $("#Gender").val(result.Gender);
+                        $("#DepartmentName").val(result.DepartmentName);
+                        $("#PropertyType").val(result.PropertyType);
+                        $("#PropertyNumber").val(result.PropertyNumber);
+                        $("#Area").val(result.Area);
+                        $("#FloorAreaRange").val(result.FloorAreaRange);
+                        $("#LeaseDeedDueDate").data("kendoDatePicker").value(result.LeaseDeedDueDate);
+                        $("#PossessionDueDate").data("kendoDatePicker").value(result.PossessionDueDate);
+                        $("#PossessionOrderDate").data("kendoDatePicker").value(result.PossessionOrderDate);
+                        $("#LeaseDeedExecutionDate").data("kendoDatePicker").value(result.LeaseDeedExecutionDate);
+                        // Hiding Area Change Divs in case of Department is Housing
+                        if (result.DepartmentId == 5) {
+                            $("#divAreaChangeRadio").hide();
+                            $("#divAreaChange").hide();
+                        }
+                        
+
+                        $("#divPossessionDetails").show();
+                        $("#btnAdd").show();
+
+                        //$("#PossessionDate").kendoDatePicker({
+                        //    max: result.CurrentDate,
+                        //    min: result.PossessionOrderDate
+                        //});
+
+                    }
+                    else {
+                        RemoveApplicantDetails();
+                        alertify.error("There is no records for this RID for Possession.");
+                    }
+                },
+                error: function (obj) {
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            });
+        }
+        else {
+            RemoveApplicantDetails();
+        }
+
+    }
+
+    function GetKYADetails(rId) {
+        //var rId = $("#RId").val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ RegistrationId: rId }),
+            url: '/Property/PropertyRegistration/GetKYADetailsForRid',
+            success: function (result) {
+                if (result != null) {
+                    if (result.StatusId == "2") {
+                        alertify.error("Your KYA has been Rejected. Please Complete your KYA again.");
+                        $('#btnSubmitScheme').attr('disabled', 'disabled');
+                        return false;
+                    }
+                    else if (result.StatusId == "" || result.StatusId == null) {
+                        alertify.error("Please Complete your KYA.");
+                        $('#btnSubmitScheme').prop('disabled', true);
+                        return false;
+                    }
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+
+    function RemoveApplicantDetails() {
+        $("input[type=submit]").attr('disabled', 'disabled');
+        $("#PropertyId").val();
+        $("#SchemeName").val("");
+        $("#ApplicantName").val("");
+        $("#FatherName").val("");
+        $("#MotherName").val('');
+        $('#SigningAuthority').val('');
+        $('#RegisteredOffice').val('');
+        $('#CorrespondAdd').val('');
+        $("#Gender").val("");
+        $("#DepartmentName").val("");
+        $("#PropertyType").val("");
+        $("#PropertyNumber").val("");
+        $("#Area").val("");
+        $("#FloorAreaRange").val("");
+
+        $("#LeaseDeedDueDate").data("kendoDatePicker").value("");
+        $("#LeaseDeedExecutionDate").data("kendoDatePicker").value("");
+        $("#PossessionDueDate").data("kendoDatePicker").value("");
+        $("#PossessionOrderDate").data("kendoDatePicker").value("");
+        $("#PossessionDate").data("kendoDatePicker").value("");
+    }
+
+</script>

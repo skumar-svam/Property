@@ -1,0 +1,198 @@
+﻿@model NA.PMS.Model.TransferModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+
+<style>
+    #divGPArow1{
+        display:none;
+    }
+    #divGPArow2{
+        display:none;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.Label("Transfer Type", htmlAttributes: new { @class = "required" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @(Html.Kendo().DropDownListFor(m => m.TransferType)
+            .Filter("contains")
+            .DataTextField("text")
+            .DataValueField("id")
+            .OptionLabel("Select")
+            .DataSource(source =>source.Read(read => read.Action("GetTransferTypes", "PropertyRegistration")))
+            .Events(events => { events.Change("TransChange"); })
+            .HtmlAttributes(new {style = "width:100%" })
+        )
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.Label("Transfer Sub-type", htmlAttributes: new { @class = "required" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @(Html.Kendo().DropDownListFor(m => m.TransferSubType)
+            .Filter("contains")
+            .DataTextField("text")
+            .DataValueField("id")
+            .OptionLabel("Select").CascadeFrom("TransferType")
+            .DataSource(source => source.Read(read => read.Action("GetTransferSubTypes", "PropertyRegistration").Data("AdditionalData1")).ServerFiltering(true))
+            .HtmlAttributes(new {style = "width:100%" })
+        )
+    </div>
+</div>
+
+@*GPA fields not required anymore on this screen*@
+<div class="row" id="divGPArow1">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("GPA Holder Name", new { @class = "GPAField" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(trans => trans.GPAHolderName, new { @class = "GPAField form-control", @disabled="disabled" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("GPA Holder Address", new { @class = "GPAField" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(trans => trans.GPAHolderAdd, new { @class = "GPAField form-control", @disabled = "disabled" })
+        </div>
+    </div>
+
+    <div class="row" id="divGPArow2">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("GPA Effective From", new { @class = "GPAField" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DatePickerFor(trans => trans.GPAEffectiveFrom)
+                                                          .HtmlAttributes(new { @class = "DisableKeyboardInput GPAField", style = "width:100%", @disabled = "disabled" }))
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("GPA Effective Till", new { @class = "GPAField" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DatePickerFor(trans => trans.GPAEffectiveTill)
+                                                          .HtmlAttributes(new { @class = "DisableKeyboardInput GPAField", style = "width:100%", @disabled = "disabled" }))
+        </div>
+    </div>
+
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.Label("Transfer Applied On", htmlAttributes: new { @class = "required" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @(Html.Kendo().DatePickerFor(trans => trans.TransferDate).Max(DateTime.Now)
+                                          .HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.Label("Tranfer Charge (per sqmtr)", htmlAttributes: new { @class = "required" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @(Html.Kendo().NumericTextBoxFor(trans => trans.TransferChargePerSqMtr)
+            .Name("TransferChargePerSqMtr")
+            .Min(0).Max(9999999999999)
+            .Spinners(false).Step(0)
+            .Enable(true)
+            .HtmlAttributes(new { style = "width: 100%", @maxlength = "13", @class = "k-label schemeForms textBoxValueRightAlign" })
+        )
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.Label("Total Transfer Charge")
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.TextBoxFor(trans => trans.TotalTransferCharge, new { @readonly = "readonly", @class = "form-control" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.Label("Current Allotment Rate", htmlAttributes: new { @class = "required" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @*@Html.TextBoxFor(trans => trans.CurrentPropertyRate, new { @class = "form-control", onkeypress = "return IsNumeric(event);" })*@
+        @(Html.Kendo().NumericTextBoxFor(trans => trans.CurrentPropertyRate)
+            .Min(0).Max(9999999999)
+            .Spinners(false).Step(0).Enable(true)
+            .Events(e => e.Change("CalculatePropertyCost"))
+            .HtmlAttributes(new { style = "width: 100%", @maxlength = "10", @class = "k-label textBoxValueRightAlign" })
+        )
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.Label("Location Charge (INR)")
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @*@Html.TextBoxFor(trans => trans.LocationCharge, new { @class = "form-control", onkeypress = "return IsNumeric(event);" })*@
+        @(Html.Kendo().NumericTextBoxFor(trans => trans.LocationCharge)
+            .Min(0).Max(9999999999)
+            .Spinners(false).Step(0).Enable(true)
+            .Events(e => e.Change("CalculatePropertyCost"))
+            .HtmlAttributes(new { style = "width: 100%", @maxlength = "10", @class = "k-label schemeForms textBoxValueRightAlign" })
+        )
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.Label("Total Property Cost")
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @*@Html.TextBoxFor(trans => trans.TotalPropertyCost, new { @class = "form-control", onkeypress = "return IsNumeric(event);" })*@
+        @(Html.Kendo().NumericTextBoxFor(trans => trans.TotalPropertyCost)
+            .Min(0).Max(99999999999999)
+            .Spinners(false).Step(0).Enable(true)
+            .Events(e => e.Change("CalculatePropertyCost"))
+            .HtmlAttributes(new { style = "width: 100%", @maxlength = "14", @class = "k-label schemeForms textBoxValueRightAlign" })
+        )
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+       @Html.Label("Lease Rent Per Annum")
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @*@Html.TextBoxFor(trans => trans.AnnualLeaseRent, new { @class = "form-control", onkeypress = "return IsNumeric(event);" })*@
+        @(Html.Kendo().NumericTextBoxFor(trans => trans.AnnualLeaseRent)
+            .Min(0).Max(999999999999999)
+            .Spinners(false).Step(0).Enable(true)
+            .Events(e => e.Change("CalculatePropertyCost"))
+            .HtmlAttributes(new { style = "width: 100%", @maxlength = "15", @class = "k-label schemeForms textBoxValueRightAlign" })
+        )
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+       
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    function AdditionalData1() {
+        //alert($("#TransferType").val());
+        return {
+            TransferType: $("#TransferType").val()
+        };
+    }
+
+    function CalculatePropertyCost() {
+        var rate = $('#CurrentPropertyRate').val() == "" ? 0 : $('#CurrentPropertyRate').val();
+        var locationcharge = $('#LocationCharge').val() == "" ? 0 : $('#LocationCharge').val();
+        var area = $("#lblArea").html() == "" ? 0 : $("#lblArea").html();
+        var intArea = parseFloat(area);
+        if (rate > 0) {
+            var totalrate = parseFloat(parseFloat(locationcharge) + parseFloat(rate)).toFixed(2);
+            var totalcost = intArea * totalrate;
+            var leaserent = (totalcost * 2.5) / 100;
+            $("#TotalPropertyCost").data("kendoNumericTextBox").value(totalcost.toFixed(2));
+            $("#AnnualLeaseRent").data("kendoNumericTextBox").value(leaserent.toFixed(2));
+        }
+        else {
+            alert("Please enter Current Property Rate");
+            $('#CurrentPropertyRate').data("kendoNumericTextBox").value('');
+            $('#LocationCharge').data("kendoNumericTextBox").value('');
+            $("#TotalPropertyCost").data("kendoNumericTextBox").value('');
+            $("#AnnualLeaseRent").data("kendoNumericTextBox").value('');
+        }
+    }
+
+</script>

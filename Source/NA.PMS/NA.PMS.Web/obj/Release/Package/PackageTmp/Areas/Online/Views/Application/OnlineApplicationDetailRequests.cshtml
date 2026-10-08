@@ -1,0 +1,192 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@using NA.PMS.Common;
+@model NA.PMS.Model.OnlineApplicationDetailProcess
+@{
+    ViewBag.Title = "Manage Online Application Details Request";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="ManageOnlineApplicationDetails">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Online Application Details Request</h1></div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="row">
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <h2 class="blck-heading">Select Application Status</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            @Html.Label("Application Status:")
+                            <select class="form-control" id="DpApplicationStatus">
+                                <option value="0">Select Status</option>
+                                <option value="@Constants.Approved">Approve</option>
+                                <option value="@Constants.Rejected">Reject</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group" style="text-align:right">
+                            @Html.Label("")<br />
+                            <input type="button" id="btnAddAppStatus" class="btn btn-add pull-right col-md-offset-1" value="Proceed" />
+                            <input type="button" id="btnClear" class="btn btn-default pull-right " value="Clear" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.OnlineApplicationDetailProcess>()
+                .Name("gridOnlineApplicationDetails")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.Comment).Hidden(true);
+            columns.Bound(c => c.OnlineApplicationDetailProcessId).Title("").Width(40).ClientTemplate("<input  type='checkbox' class='IsAppProcess' id='c_#= OnlineApplicationDetailProcessId#' />").Filterable(false);
+            columns.Bound(c => c.OnlineApplicationDetailProcessId).Title("ID").Width(50);
+            columns.Bound(c => c.OnlineApplicationId).Title("OnlineApplicationId");
+            columns.Bound(c => c.CreatedDate).Title("Created Date").Format("{0:dd-MMM-yyyy}");
+            columns.Bound(c => c.UserCreatedBy).Title("Created By");
+            columns.Bound(c => c.AssignTo).Title("Approved By");
+            columns.Bound(c => c.ApprovalDate).Title("Approved Date").Format("{0:dd-MMM-yyyy}");            
+            columns.Bound(c => c.strApplicationStatus).Title("Application Status");
+            columns.Bound(c => c.strProcessStatus).Title("Process Status");
+            columns.Bound(c => c.Comment).Title("Previous comment").ClientTemplate("<a onclick='javascript:ShowComments(this);'><span class='glyphicon glyphicon-eye-open'></span></a>");
+            //columns.Bound(c => c.IsActive).Title("Action").ClientTemplate("<a href=\"/Revenue/Finance/ViewLeaseDeedDetails/#= OnlineApplicationDetailProcessId#\" id='e_#=LeaseDeedId#'><span class='glyphicon glyphicon-eye-open'></span></a>").Filterable(false).Sortable(false).Width(100);
+        })
+        .Sortable()
+        .Filterable()
+        .Resizable(resize => resize.Columns(true))
+        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+        .DataSource(dataSource => dataSource
+            .Ajax()
+                    .Model(model => model.Id(p => p.OnlineApplicationDetailProcessId))
+            .ServerOperation(true)
+                    .Read(read => read.Action("GetOnlineApplicationProcessRequests", "Application")).PageSize(20)
+            )
+        )
+    </div>
+</div>
+
+@(
+ Html.Kendo().Window().Name("commentsWindow").Title("Please Provide a Comment").Modal(true).Visible(false).Content(
+@<text>
+    <div class="col-md-12">
+        <div class="row" style="margin-top:20px;">
+            <div class="col-md-3">
+                @Html.Label("Comment :")
+            </div>
+            <div class="col-md-9">
+                @Html.TextAreaFor(m => m.ApproverComments, new { @maxlength = "500", style = "width:100%;height:80px;" })
+            </div>
+        </div>
+        <div class="row topSpace">
+            <div class="col-md-9 col-sm-12 col-md-offset-3">
+                <input type="button" class="btn btn-add" id="btnSubmit" value="Submit" />
+                <input type="button" class="btn btn-default closePopup" value="Close" />
+            </div>
+        </div>
+    </div>
+</text>)
+                    .Draggable()
+                    .Resizable()
+                    .Actions(actions => actions.Close())
+)
+
+@(
+ Html.Kendo().Window().Name("ShowcommentsWindow").Title("Comment").Modal(true).Width(700).Visible(false).Content(
+@<text>
+    <div class="col-md-12">
+        <div class="row" style="margin-top:20px;">
+            <div class="col-md-2">
+                @Html.Label("Comment :")
+            </div>
+            <div class="col-md-10">
+                <label style="white-space:pre" id="showcomment"></label>
+            </div>
+        </div>
+        <div class="row topSpace">
+            <div class="col-md-9 col-sm-12 col-md-offset-3">
+                <input type="button" class="btn btn-default closePopup" value="Close" />
+            </div>
+        </div>
+    </div>
+</text>)
+                    .Draggable()
+                    .Resizable()
+                    .Actions(actions => actions.Close())
+)
+
+<script type="text/javascript">
+    var checkedIDs = [];
+    $(document).ready(function () {
+        $(function () {
+            $('#gridOnlineApplicationDetails').on('change', '.IsAppProcess', function () {
+                var checked = $(this).is(':checked');
+                var grid = $('#gridOnlineApplicationDetails').data().kendoGrid;
+                var dataItem = grid.dataItem($(this).closest('tr'));
+                if (checked == true) {
+                    checkedIDs.push({ 'text': dataItem.OnlineApplicationDetailProcessId, 'id': dataItem.OnlineApplicationDetailProcessId.toString() });
+                }
+                else {
+                    var arr = checkedIDs.map(function (o) { return o.id; });
+                    var i = arr.indexOf(dataItem.OnlineApplicationDetailProcessId);
+                    checkedIDs.splice(i, 1);
+                }
+                var arr = checkedIDs.map(function (o) { return parseInt(o.id); });
+            });
+        });
+    });
+
+    $("#btnSubmit").click(function () {
+        var DpVal = $('#DpApplicationStatus').val();
+        if (DpVal != "" && DpVal != null) {
+            UpdateApplicationProcess(DpVal);
+        } else { alertify.error("Please select application status."); }
+    });
+
+    $("#btnAddAppStatus").click(function () {
+        $("#commentsWindow").data("kendoWindow").center();
+        $("#commentsWindow").data("kendoWindow").open();
+    });
+
+    function ShowComments(row) {
+        var tr = $(row).parent().parent();
+        var comments = $(tr).children("td:eq(0)").text();
+        $("#showcomment").html(comments);
+        $("#ShowcommentsWindow").data("kendoWindow").center();
+        $("#ShowcommentsWindow").data("kendoWindow").open();
+    }
+
+    $(".closePopup").click(function () {
+        $("#commentsWindow").data("kendoWindow").close();
+        $("#ShowcommentsWindow").data("kendoWindow").close();
+    });
+
+    function UpdateApplicationProcess(Type) {
+        var optionTexts = checkedIDs.map(function (o) { return parseInt(o.id); });;
+        var processStage = Type;
+        var comment = $("#ApproverComments").val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ StatusType: processStage, ApplicationProcessIdList: optionTexts, Comment: comment }),
+            url: '/Online/Application/UpdateOnlineApplicationStatus',
+            success: function (result) {
+                if (result != null) {
+                    if (result.ReturnType = 200) {
+                        $("#commentsWindow").data("kendoWindow").close();
+                        alertify.success("File approved.");
+                    } else { $("#commentsWindow").data("kendoWindow").close(); }
+                } else { $("#commentsWindow").data("kendoWindow").close(); }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                alertify.error("Some Error in save database.");
+            }
+        });
+    }
+</script>

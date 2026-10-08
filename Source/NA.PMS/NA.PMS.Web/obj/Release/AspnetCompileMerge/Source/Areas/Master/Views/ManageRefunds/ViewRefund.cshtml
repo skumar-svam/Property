@@ -1,0 +1,83 @@
+﻿@model NA.PMS.Model.Refund
+
+@{
+    ViewBag.Title = "ViewRefund";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">View Refund</h1></div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px;">
+                <h2 class="blck-heading">Refund Information</h2>
+                <div class="form-bx">                
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.LabelFor(model => model.SchemeName, htmlAttributes: new { @class="font-bold"})</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><span class="form-control ">@Html.DisplayFor(model => model.SchemeName)</span></div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.LabelFor(model => model.DepartmentName, htmlAttributes: new { @class = "font-bold" })</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><span class="form-control ">@Html.DisplayFor(model => model.DepartmentName)</span></div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.LabelFor(model => model.Deduction, htmlAttributes: new { @class = "font-bold" })</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><span class="form-control ">@Html.DisplayFor(model => model.Deduction)</span></div>
+                   
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.LabelFor(model => model.Unit, htmlAttributes: new { @class = "font-bold" })</div>
+                        @*<div class="col-md-3 col-sm-3 col-xs-12 form-group"><span class="form-control ">@Html.DisplayFor(model => model.Unit)</span></div>*@
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">                          
+                            <span class="form-control ">
+                                     @{
+                                         if (Model.Unit == "P")
+                                         {
+                                            @*@Html.Display("PER")*@
+                                            <text>PER</text>
+                                         }
+                                         else
+                                         {
+                                            @Html.DisplayFor(model => model.Unit)
+                                         }
+                                    }                         
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.LabelFor(model => model.DeductionApplyOn, htmlAttributes: new { @class = "font-bold" })</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><span class="form-control ">@Html.DisplayFor(model => model.DeductionApplyOn)</span></div>
+                   
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.LabelFor(model => model.InterestRate, htmlAttributes: new { @class = "font-bold" })</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><span class="form-control ">@Html.DisplayFor(model => model.InterestRate)</span></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.LabelFor(model => model.RefundLockPeriod, htmlAttributes: new { @class = "font-bold" })</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><span class="form-control ">@Html.DisplayFor(model => model.RefundLockPeriod)</span></div>
+
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.LabelFor(model => model.DaysAfterInterest, htmlAttributes: new { @class = "font-bold" })</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><span class="form-control ">@Html.DisplayFor(model => model.DaysAfterInterest)</span></div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.LabelFor(model => model.RefundDescription, htmlAttributes: new { @class = "font-bold" })</div>                      
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <span class="form-control ">
+                                @Html.DisplayFor(model => model.RefundDescription)</span>
+                            @*@Html.TextBoxFor(model => model.RefundDescription, htmlAttributes: new { @class="lbl-form-control",@Readonly=true})*@
+                        </div>
+                    </div>
+                   
+                </div>
+            </div>
+            <div class="box-button text-center">
+                @*<input type="button" id="btnCancel" value="Cancel" class="btn btn-default" />*@
+                @Html.ActionLink("Back", "ManageRefund", "ManageRefunds", new { @class = "btn btn-default" })
+            </div>
+        </div>
+       
+    </div>
+</div>

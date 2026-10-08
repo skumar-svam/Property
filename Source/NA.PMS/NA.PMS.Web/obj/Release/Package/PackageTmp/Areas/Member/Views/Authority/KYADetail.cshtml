@@ -1,0 +1,621 @@
+﻿@model NA.PMS.Model.KYAViewModel
+@using Kendo.Mvc.UI;
+@using NA.PMS.Common
+@using NA.PMS.Model
+@using NA.PMS.Web.Models
+
+@{
+    ViewBag.Title = "KYA Detail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    #divPopupWindow{
+        display:none;
+    }
+    .right-padding{
+        padding-left:30px;
+    }
+    .col-company{
+        display:none;
+    }
+    [class*="col-"]{
+        padding-right:15px;
+    }
+    .row-approver{
+        display:none;
+    }
+    .row-reason{
+        display:none;
+    }
+</style>
+<div class="PropertyDetails col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12">
+                <h1 class="gridTitle">KYA Details [Ref-No: @Model.KYAReferenceCode]</h1>
+            </div>
+            <div class="col-md-6  col-sm-12 col-xs-12 col-btn">
+                @{
+                    if (Model.StatusId != null)
+                    {
+                        if (Model.StatusId == NAStatusId.Initiated || Model.StatusId == NAStatusId.Forwarded)
+                        {
+                            <span class="fa fa-circle-o-notch" style="color:#ffac00;font-size:18px;"></span>
+                            <span style="font-size:20px;color:#ffac00;font-style:normal;">KYA Validation Pending</span>
+                        }
+                        else if (Model.StatusId == NAStatusId.Approved)
+                        {
+                            <span class="glyphicon glyphicon-ok" style="color:#00ff21;font-size:18px;"></span>
+                            <span style="font-size:20px;color:#00ff21;font-style:normal;">KYA Completed</span>
+                        }
+                        else if (Model.StatusId == NAStatusId.Rejected)
+                        {
+                            <span class="glyphicon glyphicon-remove" style="color:darkred;font-size:18px;"></span>
+                            <span style="font-size:20px;color:darkred;font-style:normal;">KYA Rejected</span>
+                        }
+                        else if (Model.StatusId == NAStatusId.CancelAfterTransfer)
+                        {
+                            <span class="glyphicon glyphicon-remove" style="color:#FF8C00;font-size:18px;"></span>
+                            <span style="font-size:20px;color:darkred;font-style:normal;">KYA Cancel After Transfer</span>
+                        }
+                        else
+                        {
+                            <span class="glyphicon glyphicon-remove" style="color:red;font-size:18px;"></span>
+                            <span style="font-size:20px;color:red;font-style:normal;">KYA Pending</span>
+                        }
+                    }
+
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="user-template" style="padding-top:30px;">
+        <div class="col-md-12" id="kya-form-content" style="border:solid #e2e3e4; border-width:0 1px 1px; margin-bottom:15px;">
+            <div class="row">
+                <input type="hidden" id="hdnOTP" />
+                @Html.HiddenFor(model => model.DepartmentId)
+                @Html.HiddenFor(m=>m.Id)
+                @Html.HiddenFor(model => model.StatusId, htmlAttributes: new { @id="hdn-status-id"})
+            </div>
+            <div class="row" style="margin-top:12px;">
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <label>Registration Id</label>
+                </div>
+                <div class="col-md-3">
+                    @Html.TextBoxFor(model => model.RegistrationId, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                </div>
+                @{
+                    if (Model.StatusId == NAStatusId.Approved)
+                    {
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("KYA Uid", new { id = "lbl-kyaid" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.KYAuid, new { @class = "form-control", @readonly = "readonly" })
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label>KYA Reference Code</label>
+                        </div>
+                        <div class="col-md-3">
+                            @Html.TextBoxFor(model => model.KYAReferenceCode, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                        </div>
+                    }
+                }
+            </div>
+            
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Allottee Name", new { id = "lbl-allottee-name" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextAreaFor(model => model.AllotteeName, new { @class = "form-control", @maxlength = "100", @readonly = "readonly", style="height:34px;" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Department", new { id = "lbl-department" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.Department, new { @class = "form-control", @maxlength = "100", @readonly = "readonly" })
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <label class="" id="lbl-mobile-no">Mobile No</label>
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.MobileNo, new { @class = "form-control", @maxlength = "12", @readonly = "readonly" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <label class="" id="lbl-email">Email</label>
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.Email, htmlAttributes: new { @class = "form-control", @maxlength = "45", @readonly = "readonly" })
+                </div>
+            </div>
+
+            @*<div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group col-individual">
+                    <label class="" id="lbl-aadhar-no">Aadhar No</label>
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group col-individual">
+                    @Html.TextBoxFor(model => model.AadharNo, new { @class = "form-control", @maxlength = "16" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group col-company">
+                    <label class="" id="lbl-roc">ROC</label>
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group col-company">
+                    @Html.TextBoxFor(model => model.ROC, new { @class = "form-control", @maxlength = "20" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <label class="required" id="lbl-department">Department</label>
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.Department, htmlAttributes: new { @class = "form-control", @maxlength = "45", @readonly = "readonly" })
+                </div>
+            </div>*@
+
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Correspond Address", htmlAttributes: new { @class = "" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextAreaFor(model => model.CorrespondAddress, new { @class = "form-control", @maxlength = "500", @readonly = "readonly" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Communication Address", htmlAttributes: new { @class = "" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextAreaFor(model => model.CommunicationAddress, new { @class = "form-control", @maxlength = "500", @readonly = "readonly" })
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                    @Html.Label("Allottee Type")
+                </div>
+                <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.AllotteeType, htmlAttributes: new { @class = "form-control", @maxlength = "20", @onchange = "ChangeInAllotteeType()", @readonly = "readonly" })
+                </div>
+                <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                    <label class="" id="lbl-pan">Allottee PAN</label>
+                </div>
+                <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.PAN, htmlAttributes: new { @class = "form-control", @onchange = "javascript:PanNumberChange()", @readonly = "readonly" })
+                </div>
+            </div>
+
+            <div class="row row-company">
+                <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                    @Html.Label("Authorized Signatory Mobile No", new { @class = "" })
+                </div>
+                <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.SignatoryMobileNo, htmlAttributes: new { @class = "form-control", @maxlength = "150", @readonly = "readonly" })
+                </div>
+                <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                    @Html.Label("Authorized Signatory Email Id", new { @class = "" })
+                </div>
+                <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.SignatoryEmail, htmlAttributes: new { @class = "form-control", @maxlength = "150", @readonly = "readonly" })
+                </div>
+            </div>
+
+            <div class="row row-company">
+                <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                    @Html.Label("Authorized Signatory Name", new { @class = "" })
+                </div>
+                <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.AuthorizedSignatory, htmlAttributes: new { @class = "form-control", @maxlength = "25", @readonly = "readonly" })
+                </div>
+                <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                    @Html.Label("GST No")
+                </div>
+                <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                    @Html.TextBoxFor(model => model.GSTNo, htmlAttributes: new { @class = "form-control", @maxlength = "150", @readonly = "readonly" })
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                    @Html.Label("Request Date")
+                </div>
+                <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                    @(Html.Kendo().DatePickerFor(m => m.SubmitDate).HtmlAttributes(new { style = "width:100%;", @readonly = "readonly" }))
+                </div>
+                @{
+                    if (Model.StatusId == NAStatusId.Rejected)
+                    {
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            @Html.Label("Reason For Rejection")
+                        </div>
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.OptionalAction, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                        </div>
+                    }
+                }
+            </div>
+
+            <div class="row">              
+                @{
+                    if (Model.Validator != null && Model.Validator != string.Empty)
+                    {
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            <label class="" >Validation Date</label>
+                        </div>
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                             @(Html.Kendo().DatePickerFor(m => m.ValidationDate).HtmlAttributes(new { style="width:100%;", @readonly="readonly"}))
+                        </div>
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            @Html.Label("Validator")
+                        </div>
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.Validator, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                        </div>
+                    }
+                }
+            </div>
+
+            @{
+                if (Model.StatusId == NAStatusId.Approved || Model.StatusId == NAStatusId.Rejected)
+                {
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            <label class="">Approval Date</label>
+                        </div>
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            @(Html.Kendo().DatePickerFor(m => m.ApprovalDate).HtmlAttributes(new { style = "width:100%;", @readonly = "readonly" }))
+                        </div>
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            @Html.Label("Approver")
+                        </div>
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.Approver, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                        </div>
+                    </div>
+                }
+            }
+
+            <div class="col-md-12 k-grid-content">
+                @(Html.Kendo().Grid<NA.PMS.Model.DocumentViewModel>()
+                .Name("gridPropertyDocument")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.DocumentName).Title("Document").Width(80).Filterable(false);
+                    columns.Bound(c => c.DocumentPath).Hidden(true);
+                    columns.Bound(c => c.DocumentPath).Title("View Document").Width(150).ClientTemplate("<a style = 'cursor:pointer;' onclick=javascript:OpenFile(this);>Click Here</a>").Width(80).Filterable(false);
+                })
+                .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                .DataSource
+                (
+                  dataSource => dataSource
+                      .Ajax().ServerOperation(true)
+                      .Model(model => model.Id(p => p.RegistrationId))
+                      .Read(read => read.Action("GetDocumentListByRegistrationId", "Authority", new { area = "Member" }).Data("AdditionalDocument"))
+                )
+                .HtmlAttributes(new { style = "margin-left:30px;margin-bottom:15px;border:solid #e2e3e4; border-width: 1px 1px 2px 1px ;" })
+                )
+
+                @(Html.Kendo().Window().Visible(false).Name("IDWindow").Width(920).Title("Document").Modal(true)
+                .Content(@<text><div style="width:100%" id="windowDiv"><iframe id="ifrmViewPdf" style="width:900px; height:500px;"></iframe></div></text>)
+                .Actions(actions => actions.Close())
+                )
+            </div>
+            <div class="row">
+                <div class="col-md-12 form-group" style="text-align:right">
+                    @{
+                        var user = Session["CurrentUser"] as CurrentUserDetail;
+                        if (user != null)
+                        {
+                            if (Model.ValidatorId != null)
+                            {
+                                if (Model.ApproverId == user.UserID)
+                                {
+                                    <input type="button" id="btn-approve-hod" value="Approve/Reject" class="btn btn-primary" style="min-width:100px; margin-right:12px;border-radius:0;" />
+                                }
+                            }
+                            else
+                            {
+                                <input type="button" id="btn-approve-asst" value="Validate" class="btn btn-primary" style="min-width:100px; margin-right:12px;border-radius:0;" />
+                            }
+                            <input type="button" id="btn-cancel" value="Back" class="btn btn-primary" style="width:100px; margin-right:12px;border-radius:0;" />
+                        }
+                    }
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="col-md-12" id="divPopupWindow" style="min-height:300px;background:url(/Content/Images/boxed-bg.jpg) repeat">
+    <div class="row form-group">
+        <div class="col-md-3 col-sm-12 col-xs-12 form-group">
+            <label>Service Status</label>
+        </div>
+        <div class="col-md-6">
+            @(Html.Kendo().DropDownListFor(model => model.StatusId)
+                .Filter("contains")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .OptionLabel(" -- Select --")
+                .DataSource(source =>
+                {
+                    source.Custom()
+                    .ServerFiltering(true)
+                    .ServerPaging(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    .Transport(transport => transport.Read(read => read.Action("GetStatusMasterAsDataSource", "Authority", new { area = "Member" })))
+                    .Schema(schema => schema.Data("Data").Total("Total"))
+                    .PageSize(100);
+                })
+                .Events(events => { events.Change("ChangeStatusIdEvent"); })
+                .HtmlAttributes(new { @class = "input-disabled", style = "width:100%; float:right;" })
+            )
+        </div>
+    </div>
+    <div class="row form-group row-approver">
+        <div class="col-md-3 col-sm-12 col-xs-12 form-group">
+            <label>Approver</label>
+        </div>
+        <div class="col-md-6">
+            @(Html.Kendo().DropDownListFor(model => model.ApproverId)
+                .Filter("contains")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .OptionLabel(" -- Select --")
+                .DataSource(source =>
+                {
+                    source.Custom()
+                    .ServerFiltering(true)
+                    .ServerPaging(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    .Transport(transport => transport.Read(read => read.Action("GetApproverIdList", "Authority", new { area = "Member" })))
+                    .Schema(schema => schema.Data("Data").Total("Total"))
+                    .PageSize(100);
+                })
+                    //.Events(events => { events.Change("ChangeDepartmentEvent"); })
+                .HtmlAttributes(new { @class = "input-disabled", style = "width:100%; float:right;" })
+            )
+        </div>
+    </div>
+    <div class="row form-group row-reason">
+        <div class="col-md-3 col-sm-12 col-xs-12 form-group">
+            <label>Reason</label>
+        </div>
+        <div class="col-md-6">
+            @(Html.Kendo().DropDownListFor(model => model.OptionalId)
+                .Filter("contains")
+                .DataTextField("Text")
+                .DataValueField("Text")
+                .OptionLabel(" -- Select --")
+                .DataSource(source =>
+                {
+                    source.Custom()
+                    .ServerFiltering(true)
+                    .ServerPaging(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    .Transport(transport => transport.Read(read => read.Action("GetOptionalReasonAsDataSource", "Authority", new { area = "Member" })))
+                    .Schema(schema => schema.Data("Data").Total("Total"))
+                    .PageSize(100);
+                })
+                    //.Events(events => { events.Change("ChangeDepartmentEvent"); })
+                .HtmlAttributes(new { @class = "input-disabled", style = "width:100%; float:right;" })
+            )
+        </div>
+    </div>
+    <div class="row" style="margin-top:25px;">
+        <div class="col-md-3 col-sm-12 col-xs-12 form-group">
+            <label>Remarks</label>
+        </div>
+        <div class="col-md-8 col-sm-12 col-xs-12 form-group">
+            @Html.TextAreaFor(model => model.Remarks, htmlAttributes: new { @class = "form-control" })
+            @*<input type="text" class="k-textbox" id="txtotp" maxlength="10" placeholder="enter otp here" style="width:100%" />*@
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-12 col-xs-12 form-group">
+
+        </div>
+        <div class="col-md-8 col-sm-12 col-xs-12 form-group">
+            <input type="button" class="k-button" id="btnCancelPopup" value="Cancel" style="width:100px" />
+            <input type="button" class="k-button" id="btnSubmitComment" value="submit" style="width:100px" />
+        </div>
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        $('#divPopupWindow').kendoWindow({
+            modal: true,
+            title: "Validate KYA Form",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "30%"
+            },
+            width: "50%", height: "35%"
+        });
+
+        $('#btn-approve-hod').click(function () {
+            $("#divPopupWindow").data("kendoWindow").center();
+            $("#divPopupWindow").data("kendoWindow").open();
+            $("#divPopupWindow").data("kendoWindow").pin();
+        });
+
+        $('#btn-approve-asst').click(function () {
+            $("#divPopupWindow").data("kendoWindow").center();
+            $("#divPopupWindow").data("kendoWindow").open();
+            $("#divPopupWindow").data("kendoWindow").pin();
+        });
+
+        $('#btnCancelPopup').click(function () {
+            $("#divPopupWindow").data("kendoWindow").close();
+        });
+
+        $('#btnSubmitComment').click(function () {
+            UpdateKYAStatus();
+        });
+
+        $("#btn-cancel").click(function () {
+            window.location.href = "/Member/Authority/ManageKYA";
+        });
+        //GetKYADetails();
+        ChangeInAllotteeType();
+
+        if ($('#hdn-status-id').val() == '@NAStatusId.Forwarded') {
+            $('#btn-approve-hod').val("Approve/Reject");
+        }
+        else if (($('#hdn-status-id').val() == '@NAStatusId.Approved') || ($('#hdn-status-id').val() == '@NAStatusId.Rejected')) {
+            $('#btn-approve-asst').css("display", "none");
+            $('#btn-approve-hod').css("display", "none");
+        }
+    });
+
+    function ChangeInAllotteeType() {
+        //alert("change in allottee type");
+        if ($('#AllotteeType').val() == "Company") {
+            $('#lbl-allottee-name').text("Name Of Organisation");
+            $('#lbl-mobile-no').text("Organisation's Contact No");
+            $('#lbl-email').text("Organisation's Email Id");
+            //$('#lbl-idproof').text("Organisation PAN/GST Reg.");
+            $('#lbl-pan').text("Organisation PAN")
+            $('.row-company').show();
+            //$('.col-company').show();
+            //$('.col-individual').css("display", "none");
+        }
+        else {
+            $('#lbl-allottee-name').text("Allottee Name");
+            $('#lbl-mobile-no').text("Allottee's Mobile No");
+            $('#lbl-email').text("Allottee's Email Id");
+            $('#lbl-idproof').text("Id Proof")
+            $('#lbl-pan').text("Allottee PAN")
+            $('.row-company').css("display", "none");
+            //$('.col-company').css("display", "none");
+            //$('.col-individual').show();
+        }
+        //$('#AllotteeIdFileType').data('kendoDropDownList').dataSource.read();
+        //$('#PlotOwnershipFileType').data('kendoDropDownList').dataSource.read();
+    }
+
+    function AdditionalDocument() {
+        return {
+            rid: $('#RegistrationId').val(),
+            id: $('#Id').val()
+            //oldRid: $("#hdnOldRId").val()
+            //RegistrationId: $('#RegistrationId').val()
+        };
+    }
+
+    function ChangeStatusIdEvent() {
+        if ($('#StatusId').val() == '') {
+            $('.row-approver').css("display", "none");
+            $('.row-reason').css("display", "none");
+        }
+        else if ($('#StatusId').val() == '@NAStatusId.Approved') {
+            $('.row-approver').css("display", "none");
+            $('.row-reason').css("display", "none");
+        }
+        else if (($('#StatusId').val() == '@NAStatusId.Rejected') || ($('#StatusId').val() == '@NAStatusId.Pending')) {
+            $('.row-approver').css("display", "none");
+            $('.row-reason').show();
+        }
+        else if ($('#StatusId').val() == '@NAStatusId.Forwarded') {
+            $('.row-approver').show();
+            $('.row-reason').css("display", "none");
+        }
+    }
+
+    function OpenFile(row) {
+        $("#windowDiv").empty();
+        var tr = $(row).parent().parent();
+        var link = $(tr).children("td:eq(1)").text();
+        $("#windowDiv").append($('<iframe src=' + link + ' style="width:900px; height:500px;"></iframe>'));
+        $("#IDWindow").data("kendoWindow").center();
+        $("#IDWindow").data("kendoWindow").open();
+    }
+
+    function UpdateKYAStatus() {
+        if (ValidateActionField()) {
+            var model = {
+                Id: $('#Id').val(),
+                StatusId: $('#StatusId').val(),
+                OptionalId: $('#OptionalId').val(),
+                ApproverId: $('#ApproverId').val(),
+                OptionalAction: $('#OptionalId').val()=="" ? "NA" : $('#OptionalId').data("kendoDropDownList").text(),
+                Remarks: $('#Remarks').val()
+            };
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ model: model }),
+                url: '/Member/Authority/ValidateKYAForm',
+                success: function (result) {
+                    if (result == '@ReturnType.None') {
+                        $('#divPopupWindow').data("kendoWindow").close();
+                        alertify.error("provider failed to update status.");
+                    }
+                    else if (result == '@ReturnType.Initiated') {
+                        $('#divPopupWindow').data("kendoWindow").close();
+                        alertify.error("Form can't be approved/reject but forward.");
+                    }
+                    else if (result == '@ReturnType.Updated') {
+                        $('#divPopupWindow').data("kendoWindow").close();
+                        alertify.error("KYA form already approved.");
+                    }
+                    else if (result == '@ReturnType.Approved') {
+                        $('#divPopupWindow').data("kendoWindow").close();
+                        alertify.success("Data approved successfully.");
+                    }
+                    else if (result == '@ReturnType.Rejected') {
+                        $('#divPopupWindow').data("kendoWindow").close();
+                        alertify.success("KYA rejected successfully.");
+                    }
+                    else if (result == '@ReturnType.Forwarded') {
+                        $('#divPopupWindow').data("kendoWindow").close();
+                        alertify.error("KYA already forwarded, either approve or reject it.");
+                    }
+                    else if (result == '@ReturnType.Validated') {
+                        $('#divPopupWindow').data("kendoWindow").close();
+                        alertify.success("KYA validated and forwarded to Approver.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again later");
+                }
+            });
+        }
+    }
+
+    function ValidateActionField() {
+        var flag = true;
+        if ($('#StatusId').val() == "") {
+            alertify.error("Select service status");
+            flag = false;
+        }
+        else if (($('#StatusId').val() == '@NAStatusId.Rejected') || ($('#StatusId').val() == '@NAStatusId.Pending')) {
+            if ($('#OptionalId').val() == "") {
+                alertify.error("Select reason for rejection/pending");
+                flag = false;
+            }
+            if ($('#Remarks').val() == "") {
+                alertify.error("Enter remarks for rejection/pending");
+                flag = false;
+            }
+        }
+        else if ($('#StatusId').val() == '@NAStatusId.Forwarded') {
+            if ($('#ApproverId').val() == "") {
+                alertify.error("Select Approver");
+                flag = false;
+            }
+        }
+        return flag;
+    }
+
+</script>

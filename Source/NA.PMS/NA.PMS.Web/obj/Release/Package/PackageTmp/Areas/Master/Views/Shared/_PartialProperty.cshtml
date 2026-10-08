@@ -1,0 +1,314 @@
+﻿@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+
+<style>
+    .left-padding {
+        padding-left: 15px;
+        padding-right: 15px;
+    }
+
+    .k-textbox {
+        width: 100%;
+    }
+
+    .form-group label {
+        padding-left: 0;
+    }
+</style>
+<div class="panel-body">
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group left-padding">
+            <label>Property Id</label>
+            @(Html.Kendo().ComboBox()
+                .Name("PPropertyId")
+                .DataTextField("text")
+                .DataValueField("id")                
+                .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => { transport.Read("GetPropertyIdList", "ManageProperty", new { area="Master"}); })
+                        .Schema(schema => { schema.Data("Data").Total("Total"); })
+                        .PageSize(100);
+                    }
+                 )
+                .Events(events => { events.Change("GetPropertyDetailsById"); })
+                .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group left-padding">
+            <label class="">Parent Property Id</label>
+            <input type="text" maxlength="10" id="PParentPropertyId" class="k-textbox" />
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group left-padding">
+            <label class="">Village Name</label>
+            @(Html.Kendo().ComboBox()
+                .Name("PVillageId")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .DataSource(source => source.Read(read => read.Action("GetVillageIdList", "ManageProperty", new { area = "Master" })))
+                .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group left-padding">
+            <label class="">Group Project Id</label>
+            <input type="text" maxlength="10" id="PGroupProjectId" class="k-textbox" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group left-padding">
+            <label>Sector</label>
+            @(Html.Kendo().ComboBox()
+                .Name("PSector")
+                .DataTextField("text")
+                .DataValueField("id")
+                .DataSource(source => source.Read(read => read.Action("GetAllSectorsForProperty", "ManageProperty", new { area = "Master" })))
+                .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group left-padding">
+            <label>Block</label>
+            @(Html.Kendo().ComboBox()
+                .Name("PBlock")
+                .DataTextField("text")
+                .DataValueField("id")
+                .DataSource(source => source.Read(read => read.Action("GetAllBlocksForProperty", "ManageProperty", new { area = "Master" })))
+                .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group left-padding">
+            <label class="lbl-authority">Plot No:</label>
+            <input type="text" maxlength="100" id="PPlotNo" class="k-textbox" />
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group left-padding">
+            <label>Registry Type</label>
+            <input type="text" maxlength="10" id="PRegistry" class="k-textbox" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group left-padding">
+            <label>Land Rate(sqm):</label>
+            <input type="text" maxlength="10" id="PLandRate" class="k-textbox" />
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group left-padding">
+            <label>Property Cost:</label>
+            <input type="text" maxlength="10" id="PPropertyCost" class="k-textbox" />
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group left-padding">
+            <label>Civil Cost:</label>
+            <input type="text" maxlength="10" id="PCivilCost" class="k-textbox" />
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group left-padding">
+            <label>Total Cost:</label>
+            <input type="text" maxlength="10" id="PTotalCost" class="k-textbox" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group left-padding">
+            <label>Floor Area:</label>
+            @(Html.Kendo().ComboBox()
+                .Name("PFloor")
+                .DataTextField("text")
+                .DataValueField("id")
+                .DataSource(source => source.Read(read => read.Action("GetAllFloorTypes", "ManageProperty", new { area="Master"})))
+                .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group left-padding">
+            <label>Covered Area:</label>
+            <input type="text" maxlength="10" id="PCoveredArea" class="k-textbox" />
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group left-padding">
+            <label>Actual Area:</label>
+            <input type="text" maxlength="10" id="PActualArea" class="k-textbox" />
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group left-padding">
+            <label>Total Area:</label>
+            <input type="text" maxlength="10" id="PTotalArea" class="k-textbox" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group left-padding">
+            <label class="">Khasra Number</label>
+            <input type="text" maxlength="100" id="PKhasraNo" class="k-textbox" />
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group left-padding">
+            <label class="">Khatoni Number</label>
+            <input type="text" maxlength="100" id="PKhatoniNo" class="k-textbox" />
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group left-padding">
+            <label class="">Latitude</label>
+            <input type="text" maxlength="100" id="PLatitude" class="k-textbox" />
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group left-padding">
+            <label class="">Longitude</label>
+            <input type="text" maxlength="100" id="PLongitude" class="k-textbox" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group left-padding">
+            <label>Allotment Money</label>
+            <input type="text" maxlength="10" id="PAllotmentMoney" class="k-textbox" />
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group left-padding">
+            <label>Earnest Money</label>
+            <input type="text" maxlength="10" id="PEarnestMoney" class="k-textbox" />
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group left-padding">
+            <label>Proccessing fee</label>
+            <input type="text" maxlength="10" id="PProccessingFee" class="k-textbox" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 form-group" style="text-align:right;">
+            <input type="button" id="btnUpdateProperty" value="Update" class="k-button" />
+            <input type="button" id="btnClearProperty" value="Clear" class="k-button" />
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#btnUpdateProperty').click(function () {
+            UpdatePropertyDetail();
+        });
+
+        $('#btnClearProperty').click(function () {
+            ClearPropertyDetails();
+        });        
+    });
+
+    function GetPropertyDetailsById() {
+        var pid = $('#PPropertyId').val();
+
+        if (pid != "") {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ propertyId: pid }),
+                url: '@Url.Action("GetPropertyDetailsById", "ManageProperty", new { area="Master"})',
+                success: function (result) {
+                    if (result != null) {
+                        $('#PParentPropertyId').val(result.ParentPropertyId);
+                        $('#PSector').data("kendoComboBox").value(result.SectorId);
+                        $('#PBlock').data("kendoComboBox").value(result.BlockId);
+                        $('#PFloor').data("kendoComboBox").value(result.FloorId);
+                        $('#PPlotNo').val(result.PlotNo);
+                        $('#PLandRate').val(result.PropertyRate);
+                        $('#PPropertyCost').val(result.PropertyCost);
+                        $('#PCivilCost').val(result.CivilCost);
+                        $('#PTotalCost').val(result.TotalPropertyCost);
+                        $('#PCoveredArea').val(result.CoveredArea);
+                        $('#PActualArea').val(result.ActualArea);
+                        $('#PTotalArea').val(result.TotalArea);
+                        $('#PRegistry').val(result.Registry);
+                        $('#PAllotmentMoney').val(result.AllotmentMoney);
+                        $('#PEarnestMoney').val(result.EarnestMoney);
+                        $('#PLongitude').val(result.Longitude);
+                        $('#PLatitude').val(result.Latitude);
+                        $('#PKhatoniNo').val(result.KhatoniNumber);
+                        $('#PKhasraNo').val(result.KhasraNumber);
+                        $('#PProccessingFee').val(result.ProcessingFee);
+                        $('#PGroupProjectId').val(result.GroupProjectId);
+                        $('#PVillageId').val(result.VillageId);
+                    }
+                    else {
+                        alertify.error("PropertyId Id doesn't exist");
+                    }
+                    @*if (result == '@ReturnType.NotExist') {
+                        alertify.error("PropertyId Id doesn't exist");
+                    }*@
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network Error. Please try again.");
+                }
+            });
+        }
+    }
+
+    function UpdatePropertyDetail() {
+        var Pmodel = {
+            PropertyId: $('#PPropertyId').val(),
+            ParentPropertyId: $('#PParentPropertyId').val(),
+            SectorId: $('#PSector').val(),
+            BlockId: $('#PBlock').val(),
+            PlotNo: $('#PPlotNo').val(),
+            FloorAreaId: $('#PFloor').val(),
+            PropertyRate: $('#PLandRate').val(),
+            PropertyCost: $('#PPropertyCost').val(),
+            CivilCost: $('#PCivilCost').val(),
+            TotalPropertyCost: $('#PTotalCost').val(),
+            CoveredArea: $('#PCoveredArea').val(),
+            ActualArea: $('#PActualArea').val(),
+            TotalArea: $('#PTotalArea').val(),
+            Registry: $('#PRegistry').val(),
+            AllotmentMoney: $('#PAllotmentMoney').val(),
+            EarnestMoney: $('#PEarnestMoney').val(),
+            Longitude: $('#PLongitude').val(),
+            Latitude: $('#PLatitude').val(),
+            KhatoniNumber: $('#PKhatoniNo').val(),
+            KhasraNumber: $('#PKhasraNo').val(),
+            ProcessingFee: $('#PProccessingFee').val(),
+            GroupProjectId: $('#PGroupProjectId').val(),
+            VillageId: $('#PVillageId').val()
+        };
+        $.ajax({
+            type: "post",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ model: Pmodel }),
+            url: '@Url.Action("UpdatePropertyDetail", "ManageProperty", new { area="Master"})',
+            success: function (result) {
+                if (result == '@ReturnType.Success') {
+                    alertify.success("Property detail updated successfully.");
+                    ClearPropertyDetails();
+                }
+                if (result == '@ReturnType.NotExist') {
+                    alertify.error("Property doesn't exist.");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Please try again.");
+            }
+        });
+    }
+
+    function ClearPropertyDetails() {
+        $('#PPropertyId').data("kendoComboBox").value('');
+        //$('#PParentProperty').data("kendoComboBox").value('');
+        $('#PSector').data("kendoComboBox").value('');
+        $('#PBlock').data("kendoComboBox").value('');
+        $('#PPlotNo').val('');
+        $('#PFloor').data("kendoComboBox").value('');
+        $('#PLandRate').val('');
+        $('#PPropertyCost').val('');
+        $('#PCivilCost').val('');
+        $('#PTotalCost').val('');
+        $('#PCoveredArea').val('');
+        $('#PActualArea').val('');
+        $('#PTotalArea').val('');
+        $('#PRegistry').val('');
+        $('#PAllotmentMoney').val('');
+        $('#PParentPropertyId').val('');
+        $('#PEarnestMoney').val('');
+        $('#PLongitude').val('');
+        $('#PLatitude').val('');
+        $('#PKhatoniNo').val('');
+        $('#PKhasraNo').val('');
+        $('#PProccessingFee').val('');
+        $('#PGroupProjectId').val('');
+        $('#PVillageId').data("kendoComboBox").value('');
+    }
+
+</script>

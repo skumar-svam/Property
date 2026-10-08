@@ -1,0 +1,120 @@
+﻿@model NA.PMS.Model.UsersModel
+
+@{
+    ViewBag.Title = "View User";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    .k-textbox {
+        width: 100%;
+    }
+</style>
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">View User</h1></div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">               
+                <h2 class="blck-heading">User Information</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                           @Html.Label("User Name")
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(u => u.empID, new { @class = "form-control", @disabled = "disabled", @readonly = "readonly" })
+                        </div>
+
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("First Name")
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(u => u.firstName, new { @class = "form-control", @disabled = "disabled", @readonly = "readonly" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Middle Name")
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(u => u.middleName, new { @class = "form-control", @disabled = "disabled", @readonly = "readonly" })
+                        </div>
+
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Last Name")
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(u => u.lastName, new { @class = "form-control", @disabled = "disabled", @readonly = "readonly" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Mobile")
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(u => u.mobile, new { @class = "form-control", @disabled = "disabled", @readonly = "readonly" })
+                        </div>
+
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Email")
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(u => u.email, new { @class = "form-control", @disabled = "disabled", @readonly = "readonly" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Department(s)")
+                        </div>
+                        <div class="col-md-10 col-sm-9 col-xs-12 form-group">
+                            @for (var i = 0; i < Model.depttIDs.Count(); i++)
+                            {
+                                @Html.Raw("&nbsp;&nbsp;&nbsp;")
+                                @Html.HiddenFor(u => u.depttIDs[i].id)
+                                @Html.CheckBoxFor(u => u.depttIDs[i].isChecked, new { @disabled = "disabled" })
+                                @Html.Raw("&nbsp;")
+                                @Html.DisplayFor(u => u.depttIDs[i].display)
+                            }
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Sub Department(s)", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-9 col-sm-9 col-xs-12 form-group">
+                            @for (var i = 0; i < Model.SubDepartmentList.Count(); i++)
+                            {
+                                @Html.Raw("&nbsp;&nbsp;&nbsp;")
+                                @Html.HiddenFor(u => u.SubDepartmentList[i].Id)
+                                @Html.CheckBoxFor(u => u.SubDepartmentList[i].IsChecked)
+                                @Html.Raw("&nbsp;")
+                                @Html.DisplayFor(u => u.SubDepartmentList[i].CheckBoxName)
+                            }
+                        </div>
+                    </div>
+
+                </div>
+                
+            </div>
+            <div class="box-button text-center">
+                <input type="button" id="btnBack" value="Back" class="btn btn-default" />
+                @*<input type="submit" value="Add" id="btnSubmit" class="btn btn-add" />*@
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#btnBack").click(function () {
+            window.location.href = '@Url.Action("ManageUsers", "ManageUsers")';
+        });
+
+    });
+</script>
+

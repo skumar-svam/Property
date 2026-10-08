@@ -1,0 +1,321 @@
+﻿@model NA.PMS.Model.BankAccountViewModel
+@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions
+
+<style>
+    .form-control{
+        padding:0;
+    }
+</style>
+
+@using (Html.BeginForm("SaveBankAccountDetail", "Authority", FormMethod.Post, new { enctype = "multipart/form-data", id = "BankAccountForm" }))
+{
+    <div class="row form-group">
+        <div class="col-md-12" id="ApplicationMenu" style="text-align:center">
+            <input type="radio" name="bank-action" value="AddBank" />Add Bank &nbsp;&nbsp;
+            <input type="radio" name="bank-action" value="UpdateBank" />Update Bank &nbsp;&nbsp;
+            <input type="radio" name="bank-action" value="AddBranch" />Add Branch &nbsp;&nbsp;
+            <input type="radio" name="bank-action" value="UpdateBranch" />Update Branch &nbsp;&nbsp;
+            <input type="radio" name="bank-action" value="UpdateAccountNo" />Update Account No &nbsp;&nbsp;
+            <input type="radio" name="bank-action" value="UpdateIFSCCode" />Update Account No
+        </div>
+        <div>
+            @Html.HiddenFor(model=>model.ActionType)
+            @Html.HiddenFor(model => model.BankId, htmlAttributes: new { @id="hdn-bank-id"})
+        </div>
+    </div>
+    <div class="row form-group" style="padding-right:30px;padding-left:30px;">
+        <div class="col-md-6">
+            <label>Bank</label>
+            @(Html.Kendo().DropDownListFor(model => model.BankId)
+                    .Name("window-bank-id")
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel(" --- select ---")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetBankAccountDetailAsDataSource", "Authority", new { area = "Member" }).Data("FilterActionType")))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(100);
+                    })
+                   .Events(events => { events.Change("ChangeInBankName2"); })
+                   .HtmlAttributes(new { @class = "input-disabled", style = "width:95%" })
+            )
+        </div>
+        <div class="col-md-6">
+            <label>Bank Name</label>
+            @Html.TextAreaFor(model => model.BankName, htmlAttributes: new { @class = "form-control", @maxlength="30" ,style = "height:30px; width:95%; float:right;" })
+        </div>
+    </div>
+    <div class="row form-group" style="padding-right:30px;padding-left:30px;">
+
+        <div class="col-md-6">
+            <label>Branch Address</label>
+            @(Html.Kendo().DropDownListFor(model => model.BranchId)
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel(" --- select ---")
+                    .CascadeFrom("window-bank-id")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetBankAccountDetailAsDataSource", "Authority", new { area = "Member" }).Data("FilterBankId")))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(100);
+                    })
+                   .Events(events => { events.Change("ChangeInBranchAddress"); })
+                    .HtmlAttributes(new { @class = "input-disabled", style = "width:95%" })
+            )
+        </div>
+        <div class="col-md-6">
+            <label>Branch Address</label>
+            @Html.TextAreaFor(model => model.BranchAddress, htmlAttributes: new { @class = "form-control", @maxlength = "30", style = "height:30px; width:95%; float:right;" })
+        </div>
+    </div>
+    <div class="row form-group" style="padding-right:30px;padding-left:30px;">
+        <div class="col-md-6">
+            <label>Account No</label>
+            @Html.TextBoxFor(model => model.AccountNo, htmlAttributes: new { @class = "form-control",@maxlength="21", style = "width:95%;" })
+        </div>
+        <div class="col-md-6">
+            <label>IFSC Code</label>
+            @Html.TextBoxFor(model => model.IFSCCode, htmlAttributes: new { @class = "form-control",@maxlength="21", style = "width:95%;float:right;" })
+        </div>
+    </div>
+    <div class="row form-group" style="text-align:right;padding-right:30px;">
+        <div class="col-md-12">
+            <input type="button" id="btn-request" class="k-button" value="Update" style="min-width:80px;" />
+            <input type="button" id="btn-clear" class="k-button" value="Clear" />
+        </div>
+    </div>
+}
+<script>
+    function FilterActionType() {
+        return { FilterType: "Bank" }
+    }
+    function FilterBankId() {
+        return {
+            FilterType: "Branch",
+            BankId: $('#window-bank-id').val()
+        }
+    }
+    $(document).ready(function () {
+
+        $('input[type="radio"][name="bank-action"]').on("change", function () {
+            var action = $('input[type="radio"][name="bank-action"]:checked').val();
+            if (action == "AddBank") {
+                $('#window-bank-id').data("kendoDropDownList").value('');
+                $('#window-bank-id').data("kendoDropDownList").enable(false);
+                $('#ActionType').val("AddBank");
+                $('#btn-request').val("Add Bank");
+                //$('#window-bank-id').data("kendoDropDownList").read();
+            }
+            else if (action == "UpdateBank") {
+                $('#window-bank-id').data("kendoDropDownList").enable(true);
+                $('#ActionType').val("UpdateBank");
+                $('#btn-request').val("Update Bank");
+                //$('#window-bank-id').data("kendoDropDownList").read();
+            }
+            else if (action == "AddBranch") {
+                $('#window-bank-id').data("kendoDropDownList").enable(true);
+                $('#ActionType').val("AddBranch");
+                $('#btn-request').val("Add Branch");               
+            }
+            else if (action == "UpdateBranch") {
+                $('#window-bank-id').data("kendoDropDownList").enable(true);
+                $('#ActionType').val("UpdateBranch");
+                $('#btn-request').val("Update Branch");               
+            }
+            else if (action == "UpdateAccountNo") {
+                $('#window-bank-id').data("kendoDropDownList").enable(true);
+                $('#ActionType').val("UpdateAccountNo");
+                $('#btn-request').val("Update Account No.");
+            }
+            else if (action == "UpdateIFSCCode") {
+                $('#window-bank-id').data("kendoDropDownList").enable(true);
+                $('#ActionType').val("UpdateIFSCCode");
+                $('#btn-request').val("Update IFSC Code");
+            }
+        });
+
+        $('#btn-request').click(function () {
+            SubmitBankAccountForm();
+        });
+
+        $('#btn-clear').click(function () {
+            ClearInputFields();
+        });
+    });
+
+    function ChangeInBankName2() {
+        var filterType = "Bank";
+        GetBankAccountDetail(filterType);
+    }
+
+    function ChangeInBranchAddress() {
+        var filterType = "Branch";
+        GetBankAccountDetail(filterType);
+    }
+
+    function GetBankAccountDetail(filterType) {
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ BankId: $('#window-bank-id').val(), BranchId: $('#BranchId').val(), FilterType: filterType }),
+            url: '/Member/Authority/GetBankAccountDetailById',
+            success: function (result) {
+                if (result != null) {
+                    if (result.FilterType == "Bank") {
+                        $('textarea#BankName').val(result.BankName);
+                    }
+                    else if (result.FilterType == "Branch") {
+                        $('textarea#BranchAddress').val(result.BranchAddress);
+                        $('#AccountNo').val(result.AccountNo);
+                        $('#IFSCCode').val(result.IFSCCode);
+                    }
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                //alertify.error("Network error, try again later");
+            }
+        });
+    }
+
+    function ValidateBankAccountForm() {
+        var flag = true;
+        var actiontype = $('input[type="radio"][name="bank-action"]:checked').val();
+        if (actiontype == "" || actiontype == undefined) {
+            flag = false;
+            alertify.error("Select Action type.");
+            return false;
+        }
+        else if (actiontype == "AddBank") {
+            if ($('#BankName').val().trim() == "") {
+                alertify.error("Enter Bank name.");
+                flag = false;
+            }
+        }
+        else if (actiontype == "UpdateBank") {
+            if ($('#window-bank-id').val() == "") {
+                alertify.error("Please select Bank");
+                flag = false;
+            }
+            else if ($('#BankName').val().trim() == "") {
+                alertify.error("Enter Bank name.");
+                flag = false;
+            }
+        }
+        else if (actiontype == "AddBranch") {
+            if ($('#window-bank-id').val() == "") {
+                alertify.error("Please select Bank");
+                flag = false;
+            }
+            else if ($('#BranchAddress').val().trim() == "") {
+                alertify.error("Enter Branch Address");
+                flag = false;
+            }
+        }
+        else if (actiontype == "UpdateBranch") {
+            if ($('#window-bank-id').val() == "") {
+                alertify.error("Please select Bank");
+                flag = false;
+            }
+            else if ($('#BranchId').val() == "") {
+                alertify.error("Select Branch Address");
+                flag = false;
+            }
+            else if ($('#BranchAddress').val().trim() == "") {
+                alertify.error("Enter Branch Address");
+                flag = false;
+            }
+        }
+        else if (actiontype == "UpdateAccountNo") {
+            if ($('#window-bank-id').val() == "") {
+                alertify.error("Please select Bank");
+                flag = false;
+            }
+            else if ($('#BranchId').val() == "") {
+                alertify.error("Select Branch Address");
+                flag = false;
+            }
+            else if ($('#AccountNo').val().trim() == "") {
+                alertify.error("Enter Account No");
+                flag = false;
+            }
+        }
+        else if (actiontype == "UpdateIFSCCode") {
+            if ($('#window-bank-id').val() == "") {
+                alertify.error("Please select Bank");
+                flag = false;
+            }
+            else if ($('#BranchId').val() == "") {
+                alertify.error("Select Branch Address");
+                flag = false;
+            }
+            else if ($('#IFSCCode').val().trim() == "") {
+                alertify.error("Enter IFSC Code");
+                flag = false;
+            }
+        }
+        return flag;
+    }
+
+
+    function SubmitBankAccountForm() {
+        var flag = ValidateBankAccountForm();
+        if (flag) {
+            var actionType = $('input[type="radio"][name="bank-action"]:checked').val();
+            $('#ActionType').val(actionType);
+            $('#hdn-bank-id').val($('#window-bank-id').val());
+            var formData = new FormData($('form#BankAccountForm').get(0));
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: false, // Not to set any content header
+                processData: false, // Not to process data
+                data: formData,
+                url: '/Member/Authority/SaveBankAccountDetail',
+                success: function (result) {
+                    if (result == '@ReturnType.Saved') {
+                        alertify.success("Data saved successfully.");
+                        $('.kendo-popup-window').data("kendoWindow").close();
+                        $('#gridBankAccount').data("kendoGrid").dataSource.read();
+                        ClearInputFields();
+                    }
+                    else if (result == '@ReturnType.Updated') {
+                        alertify.success("Data updated successfully.");
+                        $('.kendo-popup-window').data("kendoWindow").close();
+                        $('#gridBankAccount').data("kendoGrid").dataSource.read();
+                        ClearInputFields();
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    alertify.error("Network error, try again later");
+                }
+            });
+        }      
+    }
+
+    function ClearInputFields() {
+        $('#window-bank-id').data("kendoDropDownList").value('');
+        $('#BankName').val('');
+        $('#BranchAddress').val('');
+        $('#AccountNo').val('');
+        $('#BranchId').data("kendoDropDownList").value('');
+        $('#IFSCCode').val('');
+    }
+
+</script>
+

@@ -1,0 +1,294 @@
+﻿@model NA.PMS.Model.TransferModel
+@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions;
+@{
+    ViewBag.Title = "View Transfer Request";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .k-window {
+        width: 39%;
+        min-height: 200px;
+    }
+
+</style>
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">View Transfer Request</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 col-btn">
+                    <a href="#" id="btnComment" class="">View Comments</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <input type="hidden" id="hdnRid" value="@Model.RId" />
+                <h2 class="blck-heading">Select Registration Id</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Registration Id", htmlAttributes: new { @class = "required" })</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(m => m.RId)
+                                .Filter("contains")
+                                .DataTextField("text")
+                                .DataValueField("id")
+                                .OptionLabel("Select")
+                                .DataSource(source =>
+                                {
+                                    //source.Read(read =>
+                                    //{
+                                    //    read.Action("GetRIDsForTransfer", "PropertyRegistration");
+                                    //});
+                                    source.Custom()
+                                    .ServerFiltering(true)
+                                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                    .Transport(transport =>
+                                    {
+                                        transport.Read(read => read.Action("GetRIDsForTransferForView", "PropertyRegistration").Data("GetRid"));
+                                    }).Schema(schema =>
+                                    {
+                                        schema.Data("Data")
+                                        .Total("Total");
+                                    }).PageSize(100);
+                                })
+                                .HtmlAttributes(new { @class = "schemeForms", style = "width:100%" })
+                            )
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Property Number")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            <label id="lblPropNo" class="lbl-form-control"></label>
+                        </div>
+                    </div>
+                </div>
+                @*<input type="text" id="hdnTransfereeGenderName" value="@Model.TransfereeGenderName" />*@
+                <input type="hidden" id="hdnReqNo" value="@Model.ReqNo" />
+                <input type="hidden" id="hdnTransfereeGenderName" />
+                <h2 class="blck-heading" id="allottee_detail_header">Allottee Details</h2>
+                <div class="form-bx" id="allottee_detail_formbox">
+
+                    @{Html.RenderPartial("_TransferAllotteDetails");}
+
+                </div>
+
+                <h2 class="blck-heading" id="transfer_detail_header">Transfer Details</h2>
+                <div class="form-bx" id="transfer_detail_formbox">
+
+                    @{Html.RenderPartial("_TransferDetailsDocs");}
+
+                </div>
+
+                <h2 class="blck-heading" id="transfer_detail_header">Transferee Details</h2>
+                <div class="form-bx" id="transfer_detail_formbox">
+
+                    @{Html.RenderPartial("_ViewTransferee", Model);}
+
+                </div>
+
+            </div>
+            <div class="box-button text-center">
+                <input type="button" value="Approve" id="btnApprove" class="btn btn-default" />
+                <input type="button" value="Reject" id="btnReject" class="btn btn-default" />
+                <button type="button" id="bckbtn" value="back" class="btn btn-default" onclick="javascript: window.location = '@Url.Action("ManageTransfers_Approver", "PropertyRegistration")';">Back</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+@(Html.Kendo().Window().Name("commentsWindow").Title("Please Provide a Comment").Modal(true).Visible(false).Content(@<text>
+        <div class="col-md-12">
+            <div class="row" style="margin-top:20px;">
+                <div class="col-md-3">
+                    @Html.Label("Comment :")
+                </div>
+                <div class="col-md-9">
+                    @Html.TextAreaFor(m => m.ApproverComments, new { @maxlength = "500", style = "width:100%;height:80px;" })
+                </div>
+            </div>
+            <div class="row topSpace">
+                <div class="col-md-9 col-sm-12 col-md-offset-3">
+                    <input type="button" class="btn btn-add" id="btnSubmit" value="Submit" />
+                    <input type="button" class="btn btn-default closePopup" value="Close" />
+                </div>
+            </div>
+        </div>
+</text>)
+.Draggable()
+.Resizable()
+//.Width()
+.Actions(actions => actions.Close())
+)
+
+@(Html.Kendo().Window().Name("viewCommentsWindow").Title("View Comments").Modal(true).Visible(false).Content(@<text>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-3">
+                    @Html.Label("From :")
+                </div>
+                <div class="col-md-9">
+                    @Html.DisplayFor(model => model.From)
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    @Html.Label("Date :      ")
+                </div>
+                <div class="col-md-9">
+                    @Convert.ToString(string.Format("{0:dd/MM/yyyy}", Model.SubmittedDate))
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    @Html.Label("Comments : ")
+                </div>
+                <div class="col-md-8">
+                    @Html.TextAreaFor(model => model.Comment, new { @disabled = "disabled", @style = "width:100%;background:#ffffff;padding:0;margin:0;border:0;" })
+                </div>
+            </div>
+
+            <div class="row topSpace">
+                <div class="col-md-9 col-md-offset-3">
+                    <input type="button" class="btn btn-default closePopup" value="Close" />
+                </div>
+            </div>
+        </div>
+</text>)
+    .Draggable()
+    .Resizable()
+    //.Width(400)
+    .Actions(actions => actions.Close())
+)
+
+<script type="text/javascript">
+
+    function GetRid() {
+        return {
+            Rid: $("#hdnRid").val()
+        };
+    }
+
+    var i = 0;//To check whether "Approve" or "Reject" has been clicked.
+    $(document).ready(function () {
+        //Hide buttons according to Status.
+        var status = $("#Status").val();
+        //var ddlRid = $("#RId").data("kendoDropDownList");
+        //$("#RId").data("kendoDropDownList").enable(false);
+        $(".comGender").hide();
+
+        if ($("#hdnTransfereeGenderName").val() == '@NA.PMS.Common.Constants.genderCompany') {
+            $(".mfGender").hide();
+            //$("#lblCoNa").html(result.ApplicantName);
+            //$("#lblSiAu").html(result.RelationName);
+            $(".comGender").show();
+        }
+
+        $(".GPAField").hide();
+        var transTypeIsGPA = $("#TransferType").data("kendoDropDownList").value();
+        var intGPA = parseInt('@NA.PMS.Common.Constants.GPATransType');
+        if (transTypeIsGPA == intGPA) {
+            $(".GPAField").show();
+        }
+
+        if (status == '@NA.PMS.Common.AllotmentStatus.Cancelled') {
+            $("#btnApprove").hide();
+            $("#btnReject").hide();
+        }
+
+        else if (status == '@NA.PMS.Common.AllotmentStatus.Approved') {
+            $("#btnApprove").hide();
+            $("#btnReject").hide();
+        }
+
+        else if (status == '@NA.PMS.Common.AllotmentStatus.Rejected') {
+            $("#btnApprove").hide();
+            $("#btnReject").hide();
+        }
+
+        $("#btnApprove").click(function () {
+            $("#commentsWindow").data("kendoWindow").center();
+            $("#commentsWindow").data("kendoWindow").open();
+            i = 1;
+        });
+
+        $("#btnReject").click(function () {
+            $("#commentsWindow").data("kendoWindow").center();
+            $("#commentsWindow").data("kendoWindow").open();
+            i = 2;
+        });
+
+        $("#btnSubmit").click(function () {
+            var comments = $("#ApproverComments").val();
+            var ReqNo = $("#ReqNo").val();
+            if (i == 2) {
+                if ($("#ApproverComments").val() == "") {
+                    alertify.error("Please enter Comments.");
+                    return false;
+                }
+            }
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ comments: comments, intStatus: i, ReqNo: ReqNo }),
+                url: '/PropertyRegistration/SaveTransferApprovalStatus',
+                success: function (result) {
+                    if (result == true) {
+                        $("#commentsWindow").data("kendoWindow").close();
+                        $("#ApproverComments").val('');
+                        $("#btnApprove").hide();
+                        $("#btnReject").hide();
+                        alertify.success("Request saved successfully.");
+                    }
+                    else {
+                        alertify.error("Some error occured. Please try again later.");
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        });
+
+        $(".closePopup").click(function () {
+            $("#viewCommentsWindow").data("kendoWindow").close();
+            $("#commentsWindow").data("kendoWindow").close();
+        });
+
+        $("#btnComment").click(function () {
+            $("#viewCommentsWindow").data("kendoWindow").center();
+            $("#viewCommentsWindow").data("kendoWindow").open();
+        });
+
+        $("#bckbtn").click(function () {
+            var PendencyReq = '@Request.QueryString["pr"]';
+            if (PendencyReq == 'true') {
+                window.location.href = '@Url.Action("PendencyReport", "Report", new { Area = "Reports" })';
+            }
+            else { window.location.href = '@Url.Action("ManageTransfers_Approver", "PropertyRegistration")'; }
+        })
+    });
+
+    //Bug#248 - Resolved.
+    //Of no use but required because same Partial View is used which contains this event
+    function TransChange() {
+        var trans = $("#TransferType").val();
+        if (trans == '@NA.PMS.Common.Constants.GPATransType') {
+            alertify.error("Please fill GPA details before Transfer.");
+            $("#TransferType").data("kendoDropDownList").value("");
+            $("#TransferSubType").data("kendoDropDownList").value("");
+        }
+    }
+</script>

@@ -1,0 +1,750 @@
+﻿@model NA.PMS.Model.OnlineFormViewModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@using NA.PMS.Common;
+@{
+    ViewBag.Title = "Online Applications";
+    if (Session["CurrentUser"] != null)
+    {
+        var usr = (NA.PMS.Web.Models.CurrentUserDetail)HttpContext.Current.Session["CurrentUser"];
+        var role = usr.RoleMaster.RoleName;
+        if (role.ToLower() == NA.PMS.Common.Constants.Consultant.ToLower())
+        {
+            Layout = "~/Views/Shared/_LayoutOnline.cshtml";
+        }
+        else
+        {
+            Layout = "~/Views/Shared/_Layout.cshtml";
+        }
+    }
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+<style type="text/css">
+    [class*="col-"] {
+        /*padding-left: 15px;
+        padding-right: 15px;*/
+    }
+
+    .form-bx {
+        padding-left: 30px;
+    }
+</style>
+<div class="ManageAllotment">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Online Applications</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                <a href="#" id="btnRequest" class="" onclick="javascript: RegisterForm(event);">Register Form</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="row">
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <h2 class="blck-heading">Search Application</h2>
+                @Html.HiddenFor(m => m.ApplicationIdList)
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            @Html.Label("Scheme Name")
+                            @(Html.Kendo().DropDownListFor(model => model.SchemeId)
+                                      .Name("SchemeId")
+                                      .DataTextField("Text")
+                                      .DataValueField("Id")
+                                      .OptionLabel(" -- Please Select --")
+                                      .DataSource(source => source.Read(read => read.Action("GetSchemeList", "Application")))
+                                      .Enable(true)
+                                      .AutoBind(true)
+                                      .Filter("contains")
+                                      .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" })
+                                      .Events(e => e.Change("ChangeDeptEvent"))
+                            )
+                        </div>
+                        <div class="col-md-3 col-sm-6 col-xs-12 col-md-offset-1 form-group">
+                            @Html.Label("Department")
+                            @(Html.Kendo().DropDownListFor(m => m.DepartmentId)
+                                .Name("DepartmentId")
+                                .Filter("contains")
+                                .DataTextField("Text")
+                                .DataValueField("Id")
+                                .OptionLabel(" -- Please Select --")
+                                .CascadeFromField("SchemeId")
+                                .DataSource(source =>
+                                {
+                                    source.Custom()
+                                   .ServerFiltering(true)
+                                   .ServerPaging(true)
+                                   .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                   .Transport(transport => transport.Read(read => read.Action("GetDepartmentListBySchemeSearch", "Application").Data("FilterSchemeId")))
+                                   .Schema(schema => schema.Data("Data").Total("Total"))
+                                   .PageSize(100);
+                                })
+                                .CascadeFrom("SchemeId")
+                                .Events(events => { events.Change("ChangeDeptEvent"); })
+                                .HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" })
+                            )
+                        </div>
+                        @{ if (Model.UserRoleType == NA.PMS.Common.Constants.Admin)
+                         {
+                            <div class="col-md-2 col-sm-6 col-xs-12 col-md-offset-1 form-group">
+                                @Html.Label("Payment Status")<br />
+                                <label>@Html.RadioButtonFor(m => m.PayType, "1", new { @checked = true, @id = "PayType_all" }) All</label>
+                                <label>@Html.RadioButtonFor(m => m.PayType, "2", new { @id = "" }) Paid</label>
+                            </div>
+                         }
+                        }
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group" style="text-align:right">
+                            @Html.Label("")<br />
+                            <input type="button" id="btnSearch" class="btn btn-add" value="Search" />
+                            <input type="button" id="btnClear" class="btn btn-default" value="Clear" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="k-grid-content">
+
+        @{ if (Model.UserRoleType == NA.PMS.Common.Constants.Admin || Model.UserId==1222)
+         {
+            <div class="row">
+                <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                    @Html.Label("Application Process:")
+                </div>
+                <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                    <select class="form-control" id="DpApplicationProcess">
+                        <option value="0">Select Service</option>
+                        <option value="@strOnlineApplicationProcess.MoveToOSD">Move to OSD</option>
+                        <option value="@strOnlineApplicationProcess.Scrutiny">Scrutiny</option>
+                        <option value="@strOnlineApplicationProcess.ApprovalCEO">For approval of CEO</option>
+                        <option value="@strOnlineApplicationProcess.Draw">Draw</option>
+                        <option value="@strOnlineApplicationProcess.AllotmentProcess">Allotment Process</option>
+                    </select>
+                </div>
+                <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                    <input type="button" id="btnAddService" class="btn btn-add pull-right" value="Proceed" />
+                </div>
+            </div>
+            <br />
+            @( Html.Kendo().Grid<NA.PMS.Model.OnlineFormViewModel>()
+            .Name("gridOnlineApplicationDetail")
+            .Excel(excel => excel.AllPages(true).Filterable(true).FileName("OnlineApplications.xlsx"))
+            .ToolBar(toolsExcel => toolsExcel.Excel())
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.ApplicationFormId).Hidden(true);
+                columns.Bound(c => c.TotalAmount).Hidden(true);
+                columns.Bound(c => c.ApplicationFormId).Title("").Width(40).ClientTemplate("#if(ChallanStatus=='Paid' || ChallanStatus=='PC Paid'){#<input  type='checkbox' class='IsAppProcess' id='c_#= ApplicationFormId #' />#}else{# #}#").Filterable(false);
+                columns.Bound(c => c.ApplicationFormId).ClientTemplate("<a target='_blank' href='" + "/Online/Application/FormDetail/#= EncryptedFormId #'>#= ApplicationFormId #</a>").Title("Application ID").Width(150).ClientFooterTemplate("Total Count: #=count#");
+                columns.Bound(c => c.FirstName).Title("Applicant");
+                columns.Bound(c => c.AreaRange).Title("Area");
+                columns.Bound(c => c.TotalAmount).Title("Amount").ClientTemplate("#if(TotalAmount!=null){# #=TotalAmount# #}else{# 0 #}#").ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+                columns.Bound(c => c.ApplicantType).Title("Applicant Type");
+                columns.Bound(c => c.SubmitDate).Title("Form Submittion Date").Format("{0:dd-MM-yyyy}");
+                columns.Bound(c => c.AmountPaidDate).Title("Payment/Challan Date").ClientTemplate("#if(AmountPaidDate!=null){# #=kendo.toString(AmountPaidDate, 'dddd, MMM dd, yyyy')# #}else{# -- #}#");
+                columns.Bound(c => c.ChallanBank).Title("Bank(RTGS)");
+                // columns.Bound(c => c.IsPaid).Title("Payment Mode");
+                columns.Bound(c => c.PayType).Title("Payment Mode");
+                columns.Bound(c => c.ProcessType).Title("App Process");
+                //else if(ChallanStatus=='SWP Paid'){# SWP Paid #}else if(ChallanStatus=='SWP Not Paid'){# <a onclick='javascript:UpdateSWPStatus(this);'><center><span value='SWP Not Paid' class='glyphicon glyphicon-edit text-danger'>SWP Not Paid</span></center></a> #}
+                columns.Bound(c => c.ChallanStatus).Title("Challan/Online Payment Status").ClientTemplate("#if(ChallanStatus=='Challan Updated'){# <a onclick='javascript:UpdateChallanStatus(this);'><center><span value='Challan Updated' class='glyphicon glyphicon-edit text-danger'>Challan Updated</span></center></a> #}else if(ChallanStatus=='Challan Generated'){# Challan Generated #}else if(ChallanStatus=='Paid'){# Paid #}else if(ChallanStatus=='Paid'){# Paid #}else if(ChallanStatus=='Not Paid'){# Not Paid #}else if(ChallanStatus=='PC Paid'){# PC Paid #}else if(ChallanStatus=='PC Not Paid'){# <a onclick='javascript:UpdatePreviousChallanStatus(this);'><center><span value='PC Not Paid' class='glyphicon glyphicon-edit text-danger'>PC Not Paid</span></center></a> #}else if(ChallanStatus=='SWP Paid'){# SWP Paid #}else if(ChallanStatus=='SWP Not Paid'){# <a onclick='javascript:UpdateSWPStatus(this);'><center><span value='SWP Not Paid' class='glyphicon glyphicon-edit text-danger'>SWP Not Paid</span></center></a> #}else{# -- #}#").Filterable(true);
+                columns.Bound(c => c.IsDeleted).ClientTemplate("#if(IsDeleted=='Accepted'){# <a onclick='javascript:RejectApplication(this);'><center><span value='Reject Application' class='glyphicon glyphicon-remove text-danger'></span></center></a> #}else{# Rejected #}#").Title("Reject").Width(80).Filterable(false);
+                //columns.Bound(c => c.SubmitDate).ClientTemplate("#if(ChallanStatus=='PC Paid' || ChallanStatus=='SWP Paid' || ChallanStatus=='Paid'){# <a onclick='javascript:UpdateApplicationDetails(this);'><center><span value='Allotment Process' class='glyphicon glyphicon-edit text-danger'>Allotment Process</span></center></a> #}else{# -- #}#");
+                columns.Bound(c => c.SubmitDate).ClientTemplate("<a onclick='javascript:UpdateApplicationDetails(this);'><center><span value='Allotment Process' class='glyphicon glyphicon-edit text-danger'>Allotment Process</span></center></a>");
+            })
+            .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+            .DataSource
+            (
+                dataSource => dataSource
+                .Ajax()
+                .Model(model => model.Id(p => p.ApplicationFormId))
+                .ServerOperation(true)
+                    //.Group(group => group.Add(m => m.ApplicationFormId))
+                .Group(group => group.Add(m => m.SchemeName))
+                .Read(read => read.Action("GetOnlineApplications", "Application").Data("FilterData"))
+                .Sort(s => s.Add("ApplicationFormId").Descending())
+                .PageSize(10)
+                .Aggregates(aggregates =>
+                {
+                    aggregates.Add(p => p.ApplicationFormId).Count();
+                    aggregates.Add(p => p.TotalAmount).Sum();
+                })
+            ))
+         }
+         else
+         {
+            @(Html.Kendo().Grid<NA.PMS.Model.OnlineFormViewModel>()
+            .Name("gridOnlineApplicationDetail")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.ApplicationFormId).Hidden(true);
+                columns.Bound(c => c.TotalAmount).Hidden(true);
+                columns.Bound(c => c.ApplicationFormId).ClientTemplate("<a target='_blank' href='" + "/Online/Application/FormDetail/#= EncryptedFormId #'>#= ApplicationFormId #</a>").Title("Application ID").Width(150).ClientFooterTemplate("Total Count: #=count#").Title("Application ID").Width(150);
+                columns.Bound(c => c.FirstName).Title("Applicant");
+                columns.Bound(c => c.AreaRange).Title("Area").Width(110);
+                columns.Bound(c => c.TotalAmount).Title("Amount").ClientTemplate("#if(TotalAmount!=null){# #=TotalAmount# #}else{# 0 #}#").ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>").Width(120);
+                columns.Bound(c => c.ApplicationFormType).Title("Form Type").Width(120);
+                columns.Bound(c => c.ExpansionType).Title("Expansion Type").Width(140);
+                columns.Bound(c => c.ApplicantType).Title("Applicant Type").Width(120);
+                //columns.Bound(c => c.SubmitDate).Title("Form Submittion Date").Format("{0:dd-MM-yyyy}");
+                columns.Bound(c => c.AmountPaidDate).Title("Payment/Challan Date").ClientTemplate("#if(AmountPaidDate!=null){# #=kendo.toString(AmountPaidDate, 'dddd, MMM dd, yyyy')# #}else{# -- #}#").Width(200);
+                //columns.Bound(c => c.PayType).Title("Payment Mode");
+                // columns.Bound(c => c.ChallanStatus).Title("Challan/Online Payment Status").ClientTemplate("#if(ChallanStatus=='Challan Updated'){# <center><span value='Challan Updated' class=''>Challan Updated</span></center> #}else if(ChallanStatus=='Challan Generated'){# Challan Generated #}else if(ChallanStatus=='Paid'){# Paid #}else if(ChallanStatus=='Paid'){# Paid #}else if(ChallanStatus=='Not Paid'){# Not Paid #}else{# -- #}#").Filterable(false).Sortable(false);
+
+            })
+            .Sortable()
+            .Filterable()
+            .Resizable(resize => resize.Columns(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+            .DataSource
+            (
+                dataSource => dataSource
+                .Ajax()
+                .Model(model => model.Id(p => p.ApplicationFormId))
+                .ServerOperation(true)
+                .Group(group => group.Add(m => m.SchemeName))
+                    //.Sort(sort => sort.Add("SubmitDate").Descending())
+                .Read(read => read.Action("GetOnlineApplications", "Application").Data("FilterData"))
+                .Sort(s => s.Add("ApplicationFormId").Descending())
+                .PageSize(10)
+                .Aggregates(aggregates =>
+                {
+                    aggregates.Add(p => p.ApplicationFormId).Count();
+                    aggregates.Add(p => p.TotalAmount).Sum();
+                })
+            ))
+         }
+        }
+    </div>
+</div>
+<div id="divChallanDetails" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="padding-top:40px;">
+    <div class="modal-dialog" style="width: 60%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title"><b>Challan Transaction Details - [ <label id="FormId_Challan_trans_Id" class=""></label> ]</b></h4>
+            </div>
+            <div class="modal-body" style="overflow:auto; height:auto;">
+                <input type="hidden" id="FormId_Challan_trans" />
+                <input type="hidden" id="Amount_Challan_trans" />
+                <input type="hidden" id="filepath_Challan_trans" />
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                            @Html.Label("Challan Bank Name:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                            <label id="challanBankName" class="form-control"></label>
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                            @Html.Label("Transaction ID:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                            <label id="transactionId" class="form-control"></label>
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                            @Html.Label("Submitted Date:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                            <label id="submittedDate" class="form-control"></label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                            @Html.Label("UTR No:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                            <label id="utrNo" class="form-control"></label>
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                            <a id="challan_reciept" onclick="javascript:ShowChallanDocument()">View Uploaded Document</a>
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="submit" id="btnUpdateChallan_trans" class="k-button" data-dismiss="modal">Update Status</button>
+                <button type="button" id="btnCancel_ChallanTrans" class="k-button">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*Previous Challan*@
+<div id="divPreviousChallanDetails" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="padding-top:40px;">
+    <div class="modal-dialog" style="width: 60%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title"><b>Previous Challan Transaction Details - [ <label id="FormId_Previous_Challan_trans_Id" class=""></label> ]</b></h4>
+            </div>
+            <div class="modal-body" style="overflow:auto; height:auto;">
+                <input type="hidden" id="FormId_Previous_Challan_trans" />
+                <input type="hidden" id="Amount_Previous_Challan_trans" />
+                <input type="hidden" id="filepath_Previous_Challan_trans" />
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                            @Html.Label("Trans ID:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                            <label id="AppTransactionId" class="form-control"></label>
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                            @Html.Label("Trans ID/Challan No:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                            <label id="PreviousChallanTransactionId" class="form-control"></label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                            @Html.Label("Bank Name:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                            <label id="PreviousChallanBankName" class="form-control"></label>
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                            @Html.Label("Amount:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                            <label id="PreviousChallanAmount" class="form-control"></label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                            @Html.Label("Submitted Date:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                            <label id="PreviousChallanSubmittedDate" class="form-control"></label>
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                            <a id="challan_reciept" onclick="javascript:ShowPreviousChallanDocument()">View Uploaded Document</a>
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="submit" id="btnUpdatePreviousChallan_trans" class="k-button" data-dismiss="modal">Update Status</button>
+                <button type="button" id="btnCancel_PreviousChallanTrans" class="k-button">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="divDocumentView" style="overflow:hidden">
+    <div class="row">
+        <div class="col-md-12 no-margin no-padding" id="divPageView" style="overflow:hidden">
+            <iframe id="ifrmViewPdf"></iframe>
+        </div>
+    </div>
+</div>
+
+<div id='divAssineRequetApproval' class='adminfeediv'>
+    <div class="container-fluid">
+        <div class="row topSpace">
+            <div class="col-md-3 col-md-offset-1">
+                @Html.Label("Assign To: ")
+            </div>
+            <div class="col-md-6">
+                @(Html.Kendo().DropDownListFor(model => model.User)
+                .DataTextField("text")
+                .DataValueField("id")
+                .Filter("contains")
+                .OptionLabel("Select")
+                .DataSource(source =>
+                {
+                    source.Read(read =>
+                    {
+                        read.Action("GetAssineTo", "Allotment", new { area = "Property" });
+                    });
+                })
+                .HtmlAttributes(new { style = "width:100%" })
+                )
+                @Html.ValidationMessageFor(model => model.User)
+            </div>
+        </div>
+        <div class="row topSpace bottomSpace">
+            <div class="col-md-6 col-md-offset-4">
+                <button type='submit' id="btnRequetForApproval" class='btn btn-default' value='Save'>Submit</button>
+                <button type='button' class='btn btn-default' value='Cancel' onclick="CloseCommnetPopUpForApproval();">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+<br />
+<br />
+<script type="text/javascript">
+    var checkedIDs = [];
+    $(document).ready(function () {
+        $('#divDocumentView').kendoWindow({
+            modal: true,
+            title: "Document",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "15%"
+            },
+            width: "70%", height: "80%"
+        });
+
+        $("#divAssineRequetApproval").kendoWindow({
+            modal: true,
+            title: "Assign Request to Approver",
+            visible: false,
+            //width: "30%"
+        });
+
+        $(function () {
+            $('#gridOnlineApplicationDetail').on('change', '.IsAppProcess', function () {
+                var checked = $(this).is(':checked');
+                var grid = $('#gridOnlineApplicationDetail').data().kendoGrid;
+                var dataItem = grid.dataItem($(this).closest('tr'));
+                if (checked == true) {
+                    checkedIDs.push({ 'text': dataItem.ApplicationFormId, 'id': dataItem.ApplicationFormId.toString() });
+                }
+                else {
+                    var arr = checkedIDs.map(function (o) { return o.id; });
+                    var i = arr.indexOf(dataItem.ApplicationFormId);
+                    checkedIDs.splice(i, 1);
+                }
+                var arr = checkedIDs.map(function (o) { return parseInt(o.id); });
+                $('#ApplicationIdList').val(arr);
+            });
+        });
+    });
+
+    $("#btnAddService").click(function () {
+        OpenAssineRequetApprovalPopUp();
+    });
+
+    $("#btnRequetForApproval").click(function () {
+        var DpVal = $('#DpApplicationProcess').val();
+        if (DpVal != "" && DpVal != null) {
+            UpdateApplicationProcess(DpVal);
+        } else {
+            CloseCommnetPopUpForApproval();
+            alertify.error("Please select application process.");
+        }
+    });
+
+    function UpdateApplicationProcess(Type) {
+        var optionTexts = checkedIDs.map(function (o) { return parseInt(o.id); });;
+        var processStage = Type;
+
+        var userVal = $("#User").val();
+
+        if (userVal == '' || userVal == null) {
+            CloseCommnetPopUpForApproval();
+            alertify.error("Please select a User.");
+            return false;
+        }
+
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ ProcessType: processStage, ApplicationIdList: optionTexts, User: userVal }),
+            url: '/Online/Application/UpdateApplicationProcess',
+            success: function (result) {
+                if (result != null) {
+                    if (result.ReturnType = 200) {
+                        CloseCommnetPopUpForApproval();
+                        alertify.success(result.Message);
+                        alertify.success("Online application send for approval.");
+                    } else { CloseCommnetPopUpForApproval(); }
+                } else { CloseCommnetPopUpForApproval(); }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                alertify.error("Some Error in save database.");
+            }
+        });
+    }
+
+    $('input:radio[name=PayType]').on('change', function () {
+        $("#gridOnlineApplicationDetail").data("kendoGrid").dataSource.read();
+    });
+
+    function OpenAssineRequetApprovalPopUp() {
+        var win = $("#divAssineRequetApproval").data("kendoWindow");
+        win.center();
+        win.open();
+    }
+
+    function CloseCommnetPopUpForApproval() {
+        var win = $("#divAssineRequetApproval").data("kendoWindow");
+        win.close();
+    }
+
+    function RegisterForm(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("RegisterForm", "Application")';
+    }
+
+    function FilterSchemeId() {
+        return { schemeId: $("#SchemeId").val() };
+    }
+
+    function FilterData() {
+        var ApplicationModal = {
+            SchemeId: parseInt($("#SchemeId").val()),
+            DepartmentId: parseInt($("#DepartmentId").val()),
+            PayType: $('input[name=PayType]:checked').val()
+        };
+        return ApplicationModal;
+    }
+
+    function RejectApplication(row) {
+        var tr = $(row).parent().parent();
+        var ApplicationId = $(tr).children("td:eq(1)").text();
+        if (confirm("Are you sure? You want to reject this application.")) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ AppId: ApplicationId }),
+                url: '/Online/Application/RejectApplication',
+                success: function (result) {
+                    if (result == true) {
+                        alertify.success("Application rejected successfully.");
+                    } else { alertify.error("Application not rejected."); }
+                    $("#gridOnlineApplicationDetail").data("kendoGrid").dataSource.read();
+                },
+                error: function (obj) {
+                }
+            });
+        }
+    }
+
+    function UpdateApplicationDetails(row) {
+        var tr = $(row).parent().parent();
+        var ApplicationId = $(tr).children("td:eq(1)").text();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ FormId: ApplicationId }),
+            url: '/Online/Application/AddToAllotment',
+            success: function (result) {
+                if (result == '@ReturnType.Updated') {
+                    alertify.success("Online application added to application detail.");
+                }
+                else if (result == '@ReturnType.NotPaid') {
+                    alertify.error("Application Detail updated but payment not.");
+                }
+                else if (result == '@ReturnType.Exist') {
+                    alertify.error("Application Detail already exist.");
+                }
+                else {
+                    alertify.error("Some Error in save database.");
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                alertify.error("Some Error in save database.");
+            }
+        });
+    }
+
+    function UpdateChallanStatus(row) {
+        $("#FormId_Challan_trans").val('');
+        $("#Amount_Challan_trans").val('');
+        $("#filepath_Challan_trans").val('');
+        var tr = $(row).parent().parent();
+        var ApplicationId = $(tr).children("td:eq(1)").text();
+        var Amount = $(tr).children("td:eq(2)").text();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ ApplicationFormId: ApplicationId }),
+            url: '/Online/Payment/GetChallanDetailsTrans',
+            success: function (result) {
+                $("#challanBankName").html(result.BankName);
+                $("#transactionId").html(result.TransactionId);
+                var ModDate = (new Date(parseInt(result.modifiydate.replace("/Date(", "").replace(")/", ""), 10))).toString("dd/MM/yyyy");
+                $("#submittedDate").html(ModDate);
+                $("#FormId_Challan_trans_Id").html(ApplicationId);
+                $("#utrNo").html(result.TransactionKey);
+
+                $("#FormId_Challan_trans").val(ApplicationId);
+                $("#Amount_Challan_trans").val(Amount);
+                $("#filepath_Challan_trans").val(result.docPath);
+                $("#divChallanDetails").modal('show');
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                alertify.error("Some Error in save database.");
+            }
+        });
+    }
+
+    function UpdatePreviousChallanStatus(row) {
+        $("#FormId_Previous_Challan_trans").val('');
+        $("#Amount_Previous_Challan_trans").val('');
+        $("#filepath_Previous_Challan_trans").val('');
+        var tr = $(row).parent().parent();
+        var ApplicationId = $(tr).children("td:eq(1)").text();
+        var Amount = $(tr).children("td:eq(2)").text();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ ApplicationFormId: ApplicationId }),
+            url: '/Online/Payment/GetPreviousChallanDetailsTrans',
+            success: function (result) {
+                $("#PreviousChallanBankName").html(result.IssuingBank);
+                $("#AppTransactionId").html(result.TransactionId);
+                $("#PreviousChallanTransactionId").html(result.TransactionKey);
+                var ModDate = (new Date(parseInt(result.EntryDate.replace("/Date(", "").replace(")/", ""), 10))).toString("dd/MM/yyyy");
+                $("#PreviousChallanSubmittedDate").html(ModDate);
+                $("#FormId_Previous_Challan_trans_Id").html(ApplicationId);
+                $("#PreviousChallanAmount").html(result.Amount);
+                $("#FormId_Previous_Challan_trans").val(ApplicationId);
+                $("#Amount_Previous_Challan_trans").val(Amount);
+                $("#filepath_Previous_Challan_trans").val(result.docPath);
+                $("#divPreviousChallanDetails").modal('show');
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                alertify.error("Some Error in save database.");
+            }
+        });
+    }
+
+    function ShowChallanDocument() {
+        $("#divDocumentView").empty();
+        var link = $("#filepath_Challan_trans").val();
+        $("#divDocumentView").append($('<iframe src=' + link + ' style="width:100%; height:100%;"></iframe>'));
+        $("#divDocumentView").data("kendoWindow").center();
+        $("#divDocumentView").data("kendoWindow").open();
+    }
+
+    function ShowPreviousChallanDocument() {
+        $("#divDocumentView").empty();
+        var link = $("#filepath_Previous_Challan_trans").val();
+        $("#divDocumentView").append($('<iframe src=' + link + ' style="width:100%; height:100%;"></iframe>'));
+        $("#divDocumentView").data("kendoWindow").center();
+        $("#divDocumentView").data("kendoWindow").open();
+    }
+
+    function ChangeDeptEvent() {
+        $("#gridOnlineApplicationDetail").data("kendoGrid").dataSource.read();
+    }
+
+    $("#btnCancel_ChallanTrans").click(function () {
+        $("#divChallanDetails").modal('hide');
+    });
+
+    $("#btnCancel_PreviousChallanTrans").click(function () {
+        $("#divPreviousChallanDetails").modal('hide');
+    });
+
+    $("#btnSearch").click(function () {
+        $("#gridOnlineApplicationDetail").data("kendoGrid").dataSource.read();
+    });
+
+    $('#btnClear').click(function () {
+        $('#SchemeId').data('kendoDropDownList').value('');
+        $('#DepartmentId').data('kendoDropDownList').value('');
+        $('#PayType_all').prop("checked", true);
+        $("#gridOnlineApplicationDetail").data("kendoGrid").dataSource.read();
+    });
+
+    $('#btnUpdateChallan_trans').click(function () {
+        var ApplicationId = $("#FormId_Challan_trans").val();
+        var Amount = $("#Amount_Challan_trans").val();
+        var PaymentType = '@Constants.offlineApplicationPayment';
+        if (confirm("Are you sure? You want to update challan status of this application.")) {
+            UpdateAppStatus_AjaxRequest(ApplicationId, PaymentType, Amount);
+        } else {
+            event.preventDefault();
+        }
+    });
+
+    $('#btnUpdatePreviousChallan_trans').click(function () {
+
+        var ApplicationId = $("#FormId_Previous_Challan_trans").val();
+        var Amount = $("#Amount_Previous_Challan_trans").val();
+        var PaymentType = '@Constants.offlinePrevoiusChallanApplicationPayment';
+        if (confirm("Are you sure? You want to update status of this application paid by previous challan.")) {
+
+            UpdateAppStatus_AjaxRequest(ApplicationId, PaymentType, Amount);
+        }
+        else {
+            event.preventDefault();
+        }
+    });
+
+    function UpdateSWPStatus(row) {
+        var tr = $(row).parent().parent();
+        var ApplicationId = $(tr).children("td:eq(1)").text();
+        var Amount = $(tr).children("td:eq(2)").text();
+        var PaymentType = '@Constants.singleWindowPortalApplicationPayment';
+
+        if (confirm("Are you sure? You want to update of this application paid through single window portal.")) {
+
+            UpdateAppStatus_AjaxRequest(ApplicationId, PaymentType, Amount);
+        }
+        else {
+            event.preventDefault();
+        }
+    }
+
+    function UpdateAppStatus_AjaxRequest(ApplicationId, PaymentType, Amount) {
+        var paymentType = PaymentType;
+        var applicationId = ApplicationId;
+        var amount = Amount;
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ AppId: applicationId, PaymentType: paymentType, Amount: amount }),
+            url: '/Online/Payment/UpdateChallanStatus',
+            success: function (result) {
+                if (result == true) {
+                    alertify.success("Application updated successfully.");
+                } else { alertify.error("Application not updated."); }
+                $("#gridOnlineApplicationDetail").data("kendoGrid").dataSource.read();
+            },
+            error: function (obj) {
+            }
+        });
+    }
+
+</script>

@@ -1,0 +1,340 @@
+﻿@model NA.PMS.Model.OnlineDocumentViewModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@using NA.PMS.Common;
+@{
+    ViewBag.Title = "Manage CheckList Document";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style type="text/css">
+    [class*="col-"] {
+        /*padding-left: 15px;
+        padding-right: 15px;*/
+    }
+
+    .form-bx {
+        padding-left: 30px;
+    }
+</style>
+
+<div class="ManageAllotment">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Online CheckList Document</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                @*<a href="/Online/Application/RegisterForm" class="" target="_blank">Register Form</a>*@
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 content-top-spce">
+        <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            <h2 class="blck-heading" style="margin-bottom:5px;">Search Checklist Document Type</h2>
+            <div class="form-bx">
+                <div class="row">
+                    <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                        @Html.Label("Department")
+                        @(Html.Kendo().DropDownListFor(m => m.DepartmentId)
+                                .Name("DepartmentId")
+                                .Filter("contains")
+                                .DataTextField("Text")
+                                .DataValueField("Id")
+                                .OptionLabel(" -- Select --")
+                                .DataSource(source =>
+                                {
+                                    source.Custom()
+                                   .ServerFiltering(true)
+                                   .ServerPaging(true)
+                                   .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                   .Transport(transport => transport.Read(read => read.Action("GetDepartmentListAsDataSource", "Application", new { area="Online"})))
+                                   .Schema(schema => schema.Data("Data").Total("Total"))
+                                   .PageSize(100);
+                                })
+                                .Events(events => { events.Change("ChangeDeptEvent"); })
+                                .HtmlAttributes(new { @class = "input-disabled", style = "width:95%" })
+                        )
+                    </div>
+                    <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                        @Html.Label("Checklist Type")
+                        @(Html.Kendo().DropDownListFor(model => model.CheckListType)
+                            .DataTextField("Text")
+                            .DataValueField("Id")
+                            .OptionLabel(" -- Select --")
+                                //.DataSource(source => source.Read(read => read.Action("GetPaymentStatusList", "Application")))
+                            .DataSource(source =>
+                                {
+                                    source.Custom()
+                                    .ServerFiltering(true)
+                                    .ServerPaging(true)
+                                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                    .Transport(transport => transport.Read(read => read.Action("GetChecklistTypeList", "Application", new { area = "Online" })))
+                                    .Schema(schema => schema.Data("Data").Total("Total"))
+                                    .PageSize(100);
+                                })
+                            .Enable(true).AutoBind(true).Filter("contains")
+                            .HtmlAttributes(new { style = "width:95%", @class = "input-disabled" })
+                            .Events(e => e.Change("ChangeDeptEvent"))
+                        )
+
+                    </div>
+                    <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+
+                    </div>
+                    @*<div class="col-md-2 col-sm-3 col-xs-12 form-group" style="text-align:right">
+                        @Html.Label("")<br />
+                        <input type="button" id="btnSearch" class="btn btn-add" value="Search" />
+                        <input type="button" id="btnClear" class="btn btn-default" value="Clear" />
+                    </div>*@
+                </div>
+            </div>
+
+            <div class="col-md-12 k-grid-content">
+                @( Html.Kendo().Grid<NA.PMS.Model.OnlineDocumentViewModel>()
+                        .Name("gridOnlineApplicationDetail")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(c => c.Id).Title("Id").Width(50);
+                            columns.Bound(c => c.DocumentName).Title("Document").Sortable(false);
+                            columns.Bound(c => c.Department).Title("Department").Width(130).Sortable(false);
+                            columns.Bound(c => c.CheckListType).Title("Type").Width(100).Sortable(false);
+                            columns.Bound(c => c.IsActive).Title("Status").Width(100).Sortable(false);//.ClientTemplate("#if(ChallanStatus=='Challan Updated'){# <a onclick='javascript:UpdateChallanStatus(this);'><center><span value='Challan Updated' class='glyphicon glyphicon-edit text-danger'>Challan Updated</span></center></a> #}else if(ChallanStatus=='Challan Generated'){# Challan Generated #}else if(ChallanStatus=='Paid'){# Paid #}else if(ChallanStatus=='Paid'){# Paid #}else if(ChallanStatus=='Not Paid'){# Not Paid #}else{# -- #}#").Filterable(true);
+                            columns.Bound(c => c.SchemeId).Title("SchemeId").Width(100).Sortable(false).Filterable(false);
+                            //columns.Bound(c => c.IsActive).ClientTemplate("#if(IsDeleted=='Accepted'){# <a onclick='javascript:RejectApplication(this);'><center><span value='Reject Application' class='glyphicon glyphicon-remove text-danger'></span></center></a> #}else{# Rejected #}#").Title("Reject").Width(80).Filterable(false);
+                        })
+                        .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                        .DataSource
+                        (
+                            dataSource => dataSource
+                            .Ajax().ServerOperation(true).Sort(s=>s.Add(c=>c.Id).Ascending())
+                            .Model(model => model.Id(p => p.Id))
+                            .Read(read => read.Action("GetOnlineChecklistDocument", "Application", new { area="Online"}).Data("FilterData"))
+                            .PageSize(10)
+                       ))
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="divChallanDetails" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="padding-top:40px;">
+    <div class="modal-dialog" style="width: 60%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title"><b>Challan Transaction Details - [ <label id="FormId_Challan_trans_Id" class=""></label> ]</b></h4>
+            </div>
+            <div class="modal-body" style="overflow:auto; height:auto;">
+                <input type="hidden" id="FormId_Challan_trans" />
+                <input type="hidden" id="filepath_Challan_trans" />
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                            @Html.Label("Challan Bank Name:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                            <label id="challanBankName" class="form-control"></label>
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                            @Html.Label("Transaction ID:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                            <label id="transactionId" class="form-control"></label>
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                            @Html.Label("Submitted Date:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                            <label id="submittedDate" class="form-control"></label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                            @Html.Label("UTR No:", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                            <label id="utrNo" class="form-control"></label>
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                            <a id="challan_reciept" onclick="javascript:ShowChallanDocument()">View Uploaded Document</a>
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-prnt">
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="submit" id="btnUpdateChallan_trans" class="k-button" data-dismiss="modal">Update Status</button>
+                <button type="button" id="btnCancel_ChallanTrans" class="k-button">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="divDocumentView" style="overflow:hidden">
+    <div class="row">
+        <div class="col-md-12 no-margin no-padding" id="divPageView" style="overflow:hidden">
+            <iframe id="ifrmViewPdf"></iframe>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#divDocumentView').kendoWindow({
+            modal: true,
+            title: "Document",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "15%"
+            },
+            width: "70%", height: "80%"
+        });
+    });
+
+    $('input:radio[name=PayType]').on('change', function () {
+        $("#gridOnlineApplicationDetail").data("kendoGrid").dataSource.read();
+    });
+
+    function RegisterForm(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("RegisterForm", "Application")';
+    }
+
+    function FilterSchemeId() {
+        return { schemeId: $("#SchemeId").val() };
+    }
+
+    function FilterData() {
+        var model = {
+            //SchemeId: parseInt($("#SchemeId").val()),
+            DepartmentId: parseInt($("#DepartmentId").val()),
+            CheckListType: $('#CheckListType').val()
+            //PayType: $('input[name=PayType]:checked').val()
+        };
+        return model;
+    }
+
+    function RejectApplication(row) {
+        var tr = $(row).parent().parent();
+        var ApplicationId = $(tr).children("td:eq(1)").text();
+        if (confirm("Are you sure? You want to reject this application.")) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ AppId: ApplicationId }),
+                url: '/Online/Application/RejectApplication',
+                success: function (result) {
+                    if (result == true) {
+                        alertify.success("Application rejected successfully.");
+                    } else { alertify.error("Application not rejected."); }
+                    $("#gridOnlineApplicationDetail").data("kendoGrid").dataSource.read();
+                },
+                error: function (obj) {
+                }
+            });
+        }
+    }
+
+    function UpdateChallanStatus(row) {
+        $("#FormId_Challan_trans").val('');
+        $("#filepath_Challan_trans").val('');
+        var tr = $(row).parent().parent();
+        var ApplicationId = $(tr).children("td:eq(1)").text();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ ApplicationFormId: ApplicationId }),
+            url: '/Online/Payment/GetChallanDetailsTrans',
+            success: function (result) {
+                $("#challanBankName").html(result.BankName);
+                $("#transactionId").html(result.TransactionId);
+                var ModDate = (new Date(parseInt(result.modifiydate.replace("/Date(", "").replace(")/", ""), 10))).toString("dd/MM/yyyy");
+                $("#submittedDate").html(ModDate);
+                $("#FormId_Challan_trans_Id").html(ApplicationId);
+                $("#utrNo").html(result.TransactionKey);
+
+                $("#FormId_Challan_trans").val(ApplicationId);
+                $("#filepath_Challan_trans").val(result.docPath);
+                $("#divChallanDetails").modal('show');
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                alertify.error("Some Error in save database.");
+            }
+        });
+    }
+
+    function ShowChallanDocument() {
+        $("#divDocumentView").empty();
+        var link = $("#filepath_Challan_trans").val();
+        $("#divDocumentView").append($('<iframe src=' + link + ' style="width:100%; height:100%;"></iframe>'));
+        $("#divDocumentView").data("kendoWindow").center();
+        $("#divDocumentView").data("kendoWindow").open();
+    }
+
+    function ChangeDeptEvent() {
+        $("#gridOnlineApplicationDetail").data("kendoGrid").dataSource.read();
+    }
+
+    $("#btnCancel_ChallanTrans").click(function () {
+        $("#divChallanDetails").modal('hide');
+    });
+
+    $("#btnSearch").click(function () {
+        $("#gridOnlineApplicationDetail").data("kendoGrid").dataSource.read();
+    });
+
+    $('#btnClear').click(function () {
+        $('#SchemeId').data('kendoDropDownList').value('');
+        $('#DepartmentId').data('kendoDropDownList').value('');
+        $('#PayType_all').prop("checked", true);
+        $("#gridOnlineApplicationDetail").data("kendoGrid").dataSource.read();
+    });
+
+    $('#btnUpdateChallan_trans').click(function () {
+        var applicationId = $("#FormId_Challan_trans").val();
+        var paymentType = '@Constants.offlineApplicationPayment';
+        var Amount = $(tr).children("td:eq(2)").text();
+        if (confirm("Are you sure? You want to update challan status of this application.")) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ AppId: applicationId, PaymentType: paymentType, Amount: amount }),
+                url: '/Online/Payment/UpdateChallanStatus',
+                success: function (result) {
+                    if (result == true) {
+                        alertify.success("Application updated successfully.");
+                    } else { alertify.error("Application not updated."); }
+                    $("#gridOnlineApplicationDetail").data("kendoGrid").dataSource.read();
+                },
+                error: function (obj) {
+                }
+            });
+        }
+    });
+</script>
+
+
+

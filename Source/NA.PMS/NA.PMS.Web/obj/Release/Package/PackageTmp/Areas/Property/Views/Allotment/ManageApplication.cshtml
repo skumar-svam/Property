@@ -1,0 +1,504 @@
+﻿@model NA.PMS.Model.ApplicationFormModel
+
+@using Kendo.Mvc.UI;
+@using NA.PMS.Model
+
+@{
+    ViewBag.Title = "Manage Applications";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+
+<style>
+    .bulkDialog {
+        display: none;
+    }
+
+    /*#btnBulkApplication {
+        float: right;
+    }
+
+    #btnAddApplication {
+        float: right;
+    }
+
+    #btnPersonalInformation {
+        float: right;
+    }*/
+
+    .disable_a_href {
+        pointer-events: none;
+    }
+
+    .k-grid-content {
+        overflow-y: hidden;
+        overflow-x: hidden;
+    }
+</style>
+
+<div class="ApplicationForm">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-3 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Applications</h1></div>
+            <div class="col-md-9 col-sm-12 col-xs-12 col-btn">
+                @*<a href="#" id="btnAddCompany" class="" onclick="javascript:UpdateAddress(event);">Update Address</a>*@
+                <a href="#" id="btnDownloadFormat" class="">Download Format</a>
+                <a href="#" id="btnAddCompany" class="" onclick="javascript:AddCompanyDetails(event);">Add Company Details</a>
+                <a href="#" id="btnDrawSlipPopup" class="" onclick="javascript:GenerateDrawSlip(event);">Generate Draw slip</a>
+                <a href="#" style="display:none" id="btnPersonalInformation" class="" onclick="javascript:UpdatePersonalInformation(event);">Update Personal Information</a>
+                <a href="#" id="btnBulkApplication" class="" onclick="javascript:AddBulkApplication(event);">Bulk Application</a>
+                <a href="#" id="btnAddApplication" class="" onclick="javascript:AddApplication(event);">New Allotment Application</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<ApplicationFormModel>()
+                .Name("gvApplications")
+                .ToolBar(tools => tools.Excel())
+                .Excel(excel => excel.FileName("ServiceRequestList.xlsx").ProxyURL(Url.Action("Excel_Export_Save", "Allotment")).AllPages(true).Filterable(true))
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.ApplicationId).Visible(false);
+                    columns.Bound(c => c.EncryptedAppId).Visible(false);
+                    columns.Bound(c => c.BankId).Visible(false);
+                    columns.Bound(c => c.RID).Title("RID").Width(110);
+                    if (@ViewBag.ReadOnlyMenu != null && @ViewBag.ReadOnlyMenu == true)
+                    {
+                        columns.Bound(c => c.FormNo).Title("Form No").Width(110).ClientTemplate("<a href='/Property/Allotment/ViewApplicationForm/#=EncryptedAppId#'>#=FormNo#</a>").Sortable(false);
+                    }
+                    else
+                    {
+                        columns.Bound(c => c.FormNo).Title("Form Number").Width(120);
+                    }
+
+                    columns.Bound(c => c.SchemeName).Title("Scheme").ClientTemplate("<a href='/Master/Scheme/ViewScheme/#= EncodedParameter #'>#= SchemeName #</a>");
+                    columns.Bound(c => c.DepartmentName).Title("Department").Width(130).Sortable(false);
+                    columns.Bound(c => c.FirstName).Title("Applicant");
+                    columns.Bound(c => c.MobileNumber).Title("Mobile No").Width(120).Sortable(false);
+                    columns.Bound(c => c.Status).Title("Status").Width(100);
+                    if (@ViewBag.EditMenuVal != null && @ViewBag.EditMenuVal == true)
+                    {
+                        // online applcation Bank Id  = 4
+                        columns.Bound(c => c.ApplicationId).Title("Edit").Width(100).ClientTemplate("# if (IsAllotted != 1 && SchemeStatus != 26 && BankId != 4) { # <a class='gridEdit' href='" + "/Property/Allotment/EditApplicationForm/#= EncryptedAppId #'>Edit </a> # } else {#<span class='gridNotEdit'>Edit</span>#} #").Filterable(false);
+                    }
+                    else
+                    {
+                        columns.Bound(c => c.ApplicationId).Title("Edit").Width(100).ClientTemplate("Edit").Filterable(false);
+                    }
+                })
+                .Sortable().Filterable()
+                .Events(e => e.DataBound("onDataBound"))
+                //.ToolBar(toolBar =>
+                //    {
+                //        toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Add Application").HtmlAttributes(new { onclick = "javascript:AddApplication(event);", @class = "k-button k-right", id = "btnAddApplication" });
+                //        toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Bulk Application").HtmlAttributes(new { onclick = "javascript:AddBulkApplication(event);", @class = "k-button", id = "btnBulkApplication" });
+                //        toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Update Personal Information").HtmlAttributes(new { onclick = "javascript:UpdatePersonalInformation(event);", @class = "k-button", id = "btnPersonalInformation" });
+                //    }
+                // )
+                .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .Groupable()
+                .DataSource
+                (
+                     dataSource => dataSource
+                    .Ajax().ServerOperation(true)
+                    .Model(model => model.Id(p => p.FormNo))
+                    .Sort(x => x.Add("FormNo").Descending())
+                    .Read(read => read.Action("GetAllApplications", "Allotment")).PageSize(20)
+                 ).AutoBind(false)
+        )
+    </div>
+</div>
+
+<div id="divForBulkUpload" class="col-md-12">
+    @{Html.RenderPartial("_PartialBulkApplicationForm"); }
+</div>
+
+@*<div id="divForBulkUpload" class="col-md-12">
+        @{Html.RenderPartial("_BulkUploadApplicationForm"); }
+    </div>*@
+
+<div id="divDrawSlip" class="col-md-12">
+    <div class="col-md-11 col-sm-12 col-xs-12 col-md-offset-1" style="padding-top:20px;">
+        <div class="row">
+            <div class="col-md-5 col-sm-12 col-xs-12 form-group">
+                @Html.Label("Scheme Name")
+                @(Html.Kendo().DropDownList()
+                      .Name("DrawSchemeId")
+                      .DataTextField("schemeName")
+                      .DataValueField("schemeId")
+                      .OptionLabel(" -- Please Select --")
+                      .DataSource(source => source.Read(read => read.Action("GetSchemeListForAllotment", "PropertyAllotment")))
+                      .Enable(true)
+                      .AutoBind(true)
+                      .HtmlAttributes(new { style = "width: 100%; height:100%" })
+                )
+            </div>
+            <div class="col-md-5 col-sm-12 col-xs-12 col-md-offset-1 form-group">
+                @Html.Label("Department")
+                @(Html.Kendo().DropDownList()
+                      .Name("DrawDepartmentId")
+                      .DataTextField("DepartmentName")
+                      .DataValueField("DepartmentId")
+                      .OptionLabel(" -- Please Select --")
+                      .DataSource(source => source.Read(read => read.Action("FilterDepartmentOnScheme", "PropertyAllotment").Data("FilterDepartment"))
+                                                          .ServerFiltering(true))
+                      .Enable(false)
+                      .AutoBind(false)
+                      .CascadeFrom("DrawSchemeId")
+                      .HtmlAttributes(new { style = "width: 100%; height:100%" })
+                )
+            </div>
+        </div>
+        <div class="row" style="padding-top:20px">
+            <div class="col-sm-4">
+                @Html.CheckBox("Applicant", htmlAttributes: new { @id = "chkApplicant" })
+                @Html.Label("Applicant Name", htmlAttributes: new { @id = "" })
+            </div>
+            <div class="col-sm-4">
+                @Html.CheckBox("FormNumber", htmlAttributes: new { @id = "chkFormNo" })
+                @Html.Label("Form Number")
+            </div>
+            <div class="col-sm-4">
+                @Html.CheckBox("Mobile Number", htmlAttributes: new { @id = "chkMobile" })
+                @Html.Label("Mobile Number")
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-4">
+                @Html.CheckBox("FatherName", htmlAttributes: new { @id = "chkFatherName" })
+                @Html.Label("Father's Name")
+            </div>
+            @*<div class="col-sm-4">
+                    @Html.CheckBox("MotherName", htmlAttributes: new { @id = "chkMotherName" })
+                    @Html.Label("Mother's Name")
+                </div>*@
+            @*<div class="col-sm-4">
+                    @Html.CheckBox("PAN Number", htmlAttributes: new { @id = "chkPan" })
+                    @Html.Label("PAN Number")
+                </div>*@
+        </div>
+        <div class="row">
+            <div class="col-md-11">
+                <div class="box-button-popup text-center">
+                    <input type="button" id="btnKendoPopupClose" value="Close" class="btn btn-default" />
+                    <input type="button" value="Generate Draw Slip" id="btnGenerateDrawSlip" class="btn btn-add" />
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<div id="divPrintDrawSlip" class="col-md-10">
+    <div class="form-bx" style="overflow:auto;height:85%;">
+        <div id="divPrintSlip" style="width:90%;"></div>
+    </div>
+    <div class="box-button text-center">
+        <input type="button" id="btnPrintKendoPopupClose" value="Close" class="btn btn-default" />
+        <input type="button" value="Generate Draw Slip" id="btnPrintGenerateDrawSlip" onclick="PrintDiv()" class="btn btn-add" />
+    </div>
+</div>
+
+<div id="divDrawSlipModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="padding-top:40px;">
+    <div class="modal-dialog" style="width: 60%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">  <b>Generate Draw slip</b></h4>
+            </div>
+            <div class="modal-body" id="divDrawSlipBody" style="overflow:auto;height:420px;">
+
+            </div>
+            <div style="page-break-after: always;"></div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="submit" id="btnPrintDiv" class="k-button" data-dismiss="modal" onclick="PrintDiv();">Print</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+    $('#btnDownloadFormat').click(function () {
+        var schemeId = $('#SchemeId').val();
+        var departmentId = $('#DepartmentId').val();
+        window.location = "/Allotment/BulkDownloadApplicationForm?schemeId=" + schemeId + "&departmentId=" + departmentId;
+    });
+
+    debugger;
+    $(document).ready(function () {
+        if ('@ViewBag.IsApplicationAdded' != '') {
+            alertify.success("Application added succesfully");
+        }
+        if ('@ViewBag.IsApplicationUpdated' != '') {
+            alertify.success("Application updated succesfully");
+        }
+        $("#gvApplications").data("kendoGrid").dataSource.read();
+    });
+
+    function PrintDiv() {
+        var contents = document.getElementById("divDrawSlipBody").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+    var checkedIds;
+
+    $("input:checkbox").change(function () {
+        var someObj = {};
+        someObj.fruitsGranted = [];
+        someObj.fruitsDenied = [];
+
+        $("input:checkbox").each(function () {
+            if ($(this).is(":checked")) {
+                someObj.fruitsGranted.push($(this).attr("id"));
+            } else {
+                someObj.fruitsDenied.push($(this).attr("id"));
+            }
+        });
+
+        //alert("GRANTED: " + someObj.fruitsGranted);
+        //alert("DENIED: " + someObj.fruitsDenied);
+    });
+
+    //$('input[type="checkbox"]').click(function () {
+    //    if ($(this).prop("checked") == true) {
+    //        alert("Checkbox is checked.");
+    //    }
+    //    else if ($(this).prop("checked") == false) {
+    //        alert("Checkbox is unchecked.");
+    //    }
+    //});
+
+    //$('#chkApplicant').blur(function () {
+    //    alert($('#chkApplicant').name());
+    //});
+    $('#divForBulkUpload').kendoWindow({
+        modal: true,
+        title: "Bulk Upload Application Form",
+        visible: false,
+        width: "50%",
+        height: "40%"
+
+    });
+
+    $('#divDrawSlip').kendoWindow({
+        modal: true,
+        title: "Generate Draw Slip",
+        visible: false,
+        width: "50%",
+        height: "40%"
+
+    });
+    $('#divPrintDrawSlip').kendoWindow({
+        modal: true,
+        title: "Generate Draw Slip",
+        visible: false,
+        width: "55%",
+        height: "70%"
+    });
+    $('#btnDrawSlipPopup').click(function () {
+        var win = $("#divDrawSlip").data("kendoWindow");
+        win.center();
+        win.open();
+    });
+
+    $('#btnKendoPopupClose').click(function () {
+        $("#divDrawSlip").data("kendoWindow").close();
+        DoUncheckBox();
+    });
+    $('#btnPrintKendoPopupClose').click(function () {
+        $("#divPrintDrawSlip").data("kendoWindow").close();
+    });
+    function ShowPrintDrawSlipWindow() {
+        var win = $("#divPrintDrawSlip").data("kendoWindow");
+        win.center();
+        win.open();
+    }
+    $('#btnGenerateDrawSlip').click(function () {
+        var scheme = $('#DrawSchemeId').val();
+        var department = $('#DrawDepartmentId').val();
+        if (scheme != "" && department != "") {
+            var checkedField = [];
+            var uncheckedField = [];
+            $("input:checkbox").each(function () {
+                if ($(this).is(":checked")) {
+                    checkedField.push($(this).attr("id"));
+                } else {
+                    uncheckedField.push($(this).attr("id"));
+                }
+            });
+            //alert(checkedField);
+            if (checkedField.length >= 2) {
+                $.ajax({
+                    type: "post",
+                    dataType: "json",
+                    contentType: "application/json;charset=utf-8",
+                    data: JSON.stringify({ schemeId: $('#DrawSchemeId').val(), departmentId: $('#DrawDepartmentId').val(), nameList: checkedField }),
+                    url: '/DocParser/PrintDrawSlipForAuthority',
+                    success: function (result) {
+                        if (result != "0") {
+                            $("#divDrawSlip").data("kendoWindow").close();
+                            $("#divDrawSlipBody").html(result);
+                            $("#divDrawSlipModal").modal('show');
+                            DoUncheckBox();
+                        }
+                        else {
+                            alertify.error("Application form is not available");
+                        }
+                    },
+                    error: function (ajaxRequest, strError) {
+                        //alert(ajaxRequest.responseText);
+                        alertify.error("Something is wrong, try again later");
+                    }
+                });
+            }
+            else {
+                alertify.error("Please select atleast two checkboxes.");
+            }
+        }
+        else {
+            alertify.error("Please select Scheme and Department");
+        }
+    });
+
+    function DoUncheckBox() {
+        $('#chkApplicant').prop('checked', false);
+        $('#chkMobile').prop('checked', false);
+        $('#chkFormNo').prop('checked', false);
+        $('#chkFatherName').prop('checked', false);
+        $('#chkMotherName').prop('checked', false);
+        $('#chkPan').prop('checked', false);
+    }
+
+    function FilterDepartment() {
+        return { SchemeId: $("#DrawSchemeId").val() };
+    }
+
+    //$("#btnUpload").click(function (event) {
+    //    alert("started");
+    //    url = 'Allotment/UploadExcelFile'
+    //    var data = $('#applicationFormFile').load(url)
+    //    $.ajax({
+
+    //        type: "POST",
+
+    //        url: '/Allotment/UploadExcelFile',
+    //        //data: data,
+
+    //        contentType: "application/json; charset=utf-8",
+    //        dataType: "json",
+    //        success: function (str) {
+    //            alert("hai");
+    //            alert(str.st);
+    //        }
+    //    });
+    //});
+
+    //function UploadFileSelection() {
+    //    var schemeId = $('#SchemeId').val();
+    //    alert("Scheme Id " + schemeId);
+    //    var departmentId = $('#DepartmentId').val();
+    //    var uploadFile = $("#UploadExcel").val();
+    //    var fileExtension = uploadFile.split('.');
+    //    alert("File extension " + fileExtension[1]);
+    //    if (fileExtension[1] != "xlsx") {
+    //        alert("Please select only excel(xlsx) file.");
+    //        return false;
+    //    }
+
+    //}
+
+
+
+    //$("#btnUpload").click(function () {
+    //    alert("1");
+    //});
+    function AddApplication(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("AddApplication", "Allotment")';
+    }
+    //function AddBulkApplication(event) {
+    //    event.preventDefault();
+    //    $("#dialog").dialog({
+    //        minHeight: 330,
+    //        width: 700
+    //    });
+    //}
+
+    function AddBulkApplication(event) {
+        var win = $("#divForBulkUpload").data("kendoWindow");
+        win.center();
+        win.open();
+    }
+    function UpdatePersonalInformation(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("PersonalInfo", "Allotment")';
+    }
+
+    //$('#downloadExcelFileId').click(function () {
+    //    var schemeId = $('#SchemeId').val();
+    //    var departmentId = $('#DepartmentId').val();
+    //    alert("download" + schemeId + " sdfsdf" + departmentId);
+    //    $.ajax({
+    //        dataType: 'json',
+    //        type: 'Post',
+    //        contentType: 'application/json; charset=utf-8',
+    //        //data: JSON.stringify({ schemeId: schemeId, departmentId: departmentId }),
+    //        url: '/Allotment/BulkDownloadApplicationForm',
+    //        data:{schemeId:schemeId, departmentId: departmentId},
+    //        success: function (str) {
+    //            alert("hai");
+    //            alert(str);
+    //        },
+    //        error: function (objAjaxRequest, strError) {
+    //            var respText = objAjaxRequest.responseText;
+    //            alert(respText);
+    //        }
+    //    });
+
+    //});
+
+    function onDataBound(e) {
+        var AddMenuVal = '@ViewBag.AddMenuVal'
+        var EditMenuVal = '@ViewBag.EditMenuVal'
+        if (AddMenuVal == "False") {
+            $("#btnAddApplication").addClass("disable_a_href");
+            $("#btnBulkApplication").addClass("disable_a_href");
+
+        }
+        if (EditMenuVal == "False") {
+            $("#btnPersonalInformation").addClass("disable_a_href");
+        }
+    }
+
+    function AddCompanyDetails(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("AddCompany", "Allotment")';
+    }
+
+    function UpdateAddress(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("UpdateAddress", "Allotment")';
+    }
+</script>

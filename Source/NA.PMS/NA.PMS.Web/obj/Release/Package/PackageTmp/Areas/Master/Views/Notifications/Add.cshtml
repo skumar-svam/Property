@@ -1,0 +1,364 @@
+﻿
+@using Kendo.Mvc.UI
+@model NA.PMS.Model.NotificationsModel
+@{
+    ViewBag.Title = "Notification";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+@using (Html.BeginForm("SaveNotificationForScheme", "Notifications", FormMethod.Post, new { enctype = "multipart/form-data", id = "notificationform" }))
+{
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Manage Notification</h1></div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+                </div>
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="col-md-12 content-top-spce">
+                <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                    @*@Html.ValidationSummary(true, "", new { @class = "text-danger" })*@
+                    <h2 class="blck-heading">Add Notification</h2>
+                    <div class="form-bx">
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Scheme Name", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                            
+                                @(Html.Kendo().DropDownListFor(m => m.schemeID)
+                                        .Filter("contains")
+                                        .DataTextField("schemeName")
+                                        .DataValueField("schemeId")
+                                        .OptionLabel(" -- Please Select --")
+                                        .DataSource(source => source.Read(read => read.Action("GetAllSchemesForNotifications", "Notifications")))
+                                        .Events(events => { events.Change("FindSchemeDate"); })
+                                        .HtmlAttributes(new { style = "width: 100%; height:100%" })
+                                )
+                                @Html.ValidationMessageFor(m => m.schemeID)
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Notification Name", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                           
+                                @Html.TextBoxFor(m => m.notificationName, new { @class = "form-control", @Maxlength = "150" })
+                                @Html.ValidationMessageFor(m => m.notificationName)
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Scheme Start Date", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                            
+                                @(Html.Kendo().DatePickerFor(m => m.notificationStart)
+                                        //.Events(e => e.Change("startChange"))
+                                        .HtmlAttributes(new { style = "width: 100%;", @class = "DisableKeyboardInput", @Readonly="readonly" }))
+                                @Html.ValidationMessageFor(m => m.notificationStart)
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Scheme End Date", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DatePickerFor(m => m.notificationEnd)
+                                    //.Events(e => e.Change("endChange"))
+                                    .HtmlAttributes(new { style = "width: 100%; ", @class = "DisableKeyboardInput", @Readonly="readonly" }))
+                                @Html.ValidationMessageFor(m => m.notificationEnd)
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Media Type", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">                                         
+                                @(Html.Kendo().MultiSelectFor(m => m.schemeMediaType)
+                                        .DataTextField("mediaType")
+                                        .DataValueField("mediaTypeId")
+                                        .Placeholder("-Please Select-")
+                                        .AutoClose(false)
+                                        .DataSource(source => source.Read(read => read.Action("GetMediaTypeForNotification", "Notifications")))
+                                        .HtmlAttributes(new { style = "width: 100%; height:100%" })
+                                )
+                                @Html.ValidationMessageFor(m => m.schemeMediaType)
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Booklet Cost (INR)", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                            
+                                @Html.TextBoxFor(m => m.bookletCost, new { @class = "form-control textBoxValueRightAlign", @maxlength = "7", onkeypress = "return IsNumeric(event);" })
+                                @Html.ValidationMessageFor(m => m.bookletCost)
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Scheme Payment Mode", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">                                        
+                                @(Html.Kendo().MultiSelectFor(m => m.schemePaymentType)
+                                    .DataTextField("paymentModeName")
+                                    .DataValueField("paymentModeId")
+                                    .Placeholder("-Please Select-")
+                                    .AutoClose(false)
+                                    .DataSource(source => source.Read(read => read.Action("GetPaymentModeForNotifications", "Notifications")))
+                                    .HtmlAttributes(new { style = "width: 100%; height:100%" })
+                                )
+                                @Html.ValidationMessageFor(m => m.schemePaymentType)
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Old Notifications")
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                           
+                                @(Html.Kendo().DropDownListFor(m => m.oldNotificationID)
+                                        .Filter("contains")
+                                        .DataTextField("oldNotificationName")
+                                        .DataValueField("oldNotificationID")
+                                        .OptionLabel(" -- Please Select --")
+                                        .DataSource(source =>
+                                            {
+                                                source.Read(read =>
+                                                {
+                                                    read.Action("GetOldNotifications", "Notifications")
+                                                        .Data("filterOldNotification");
+                                                })
+                                                .ServerFiltering(true);
+                                            })
+                                        .Enable(true)
+                                        .AutoBind(false)
+                                        .CascadeFrom("schemeID")
+                                        .HtmlAttributes(new { style = "width: 100%; height:100%" })
+                                )
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @*@Html.LabelFor(m=>m.publishDate)*@
+                                @Html.Label("Publish Date", htmlAttributes: new { @class="required"})
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DatePickerFor(m => m.publishDate).HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" }))
+                                @Html.ValidationMessageFor(m => m.publishDate)
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+                <div class="box-button text-center">               
+                    <input type="button" value="Cancel" class="btn btn-default" id="btnCancel" />
+                    <input type="button" value="Add" class="btn btn-add" id="btnSubmit" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        @{
+            if (TempData["MesgAdd"] != null || TempData["MesgAdd"] != "")
+            {
+                @*@:alertify.error("Addition of Notification is unsuccessful.");*@
+            }
+        }
+    });
+   
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1 || keyCode == 46);
+        if (ret == false)
+            return false;
+    }
+    function filterOldNotification() {
+        return {
+            schemeId: $("#schemeID").val(),
+            notiId: 0
+        };
+    }
+    //$(function () {
+    //    $("form").kendoValidator();
+    //});
+    function startChange() {
+        var endPicker = $("#notificationEnd").data("kendoDatePicker"),
+            startDate = this.value();
+
+        if (startDate) {
+            startDate = new Date(startDate);
+            startDate.setDate(startDate.getDate());
+            endPicker.min(startDate);
+        }
+    }
+    function endChange() {
+        var startPicker = $("#notificationStart").data("kendoDatePicker"),
+            endDate = this.value();
+
+        if (endDate) {
+            endDate = new Date(endDate);
+            endDate.setDate(endDate.getDate());
+            startPicker.max(endDate);
+        }
+    }
+
+
+    $('#btnSubmit').click(function () {
+        var oldNotificationID = 0;
+        //$('#btnSubmit').attr('disabled', 'disabled');
+        if ($("#schemeID").val() == '') {
+            alertify.error('Please select Scheme Type');
+            //$("#btnSubmit").removeAttr('disabled');
+            return false;
+        }
+        if ($("#notificationName").val() == '') {
+            alertify.error('Please Enter Notification Name');
+            //$("#btnSubmit").removeAttr('disabled');
+            return false;
+        }
+        if ($("#notificationStart").val() == '') {
+            alertify.error('Please select Notification Start Date');
+            //$("#btnSubmit").removeAttr('disabled');
+            return false;
+        }
+        if ($("#notificationEnd").val() == '') {
+            alertify.error('Please select Notification End Date');
+            //$("#btnSubmit").removeAttr('disabled');
+            return false;
+        }
+        if ($("#schemeMediaType").val() == null) {
+            alertify.error('Please select Media Type');
+            //$("#btnSubmit").removeAttr('disabled');
+            return false;
+        }
+        if ($("#bookletCost").val() == '') {
+            alertify.error('Please enter Booklet Cost');
+            //$("#btnSubmit").removeAttr('disabled');
+            return false;
+        }
+        if ($("#schemePaymentType").val() == null) {
+            alertify.error('Please select Payment Type');
+            //$("#btnSubmit").removeAttr('disabled');
+            return false;
+        }
+        if ($('#publishDate').val() == "" || $('#publishDate').val() == null) {
+            alertify.error("Please enter Publish Date");
+            //$("#btnSubmit").removeAttr('disabled');
+            return false;
+        }
+        else {
+            var startDate = new Date($('#notificationStart').val());
+            var endDate = new Date($('#notificationEnd').val());
+            var publishDate = new Date($('#publishDate').val());
+            if (publishDate < startDate || publishDate > endDate) {
+                alertify.error("Publish date should be between scheme start date and end date");
+                return false;
+            }
+            if ($("#oldNotificationID").val() == ''){
+                oldNotificationID = 0;
+            }
+            else {
+                oldNotificationID = $("#oldNotificationID").val();
+            }
+            //$("#btnSubmit").removeAttr('disabled');
+            $('#notificationform').submit();
+        }
+
+        @*$.ajax({
+            url: '@(Url.Action("SaveNotificationForScheme", "Notifications"))',
+            type: 'POST',
+            contentType: 'application/json; charset=utf-8',
+            dataType: 'json',
+            data: JSON.stringify({ schemeId: $("#schemeID").val(), notificationStart: $("#notificationStart").val(), notificationEnd: $("#notificationEnd").val(),publishDate:$('#publishDate').val() ,schemeMediaType: $("#schemeMediaType").val(), bookletCost: $("#bookletCost").val(), schemePaymentType: $("#schemePaymentType").val(), oldNotificationID: oldNotificationID, notificationName: $("#notificationName").val(), notificationId: 0 }),
+            success: function (result) {
+                if (result == 2) {
+                    alertify.error('Start Date of Notification should be in between Scheme Start and End Date');
+                    $("#btnSubmit").removeAttr('disabled');
+                    return false;
+                }
+                else if (result == 1) {
+                    //$("#btnSubmit").removeAttr('disabled');
+                    alertify.success("Notification added successfully");
+                    window.location.href = '@Url.Action("Manage", "Notifications")';
+                }
+                else if (result == 3) {
+                    alertify.error('Duplicate Entry.');
+                    $("#btnSubmit").removeAttr('disabled');
+                    return false;
+                }
+                else {
+                    //alert("There is some error. Please contact to administrator.");
+                    $("#btnSubmit").removeAttr('disabled');
+                    return false;
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                //alert("There is some error. Please contact to administrator.");
+                $("#btnSubmit").removeAttr('disabled');
+                //return false;
+                //var resptext = objajaxrequest.responsetext;
+                //$("#btnSubmit").removeAttr('disabled');
+                //alert(resptext);
+            }
+        });*@
+
+    });
+
+    $("#btnCancel").click(function () {
+        window.location.href = '@Url.Action("Manage", "Notifications")';
+    });
+
+
+
+    $('#bookletCost').blur(function () {
+        var bookletCost = (isNaN(parseFloat($('#bookletCost').val()).toFixed(2))) ? '' : parseFloat($('#bookletCost').val()).toFixed(2);
+        $('#bookletCost').val(bookletCost);
+        //$('#bookletCost').val(parseFloat($('#bookletCost').val()).toFixed(2));
+    });
+
+    function FindSchemeDate() {
+        var scheme = $('#schemeID').val();
+        if (scheme == "") {
+            alertify.error("Please select scheme name.");
+            return false;
+        }
+        else {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ schemeId: scheme }),
+                url: '/Notifications/GetSchemeDateForNotification',
+                success: function (result) {
+                    if (result != null) {
+
+                        $("#notificationStart").data("kendoDatePicker").value(result.notificationStart);
+                        $("#notificationEnd").data("kendoDatePicker").value(result.notificationEnd);
+                        //$("#notificationStart").data("kendoDatePicker").enable(false);
+                        //$("#notificationEnd").data("kendoDatePicker").enable(false);
+
+                    }
+                    else {
+                        alertify.error("Some error occured. Please try again later.");
+                    }
+                },
+                error: function (ajaxRequest,strError) {
+                    alertify.error("Something is wrong. Please try again later.");
+                    //alert(ajaxRequest.responseText);
+                }
+            });
+        }
+    }
+
+</script>

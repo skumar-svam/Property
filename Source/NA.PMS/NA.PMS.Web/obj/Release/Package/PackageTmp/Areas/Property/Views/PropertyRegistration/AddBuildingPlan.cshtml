@@ -1,0 +1,189 @@
+﻿@model NA.PMS.Model.BuildingPlanModel 
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@{
+    ViewBag.Title = "Add Building Plan ";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .disable_a_href {
+        pointer-events: none;
+    }
+</style>
+
+<div id="divBuildingPlan">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Add Building Plan</h1></div>
+            <div class="col-md-6 col-sm-6 col-xs-12 mandatory"></div>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="col-md-6 col-sm-6 col-xs-12 tabbable" id="dvBuildingPlan">
+            <ul class="nav nav-tabs content-tabs" id="ulBuildingPlan" role="tablist">
+                <li class="active" role="tab" data-toggle="tab"><a href="#one" data-toggle="tab" id="Building1"><i class="glyphicon glyphicon-home" style="color:#00c097;"></i>&nbsp;&nbsp;Building Plan - I</a></li>
+                <li><a href="#two" role="tab" data-toggle="tab" id="Building2" class="disable_a_href" none;"><i class="glyphicon glyphicon-briefcase" style="color:#00c097;"></i>&nbsp;&nbsp;Building Plan - II</a></li>
+            </ul>
+        </div>
+        <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+    </div>
+    
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12">
+        <div class="inr-box" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            <h2 class="blck-heading">Select Registration Id</h2>
+            <div class="form-bx">
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.Label("Registration ID", htmlAttributes: new { @class = "required" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @(Html.Kendo().DropDownListFor(m => m.RId)
+                    .Filter("contains")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel("Select")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetRIDs", "PropertyRegistration").Data("RIdChanges");
+                        });
+                    })
+                    .Events(events => { events.Change("RIdChange"); })
+                    .HtmlAttributes(new { @class = "schemeForms", style = "width:100%" })
+                        )
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.Label("Property No")
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group" id="lblPropNo">
+                        @Html.DisplayFor(m => m.PropertyNumber)
+                        @Html.HiddenFor(m => m.PropertyNumber)
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+
+    
+    <div class="col-md-12 tab-content">
+        @*<div class="tab-pane fade in active" id="one">
+            @{
+                Html.RenderPartial("_BuildingPlanI", Model);
+            }
+        </div>*@
+        <div class="tab-pane fade in active" id="one">
+            @{
+                Html.RenderPartial("_BuildingPlan1", Model);
+            }
+        </div>
+        <div class="tab-pane fade" id="two">
+
+            @{
+                Html.RenderPartial("_BuildingPlanII", Model);
+            }
+        </div>
+    </div>
+
+</div>
+
+
+    
+    
+
+<script type="text/javascript" >
+
+    function RIdChanges() {
+        return {
+            type: "buildingPlan"
+        };
+    }
+
+    function RIdChange() {
+        var rId = $("#RId").val();
+        if (rId == '') {
+            ClearValues();
+            //alertify.error("Please select an RID");
+            return false;
+        }
+        //GetKYADetails(rId);
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rId: rId }),
+            url: '/PropertyRegistration/GetBuildingPlanByRId',
+            success: function (result) {
+                if (result != null) {
+                    $("#AllotteeName").val(result.AllotteeName);
+                    $("#PropertyType").val(result.PropertyType);
+                    $("#Location_East").val(result.Location_East);
+                    $("#Location_West").val(result.Location_West);
+                    $("#Location_North").val(result.Location_North);
+                    $("#Location_South").val(result.Location_South);
+
+                    $("#PloatArea").val(result.PloatArea);
+                    $("#CoveredArea").val(result.CoveredArea);
+                    $("#FloorAreasRation").val(result.FloorAreasRation);
+                    $("#lblPropNo").html(result.PropertyNumber);
+                }
+                else {
+                    //ClearValues();
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            },
+            error: function (obj) {
+                //ClearValues();
+                alertify.error("Some error occured. Please try again later.");
+            }
+        });
+    }
+
+    function GetKYADetails(rId) {
+        //var rId = $("#RId").val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ RegistrationId: rId }),
+            url: '/Property/PropertyRegistration/GetKYADetailsForRid',
+            success: function (result) {
+                if (result != null) {
+                    if (result.StatusId == "2") {
+                        alertify.error("Your KYA has been Rejected. Please Complete your KYA again.");
+                        $('#btnSave').attr('disabled', 'disabled');
+                        return false;
+                    }
+                    else if (result.StatusId == "" || result.StatusId == null) {
+                        alertify.error("Please Complete your KYA.");
+                        $('#btnSave').prop('disabled', true);
+                        return false;
+                    }
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+
+    function ClearValues() {
+        $("#AllotteeName").val('');
+        $("#PropertyType").val('');
+        $("#Location_East").val('');
+        $("#Location_West").val('');
+        $("#Location_North").val('');
+        $("#Location_South").val('');
+
+        $("#PloatArea").val('');
+        $("#CoveredArea").val('');
+        $("#FloorAreasRation").val('');
+        $("#lblPropNo").html('');
+    }
+</script>
+
+  

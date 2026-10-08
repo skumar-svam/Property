@@ -1,0 +1,48 @@
+﻿@model NA.PMS.Model.RemarksDetailsModel
+<div class="PropertyDetailsForm content-top-spce">
+    <div class="col-md-12" style="border:solid #e2e3e4; border-width:0 1px">
+        <h2 class="blck-heading">Remarks</h2>
+        <div class="col-md-12 col-sm-12 col-xs-12 form-bx">
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Remarks") </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.TextAreaFor(m => m.Remarks) </div>
+            </div>
+            <div>
+                <button class="btn btn-add" id="btnAddRemark">Add Remark</button>
+                @*<button class="btn btn-default" id="btnBack">Back</button>*@
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $("#btnAddRemark").click(function () {
+        var Rid = $('#Rid').val();
+        var nRemarks = $('#Remarks').val();
+        if (nRemarks == "") {
+            alertify.error("please enter remarks.");
+            return false;
+        }
+        var objRemarks = { RId: Rid, Remarks: nRemarks }
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ objRemarks: objRemarks }),
+            url: "/PropertyAllotment/AddPropertyRemarks",
+            success: function (data) {
+                if (data != null) {
+                    if (data == true) { alertify.success("remarks saved successfully"); }
+                    else { alertify.error("remarks not saved"); }
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert("Error: " + respText);
+            }
+        });
+    });
+
+    $("#btnBack").click(function () {
+        window.location.href = "";
+    });
+</script>

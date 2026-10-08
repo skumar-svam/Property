@@ -1,0 +1,44 @@
+﻿@using Kendo.Mvc.UI;
+@using NA.PMS.Model
+<br />
+<div class="col-md-12 col-sm-12 col-xs-12 form-bx">
+    @*<div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="_FormID">Tenant Name </label> </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control" id="RlblTName"></label></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="_ApplicantName">Renting Date </label>  </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control" id="RlblRDate"></label></div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="_FormID">Tenant Project </label> </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control" id="RlblTProject"></label></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="_FormID">Rent Duration </label> </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label class="form-control" id="RlblRDuration"></label></div>
+        </div>*@
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<RentPermissionModel>()
+                .Name("gvRentPermisssionServiceRequest")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.TenantName).Title("Tenant Name");
+                    columns.Bound(c => c.RentingDate).Title("Renting Date");
+                    columns.Bound(c => c.TenantProject).Title("Tenant Project");
+                    columns.Bound(c => c.RentDuration).Title("Rent Duration");
+                })
+                .Sortable()
+                .Filterable()
+                .Pageable
+                    (
+                        pageable => pageable
+                        .Enabled(true)
+                        .PageSizes(true)
+                     )
+                .DataSource
+                (
+                     dataSource => dataSource
+                    .Ajax().Model(model => model.Id(p => p.Rid))
+                    .ServerOperation(true)
+                    .Read(read => read.Action("GetRentServiceReqByRid", "CitizenRequests", new { area = "Member" }).Data("GetRid")).PageSize(20)
+                 ).AutoBind(false)
+        )
+    </div>
+</div>

@@ -1,0 +1,126 @@
+﻿@using Kendo.Mvc.UI
+@model NA.PMS.Model.CitizenServiceRequestModel
+@{
+    ViewBag.Title = "ServiceRequests";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Service Requests</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Field(s) marked with an asterisk (<span class="star">*</span>) are required.</div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+
+                <h2 class="blck-heading"></h2>
+
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Registration Id", htmlAttributes: new { @class = "required" })</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(po => po.RId)
+                    .Filter("contains")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel("Select")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetRIDsByDeptt", "PropertyRegistration", new { area = "Property" });
+                        });
+                    })
+             .HtmlAttributes(new { style = "width:100%", @class = "schemeForms" })
+                            )
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Department", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(m => m.departmentId)
+                                    .DataTextField("text")
+                                    .DataValueField("id")
+                                    .OptionLabel("Select")
+                                      .Filter("contains")
+                                    .DataSource(source =>
+                                    {
+                                        source.Read(read =>
+                                        {
+                                            read.Action("GetAllDepartments", "CircleRate", new { area = "Master" });
+                                        });
+                                    }
+
+                            )
+                                    .HtmlAttributes(new { style = "width:100%" })
+                            )
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Services", htmlAttributes: new { @class = "required" })</div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(po => po.ServiceType)
+                    .Filter("contains")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel("Select")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetAllServices", "CitizenRequests");
+                        });
+                    })
+             .HtmlAttributes(new { style = "width:100%", @class = "schemeForms" })
+                            )
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Description", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextAreaFor(po => po.Description)
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <input type="button" id="btnSubmit" value="Submit" class="btn btn-add" />
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#btnSubmit").click(function () {
+            SaveServiceRequest();
+        });
+    });
+
+    function SaveServiceRequest() {
+        var rid = $("#RId").val();
+        var Department = $("#departmentId").val();
+        var ServiceType = $("#ServiceType").val();
+        var Description = $("#Description").val();
+
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rID: rid, department: Department, serviceType: ServiceType, description: Description }),
+            url: "/CitizenRequests/SaveServiceRequest",
+            success: function (data) {
+                if (data !=null) {
+                    window.location.href = '@Url.Action("CitizenService", "CitizenRequests")' + "/" + data;                    
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                //var respText = objAjaxRequest.responseText;
+                //alert("Error: " + respText);
+            }
+        });
+    }
+</script>
+

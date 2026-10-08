@@ -1,0 +1,683 @@
+﻿@model NA.PMS.Model.Department
+@using Kendo.Mvc.UI;
+
+<style>
+    /*.k-formatted-value.k-input{
+        padding:0px;
+    }*/
+</style>
+
+<div class="DeaprtmentForm">
+
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div id="deptDetail" class="col-md-12">
+            @*<div class="col-md-12 blnk-rw"></div>*@
+            <h2 class="blck-heading">Department Information</h2>
+            <div class="scheme-form-bx col-md-12 col-sm-12 col-xs-12">
+                @Html.HiddenFor(model => model.scheId, htmlAttributes: new { @class = "control-label col-md-3 schemeForms" })
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.LabelFor(model => model.departmentId, htmlAttributes: new { @class = "k-label required" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @(Html.Kendo().DropDownListFor(m => m.departmentId)
+                        .DataTextField("text")
+                        .DataValueField("id")
+                        .Filter("contains")
+                        .OptionLabel("Select")
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetAllDepartments", "Scheme");
+                            });
+                        })
+                        .Events(m => m.Change("OnDepartmentChange2"))
+                        .HtmlAttributes(new { style = "width:100%" })
+                        )
+                        @Html.ValidationMessageFor(model => model.departmentId, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.LabelFor(model => model.normalInterest, htmlAttributes: new { @class = "k-label required" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.TextBoxFor(model => model.normalInterest, htmlAttributes: new { @class = "form-control InterestRateCheck", @maxlength = "5" })
+                        @*@(Html.Kendo().DropDownListFor(m => m.normalInterest)
+                        .DataTextField("text")
+                        .DataValueField("id")
+                        .OptionLabel("Select")
+                        .Filter("contains")
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetAllInterestRate", "Scheme");
+                            });
+                        })
+                        .HtmlAttributes(new { style = "width:100%" })
+                        )*@
+
+                        @Html.ValidationMessageFor(model => model.normalInterest, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class=" row">
+
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.LabelFor(model => model.penalInterest, htmlAttributes: new { @class = "required" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.TextBoxFor(model => model.penalInterest, htmlAttributes: new { @class="form-control InterestRateCheck", @maxlength="5"})
+
+                        @*@(Html.Kendo().DropDownListFor(m => m.penalInterest)
+                        .DataTextField("text")
+                        .DataValueField("id")
+                        .OptionLabel("Select")
+                        .Filter("contains")
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetAllPenalRate", "Scheme");
+                            });
+                        })
+                        .HtmlAttributes(new { style = "width:100%" })
+                        )*@
+
+                        @Html.ValidationMessageFor(model => model.penalInterest, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.LabelFor(model => model.frequency, htmlAttributes: new { @class = "k-label required", @id = "lblInstallFre" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @(Html.Kendo().DropDownListFor(m => m.frequency)
+                        .DataTextField("text")
+                        .DataValueField("id")
+                        .OptionLabel("Select")
+                        .Filter("contains")
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetAllFrquency", "Scheme");
+                            });
+                        })
+                        .HtmlAttributes(new { style = "width:100% " })
+                        )
+
+                        @Html.ValidationMessageFor(model => model.frequency, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class=" row">
+
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.LabelFor(model => model.noInstallment, htmlAttributes: new { @class = "k-label required" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.TextBoxFor(model => model.noInstallment, new { @class = "textBoxValueRightAlign form-control", @maxlength = "3", style = "width:100%" })
+
+                        @Html.ValidationMessageFor(model => model.noInstallment, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.LabelFor(model => model.SelectionType, htmlAttributes: new { @id = "lblSelectionType", @class = "k-label required" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @(Html.Kendo().DropDownListFor(m => m.SelectionType)
+                        .DataTextField("text")
+                        .DataValueField("id")
+                        .OptionLabel("Select")
+                        .Filter("contains")
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetAllSelectionType", "Scheme");
+                            });
+                        })
+                        .HtmlAttributes(new { style = "width:100%" })
+                        )
+                    </div>
+                </div>
+
+                <div class="row" id="divRowAllotment">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.LabelFor(model => model.allotmentmoney, htmlAttributes: new { @id = "lblallotmentmoney", @class = "k-label required" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group" id="allotmentmoneydiv">
+                        @(Html.Kendo().NumericTextBoxFor(m => m.allotmentmoney)
+                        .Name("allotmentmoney")
+                        .Min(0)
+                        .Spinners(false).Step(0)
+                        .Enable(true)
+                        .HtmlAttributes(new { style = "width: 100%;", @maxlength = "5", @class = "k-label textBoxValueRightAlign", onblur = "AllotmentInstallmentMoneyCal('allotmentmoney');" })
+                        )
+
+                        @Html.ValidationMessageFor(model => model.allotmentmoney, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.LabelFor(model => model.installmentmoney, htmlAttributes: new { @id = "lblinstallmentmoney", @class = "k-label required" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @(Html.Kendo().NumericTextBoxFor(m => m.installmentmoney)
+                        .Name("installmentmoney")
+                        .Min(0)
+            .Spinners(false).Step(0)
+                        .Enable(true)
+                        .HtmlAttributes(new { style = "width: 100%", onblur = "AllotmentInstallmentMoneyCal('installmentmoney');", @maxlength = "5", @class = "k-label textBoxValueRightAlign" })
+                        )
+
+                        @Html.ValidationMessageFor(model => model.installmentmoney, "", new { @class = "text-danger" })
+                    </div>
+
+                </div>
+
+                <div class="row" id="divRowFloorAreaRatio">
+
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.LabelFor(model => model.floorArearatio, htmlAttributes: new { @id = "lblfloorArearatio", @class = "k-label required" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @*@Html.TextBoxFor(model => model.floorArearatio, htmlAttributes: new { @class = "k-label schemeForms", @maxlength = "4" })*@
+                        @(Html.Kendo().NumericTextBoxFor(model => model.floorArearatio)
+                        .Name("floorArearatio")
+                        .Min(0)
+                        .Spinners(false).Step(0)
+                        .Enable(true)
+                        .HtmlAttributes(new { style = "width: 100%", @class = "textBoxValueRightAlign", @maxlength = "5", onblur = "AllotmentInstallmentMoneyCal('floorArearatio');" })
+                        )
+
+                        @Html.ValidationMessageFor(model => model.floorArearatio, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.LabelFor(model => model.leaseRent, htmlAttributes: new { @id = "lbldepttleaseRent", @class = "k-label required" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @*@Html.TextBoxFor(m => m.leaseRent, htmlAttributes: new { @id = "txtdepttleaseRent", @class = "schemeForms", @maxlength = "5" })*@
+                        @(Html.Kendo().NumericTextBoxFor(m => m.leaseRent)
+                        .Name("leaseRent")
+                        .Min(0)
+                        .Spinners(false).Step(0)
+                        .Enable(true)
+                        .HtmlAttributes(new { style = "width: 100%", @id = "txtdepttleaseRent", @class = "textBoxValueRightAlign", @maxlength = "5" })
+                        )
+
+                        @Html.ValidationMessageFor(model => model.leaseRent, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+                <div class="row">                    
+                    <div class="col-md-9" style="text-align:center">                       
+                    </div>
+                    
+                </div>
+
+            </div>
+
+        </div>
+    }
+
+    <div class="row scheme-rw-btn">
+        <div class="col-md-4 col-sm-4 col-xs-4 text-left">
+            <button type="button" class="btn btn-add" value="Add" id="btnPre2">Previous <i class="glyphicon glyphicon-backward"></i></button>
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-4 text-center">
+            <button type="button" class="btn btn-add" value="Add" id="btnAddDeptt"> Add</button>
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+            <button type="button" class="btn btn-add" value="Add" id="btnNext2">Next <i class="glyphicon glyphicon-forward"></i></button>
+        </div>
+    </div>
+    @*<div class="col-md-3 col-sm-3 col-xs-2 form-group">
+        <button type="button" class="btn btn-add" value="Add" id="btnPre2">Previous <i class="glyphicon glyphicon-backward"></i></button>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-2 form-group">
+        </div>
+    <div class="col-md-3 col-sm-3 col-xs-2 form-group">
+    </div>
+        <div class="col-md-3 col-sm-3 col-xs-2 form-group">
+            <button type="button" class="btn btn-add" value="Add" id="btnNext2">Next <i class="glyphicon glyphicon-forward"></i></button>
+        </div>*@
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 k-grid-content" style="margin-bottom:10px;">
+            <div class="">
+                @(Html.Kendo().Grid<NA.PMS.Model.Department>()
+                .Name("gridDepartment")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.departmentName).Title("Department");
+                    columns.Bound(c => c.departmentId).Hidden(true);
+                    columns.Bound(c => c.normalInterest).Title("Normal Interest");
+                    columns.Bound(c => c.penalInterest).Title("Penal Interest");
+                    columns.Bound(c => c.frequencyName).Title("Frequency");
+                    columns.Bound(c => c.frequency).Hidden(true);
+                    columns.Bound(c => c.noInstallment).Title("Max no. of Installment");
+                    columns.Bound(c => c.allotmentmoney).Title("Allotment Money");
+                    columns.Bound(c => c.installmentmoney).Title("Installment Money");
+                    columns.Bound(c => c.leaseRent).Title("Lease Rent");
+                    columns.Bound(c => c.floorArearatio).Title("FAR");
+                    columns.Bound(c => c.SelectionType).Title("Selection Type");
+                    if (ViewBag.view != "Yes")
+                    {
+                        columns.Bound(c => c.refId).Title("Action").HeaderHtmlAttributes(new { @class = "removeColumnHeader" }).ClientTemplate("<a onclick='javascript:RemoveDepttRecord(\"#=refId#\");' class='schemeMasterGrids'>Remove</a>").Filterable(false).Sortable(false);
+                    }
+                })
+                .Sortable()
+                        .Filterable()
+                      .Groupable()
+                            .Pageable
+                            (pageable => pageable
+                                .Enabled(true)
+                                .PageSizes(true)
+                            )
+                .AutoBind(false)
+                .DataSource
+                (
+                     dataSource => dataSource
+                .Ajax().Model(model => model.Id(p => p.refId))
+                    .ServerOperation(true)
+                    .Read(read => read.Action("GetDepttData", "Scheme").Data("AdditionalData")).PageSize(10)
+                 ).AutoBind(false)
+                )
+            </div>
+            <div class="row scheme-rw-btn">
+                <div class="col-md-4 col-sm-4 col-xs-4 text-left">
+                    <button type="button" class="btn btn-add" value="Add" id="btnPre21">Previous <i class="glyphicon glyphicon-backward"></i></button>
+                </div>
+                <div class="col-md-4 col-sm-4 col-xs-4 text-center">
+                    
+                </div>
+                <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+                    <button type="button" class="btn btn-add" value="Add" id="btnNext21">Next <i class="glyphicon glyphicon-forward"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<script type="text/javascript">
+    function OnDepartmentChange2() {
+        var departmentID = $('#departmentId').val();
+        var schemeID = $("#scheId").val();
+        //validateDuplicateDeptt(departmentID, schemeID);
+
+        if (departmentID == 5) {
+            $('#lblfloorArearatio').hide();
+            $('#floorArearatio').hide();
+            $('#allotmentmoney').hide();
+            $('#lblallotmentmoney').hide();
+            $('#lblinstallmentmoney').hide();
+            $('#installmentmoney').hide();
+            $('#lbldepttleaseRent').hide();
+            $('#txtdepttleaseRent').hide();
+            $('span[for="noInstallment"]').hide();
+            $('span[for="txtdepttleaseRent"]').hide();
+            $('span[for="installmentmoney"]').hide();
+            $('span[for="allotmentmoney"]').hide();
+            $('span[for="floorArearatio"]').hide();
+            $("#normalInterest").val("");
+            $("#penalInterest").val("");
+            //$("#normalInterest").data("kendoDropDownList").value("");
+            //$("#penalInterest").data("kendoDropDownList").value("");
+            $("#frequency").data("kendoDropDownList").value("");
+            $("#SelectionType").data("kendoDropDownList").value("");
+            $("#noInstallment").val("");
+            $("#allotmentmoney").val('');
+            $("#installmentmoney").val('');
+            $("#leaseRent").val('');
+            $("#floorArearatio").val('');
+            $("#txtdepttleaseRent").val('');
+            $("#divRowAllotment").hide();
+            $("#divRowFloorAreaRatio").hide();
+            $("#installmentmoney").data("kendoNumericTextBox").value("");
+            $("#allotmentmoney").data("kendoNumericTextBox").value("");
+            $("#floorArearatio").data("kendoNumericTextBox").value("");
+            $("#txtdepttleaseRent").data("kendoNumericTextBox").value("");
+        }
+        else {
+            if (departmentID == 2) {
+                $("#lblInstallFre").html('Installment Frequency');
+            }
+            else
+                $("#lblInstallFre").html('Frequency');
+            $('#lblfloorArearatio').show();
+            $('#floorArearatio').show();
+            $('#allotmentmoney').show();
+            $('#lblallotmentmoney').show();;
+            $('#lblinstallmentmoney').show();
+            $('#installmentmoney').show();
+            $('#lbldepttleaseRent').show();
+            $('#txtdepttleaseRent').show();
+            $('span[for="txtdepttleaseRent"]').hide();
+            $('span[for="installmentmoney"]').hide();
+            $('span[for="allotmentmoney"]').hide();
+            $('span[for="floorArearatio"]').hide();
+            $('span[for="noInstallment"]').hide();
+            $("#normalInterest").val("");
+            $("#penalInterest").val("");
+            //$("#normalInterest").data("kendoDropDownList").value("");
+            //$("#penalInterest").data("kendoDropDownList").value("");
+            $("#frequency").data("kendoDropDownList").value("");
+            $("#SelectionType").data("kendoDropDownList").value("");
+            $("#noInstallment").val("");
+            $("#allotmentmoney").val('');
+            $("#installmentmoney").val('');
+            $("#leaseRent").val('');
+            $("#floorArearatio").val('');
+            $("#txtdepttleaseRent").val('');
+            $("#divRowAllotment").show();
+            $("#divRowFloorAreaRatio").show();
+            $("#installmentmoney").data("kendoNumericTextBox").value("");
+            $("#allotmentmoney").data("kendoNumericTextBox").value("");
+            $("#floorArearatio").data("kendoNumericTextBox").value("");
+            $("#txtdepttleaseRent").data("kendoNumericTextBox").value("");
+        }
+    }
+
+    //Used for making JQuery Asynch in the case of "Add" button click.
+    //var temp = false;
+
+    function CheckInterestRate(rate){
+        if(rate > 99.99 || rate < -1){
+            alertify.error("Interest rate can't be more than 99.99");
+            return false;
+        }
+        else{
+            return true;
+        }
+    }
+
+    $(".InterestRateCheck").blur(function(){
+        var rate = $('#InterestRateCheck').val();
+        CheckInterestRate(rate);
+    })
+
+    $(document).ready(function () {
+        $('#btnNext2').attr('disabled', 'disabled');
+        $('#btnPre2').attr('disabled', 'disabled');        
+        OnDepartmentChange2();
+        //$("#btnAddDeptt").removeAttr('disabled');
+        $("#btnAddDeptt").click(function () {
+            //$("#btnAddDeptt").attr('disabled', 'disabled');
+            var validatedett = ValidateDepttMasterScheme();
+            if (validatedett == true) {
+                var departmentID = $('#departmentId').val();
+                var schemeID = $("#scheId").val();
+                var leaseRent = $("#leaseRent").val();
+                var txtdepttleaseRent = $("#txtdepttleaseRent").val();
+                //var ret = validateDuplicateDeptt(departmentID, schemeID);
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ departmentID: departmentID, schemeID: schemeID }),
+                    url: '/Scheme/IsDepatmnetNameUnique',
+                    success: function (result) {
+                        if (result == true) {
+                            alertify.error("This Department already exists");
+                            //$("#btnAddDeptt").removeAttr('disabled');
+                            return false;
+                        }
+                        else {
+                            var $form = $("form");
+                            if ($form.valid()) {
+                                $.ajax({
+                                    dataType: 'json',
+                                    type: 'Post',
+                                    contentType: 'application/json; charset=utf-8',
+                                    //data: JSON.stringify({ departmentId: $("#departmentId").val(), normalInterest: $("#normalInterest").data("kendoDropDownList").text(), penalInterest: $("#penalInterest").data("kendoDropDownList").text(), frequency: $("#frequency").val(), noInstallment: $("#noInstallment").val(), allotmentmoney: $("#allotmentmoney").val(), installmentmoney: $("#installmentmoney").val(), leaseRent: $("#txtdepttleaseRent").val(), floorArearatio: $("#floorArearatio").val(), schemeId: $("#scheId").val(), selectionType: $("#SelectionType").val() }),
+                                    data: JSON.stringify({ departmentId: $("#departmentId").val(), normalInterest: $("#normalInterest").val(), penalInterest: $("#penalInterest").val(), frequency: $("#frequency").val(), noInstallment: $("#noInstallment").val(), allotmentmoney: $("#allotmentmoney").val(), installmentmoney: $("#installmentmoney").val(), leaseRent: $("#txtdepttleaseRent").val(), floorArearatio: $("#floorArearatio").val(), schemeId: $("#scheId").val(), selectionType: $("#SelectionType").val() }),
+                                    url: "/Scheme/AddDeptt",
+                                    success: function (data) {
+                                        if (data == true) {
+                                            $("#departmentId").data("kendoDropDownList").value("");
+                                            $("#normalInterest").val("");
+                                            $("#penalInterest").val("");
+                                            //$("#normalInterest").data("kendoDropDownList").value("");
+                                            //$("#penalInterest").data("kendoDropDownList").value("");
+                                            $("#frequency").data("kendoDropDownList").value("");
+                                            $("#SelectionType").data("kendoDropDownList").value("");
+                                            $("#noInstallment").val("");
+                                            $("#allotmentmoney").data("kendoNumericTextBox").value("");
+                                            $("#installmentmoney").data("kendoNumericTextBox").value("");
+                                            $("#leaseRent").val('');
+                                            $("#txtdepttleaseRent").data("kendoNumericTextBox").value("");
+                                            $("#floorArearatio").data("kendoNumericTextBox").value("");
+                                            $("#gridDepartment").data("kendoGrid").dataSource.read();
+
+                                            $('#btnNext2').removeAttr('disabled');
+                                            $('#btnPre2').removeAttr('disabled');
+                                            $(".third .fke-link").hide();
+                                            $(".third .accordion-section-title").show();
+
+                                            alertify.success("Data added successfully");
+                                            RebindDepartmentDdl();
+                                            setTimeout(function () { ActivateScheme(); }, 2000);
+                                            //$("#btnAddDeptt").removeAttr('disabled');
+                                        }
+                                        else{
+                                            alertify.error("This Department already exists");
+                                            //$("#btnAddDeptt").removeAttr('disabled');
+                                        }
+                                    },
+                                    error: function (objAjaxRequest, strError) {
+                                        var respText = objAjaxRequest.responseText;
+                                        //$("#btnAddDeptt").removeAttr('disabled');
+                                        //alert(respText);
+                                    }
+                                });
+                            }
+                        }
+                    },
+                    error: function (objAjaxRequest, strError) {
+                        var respText = objAjaxRequest.responseText;
+                        //$("#btnAddDeptt").removeAttr('disabled');
+                        //alert(respText);
+                    }
+
+                });
+                //commented code.
+            }
+            else{
+                //$("#btnAddDeptt").removeAttr('disabled');
+            }
+            //$("#departmentId").data("kendoDropDownList").value("");
+            //$("#btnAddDeptt").removeAttr('disabled');
+        });
+        $('#btnNext2').click(function () {
+            $("#acc3").click();
+        });
+        $('#btnPre2').click(function () {
+            $("#acc1").click();
+        });
+        $('#btnNext21').click(function () {
+            //debugger;
+            $("#acc3").click();
+        });
+        $('#btnPre21').click(function () {
+            $("#acc1").click();
+        });
+    });
+
+    function RemoveDepttRecord(refId) {
+        var schemeID = $("#scheId").val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ refId: refId, schemeID: schemeID }),
+            url: '/Scheme/RemoveDepttRecord',
+            success: function (result) {
+                if (result == true) {
+                    $("#gridDepartment").data("kendoGrid").dataSource.read();
+                    var gridDepartment = $("#gridDepartment").data("kendoGrid").dataSource.data();
+                    if (gridDepartment.length == 1) {
+                        IsSchemeCompletedByRemove(false);
+                    }
+                    alertify.success("Record deleted successfully.");
+                }
+                else {
+                    alertify.error("Department can't be deleted as a dependent Quota, Rebate or Cost exists for it.");
+                }
+            },
+            error: function (obj) {
+                //alert('Error While Saving Record.');
+            }
+        });
+    }
+    function ValidateDepttMasterScheme() {
+        var selecteddpttValue = $('#departmentId');
+        var selectedNoInttValue = $('#normalInterest');
+        var selectedPenInttValue = $('#penalInterest');
+        var selectedfreqValue = $('#frequency');
+        var selectionType = $('#SelectionType');
+        var floorArearatio = $("#floorArearatio").val().trim();
+        var installmentmoney = $("#installmentmoney").val().trim();
+        var allotmentmoney = $("#allotmentmoney").val().trim();
+        var txtdepttleaseRent = (isNaN(parseFloat($('#txtdepttleaseRent').val()))) ? 0 : parseFloat($('#txtdepttleaseRent').val());
+        if (selecteddpttValue.val() == "") {
+            alertify.error('Please Select Department');
+            //$("#btnAddDeptt").removeAttr('disabled');
+            return false;
+        }
+        else if (selectedNoInttValue.val() == "") {
+            alertify.error('Please Select Normal Interest');
+            //$("#btnAddDeptt").removeAttr('disabled');
+            return false;
+        }
+        else if (selectedPenInttValue.val() == "") {
+            alertify.error('Please Select Penal Interest');
+            //$("#btnAddDeptt").removeAttr('disabled');
+            return false;
+        }
+        else if (selectedfreqValue.val() == "") {
+            alertify.error('Please Select Frequency');
+            //$("#btnAddDeptt").removeAttr('disabled');
+            return false;
+        }
+        else if (selectionType.val() == "") {
+            alertify.error('Please Select Selection Type');
+            //$("#btnAddDeptt").removeAttr('disabled');
+            return false;
+        }
+
+        else if ($('#noInstallment').val().trim() == "") {
+            alertify.error('Please Maximum No. of Installment');
+            //$("#btnAddDeptt").removeAttr('disabled');
+            return false;
+        }
+
+        else if (selecteddpttValue.val() != 5) {
+            var total = parseFloat(installmentmoney) + parseFloat(allotmentmoney)
+
+            if($('#noInstallment').val().trim()=="")
+            {
+                alertify.error('Please enter Maximum No. of Installment.');
+                //$("#btnAddDeptt").removeAttr('disabled');
+                return false;
+            }
+            else if(allotmentmoney=="")
+            {
+                alertify.error('Please enter allotment money.');
+                //$("#btnAddDeptt").removeAttr('disabled');
+                return false;
+            }
+            else if(installmentmoney=="")
+            {
+                alertify.error('Please enter Installment money.');
+                //$("#btnAddDeptt").removeAttr('disabled');
+                return false;
+            }
+            else if (floorArearatio == "") {
+                alertify.error('Please enter Floor Area Ratio.');
+                //$("#btnAddDeptt").removeAttr('disabled');
+                return false;
+            }
+            else if($('#txtdepttleaseRent').val().trim()=="")
+            {
+                alertify.error('Please enter Lease Rent.');
+                //$("#btnAddDeptt").removeAttr('disabled');
+                return false;
+            }
+            else if (total != 100) {
+                alertify.error('Sum of Allotment Money % and Installment Money % should be equal to 100%.');
+                //$("#btnAddDeptt").removeAttr('disabled');
+                return false;
+            }
+            else if (floorArearatio > 100) {
+                alertify.error('Floor Area Ratio should be less then 100 percents');
+                //$("#btnAddDeptt").removeAttr('disabled');
+                return false;
+            }
+            else if(txtdepttleaseRent>100)
+            {
+                alertify.error("Department Lease Rent Should be between 0 to 100");
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function AllotmentInstallmentMoneyCal(controlID) {
+        if (controlID == "allotmentmoney") {
+            var allotmentmoney = (isNaN(parseFloat($('#allotmentmoney').val()))) ? 0 : parseFloat($('#allotmentmoney').val());
+            if (allotmentmoney != 0) {
+                if(allotmentmoney>=100)
+                {
+                    alertify.error("Allotment money value should be between 0 to 99");
+                    $("#allotmentmoney").data("kendoNumericTextBox").value(99);
+                    var allotmentmoney1 = (isNaN(parseFloat($('#allotmentmoney').val()))) ? 0 : parseFloat($('#allotmentmoney').val());
+                    var totalMoney = parseFloat((100.00 - parseFloat(allotmentmoney1)).toFixed(2));
+                    $("#installmentmoney").data("kendoNumericTextBox").value(totalMoney);
+                }
+                else{
+                    var totalMoney = parseFloat((100.00 - parseFloat(allotmentmoney)).toFixed(2));
+                    $("#installmentmoney").data("kendoNumericTextBox").value(totalMoney);
+                }
+            }
+        }
+        else if (controlID == "installmentmoney") {
+            var installmentmoney = (isNaN(parseFloat($('#installmentmoney').val()))) ? 0 : parseFloat($('#installmentmoney').val());
+            if (installmentmoney != 0) {
+                if(installmentmoney>=100)
+                {
+                    alertify.error("Installment money value should be between 0 to 99");
+                    $("#installmentmoney").data("kendoNumericTextBox").value(99);
+                    var installmentmoney1 = (isNaN(parseFloat($('#installmentmoney').val()))) ? 0 : parseFloat($('#installmentmoney').val());
+                    var totalallotmentMoney = parseFloat((100.00 - parseFloat(installmentmoney1)).toFixed(2));
+                    $("#allotmentmoney").data("kendoNumericTextBox").value(totalallotmentMoney);
+                }
+                else{
+                    var totalallotmentMoney = parseFloat((100.00 - parseFloat(installmentmoney)).toFixed(2));
+                    $("#allotmentmoney").data("kendoNumericTextBox").value("");
+                    $("#allotmentmoney").data("kendoNumericTextBox").value(totalallotmentMoney);
+                }
+            }
+        }
+        else if (controlID == "floorArearatio") {
+            var floorArearatio = (isNaN(parseFloat($('#floorArearatio').val()))) ? 0 : parseFloat($('#floorArearatio').val());
+            if (floorArearatio != 0) {
+                if(floorArearatio>=100)
+                {
+                    alertify.error("Floor Area Ratio value should be between 0 to 99");
+                    $("#floorArearatio").data("kendoNumericTextBox").value(99);
+                }
+            }
+        }
+        else if (controlID == "txtdepttleaseRent") {
+            var txtdepttleaseRent = (isNaN(parseFloat($('#txtdepttleaseRent').val()))) ? 0 : parseFloat($('#txtdepttleaseRent').val());
+            if (txtdepttleaseRent != 0) {
+                if(txtdepttleaseRent>=100)
+                {
+                    alertify.error("Department Lease Rent Should be between 0 to 100");
+                    //$("#txtdepttleaseRent").data("kendoNumericTextBox").value(100);
+                }
+            }
+        }
+    }
+</script>

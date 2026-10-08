@@ -1,0 +1,100 @@
+﻿@using Kendo.Mvc.UI;
+@{
+    ViewBag.Title = "Admin";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+  
+    .linkCss {
+        color: blue;
+        text-decoration: underline;
+    }
+
+    .linkCss:hover {
+        color: blue;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+    .k-grid-content{
+        overflow-y:hidden;
+        overflow-x:hidden;
+    }
+</style>
+
+<div class="ApplicationForm">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Application Users</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                @*<a href="#" id="btnAddApplication" class="" onclick="javascript:AddUser(event);">Add User</a>*@
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.UsersModel>()
+              .Name("gridViewAllUsers")
+              .Columns(columns =>
+              {
+                  columns.Bound(c => c.id).Width(10).Title("ID").Hidden(true);
+                  columns.Bound(c => c.isActive).Hidden(true).Title("Is Locked?");
+                  columns.Bound(c => c.roleId).Width(10).Title("roleId").Hidden(true);
+                  columns.Bound(c => c.applicationID).Width(10).Title("applicationID").Hidden(true);
+                  columns.Bound(c => c.applicationName).Title("Application Name").Filterable(true);
+                  columns.Bound(c => c.roleName).Title("Role Name");
+                  columns.Bound(c => c.empID).Title("Username");
+                  columns.Bound(c => c.firstName).Title("First Name");
+                  columns.Bound(c => c.lastName).Title("Last Name"); ;
+                  //columns.Bound(c => c.mobile).Width(50).Title("Mobile");
+                  //columns.Bound(c => c.email).Width(50).Title("Email");
+                  //columns.Bound(c => c.strDeptts).Width(50).Title("Department");
+                  columns.Bound(c => c.empID).HeaderHtmlAttributes(new { style = "text-align:center;" }).HtmlAttributes(new { style = "text-align:center;" }).Title("Action").ClientTemplate("<a class='gridView' href=\"/Admin/Application/ViewUser/#= id#\" id='v_#=id#'  style = 'width: 30px;' >View</a>").Filterable(false).Sortable(false);
+                  columns.Bound(c => c.id).HeaderHtmlAttributes(new { style = "text-align:center;" }).HtmlAttributes(new { style = "text-align:center;" }).Title("Access").ClientTemplate("#if(isActive == true){#  <a class='gridRevoke' onclick='javascript:LockUnlockToggle(this);'>Lock</a> #} else{#<a class='gridGrant' onclick='javascript:LockUnlockToggle(this);'>UnLock</a>#}#").Filterable(false).Sortable(false);
+                  //columns.Bound(c => c.id).Title("Access").ClientTemplate("#if(isActive == true){#  <a class='linkCss' onclick='javascript:LockUnlockToggle(this);'>Grant</a> #} else{#<a class='linkCss' onclick='javascript:LockUnlockToggle(this);'>Revoke</a>#}#").Filterable(false).Sortable(false);
+                  columns.Bound(c => c.isActive).Hidden(true);
+              })
+              .Groupable()              
+                .Filterable().Resizable(resize => resize.Columns(true))
+                .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .DataSource(dataSource => dataSource
+                      .Ajax().Model(model => model.Id(p => p.id))
+                     .ServerOperation(true)
+                     .Read(read => read.Action("GetApplicationUsersByApplicationId", "Application")).PageSize(20)
+                     .Sort(s=>s.Add(o=>o.id).Descending())
+              )
+        )
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    function LockUnlockToggle(row) {
+        var tr = $(row).parent().parent();
+        var id = $(tr).children("td:eq(0)").text();
+        var isActive = $(tr).children("td:eq(1)").text();
+        var roleId = $(tr).children("td:eq(2)").text();
+        var applicationID = $(tr).children("td:eq(3)").text();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ id: id, isActive: isActive, roleId: roleId, applicationID: applicationID }),
+            url: '/Admin/Application/LockUnlockRoleToggle',
+            success: function (result) {
+                if (result == true) {
+                    $("#gridViewAllUsers").data("kendoGrid").dataSource.read();
+                    alertify.success("User updated successfully.");
+                }
+                else
+                    alertify.error("Some error occured. Please try again later.");
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+                alertify.error("Something is wrong. Please try again later.");
+            }
+        });
+    }
+</script>

@@ -1,0 +1,318 @@
+﻿@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+
+<div class="panel-body">
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group"></div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group rdio-bx" id="AGroup1">
+            <input type="radio" id="rbtnNew" name="InfoType" value="NEW">&nbsp;New &nbsp;&nbsp;
+            <input type="radio" id="rbtnOld" name="InfoType" value="OLD" />&nbsp;Old &nbsp;
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group"></div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group rdio-bx" id="AGroup2">
+            <input type="radio" id="rbtnIndividual" name="InfoType2" value="Individual">&nbsp;Individual &nbsp;&nbsp;
+            <input type="radio" id="rbtnCompany" name="InfoType2" value="Company" />&nbsp;Company
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Registration Id:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().ComboBox()
+                .Name("ARegistrationId")
+                .DataTextField("text")
+                .DataValueField("id")
+                .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => { transport.Read("GetRegistrationIdList", "Report"); })
+                        .Schema(schema => { schema.Data("Data").Total("Total"); })
+                        .PageSize(100);
+                    }
+                 )
+                .Events(events => { events.Change("GetAllotteeDetailsByRegistrationId"); })
+                .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label class="lbl-company">First Name:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="200" id="AFirstName" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row row-individual">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Middle Name:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="500" id="AMiddleName" class="k-textbox" />
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Last Name:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="500" id="ALastName" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label class="lbl-authority">Father/Husband:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="100" id="AGuardian" class="k-textbox" />
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Mobile:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="10" id="AMobile" class="k-textbox numeric-box" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Allottee Type:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DropDownList()
+                .Name("ADDLAllotteeType")
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .OptionLabel(" --- Select ---")
+                .BindTo(new List<SelectListItem>() {
+                    new SelectListItem() { Text = "Male", Value = "Male" },
+                    new SelectListItem() { Text = "Female", Value = "Female" },
+                    new SelectListItem() { Text = "Company", Value = "Company" },
+                })
+                .HtmlAttributes(new { style = "width: 100%;" })
+            )
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Email:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="50" id="AEmailId" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label class="">Pan Card No:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="14" id="APan" class="k-textbox" />
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>GST No:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="10" id="AGSTNo" class="k-textbox numeric-box" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Corresspondance Address:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <textarea id="ACorresspondanceAdd" maxlength="500" class="form-control"></textarea>
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Permanent Address:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <textarea id="APermanentAdd" maxlength="500" class="form-control"></textarea>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 form-group" style="text-align:right;">
+            <input type="button" id="btnUpdateAllottee" value="Update" class="k-button" />
+            <input type="button" id="btnClearAllottee" value="Clear" class="k-button" onclick="javascript:ClearAllotteeFields()" />
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+       
+        $('#AGroup1 input:radio[name=InfoType]').on('change', function () {
+            var radiobtnVal = $('input[name=InfoType]:checked', '#AGroup1').val();
+            if (radiobtnVal == "NEW") {
+                ClearAllotteeFields();
+                GetAllotteeDetailsByRegistrationId();
+            }
+            else {
+                ClearAllotteeFields();
+                GetAllotteeDetailsByRegistrationId();
+            }
+        });
+
+        $('#AGroup2 input:radio[name=InfoType2]').on('change', function () {
+            var radiobtnVal = $('input[name=InfoType2]:checked', '#AGroup2').val();
+            if (radiobtnVal == "Individual") {
+                ChangeIntoIndividualField();
+                ClearAllotteeFields();
+                GetAllotteeDetailsByRegistrationId();
+            }
+            else {
+                ChangeIntoCompanyField();
+                ClearAllotteeFields();
+                GetAllotteeDetailsByRegistrationId();
+            }
+        });
+
+        $('#btnUpdateAllottee').click(function () {
+            var flag1 = $('input[name=InfoType]:checked', '#AGroup1').val();
+            var flag2 = $('input[name=InfoType2]:checked', '#AGroup2').val();
+            var rid = $('#ARegistrationId').val();
+            var fname = $('#AFirstName').val();
+            var mname = $('#AMiddleName').val();
+            var lname = $('#ALastName').val();
+            var caddress = $('#ACorresspondanceAdd').val();
+            var paddress = $('#APermanentAdd').val();
+            var aGenderType = $('#ADDLAllotteeType').val();
+            if (flag1 == null || flag1 == "undefined") {
+                alertify.error("Select radio button new or old");
+                return false;
+            }
+            if (flag2 == null || flag2 == "undefined") {
+                alertify.error("Select radio button Transfer or Allottee");
+                return false;
+            }
+            if (rid.trim() == "" || rid.length != 8) {
+                alertify.error("Please enter Registration Id");
+                return false;
+            }
+            if (fname.trim() == "") {
+                alertify.error("Please enter First name");
+                return false;
+            }
+            if (aGenderType == "") {
+                alertify.error("Please select allottee type");
+                return false;
+            }
+            if (caddress.trim() == "") {
+                alertify.error("Please enter Corresspondance Address");
+                return false;
+            }
+            else {
+                UpdateAllotteeDetail();
+            }
+        });
+    });
+
+    function GetAllotteeDetailsByRegistrationId() {
+        var flag1 = $('input[name=InfoType]:checked', '#AGroup1').val();
+        var flag2 = $('input[name=InfoType2]:checked', '#AGroup2').val();
+        var rid = $('#ARegistrationId').val();
+        if (flag1 == null || flag1 == "undefined") {
+            alertify.error("Select radio button new or old");
+            return false;
+        }
+        if (rid != "" && rid.length == 8) {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ registrationId: rid, flag1: flag1, flag2: flag2 }),
+                url: '@Url.Action("GetAllotteeDetailsByRid", "Report")',
+                success: function (result) {
+                    if (result != null) {
+                        $('#AFirstName').val(result.FirstName);
+                        $('#AMiddleName').val(result.MiddleName);
+                        $('#ALastName').val(result.LastName);
+                        $('#AGuardian').val(result.ApplicantMaster);
+                        $('#AMobile').val(result.MobileNo);
+                        $('#AEmailId').val(result.Email);
+                        var gender = result.GenderType == "M" ? "Male" : (result.GenderType == "F" ? "Female" : (result.GenderType == "C" ? "Company" : result.GenderType));
+                        $('#ADDLAllotteeType').data("kendoDropDownList").value(gender);
+                        $('#APan').val(result.PAN);
+                        $('#AGSTNo').val(result.GST);
+                        $('#ACorresspondanceAdd').val(result.CorrespondAddress);
+                        $('#APermanentAdd').val(result.PermanentAddress);
+                        if (result.ApplicantType == "Company") {
+                            ChangeIntoCompanyField();
+                            $("input[name=InfoType2][value='Company']", '#AGroup2').attr("checked", "checked");
+                        }
+                        else {
+                            ChangeIntoIndividualField();
+                            $("input[name=InfoType2][value='Individual']", '#AGroup2').attr("checked", "checked");
+                        }
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Please try again.");
+                }
+            });
+        }
+    }
+
+    function UpdateAllotteeDetail() {
+        var Amodel = {
+            FlagString: $('input[name=InfoType]:checked', '#AGroup1').val(),
+            ApplicantType: $('input[name=InfoType2]:checked', '#AGroup2').val(),
+            RegistrationId: $('#ARegistrationId').val(),
+            FirstName: $('#AFirstName').val(),
+            MiddleName: $('#AMiddleName').val(),
+            LastName: $('#ALastName').val(),
+            ApplicantMaster: $('#AGuardian').val(),
+            MobileNo: $('#AMobile').val(),
+            Email: $('#AEmailId').val(),
+            GenderType: $('#ADDLAllotteeType').val(),
+            CorrespondAddress: $('#ACorresspondanceAdd').val(),
+            PermanentAddress: $('#APermanentAdd').val(),
+            PAN: $('#APan').val(),
+            GST: $('#AGSTNo').val()
+        };        
+        $.ajax({
+            type: "post",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ model: Amodel }),
+            //url: "/Reports/Report/UpdateAllotteeBasicInfo",
+            url: '@Url.Action("UpdateAllotteeBasicInfo", "Report", new { area = "Reports" })',
+            success: function (result) {
+                if (result == '@ReturnType.Success') {
+                    alertify.success("Information updated successfully.");
+                    ClearAllotteeFields();
+                }
+
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Please try again.");
+            }
+        });
+    }
+
+    function ChangeIntoCompanyField() {
+        $('.lbl-company').text("Company Name:");
+        $('.lbl-authority').text("Signing Authority:");
+        $('.row-individual').css("display", "none");
+    }
+
+    function ChangeIntoIndividualField() {
+        $('.lbl-company').text("First Name:");
+        $('.lbl-authority').text("Guardian:");
+        $('.row-individual').show();
+    }
+
+    function ClearAllotteeFields() {
+        //$('#ARegistrationId').val('');
+        $('#AFirstName').val('');
+        $('#AMiddleName').val('');
+        $('#ALastName').val('');
+        $('#AGuardian').val('');
+        $('#AMobile').val('');
+        $('#ACorresspondanceAdd').val('');
+        $('#APermanentAdd').val('');
+        $('#AEmailId').val('');
+        $('#ADDLAllotteeType').data("kendoDropDownList").value('');
+        $('#APan').val('');
+        $('#AGSTNo').val('');
+    }
+
+</script>

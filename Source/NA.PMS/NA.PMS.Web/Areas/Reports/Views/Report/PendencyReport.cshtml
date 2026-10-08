@@ -1,0 +1,58 @@
+﻿@using Kendo.Mvc.UI
+@{
+    ViewBag.Title = "Pendency Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .k-grid-content {
+        overflow-y: hidden;
+    }
+</style>
+
+<div class="ManageTransfer">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Pendency Report</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 k-grid-content">
+
+        @(Html.Kendo().Grid<NA.PMS.Model.PendencyReport>()
+        .Name("gridPendencyReport")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.Request_No).Title("Request No").Width(130).ClientTemplate("# if(requestType=='Transfer' || requestType=='Mutation'){#<a href=\"#=PagePath##=Request_No#?pr=true\" id='v_#=Request_No#'  style = 'width: 30px;' >#=Request_No#</a>#}else{#<a href=\"#=PagePath##= EncodedParameter #?pr=true\" id='v_#=Request_No#'  style = 'width: 30px;' >#=Request_No#</a>#}#");
+            columns.Bound(c => c.rid).Title("Registration Id").Width(150);
+            columns.Bound(c => c.departmentName).Title("Department");
+            columns.Bound(c => c.Sector).Title("Sector").Width(100);
+            columns.Bound(c => c.Block).Title("Block").Width(100);
+            columns.Bound(c => c.propertyNo).Title("Property No").Width(150);
+            columns.Bound(c => c.requestedname).Title("Requested By");
+            columns.Bound(c => c.Requested_Date).Title("Request Date").Format("{0:dd/MM/yyyy}");
+            columns.Bound(c => c.Approved_Date).Title("Approved/Rejected Date").Format("{0:dd/MM/yyyy}");//Bug#191 (Note) - Resolved
+            columns.Bound(c => c.ApprovedName).Title("Assigned To");
+            columns.Bound(c => c.strStatus).Title("Status").Width(100);
+        })
+        .Sortable()
+      .Filterable()
+        .Resizable(resize => resize.Columns(true))
+        .Pageable(pageable => pageable
+        .Enabled(true)
+        .Refresh(true)
+        .PageSizes(true)
+    )
+                                            //.Groupable()
+        .DataSource(dataSource => dataSource
+                .Ajax().Model(model => model.Id(c => c.Request_No))
+                .ServerOperation(true).Sort(sort => sort.Add("Request_No").Descending())
+                        .Group(groups => groups.Add(c => c.requestType))
+                        .Read(read => read.Action("GetPendencyReport_Read", "Report")).PageSize(20)
+        )
+        )
+    </div>
+</div>

@@ -1,0 +1,85 @@
+﻿@model NA.PMS.NICServices.SWPApiServiceViewModel
+@using Kendo.Mvc.UI;
+@using NA.PMS.NICServices;
+@{
+    ViewBag.Title = "Services Status";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .ajs-header{
+        content:attr("text","Nivesh Mitra Service Status");
+    }
+</style>
+
+<div class="ManageRequestServices">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Nivesh Mitra Service Status</h1></div>
+            <div class="col-md-6 col-sm-6 col-xs-12 mandatory">
+                @*<a target="_blank" class="btn btn-default" href="/NIC/ManageNiveshMitra/">Back</a>*@
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.NICServices.SWPApiServiceViewModel>()
+            .Name("GridServiceStatus")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Title("ID").Sortable(false);
+                columns.Bound(c => c.StatusCode).Title("NIC Status Code").Sortable(false);
+                columns.Bound(c => c.StatusName).Title("NIC Status Name").Sortable(false);
+                columns.Bound(c => c.CitizenStatusName).Title("NA Status Name");
+                columns.Bound(c => c.CitizenStatusId).Title("NA Status Id");
+                columns.Bound(c => c.Status).Title("Status").ClientTemplate("#if(StatusId==1){#<label class='hyperlink' onclick='ChangeNICServiceStatus(#=Id#)'>Active</label>#}else{#<label class='hyperlink'  onclick='ChangeNICServiceStatus(#=Id#)'> In Active </label>#}#").Sortable(false);
+                //columns.Bound(c => c.Status).Title("Status").Width(50);
+            })
+            .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+            .AutoBind(true)
+            .DataSource(dataSource => dataSource
+            .Ajax().ServerOperation(true)
+            .Model(model => model.Id(c => c.Id))
+            .Read(read => read.Action("GetNiveshMitraServiceStatus", "NiveshMitra", new { area = "NIC" })).PageSize(10)
+            )
+        )
+    </div>
+</div>
+<script type="text/javascript">
+    function ChangeNICServiceStatus(id) {
+        
+        if (id != undefined && id != "") {
+            var flag = alertify.confirm(
+                "Nivesh Mitra Service Status", //as title
+                "Are you sure to change status", // as message
+                function () {
+                    $.ajax({
+                        dataType: 'json',
+                        type: 'Post',
+                        contentType: 'application/json; charset=utf-8',
+                        data: JSON.stringify({ Id: id, ActionType: "Status" }),
+                        url: '/NIC/NiveshMitra/ActivateSWPServiceStatus',
+                        success: function (result) {
+                            if (result != null && result.ReturnTypeId == '@SWPReturnTypeId.Updated') {
+                                alertify.success("Status changed successfully.");
+                                $('#GridServiceStatus').data("kendoGrid").dataSource.read();
+                            }
+                            else {
+                                alertify.error("Status does not change.");
+                            }
+                        },
+                        error: function (ajaxRequest, strError) {
+                        }
+                    });
+                },
+                function () {
+
+                }
+            );
+        }       
+    }
+</script>
+
+
+

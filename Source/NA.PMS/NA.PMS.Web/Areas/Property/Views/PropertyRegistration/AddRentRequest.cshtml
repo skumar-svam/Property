@@ -1,0 +1,854 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@using NA.PMS.Common
+@model NA.PMS.Model.RentPermissionModel
+@{
+    ViewBag.Title = "Rent Request";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    #divDepartment, #divAllotteeDetails {
+        display: none;
+    }
+
+    #allotteeDetailsHeadingId {
+        display: none;
+    }
+
+    .modal-header {
+        padding: 2px;
+    }
+</style>
+
+@using (Html.BeginForm("SaveRentPermissionRequest", "PropertyRegistration", FormMethod.Post, new { enctype = "multipart/form-data", id = "RequestForm" }))
+{
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Rent Permission</h1></div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+                </div>
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="col-md-12 content-top-spce">
+                <div id="DivRentRequestId" class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                    <h2 class="blck-heading">Property Details</h2>
+                    <div class="form-bx">
+                        <div class="row">
+                            @Html.HiddenFor(model => model.ViewName)
+                            @Html.HiddenFor(model => model.Approver)
+                            @Html.HiddenFor(model => model.Functional)
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Registration Id:", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(model => model.Rid)
+                                      .Filter("contains")
+                                      .DataTextField("text")
+                                      .DataValueField("id")
+                                      .OptionLabel(" -- Please Select --")
+                                      .DataSource(source =>
+                                        {
+                                            source.Custom()
+                                            .ServerFiltering(true)
+                                            .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                            .Transport(transport =>
+                                            {
+                                                transport.Read(read => read.Action("GetRIDsForRentPermission", "PropertyRegistration").Data("GetRid"));
+                                            })
+                                            .Schema(schema => schema.Data("Data").Total("Total"))
+                                            .PageSize(100);
+                                        })
+                                      .HtmlAttributes(new { style = "width: 100%" })
+                                      .Events(e => e.Change("GetAllotteeDetails"))
+                                )
+                                @(Html.ValidationMessageFor(m => m.Rid))
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Request Ref No:", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.ServiceRequestRefNo, htmlAttributes: new { @class = "form-control textBoxValueRightAlign", @maxlength = "8", onkeypress = "return IsNumeric(event);", @onchange = "RequestIdCheck();" })
+                                @Html.ValidationMessageFor(m => m.ServiceRequestRefNo)
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Property No:", htmlAttributes: new { })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label id="lblPropertyNo" class="font-bold form-control"></label>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Area (sqmt)", htmlAttributes: new { @class = "font-bold" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.TotalArea, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Allottee's Name", htmlAttributes: new { @class = "font-bold" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.AllotteeName, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Property Type", htmlAttributes: new { @class = "font-bold" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.PropertyType, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                        </div>
+                    </div>
+
+                    @*<h2 id="allotteeDetailsHeadingId" class="blck-heading">Allottee's Details</h2>*@
+                    <div id="divAllotteeDetails" class="form-bx">
+                        
+                        @*<div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Father's/Husband's Name", htmlAttributes: new { @id = "lblFatherName", @class = "font-bold" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.FatherOrHusbandName, new { @class = "form-control", @readonly = "readonly" })
+                                @Html.TextBoxFor(model => model.SigningAuthority, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                            
+                        </div>
+                        <div class="row">
+                            
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("AreaRange/Floor", htmlAttributes: new { @class = "font-bold" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.FloorNo, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                        </div>*@
+                    </div>
+
+                    <h2 class="blck-heading">Rent Details</h2>
+                    <div class="form-bx">
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Total Dues", htmlAttributes: new { @class = "font-bold" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.TotalDues, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Functional", htmlAttributes: new { @class = "font-bold" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.YesOrNo, new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Tenant Name", htmlAttributes: new { @class = "required font-bold" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.TenantName, new { @class = "form-control", @maxlength = "60" })
+                                @(Html.ValidationMessageFor(m => m.TenantName))
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Tenant Project", htmlAttributes: new { @class = "required font-bold" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.TenantProject, new { @class = "form-control", @maxlength = "100" })
+                                @(Html.ValidationMessageFor(model => model.TenantProject))
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Rent Duration(Years)", htmlAttributes: new { @class = "required font-bold" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.RentDuration, new { @class = "form-control textBoxValueRightAlign", @maxlength = "2" })
+                                @(Html.ValidationMessageFor(model => model.RentDuration))
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Renting Charge(INR)", htmlAttributes: new { @class = "required font-bold" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().NumericTextBoxFor(model => model.RentingCharge)
+                                    .Min(0)
+                                    .Max(1000000000000)
+                                    .Spinners(false).Step(0)
+                                    .Enable(true)
+                                    .HtmlAttributes(new { style = "width: 100%", @maxlength = "15", @class = "k-label schemeForms textBoxValueRightAlign" })
+                                )
+                                @*@Html.TextBoxFor(model => model.RentingCharge, new { @class = "form-control textBoxValueRightAlign", @maxlength = "15" })*@
+                                @(Html.ValidationMessageFor(model => model.RentingCharge))
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Renting Date", htmlAttributes: new { @class = "required font-bold" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DatePickerFor(model => model.RentingDate)
+                                                  .Events(e => e.Change("SetRentingEndDate"))
+                                                  .HtmlAttributes(new { style = "width: 100%", @class = "DisableKeyboardInput" }))
+
+                                @Html.ValidationMessageFor(model => model.RentingDate, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Renting End Date", htmlAttributes: new { @class = "required font-bold" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DatePickerFor(model => model.RentingEndDate)
+                                                  .HtmlAttributes(new { style = "width: 100%;", @class = "DisableKeyboardInput" }))
+                                @(Html.ValidationMessageFor(model => model.RentingEndDate))
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Renting Area", htmlAttributes: new { @class = "font-bold" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.Area, htmlAttributes: new { @class="form-control", @maxlength="18"})
+                                @Html.ValidationMessageFor(model => model.Area, "", new { @class = "text-danger" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Remarks", htmlAttributes: new { @class = "font-bold" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextAreaFor(model => model.Remarks, htmlAttributes: new { @class = "form-control", @maxlength = "400", style="height:30px;" })
+                                @(Html.ValidationMessageFor(model => model.Remarks))
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="box-button text-center">
+                    @Html.ActionLink("Back", "ManageRentPermission", "PropertyRegistration", new { @class = "btn btn-default" })
+                    <input type="button" id="btnApproverRequest" value="Submit for Approval" class="btn btn-add" />
+                </div>
+            </div>
+            <div class="col-md-12" id="grid-requested-rent"><br />
+                <div class="row rw-spce">
+                    @(Html.Kendo().Grid<NA.PMS.Model.RentdetailShowModel>()
+                    .Name("gridRentRequest")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(c => c.Rid).Hidden(true);
+                        columns.Bound(c => c.TenantName).Title("Tenant Name");
+                        columns.Bound(c => c.TenantProject).Title("Tenant Project");
+                        columns.Bound(c => c.RentDuration).Title("Rent Duration(Years)");
+                        columns.Bound(c => c.RentingDate).Title("Renting Start Date");
+                        columns.Bound(c => c.Area).Title("Renting Area");
+                        columns.Bound(c => c.RequestStatus).Title("Status");
+                        columns.Bound(c => c.RequestNo).Title("Action").ClientTemplate("<label class='hyperlink' onclick='RemoveRentDetail(#=RequestNo#)'>Remove</label>").Filterable(false).Sortable(false);
+                    })
+                    .Events(e=>e.DataBound("displayGrid"))
+                    .Resizable(resize => resize.Columns(true))
+                    //.Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                    //.ClientDetailTemplateId("template").AutoBind(true)
+                    .DataSource(dataSource => dataSource
+                                    .Ajax().Model(model => model.Id(p => p.RequestNo))
+                                    .ServerOperation(true)
+                                    //.Sort(sort => sort.Add("Rid").Descending())
+                                    .Read(read => read.Action("GetRentPermissionByRid", "PropertyRegistration", new { area = "Property" }).Data("filterRid")).PageSize(10)
+                        )
+                    )
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div id="divKendoPopupWindow">
+    <div class="container-fluid">
+        <div class="row form-group topSpace">
+            <div class="col-sm-3">
+                <label class="k-label">Assign To:</label>
+            </div>
+            <div class="col-sm-6">
+                @(Html.Kendo().DropDownListFor(model => model.UserId)
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .Filter("contains")
+                    .OptionLabel("---Select---")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            read.Action("GetAssineTo", "Allotment");
+                        });
+                    })
+                    //.DataSource(source =>
+                    //{
+                    //    source.Read(read =>
+                    //    {
+                    //        read.Action("GetApproverForRentPermission", "PropertyRegistration").Data("FilterRid");
+                    //    }).ServerFiltering(true);
+                    //})
+                    //.CascadeFrom("Rid")
+                    .HtmlAttributes(new { style = "width:100%;" })
+                )
+                @Html.ValidationMessageFor(model => model.UserId)
+            </div>
+        </div>
+        <div class="row form-group topSpace">
+            <div class="col-sm-6 col-sm-offset-3">
+                <input type='button' id="btnSubmitRequestForm" class='btn btn-default' value='Submit' />
+                <input type='button' id="btnCancelRequestForm" class='btn btn-default' value='Close' />
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+
+    $(document).ready(function () {
+        $('#ViewName').val("AddRentRequest");
+        var rentingEndDate = $('#RentingEndDate').data("kendoDatePicker");
+        rentingEndDate.readonly();
+
+        @{if (TempData["MesgAdd"] != null && TempData["MesgAdd"] != "")
+            {
+                @:alertify.error('Rent Permission request is not added.');
+                                                                                                                    }
+        }
+    });
+    function filterRid() {
+        if ($('#Rid').val() == "") {
+            return {
+                Rid: 0
+            }
+        }
+        else {
+            return {
+                Rid: $('#Rid').val()
+            }
+        }
+    }
+
+    function displayGrid() {
+        if ($('#gridRentRequest').data("kendoGrid").dataSource.total() == 0) {
+            $('#grid-requested-rent').css("display", "none");
+        }
+        else {
+            $('#grid-requested-rent').show();
+        }
+    }
+    //$(function () {
+    //    $("form").kendoValidator();
+    //});
+
+    //$("div[id='divKendoPopupWindow']").kendoWindow({
+    //    modal: true,
+    //    title: "Assign Request to Approver",
+    //    visible: false,
+    //    width: "30%"
+    //});
+
+    function FilterRid() {
+        return { rid: $('#Rid').val() }
+    }
+
+    function GetRid() {
+        return { Rid: 0 }
+    }
+
+    $('#divKendoPopupWindow').kendoWindow({
+        modal: true,
+        title: "Assign Request to Approver",
+        visible: false,
+        width: "35%"
+    });
+
+    $('#btnApproverRequest').click(function () {
+        //alert("rent1");
+        //debugger;
+        if ($('#Rid').val() == "") {
+            alertify.error("Please Select Registration Id");
+            return false;
+        }
+        if ($('#TotalDues').val() > 0) {
+            alertify.error("Property dues is not cleared");
+            return false;
+        }
+        if ($('#ServiceRequestRefNo').val() == "" || $('#ServiceRequestRefNo').val() == null) {
+            alertify.error("Please enter Request Ref. No.");
+            return false;
+        }
+        if (($('#ServiceRequestRefNo').val()).length < 3) {
+            alertify.error("Request Ref. No. length must be 3 characters");
+            return false;
+        }
+        if ($('#YesOrNo').val() == "No") {
+            alertify.error("Property is not functional");
+            return false;
+        }
+        if ($('#TenantName').val().trim() == "") {
+            alertify.error("Please enter Tenant Name");
+            return false;
+        }
+        if ($('#TenantProject').val().trim() == "") {
+            alertify.error("Please enter Tenant Project");
+            return false;
+        }
+        if ($('#RentDuration').val().trim() == "") {
+            alertify.error("Please enter Rent duration");
+            return false;
+        }
+        if ($('#RentingCharge').val().trim() == "") {
+            alertify.error("Please enter Renting charge");
+            return false;
+        }
+        if ($('#RentingDate').val().trim() == "") {
+            alertify.error("Please enter Renting Date");
+            return false;
+        }
+        if ($('#RentingEndDate').val().trim() == "") {
+            alertify.error("Please enter Renting End Date");
+            return false;
+        }
+        else {
+            var flag = ValidateRentingEndDate($('#RentDuration').val());
+            //var rflag = ValidateRentingDate();
+            //var flagrid = IsRidAddedForRentPermission($('#Rid').val());
+            var bflag = false;
+            var rid = $('#Rid').val();
+            if (rid != "") {
+                $.ajax({
+                    type: "post",
+                    dataType: "json",
+                    contentType: "application/json;charset=utf-8",
+                    data: JSON.stringify({ rid: rid }),
+                    url: '@Url.Action("GetAllotteDetailsForRentPermission","PropertyRegistration")',
+                    success: function (result) {
+                        if (result.IsRentPermissionRequested == true) {
+                            alertify.error("Rent Permission already added for this RID.");
+                            //flag = false;
+                            return false;
+                        }
+                        else {
+                            //alert("flag=" + flag);
+                            //flag = true;
+                            //return true;
+                            var win = $("#divKendoPopupWindow").data("kendoWindow");
+                            win.center();
+                            win.open();
+                        }
+                    },
+                    error: function (ajaxRequest, strError) {
+                        //alert(ajaxRequest.responseText);
+                        alertify.error("Something is wrong, try again later.");
+                    }
+                });
+                //alert("flag Final=" + flag);
+                //return flag;
+            }
+
+            //if (flag == true && flagrid == true) {
+            //    var win = $("#divKendoPopupWindow").data("kendoWindow");
+            //    win.center();
+            //    win.open();
+            //}
+        }
+    });
+
+    $('#btnCancelRequestForm').click(function () {
+        $("#divKendoPopupWindow").data("kendoWindow").close();
+    });
+
+    $('#btnSubmitRequestForm').click(function () {
+        if ($('#UserId').val() != "") {
+            var flag = ValidateRentingEndDate($('#RentDuration').val());
+            if (flag == true) {
+                $('#Approver').val($('#UserId').val());
+                $("#divKendoPopupWindow").data("kendoWindow").close();
+                //$('form#RequestForm').submit();
+                window.location = '/Property/PropertyRegistration/ManageRentPermission';
+                var formData = new FormData($('form#RequestForm').get(0));
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: false, // Not to set any content header
+                    processData: false, // Not to process data
+                    data: formData,
+                    url: '/Property/PropertyRegistration/SaveRentPermissionRequest',
+                    success: function (result) {
+
+                        if (result == true) {
+                            //$('#gridRentRequest').data('kendoGrid').dataSource.read();
+                            alertify.success("Rent Detail added successfully.");
+                        }
+                        else {
+                            alertify.error("Rented Area can't be greater than total Area.");
+                        }
+                    },
+                    error: function (ajaxRequest, strError) {
+                        alertify.error("Network error, try again later");
+                    }
+                });
+            }
+        }
+        else {
+            alertify.error("Please select Approver");
+            return false;
+        }
+    });
+
+    function GetAllotteeDetails() {
+        var rid = $('#Rid').val();
+        if (rid == "") {
+            //$('#allotteeDetailsHeadingId').hide();
+            //$('#divAllotteeDetails').hide();
+            //$('#gridRentRequest').hide();
+            RemoveAllotteeDetailFields();
+            RemoveRentDetailFields();
+            return false;
+        }
+        else {
+            //GetKYADetails(rid);
+            RemoveRentDetailFields();
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify({ rid: rid }),
+                url: '@Url.Action("GetAllotteDetailsForRentPermission","PropertyRegistration")',
+                success: function (result) {
+                    if (result != null) {
+                        if (result.IsRentPermissionRequested == true) {
+                            //$('#Rid').val('');
+                            alertify.error("Rent Permission already added for this RID.");
+                            return false;
+                        } else {
+                            //$('#Department').val(result.Department);
+                            $('#AllotteeName').val(result.AllotteeName);
+                            $('#GenderOrCompany').val(result.GenderOrCompany);
+
+                            if (result.GenderOrCompany == "company") {
+                                $('#lblFatherName').text("Authorized Signatory");
+                                $('#SigningAuthority').val(result.SigningAuthority);
+                                $('#FatherOrHusbandName').val('');
+                                $('#FatherOrHusbandName').hide();
+                                $('#SigningAuthority').show();
+                            }
+                            else {
+                                $('#lblFatherName').text("Father/HusbandName");
+                                $('#FatherOrHusbandName').val(result.FatherOrHusbandName);
+                                $('#SigningAuthority').val('');
+                                $('#SigningAuthority').hide();
+                                $('#FatherOrHusbandName').show();
+                            }
+
+                            $('#PropertyType').val(result.PropertyType);
+                            $('#TotalArea').val(result.TotalArea);
+                            $('#FloorNo').val(result.FloorNo);
+                            $('#lblPropertyNo').text(" " + result.Sector + "/" + result.Block + "/" + result.PropertyNo);
+                            $('#PropertyNo').val(result.PropertyNo);
+                            $('#TotalDues').val(result.TotalDues);
+                            $('#YesOrNo').val(result.YesOrNo);
+                            //$('#Functional').val(result.Functional);
+                            $('#allotteeDetailsHeadingId').show();
+                            $('#divAllotteeDetails').show();
+                        }
+                        $('#gridRentRequest').data("kendoGrid").dataSource.read();
+                    }
+                    else {
+                        alertify.error("There is some error, try again");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Something is wrong, try again later.");
+                }
+            });
+        }
+    }
+
+    function GetKYADetails(rid) {
+        //var rId = $("#RId").val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ RegistrationId: rid }),
+            url: '/Property/PropertyRegistration/GetKYADetailsForRid',
+            success: function (result) {
+                if (result != null) {
+                    if (result.StatusId == "2") {
+                        alertify.error("Your KYA has been Rejected. Please Complete your KYA again.");
+                        $('#btnApproverRequest').attr('disabled', 'disabled');
+                        return false;
+                    }
+                    else if (result.StatusId == "" || result.StatusId == null) {
+                        alertify.error("Please Complete your KYA.");
+                        $('#btnApproverRequest').prop('disabled', true);
+                        return false;
+                    }
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+
+    $('#RentDuration').click(function () {
+        var duration = $('#RentDuration').val();
+        $('#RentDuration').val(duration.trim());
+    });
+
+    $('#RentDuration').blur(function () {
+        var duration = $('#RentDuration').val();
+        $('#RentDuration').val(duration.trim());
+    });
+
+    $('#RentingCharge').blur(function () {
+        var charge = $('#RentingCharge').val();
+        if (charge != "") {
+            $('#RentingCharge').val(parseFloat($('#RentingCharge').val()).toFixed(2));
+        }
+    });
+
+    function SetRentingEndDate() {
+        var rid = $('#Rid').val();
+        var rentdate = $('#RentingDate').val();
+        var duration = $('#RentDuration').val();
+        if (duration.trim() == "" || duration == null) {
+            alertify.error("Please enter rent duration");
+            return false;
+        }
+        if (rentdate.trim() != "") {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify({ rid: rid, rentStartDate: rentdate }),
+                url: '@Url.Action("ValidateRentingStartDate","PropertyRegistration")',
+                success: function (result) {
+                    //alert(result);
+                    if (Date.parse(result) >= Date.parse(rentdate)) {
+                        alertify.error("Renting date can't be earlier than functional date.");
+                        return false;
+                        //flag = false;
+                    }
+                    else {
+                        var startDate = $('#RentingDate').val();
+                        var endDate = $('#RentingEndDate').data("kendoDatePicker");
+                        var newDate = new Date(startDate);
+                        newDate.setFullYear(newDate.getFullYear() + parseInt(duration));
+                        //newDate.setDate(newDate.getDate() - 1);
+                        var newDate2 = new Date(newDate.setDate(newDate.getDate() - 1));
+                        endDate.value(newDate2);
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Something is wrong, try again later.");
+                }
+            });
+        }
+
+        //var startDate = $('#RentingDate').val();
+        //var endDate = $('#RentingEndDate').data("kendoDatePicker");
+        //var newDate = new Date(startDate);
+        //newDate.setFullYear(newDate.getFullYear() + parseInt(duration));
+        //endDate.value(newDate);
+    }
+
+    function ValidateRentingDate() {
+        var flag = false;
+        var rid = $('#Rid').val();
+        var rentdate = $('#RentingDate').val();
+        $.ajax({
+            type: "post",
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            data: JSON.stringify({ rid: rid, rentStartDate: rentdate }),
+            url: '@Url.Action("ValidateRentingStartDate","PropertyRegistration")',
+            success: function (result) {
+                if (Date.parse(result) >= Date.parse(rentdate)) {
+                    alertify.error("Renting date can't be earlier than functional date.");
+                    //return false;
+                    flag = false;
+                }
+                else {
+                    flag = true;
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Something is wrong, try again later.");
+            }
+        });
+        return flag;
+    }
+
+    function ValidateRentingEndDate(duration) {
+        var startDate = $('#RentingDate').val();
+        var endDate = $('#RentingEndDate').val();
+        var stDate = new Date(startDate);
+        var enDate = new Date(endDate);
+        var timeDiff = Math.abs(enDate.getTime() - stDate.getTime());
+        var diffYears = Math.floor(timeDiff / (1000 * 3600 * 24 * 364));
+        if (diffYears != parseInt(duration)) {
+            alertify.error("Rent duration should be equal to difference of renting end date and start date");
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+    function RemoveAllotteeDetailFields() {
+        $('#AllotteeName').val('');
+        $('#GenderOrCompany').val('');
+        $('#SigningAuthority').val('');
+        $('#FatherOrHusbandName').val('');
+        $('#FatherOrHusbandName').val('');
+        $('#SigningAuthority').val('');
+        $('#PropertyType').val('');
+        $('#TotalArea').val('');
+        $('#FloorNo').val('');
+        $('#PropertyNo').val('');
+        $('#TotalDues').val('');
+        $('#Functional').val('');
+    }
+
+    function RemoveRentDetailFields() {
+        $('#TenantName').val('');
+        $('#TenantProject').val('');
+        $('#RentDuration').val('');
+        $('#RentingCharge').val('');
+        $('#RentingDate').val('');
+        $('#RentingEndDate').val('');
+    }
+    var flag = false;
+    function IsRidAddedForRentPermission(rid) {
+
+        //alert(rid);
+        if (rid != "") {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify({ rid: rid }),
+                url: '@Url.Action("GetAllotteDetailsForRentPermission","PropertyRegistration")',
+                success: function (result) {
+                    if (result.IsRentPermissionRequested == true) {
+                        alertify.error("Rent Permission already added for this RID.");
+                        flag = false;
+                        //return false;
+                    }
+                    else {
+                        //alert("flag=" + flag);
+                        flag = true;
+                        //return true;
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Something is wrong, try again later.");
+                }
+            });
+            //alert("flag Final=" + flag);
+            return flag;
+        }
+    }
+
+    function ToJavaScriptDate(value) {
+        var pattern = /Date\(([^)]+)\)/;
+        var results = pattern.exec(value);
+        //return value;
+        if (results != null) {
+            var dt = new Date(parseFloat(results[1]));
+            return (dt.getMonth() + 1) + "/" + dt.getDate() + "/" + dt.getFullYear();
+        }
+    }
+    function RemoveRentDetail(id) {
+        if (id != 0 && id != undefined) {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify({ RequestNo: id }),
+                url: '@Url.Action("RemoveRentRequestDetailsById", "PropertyRegistration", new { area="Property"})',
+                success: function (result) {
+                    if (result == '@ReturnType.Removed') {
+                        alertify.success("Rent Details Successfully Removed.");
+                        $('#gridRentRequest').data('kendoGrid').dataSource.read();
+                    }
+                    else {
+                        alertify.error("Rent Details not Removed.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network Error, Try again latter");
+                }
+            });
+        }
+    }
+
+    function RequestIdCheck() {
+        var request = $("#ServiceRequestRefNo").val();
+        rModel = {
+            RequestId: $("#ServiceRequestRefNo").val(),
+            RegistrationId: $("#Rid").val(),
+            ServiceId: "2"
+        }
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ model: rModel }),
+            url: '/Property/PropertyRegistration/IsRequestIdIsExist',
+            success: function (result) {
+                if (result != '@ReturnType.Exist') {
+                    if (result == '@NAStatusId.Completed') {
+                        alertify.error("This Request is Completed");
+                    }
+                    else if (result == '@NAStatusId.Initiated') {
+                        alertify.error("This Request is in Initiated State. Please Forward this request first.");
+                    }
+                    else if (result == '@NAStatusId.Objection') {
+                        alertify.error("This Request in Objection State.");
+                    }
+                    else if (result == '@NAStatusId.Rejected') {
+                        alertify.error("This Request is Rejected");
+                    }
+                    else if (result == '@NAStatusId.Cancelled') {
+                        alertify.error("This Request is cancelled");
+                    }
+                    else if (result == '@NAStatusId.Withdrawn') {
+                        alertify.error("This Request is Withdrawn by Allottee.");
+                    }
+                    else {
+                        alertify.error("Request no. mismatch. Please enter a valid Request No.");
+                    }
+                    $("#ServiceRequestRefNo").val('');
+                }
+
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+
+</script>

@@ -1,0 +1,217 @@
+﻿@using Kendo.Mvc.UI;
+@model NA.PMS.Model.CustomerDetailViewModel
+
+@{
+    ViewBag.Title = "Payment History";
+    Layout = "~/Views/Shared/_LayoutCustomer.cshtml";
+}
+
+<style>
+    .container-content h2 {
+        padding: 0;
+        margin: 0;
+    }
+</style>
+
+<div class="container-content">
+    <div>
+        @Html.HiddenFor(model=>model.CustomerModel.RegistrationId)
+    </div>
+    <div class="col-md-12">
+        <div class="row row-heading">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="h1-title">Payment History</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn"> <h1 class="h1-title text-right">Registration Id:@Model.CustomerModel.RegistrationId </h1> </div>
+        </div>
+    </div>
+    <div class="col-md-12 hr-div"></div>
+
+    <div class="col-md-12 content-border">
+        <div class="col-md-12">
+            <ul class="nav nav-tabs content-tabs" id="ulProperty" role="tablist">
+                <li class="active"><a href="#one" role="tab" data-toggle="tab">Payment History</a></li>
+                <li><a href="#two" role="tab" data-toggle="tab">Payment Schedule</a></li>
+                @*<li><a href="#three" role="tab" data-toggle="tab">Payment Reschedule</a></li>*@
+                <li><a href="#four" role="tab" data-toggle="tab">Account Ledger</a></li>
+                <li><a href="#five" role="tab" data-toggle="tab">Lease Rent Dues</a></li>
+                <li><a href="#Six" role="tab" data-toggle="tab">Installment Dues</a></li>
+                <li><a href="#Seven" role="tab" data-toggle="tab">NDC</a></li>
+            </ul>
+        </div>
+
+        <div class="col-md-12 tabbable tab-content" id="divProperty">
+            <div class="row tab-pane fade in active" id="one">
+                <div class="col-md-12 k-grid-content">
+                    @*<h2 class="grid-title">Payment History</h2>*@
+                    @(Html.Kendo().Grid<NA.PMS.Model.PaymentViewModel>()
+                        .Name("gridPaymentReceipt")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(c => c.ReceiptId).Title("Receipt No").Width(140);
+                            columns.Bound(c => c.ChallanId).Title("Challan No").Width(140);
+                            columns.Bound(c => c.ReceiptHeadName).Title("Receipt Head");//.Width(80);
+                            columns.Bound(c => c.ReceiptSubHeadName).Title("Receipt Sub Head");//.Width(80);
+                            columns.Bound(c => c.DepositDate).Title("Deposit Date").Format("{0:dd-MMM-yyyy}").Width(130);
+                            columns.Bound(c => c.PaidAmount).Title("Amount Paid").Width(130);
+                        })
+                        .Sortable()
+                        .Filterable()
+                        .Resizable(resize => resize.Columns(true))
+                        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                        .DataSource
+                        (
+                            dataSource => dataSource
+                            .Ajax()
+                            .Model(model => model.Id(p => p.Id))
+                            .ServerOperation(true).Sort(s=>s.Add(r=>r.DepositDate).Descending())
+                            .Read(read => read.Action("GetPaymentReceiptScheduleListById", "Property", new { area = "Customer" }).Data("AdditionalInfo1"))
+                            .PageSize(10)
+                        )
+                    )
+                </div>
+            </div>
+
+            <div class="row tab-pane fade" id="two">
+                <div class="col-md-12 k-grid-content">
+                    @(Html.Kendo().Grid<NA.PMS.Model.PaymentViewModel>()
+                       .Name("gridPaymentSchedule")
+                      .Columns(columns =>
+                      {
+                          columns.Bound(c => c.InstallmentNo).Title("Installment No").Width(80);
+                          columns.Bound(c => c.InstallmentDueDate).Format("{0:dd-MMM-yyyy}").Title("Due Date").Width(80);
+                          columns.Bound(c => c.InstallmentAmount).Title("Installment Amount").Width(80);
+                          columns.Bound(c => c.InstallmentInterest).Title("Installment Interest").Width(80);
+                          columns.Bound(c => c.BalanceAmount).Title("Balance Amount").Width(80);
+                          columns.Bound(c => c.PrincipalAmount).Title("Principal Amount").Width(80);
+                      })
+                      .Sortable()
+                      .Filterable()
+                      .Resizable(resize => resize.Columns(true))
+                      .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                      .DataSource
+                      (
+                          dataSource => dataSource
+                            .Ajax()
+                            .Model(model => model.Id(p => p.Id))
+                            .ServerOperation(true)
+                            .Read(read => read.Action("GetPaymentScheduleDataListById", "Property", new { area = "Customer" }).Data("AdditionalInfo"))
+                            .PageSize(10)
+                      )
+                    )
+                </div>
+            </div>
+
+            <div class="row tab-pane fade" id="three">
+                <div class="col-md-12 k-grid-content" id="hdnRescheduleGrid">
+                    @*<h2 class="grid-title">Payment Reschedule</h2>*@
+                    @(Html.Kendo().Grid<NA.PMS.Model.PaymentViewModel>()
+                        .Name("gridPaymentReschedule")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(c => c.InstallmentNo).Title("Number of Installment").Width(80);
+                            columns.Bound(c => c.InstallmentDueDate).Format("{0:dd-MMM-yyyy}").Title("Installment Due Date").Width(80);
+                            columns.Bound(c => c.InstallmentAmount).Title("Principal Installment Amount").Width(80);
+                            columns.Bound(c => c.InstallmentAmount).Title("Interest Installment Amount").Width(80);
+                            columns.Bound(c => c.BalanceAmount).Title("Total Installment Amount").Width(80);
+                            columns.Bound(c => c.PrincipalAmount).Title("Balance Principal Amount").Width(80);
+                        })
+                        .Sortable()
+                        .Filterable()
+                        .Resizable(resize => resize.Columns(true))
+                        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                        .DataSource
+                        (
+                            dataSource => dataSource
+                            .Ajax()
+                            .Model(model => model.Id(p => p.Id))
+                            .ServerOperation(true)
+                            //.Read(read => read.Action("GetPaymentRescheduledListById", "Property", new { area = "Customer" }).Data("AdditionalInfo"))
+                            .Read(read => read.Action("GetPaymentScheduleDataListById", "Property", new { area = "Customer" }).Data("AdditionalInfo"))
+                            .PageSize(10)
+                        )
+                    )
+                </div>
+            </div>
+
+            <div class="row tab-pane fade" id="four">
+                <div class="col-md-12 k-grid-content">
+                    @*<h2 class="grid-title">Account Ledger Book</h2>*@
+                    @(Html.Kendo().Grid<NA.PMS.Model.PaymentViewModel>()
+                        .Name("gridPaymentLedger")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(c => c.EntryDate).Title("Transaction Date").Format("{0:dd-MM-yyyy}");
+                            columns.Bound(c => c.ReceiptSubHeadName).Title("Account Name");
+                            columns.Bound(c => c.DebitAmount).Title("Debit Amount");
+                            columns.Bound(c => c.CreditAmount).Title("Credit Amount");
+                            columns.Bound(c => c.BalanceAmount).Title("Balance Amount");
+                        })
+                        .Sortable()
+                        .Filterable()
+                        .Resizable(resize => resize.Columns(true))
+                        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                        .AutoBind(true)
+                        .DataSource
+                        (
+                            dataSource => dataSource
+                            .Ajax().Model(model => model.Id(p => p.Id))
+                            .ServerOperation(true)
+                            .Read(read => read.Action("GetPaymentLedgerDataListById", "Property", new { area = "Customer" }).Data("AdditionalInfo"))
+                            .PageSize(10)
+                        )
+                    )
+                </div>
+            </div>
+
+            <div class="row tab-pane fade" id="five">
+                <div class="col-md-12 k-grid-content">
+                    @(Html.Kendo().Grid<NA.PMS.Model.LeaseRentViewModel>()
+                .Name("GridLeaseRentDues")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.Id).Title("Id").Width(50).Hidden(true);
+                    //columns.Bound(c => c.RegistrationId).Title("Registasdasration Id").ClientTemplate("<a href='" + "/Property/PropertyAllotment/PropertyDetails/#= RegistrationId #'>#= RegistrationId #</a>").Filterable(true);
+                    //columns.Bound(c => c.PropertyNo).Title("Property");
+                    columns.Bound(c => c.LeaseRentPremium).Title("Lease Rent (<span class='fa fa-rupee'></span>)").ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+                    columns.Bound(c => c.PaidUptoDate).Title("Paid Upto").Format("{0:dd-MMM-yyyy}");
+                    columns.Bound(c => c.LeaseRentDues).Title("Dues (<span class='fa fa-rupee'></span>)").ClientTemplate("<label class='hyperlink' onclick='ShowLeaseRentDetail(#=Id#)'>#= LeaseRentDues #</label>").ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+                    columns.Bound(c => c.DuesUptoDate).Title("Dues Upto").Format("{0:dd-MMM-yyyy}");
+                    //columns.Bound(c => c.RegistrationId).Title("Demand Note").Width(140).ClientTemplate(" <center><a onclick='javascript:PrintDemandNote(#=RegistrationId#,#=LeaseRentDues#);'><span class='fa fa-print'></span></a></center> ");
+                    //columns.Bound(c => c.LeaseRentDues).Title("Lease Rent Dues").ClientTemplate("<label class='hyperlinkcss' onclick='ShowLeaseRentDetail(#=Id#)'>view</label>");
+                })
+                .Sortable()
+                .Filterable()
+                .Resizable(resize => resize.Columns(true))
+                .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .Model(model => model.Id(p => p.Id))
+                        .ServerOperation(true)
+                        .Read(read => read.Action("GetMultiplePaymentStatusList", "Payment", new { area = "Revenue" }).Data("LeaseRent")).PageSize(10)
+                        .Aggregates(aggregates => aggregates.Add(p => p.LeaseRentPremium).Sum())
+                        .Aggregates(aggregates => aggregates.Add(p => p.LeaseRentDues).Sum())
+
+                    )
+                    )
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<script>
+    function AdditionalInfo() {
+        return {
+            rid: $('#CustomerModel_RegistrationId').val()
+            //rid: 10000013
+        }
+    }
+
+    function AdditionalInfo1() {
+        return {
+            RegistrationId: $('#CustomerModel_RegistrationId').val()
+            //rid: 60122464
+        }
+    }
+</script>

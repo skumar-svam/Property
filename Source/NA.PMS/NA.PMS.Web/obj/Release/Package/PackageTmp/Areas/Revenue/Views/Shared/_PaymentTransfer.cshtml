@@ -1,0 +1,154 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@using NA.PMS.Common;
+@using NA.PMS.Model
+@model NA.PMS.Model.PaymentViewModel
+
+
+<h2 class="blck-heading" style="margin-bottom:15px;">Allotment II (Transfer)</h2>
+<div class="form-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+  
+    <div class="row">
+        <div class="col-md-6 col-sm-12 col-xs-12 form-group">
+            <label>Allottee II Name</label>
+            @Html.TextBoxFor(model => model.ApplicantII, htmlAttributes: new { @class = "form-control", @maxlength = "50", style="width:97%;" })
+        </div>
+        <div class="col-md-6 col-sm-12 col-xs-12 form-group">
+            <label>Allottee II Address</label>
+            @Html.TextBoxFor(model => model.ApplicantAddressII, htmlAttributes: new { @class = "form-control", @maxlength = "50", style = "width:97%;" })
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Transfer Request Letter Date</label>
+            @(Html.Kendo().DatePickerFor(model => model.TransferRequestDate).HtmlAttributes(new { style = "width:95%;float:right;" }))
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Transfer Date</label>
+            @(Html.Kendo().DatePickerFor(model => model.TransferDeedDate).HtmlAttributes(new { style = "width:95%;float:right;" }))
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Transfer Charge (%)</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.TransferChargeRate).Name("transfer-charge-rate")
+                    .Min(0).Max(9999999999)
+                    .Spinners(false).Step(0).Enable(true)
+                   .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right", @placeholder = "" })
+            )
+            @*@Html.TextBoxFor(model => model.TransferChargeRate, htmlAttributes: new { @class = "form-control", @maxlength = "8" })*@
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Current Allotment Rate(psqm)</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.AllotmentRate).Name("transfer-allotment-rate")
+                    .Min(0).Max(9999999999)
+                    .Spinners(false).Step(0).Enable(true)
+                   .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right", @placeholder = "" })
+            )
+            @*@Html.TextBoxFor(model => model.AllotmentRate, htmlAttributes: new { @class = "form-control", @maxlength = "8" })*@
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Location Charge(psqm)</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.LocationCharge).Name("transfer-location-charge")
+                    .Min(0).Max(9999999999)
+                    .Spinners(false).Step(0).Enable(true)
+                   .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right", @placeholder = "" })
+            )
+            @*@Html.TextBoxFor(model => model.LocationCharge, htmlAttributes: new { @class = "form-control", @maxlength = "8" })*@
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label title="Total Allotment Rate At time of transfer(psqm)">Total Allotment Rate for transfer(psqm)</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.TotalAllotmentRate).Name("transfer-total-allotment-rate")
+                    .Min(0).Max(9999999999)
+                    .Spinners(false).Step(0).Enable(true)
+                   .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right", @placeholder = "Total Allotment Rate At time of transfer(psqm)" })
+            )
+            @*@Html.TextBoxFor(model => model.TotalAllotmentRate, htmlAttributes: new { @class = "form-control", @maxlength = "8" })*@
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Total Property Cost At time of transfer</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.TotalPropertyCost).Name("transfer-propertycost")
+                    .Min(0).Max(9999999999)
+                    .Spinners(false).Step(0).Enable(true)
+                   .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right", @placeholder = "" })
+            )
+            @*@Html.TextBoxFor(model => model.TotalPropertyCost, htmlAttributes: new { @class = "form-control", @maxlength = "8" })*@
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Transfer Amount</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.TransferAmount).Name("transfer-transferamount")
+                .Min(0).Max(9999999999)
+                .Spinners(false).Step(0).Enable(true)
+                .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right", @placeholder = "" })
+            )
+            @*@Html.TextBoxFor(model => model.TransferAmount, htmlAttributes: new { @class = "form-control", @maxlength = "8" })*@
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Lease Rent</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.LeaseRentAmount).Name("transfer-leaserent-amount")
+                .Min(0).Max(9999999999)
+                .Spinners(false).Step(0).Enable(true)
+                .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right", @placeholder = "" })
+            )
+            @*@Html.TextBoxFor(model => model.LeaseRentAmount, htmlAttributes: new { @class = "form-control", @maxlength = "8" })*@
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>One Time Lease Rent</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.OneTimeLeaseRentAmount).Name("transfer-onetime-leaserent")
+                .Min(0).Max(9999999999)
+                .Spinners(false).Step(0).Enable(true)
+                .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right", @placeholder = "" })
+            )
+            @*@Html.TextBoxFor(model => model.OneTimeLeaseRentAmount, htmlAttributes: new { @class = "form-control", @maxlength = "8" })*@
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Revised Lease Rent</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.RevisedLeaseRent).Name("transfer-revised-leaserent")
+                .Min(0).Max(9999999999)
+                .Spinners(false).Step(0).Enable(true)
+                .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right", @placeholder = "" })
+            )
+            @*@Html.TextBoxFor(model => model.RevisedLeaseRent, htmlAttributes: new { @class = "form-control", @maxlength = "8" })*@
+        </div>
+    </div>
+    <div class="row">
+
+    </div>
+
+    <div class="row">
+        <div class="col-md-12" style="text-align:right;">
+            @*<input type="button" class="btn btn-default" value="NDA Calculation" />*@
+            <input type="button" class="btn btn-default" value="One Time Lease Rent" />
+        </div>
+    </div>
+</div>
+
+<div class="col-md-12 k-grid-content">
+    @(Html.Kendo().Grid<NA.PMS.Model.PaymentViewModel>()
+            .Name("GridTransferPayment")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.ReceiptId).Title("Receipt Id").Width(140);//.ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+                columns.Bound(c => c.ReceiptHeadName).Title("Receipt Head");
+                columns.Bound(c => c.ReceiptSubHeadName).Title("Receipt Subhead").ClientFooterTemplate("<span>Total:-</span>");
+                //columns.Bound(c => c.DuesAmount).Title("Dues (<span class='fa fa-rupee'></span>)");//.ClientTemplate("<label class='hyperlink' onclick='ShowLeaseRentDetail(#=Id#, #=RegistrationId#, #=DepartmentId#)'>#= CurrentDues #</label>").ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+                columns.Bound(c => c.Amount).Title("Paid Amount (<span class='fa fa-rupee'></span>)").ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>").Width(120);
+                columns.Bound(c => c.ChallanId).Title("Challan Id").Width(120);
+                columns.Bound(c => c.DepositDate).Title("Deposit Date").Format("{0:dd-MMM-yyyy}").Width(120);
+            })
+            .Filterable().Resizable(resize => resize.Columns(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))//.AutoBind(false)
+            .DataSource(dataSource => dataSource
+                   .Ajax().ServerOperation(true)
+                   .Model(model => model.Id(p => p.Id))
+                   .Read(read => read.Action("GetTransferDuesCalculationDetailAsDataSource", "Finance", new { area = "Revenue" }).Data("FilterRegistrationId")).PageSize(10)
+                   .Aggregates(aggregates => aggregates.Add(p => p.Amount).Sum())
+           )
+    )
+</div>
+

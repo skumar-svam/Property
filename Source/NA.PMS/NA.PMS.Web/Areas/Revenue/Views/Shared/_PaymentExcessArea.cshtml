@@ -1,0 +1,259 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@using NA.PMS.Common;
+@using NA.PMS.Model
+@model NA.PMS.Model.PaymentViewModel
+
+
+<h2 class="blck-heading" style="margin-bottom:15px;">Excess Area Detail</h2>
+<div class="form-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+    <div class="row">
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Excess Area Date</label>
+            @(Html.Kendo().DatePickerFor(model => model.ExcessAreaDate).Events(e => e.Change("ExcessAreaDateChangeEvent")).HtmlAttributes(new { @id = "excess-area-date", style = "width:95%;float:right;" }))
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Total Excess Area(sqm)</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.TotalExcessArea).Name("excess-total-area")
+                .Min(0).Max(99999999999)
+                .Spinners(false).Step(0).Enable(true)
+                .Events(e => e.Change("CalculateExcessAreaCharge"))
+                .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Allotment Rate Of Excess Area(psqm)</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.ExcessAreaRate).Name("excess-area-rate")
+                .Min(0).Max(99999999999)
+                .Spinners(false).Step(0).Enable(true)
+                .Events(e => e.Change("CalculateExcessAreaCharge"))
+                .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Location Charge Of Excess Area(psqm)</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.LocationCharge).Name("excess-location-charge")
+                .Min(0).Max(99999999999)
+                .Spinners(false).Step(0).Enable(true)
+                .Events(e => e.Change("CalculateExcessAreaCharge"))
+                .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right" })
+            )
+        </div>
+    </div>
+
+    <div class="row">    
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label title="Total Allotment Rate of Excess Area">Total Allotment Rate(psqm)</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.TotalAllotmentRate).Name("excess-allotment-rate")
+                .Min(0).Max(99999999999)
+                .Spinners(false).Step(0).Enable(true)
+                .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right", @placeholder="Allotment Rate of Excess Area" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Total Property Cost Of Excess Area</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.ExcessAreaCost).Name("excess-area-cost")
+                .Min(0).Max(99999999999)
+                .Spinners(false).Step(0).Enable(true)
+                .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right", @placeholder = "Total Cost of Excess Area" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>One Time Lease Rent On Excess Area</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.AdvanceLeaseRentAmount).Name("excess-advance-leaserent")
+                .Min(0).Max(99999999999)
+                .Spinners(false).Step(0).Enable(true)
+                .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right", @placeholder = "Advance Leaserent of Excess Area" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label title="Total cost of Excess Area + One Time Lease Rent on Excess Area">Payable Excess Area Cost</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.TotalExcessAreaCost).Name("excess-area-totalcost")
+                .Min(0).Max(99999999999)
+                .Spinners(false).Step(0).Enable(true)
+                .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right", @placeholder = "Total cost of Excess Area + One Time Lease Rent on Excess Area" })
+            )
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Valid Upto Date</label>
+            @(Html.Kendo().DatePickerFor(model => model.ValidUptoDate).HtmlAttributes(new {@id="excess-valid-uptodate", @class = "", style = "width:95%; float:right;" }))
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label title="Interest On Total cost of Excess Area + One Time Lease Rent on Excess Area">Interest On Payable Amount</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.InterestAmount).Name("excess-interest-amount")
+                .Min(0).Max(99999999999)
+                .Spinners(false).Step(0).Enable(true)
+                        .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right", @placeholder = " Interest On Total cost of Excess Area + One Time Lease Rent on Excess Area" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label title="Total cost of Excess Area + One Time Lease Rent on Excess Area">Total Payable Amount</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.TotalPayableAmount).Name("excess-payable-amount")
+                .Min(0).Max(99999999999)
+                .Spinners(false).Step(0).Enable(true)
+                .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right", @placeholder = "Total cost of Excess Area + One Time Lease Rent on Excess Area" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+            <label>Penal Interest On Excess Area(%)</label>
+            @(Html.Kendo().NumericTextBoxFor(m => m.PenalInterest).Name("excess-penal-interest")
+                .Min(0).Max(99)
+                .Spinners(false).Step(0).Enable(true)
+                .HtmlAttributes(new { style = "width: 95%;", @maxlength = "13", @class = "text-right", @placeholder = "Peanl Interest on Excess Area" })
+            )
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12" style="text-align:right;">
+            <input type="button" class="btn btn-default" value="Calculation Of Excess Area" />
+        </div>
+    </div>
+</div>
+
+<div class="col-md-12 k-grid-content">
+    @(Html.Kendo().Grid<NA.PMS.Model.PaymentViewModel>()
+            .Name("GridExcessAreaPayment")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.ReceiptId).Title("Receipt Id").Width(140);//.ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+                columns.Bound(c => c.ReceiptHeadName).Title("Receipt Head");
+                columns.Bound(c => c.ReceiptSubHeadName).Title("Receipt Subhead").ClientFooterTemplate("<span>Total:-</span>");
+                //columns.Bound(c => c.DuesAmount).Title("Dues (<span class='fa fa-rupee'></span>)");//.ClientTemplate("<label class='hyperlink' onclick='ShowLeaseRentDetail(#=Id#, #=RegistrationId#, #=DepartmentId#)'>#= CurrentDues #</label>").ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+                columns.Bound(c => c.Amount).Title("Paid Amount (<span class='fa fa-rupee'></span>)").ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>").Width(120);
+                columns.Bound(c => c.ChallanId).Title("Challan Id").Width(120);
+                columns.Bound(c => c.DepositDate).Title("Deposit Date").Format("{0:dd-MMM-yyyy}").Width(120);
+            })
+            .Filterable().Resizable(resize => resize.Columns(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))//.AutoBind(false)
+            .DataSource(dataSource => dataSource
+                   .Ajax().ServerOperation(true)
+                   .Model(model => model.Id(p => p.Id))
+                   .Read(read => read.Action("GetExcessAreaDuesCalculationDetailAsDataSource", "Finance", new { area = "Revenue" }).Data("FilterRegistrationId")).PageSize(10)
+                   .Aggregates(aggregates => aggregates.Add(p => p.Amount).Sum())
+           )
+    )
+</div>
+
+<script>
+    $(document).ready(function () {
+        GetExcessAreaDetails();
+    });
+
+    function CalculateExcessAreaCharge() {
+        var allotmentRate = $('#excess-area-rate').val() == "" ? 0 : $('#excess-area-rate').val();
+        var locationCharge = $('#excess-location-charge').val() == "" ? 0 : $('#excess-location-charge').val();
+        var excessArea = $('#excess-total-area').val() == "" ? 0 : $('#excess-total-area').val();
+        if (allotmentRate != 0) {
+            locationCharge = parseFloat(locationCharge).toFixed(2);
+            allotmentRate = parseFloat(allotmentRate).toFixed(2);
+            excessArea = parseFloat(excessArea).toFixed(2);
+            var finalrate = Number(allotmentRate) + Number(parseFloat(allotmentRate * locationCharge / 100).toFixed(2));
+            $("#excess-allotment-rate").data("kendoNumericTextBox").value(finalrate);
+            if (excessArea != 0) {
+                var excessAreaCost = parseFloat(excessArea * finalrate).toFixed(2);
+                var leaserent = parseFloat(excessAreaCost * 2.5 / 100).toFixed(2);
+                var onetimelease = parseFloat(leaserent * 11).toFixed(2);
+                var excessAreaCharge = Number(excessAreaCost) + Number(onetimelease);
+                $("#excess-area-cost").data("kendoNumericTextBox").value(excessAreaCost);
+                $("#excess-advance-leaserent").data("kendoNumericTextBox").value(onetimelease);
+                $("#excess-area-totalcost").data("kendoNumericTextBox").value(parseFloat(excessAreaCharge));
+                $("#excess-payable-amount").data("kendoNumericTextBox").value(parseFloat(excessAreaCharge));
+            }
+        }
+    }
+
+    function ExcessAreaDateChangeEvent() {
+        if ($('#excess-area-date').val() != "") {
+            var areaDate = new Date($('#excess-area-date').val());
+            var date = new Date(areaDate);
+            var newdate = new Date(date);
+            newdate.setDate(newdate.getDate() + 30);
+            var dd = newdate.getDate();
+            var mm = newdate.getMonth() + 1;
+            var y = newdate.getFullYear();
+            var someFormattedDate = mm + '/' + dd + '/' + y;
+            $('#excess-valid-uptodate').data("kendoDatePicker").value(someFormattedDate);
+        }
+    }
+
+    function GetExcessAreaDetails() {
+        var rid = $('#hdn-registration-id').val();
+        var pid = $('#PropertyId').val();
+        if (pid != "") {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ RegistrationId: rid, PropertyId: pid }),
+                //url: "/Revenue/Payment/GetPropertyPaymentReScheduleInformationById",
+                url: "/Revenue/Finance/GetPropertyExcessAreaCostDetailById",
+                success: function (result) {
+                    if (result != null) {
+                        $("#excess-area-date").data("kendoDatePicker").value(result.ExcessAreaDate);
+                        $("#excess-total-area").data("kendoNumericTextBox").value(result.TotalExcessArea);
+                        $("#excess-area-rate").data("kendoNumericTextBox").value(result.ExcessAreaRate);
+                        $("#excess-location-charge").data("kendoNumericTextBox").value(result.LocationCharge);
+                        $("#excess-allotment-rate").data("kendoNumericTextBox").value(result.ExcessAreaAllotmentRate);
+                        $("#excess-penal-interest").data("kendoNumericTextBox").value(result.PenalInterest);
+                        $("#excess-area-cost").data("kendoNumericTextBox").value(result.ExcessAreaCost);
+                        $("#excess-advance-leaserent").data("kendoNumericTextBox").value(result.OneTimeLeaseRentAmount);
+                        $("#excess-area-totalcost").data("kendoNumericTextBox").value(result.TotalExcessAreaCost);
+                        $("#excess-interest-amount").data("kendoNumericTextBox").value(result.PenalInterestAmount);
+                        $("#excess-valid-uptodate").data("kendoDatePicker").value(result.ValidUptoDate);
+                        $("#excess-payable-amount").data("kendoNumericTextBox").value(result.TotalPayableAmount);
+                        //ExcessAreaDateChangeEvent();
+                    } else { alertify.error("no data found."); }
+
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                }
+            });
+        }
+    }
+
+    function SaveExcessAreaDetails() {
+        var excessArea = {
+            RegistrationId: $('#hdn-registration-id').val(),
+            PropertyId: $('#PropertyId').val(),
+            ExcessAreaDate: $("#excess-area-date").data("kendoDatePicker").value(),
+            AllottedArea: $("#hdn-excess-allotted-area").data("kendoNumericTextBox").value(),
+            ExcessArea: $("#excess-total-area").data("kendoNumericTextBox").value(),
+            TotalArea: $("#excess-total-area").data("kendoNumericTextBox").value(),
+            ExcessAreaRate: $("#excess-area-rate").data("kendoNumericTextBox").value(),
+            ExcessAreaAllotmentRate: $("#excess-allotment-rate").data("kendoNumericTextBox").value(),
+            ExcessAreaLocationCharge: $("#excess-location-charge").data("kendoNumericTextBox").value(),
+            ExcessAreaCharge: $("#excess-area-cost").data("kendoNumericTextBox").value(),
+            PenalInterest: $("#excess-penal-interest").data("kendoNumericTextBox").value(),
+            ExcessAreaCost: $("#excess-area-cost").data("kendoNumericTextBox").value(),
+            AdvanceLeaseRentAmount: $("#excess-advance-leaserent").data("kendoNumericTextBox").value(),
+            TotalExcessAreaCost: $("#excess-area-totalcost").data("kendoNumericTextBox").value(),
+            TotalPropertyCost: $("#excess-area-totalcost").data("kendoNumericTextBox").value(),
+            PenalInterestAmount: $("#excess-interest-amount").data("kendoNumericTextBox").value(),
+            ExcessAreaValidDate: $("#excess-valid-uptodate").data("kendoDatePicker").value(),
+            TotalPayableAmount: $("#excess-payable-amount").data("kendoNumericTextBox").value(),
+        };
+        if (pid != "") {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ model: excessArea }),
+                url: "/Revenue/Finance/SaveExcessAreaDetail",
+                success: function (result) {
+                    if (result == '@ReturnType.Saved') {
+                        alertify.success("Excess Area Detail saved successfully.");
+                    } else { alertify.error("no data found."); }
+
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                }
+            });
+        }
+    }
+</script>

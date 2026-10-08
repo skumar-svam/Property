@@ -1,0 +1,341 @@
+﻿@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+
+<style>
+    .left-padding {
+        padding-left: 30px;
+        padding-right: 30px;
+    }
+
+    .k-textbox {
+        width: 100%;
+    }
+
+    .form-group label {
+        padding-left: 0;
+    }
+</style>
+
+<div class="panel-body">
+    <div class="row">
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group left-padding">
+            <label>Department</label>
+            @(Html.Kendo().DropDownList()
+                .Name("CDepartment")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .OptionLabel(" -- Select --")
+                //.DataSource(source => source.Read(read => read.Action("GetMasterSearchParameterAsDataSource", "ManageProperty", new { area = "Master" }).Data("FilterDepartmentParameter")))
+                .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        //.Transport(transport => { transport.Read("GetMasterSearchParameterAsDataSource", "ManageProperty", new { area = "Master" }); })
+                        .Transport(transport => transport.Read(read => read.Action("GetMasterSearchParameterAsDataSource", "ManageProperty", new { area = "Master" }).Data("FilterDepartmentParameter")))
+                        .Schema(schema => { schema.Data("Data").Total("Total"); })
+                        .PageSize(100);
+                    }
+                 )
+                .Events(events => { events.Change("ChangeInDepartment"); })
+                .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group left-padding">
+            <label>Scheme</label>
+            @(Html.Kendo().DropDownList()
+                .Name("CScheme")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .OptionLabel("-- Select --")
+                //.DataSource(source => source.Read(read => read.Action("GetMasterSearchParameterAsDataSource", "ManageProperty", new { area = "Master" }).Data("FilterSchemeParameter")))
+                .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetMasterSearchParameterAsDataSource", "ManageProperty", new { area = "Master" }).Data("FilterSchemeParameter")))
+                        .Schema(schema => { schema.Data("Data").Total("Total"); })
+                        .PageSize(100);
+                    }
+                 )
+                .Events(events => { events.Change("ChangeInScheme"); })
+                .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group left-padding">
+            <label class="">Property Type</label>
+            <input type="text" maxlength="100" id="CPropertyType" class="k-textbox" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group left-padding">
+            <label>Sector</label>
+            @(Html.Kendo().DropDownList()
+                .Name("CSector")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .OptionLabel("-- Select --")
+                //.DataSource(source => source.Read(read => read.Action("GetAllSectors", "ManageProperty", new { area = "Master" })))
+                .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetMasterSearchParameterAsDataSource", "ManageProperty", new { area = "Master" }).Data("FilterSectorParameter")))
+                        .Schema(schema => { schema.Data("Data").Total("Total"); })
+                        .PageSize(100);
+                    }
+                 )
+                .Events(events => { events.Change("ChangeInSector"); })
+                .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group left-padding">
+            <label>Block</label>
+            @(Html.Kendo().DropDownList()
+                .Name("CBlock")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .OptionLabel("-- Select --")
+                //.DataSource(source => source.Read(read => read.Action("GetAllBlocks", "ManageProperty", new { area = "Master" })))
+                .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetMasterSearchParameterAsDataSource", "ManageProperty", new { area = "Master" }).Data("FilterBlockParameter")))
+                        .Schema(schema => { schema.Data("Data").Total("Total"); })
+                        .PageSize(100);
+                    }
+                 )
+                .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group left-padding">
+            <label>Floor Area</label>
+            @(Html.Kendo().DropDownList()
+                .Name("CFloor")
+                .DataTextField("text")
+                .DataValueField("id")
+                .OptionLabel("-- Select --")
+                .DataSource(source => source.Read(read => read.Action("GetAllFloorTypes", "ManageProperty", new { area = "Master" })))
+                .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group left-padding">
+            <label>Property Cost:</label>
+            <input type="text" maxlength="10" id="CPropertyCost" class="k-textbox" />
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group left-padding">
+            <label>Civil Cost:</label>
+            <input type="text" maxlength="10" id="CCivilCost" class="k-textbox" />
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group left-padding">
+            <label>Total Cost:</label>
+            <input type="text" maxlength="10" id="CTotalCost" class="k-textbox" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group left-padding">
+            <label>Allotment Money</label>
+            <input type="text" maxlength="10" id="CAllotmentMoney" class="k-textbox" />
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group left-padding">
+            <label>Earnest Money</label>
+            <input type="text" maxlength="10" id="CEarnestMoney" class="k-textbox" />
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group left-padding">
+            <label>Lease Rent</label>
+            <input type="text" maxlength="10" id="CLeaseRent" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group left-padding">
+            <label>Land Rate(sqm)</label>
+            <input type="text" maxlength="10" id="CLandRate" class="k-textbox" />
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 form-group" style="text-align:right;">
+            <input type="button" id="btnUpdatePropertyCost" value="Update" class="k-button" />
+            <input type="button" id="btnClearPropertyCost" value="Clear" class="k-button" />
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#btnUpdatePropertyCost').click(function () {
+            UpdatePropertyCostDetail();
+        });
+
+        $('#btnClearPropertyCost').click(function () {
+            ClearPropertyCostDetails();
+        });
+    });
+
+    function GetPropertyCostDetailsById() {
+        var pid = $('#CPropertyId').val();
+
+        if (pid != "") {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ propertyId: pid }),
+                url: '@Url.Action("GetPropertyDetailsById", "Report")',
+                success: function (result) {
+                    if (result != null) {
+                        $('#CSector').data("kendoComboBox").value(result.SectorId);
+                        $('#CBlock').data("kendoComboBox").value(result.BlockId);
+                        $('#CDepartment').data("kendoComboBox").value(result.FloorId);
+                        $('#CPropertyCost').val(result.PropertyRate);
+                        $('#CCivilCost').val(result.PropertyCost);
+                        $('#CTotalCost').val(result.CivilCost);
+                        $('#CPropertyType').val(result.TotalPropertyCost);
+                        $('#CFloor').val(result.CoveredArea);
+                        $('#CLandRate').val(result.ActualArea);
+                        $('#CAllotmentMoney').val(result.TotalArea);
+                        $('#CEarnestMoney').data("kendoComboBox").value(result.Registry);;
+                        $('#CLeaseRent').val(result.AllotmentMoney);
+                    }
+                    if (result == '@ReturnType.NotExist') {
+                        alertify.error("PropertyId Id doesn't exist");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Please try again.");
+                }
+            });
+        }
+    }
+
+    function UpdatePropertyCostDetail() {
+        var Pmodel = {
+            PropertyId: $('#PPropertyId').val(),
+            ParentPropertyId: $('#PParentPropertyId').val(),
+            SectorId: $('#PSector').val(),
+            BlockId: $('#PBlock').val(),
+            PlotNo: $('#PPlotNo').val(),
+            FloorAreaId: $('#PFloor').val(),
+            PropertyRate: $('#PLandRate').val(),
+            PropertyCost: $('#PPropertyCost').val(),
+            CivilCost: $('#PCivilCost').val(),
+            TotalPropertyCost: $('#PTotalCost').val(),
+            CoveredArea: $('#PCoveredArea').val(),
+            ActualArea: $('#PActualArea').val(),
+            TotalArea: $('#PTotalArea').val(),
+            Registry: $('#PRegistry').val(),
+            AllotmentMoney: $('#PAllotmentMoney').val()
+        };
+
+        $.ajax({
+            type: "post",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ model: Pmodel }),
+            url: '@Url.Action("UpdatePropertyDetail", "Report")',
+            success: function (result) {
+                if (result == '@ReturnType.Success') {
+                    alertify.success("Property detail updated successfully.");
+                    ClearPropertyDetails();
+                }
+                if (result == '@ReturnType.NotExist') {
+                    alertify.error("Property doesn't exist successfully.");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Please try again.");
+            }
+        });
+    }
+
+    function ClearPropertyCostDetails() {
+        //$('#PPropertyId').data("kendoComboBox").value('');
+        //$('#PParentProperty').data("kendoComboBox").value('');
+        $('#PSector').data("kendoComboBox").value('');
+        $('#PBlock').data("kendoComboBox").value('');
+        $('#PPlotNo').val('');
+        $('#PFloor').data("kendoComboBox").value('');
+        $('#PLandRate').val('');
+        $('#PPropertyCost').val('');
+        $('#PCivilCost').val('');
+        $('#PTotalCost').val('');
+        $('#PCoveredArea').val('');
+        $('#PActualArea').val('');
+        $('#PTotalArea').val('');
+        $('#PRegistry').data("kendoComboBox").value('');
+        $('#PAllotmentMoney').val('');
+        $('#PParentPropertyId').data("kendoComboBox").value('');
+    }
+
+    function FilterDepartmentParameter() {
+        return {
+            ActionType: "Department",
+            Department: $('#CDepartment').val()
+        };
+    }
+
+    function FilterSchemeParameter() {
+        return {
+            ActionType: "Scheme",
+            SchemeId: $('#CScheme').val(),
+            DepartmentId: $('#CDepartment').val()
+        };
+    }
+
+    function FilterSectorParameter() {
+        return {
+            ActionType: "Sector",
+            SchemeId: $('#CScheme').val(),
+            DepartmentId: $('#CDepartment').val(),
+            SectorId: $('#CSector').val()
+        };
+    }
+
+    function FilterBlockParameter() {
+        return {
+            ActionType: "Block",
+            SchemeId: $('#CScheme').val(),
+            DepartmentId: $('#CDepartment').val(),
+            SectorId: $("#CSector").val(),
+            BlockId: $("#Block").val()
+        };
+    }
+
+    function ChangeInDepartment() {
+        $('#CScheme').data('kendoDropDownList').dataSource.read();
+        //ChangeInDropdownFilter();
+    }
+
+    function ChangeInScheme() {
+        $('#CSector').data('kendoDropDownList').dataSource.read();
+        $('#CBlock').data('kendoDropDownList').dataSource.read();
+    }
+
+    function ChangeInSector() {
+        $('#CBlock').data('kendoDropDownList').dataSource.read();
+    }
+
+    function ChangeInDropdownFilter() {
+        $('#CScheme').data('kendoDropDownList').dataSource.read();
+        //$('#DepartmentId').data('kendoDropDownList').dataSource.read();
+        //$('#SectorId').data('kendoDropDownList').dataSource.read();
+        //$('#BlockId').data('kendoDropDownList').dataSource.read();
+    }
+
+</script>

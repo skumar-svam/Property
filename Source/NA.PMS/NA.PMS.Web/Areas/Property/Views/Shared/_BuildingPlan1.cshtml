@@ -1,0 +1,413 @@
+﻿@model NA.PMS.Model.BuildingPlanModel 
+@using Kendo.Mvc.UI;
+<style>
+   
+    .disable_a_href {
+        pointer-events: none;
+    }
+    .child {
+    pointer-events:auto;
+}
+</style>
+
+<div class="col-md-12">
+
+    <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+        <h2 class="blck-heading">Planning Details</h2>
+        <div class="form-bx">
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Allottee Name")
+
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(m => m.AllotteeName, htmlAttributes: new { @class = "lbl-form-control", @readonly = "readonly", @disabled="disabled" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Property Type")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(m => m.PropertyType, htmlAttributes: new { @class = "lbl-form-control", @readonly = "readonly", @disabled="disabled" })
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Location(East)")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(m => m.Location_East, htmlAttributes: new { @class="lbl-form-control", @Readonly="Readonly"})                 
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Location (West)")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group"> 
+                    @Html.TextBoxFor(m => m.Location_West, htmlAttributes: new { @class = "lbl-form-control", @Readonly = "Readonly" })                   
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Location (North)")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(m => m.Location_North, htmlAttributes: new { @class = "lbl-form-control", @readonly = "readonly" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Location (South)")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(m => m.Location_South, htmlAttributes: new { @class = "lbl-form-control", @readonly = "readonly" })
+                </div>
+            </div>
+        </div>
+
+        <h2 class="blck-heading">Add Building Plan Details</h2>
+        <div class="form-bx">
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Building Plan File No#", htmlAttributes: new { @class = "required" })
+
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <div id="lblScNa">
+                        @Html.TextBoxFor(m => m.BuildingPlanFileNo, new { @maxlength = "50", @class = "form-control" })
+                        @Html.ValidationMessageFor(model => model.BuildingPlanFileNo)
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Property Use")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <div id="lblDeNa">
+                        <div class="col-md-12">
+                            @(Html.Kendo().DropDownListFor(m => m.PropertyUse)
+                            .Filter("contains")
+                            .DataTextField("text")
+                            .DataValueField("id")
+                            .OptionLabel("Select")
+                            .DataSource(source =>
+                            {
+                                source.Read(read =>
+                                {
+                                    read.Action("GetPropertyUse", "PropertyRegistration");
+                                });
+                            })
+                            .HtmlAttributes(new { @class = "", style = "width:100%" })
+                            )
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Date Of Submission", htmlAttributes: new { @class = "required" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <div>
+                        @(Html.Kendo().DatePickerFor(model => model.DateOfSubmission).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+                        @Html.ValidationMessageFor(model => model.DateOfSubmission, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Date Of Sanction", htmlAttributes: new { @class = "required" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <div id="lblDateOfSanction">
+                        @(Html.Kendo().DatePickerFor(model => model.DateOfSanction).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))<br />
+                        @Html.ValidationMessageFor(model => model.DateOfSanction, "", new { @class = "text-danger" })
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Purchasable FAR%")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <div id="lblPurchasableFar">
+                        @(Html.Kendo().NumericTextBoxFor(m => m.PurchasableFar)
+                                  .Name("PurchasableFar")
+                                  .Min(0)
+                                    .Max(99999)
+                                            .Spinners(false).Step(0)
+                                    .Enable(true)
+                         .HtmlAttributes(new { style = "width: 100%", @maxlength = "8", @class = "k-label schemeForms textBoxValueRightAlign" })
+                        )
+                        @Html.ValidationMessageFor(model => model.PurchasableFar, "", new { @class = "text-danger" })
+                        @*@Html.TextBoxFor(m => m.PurchasableFar )*@
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Sanction Plan Validity")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <div>
+                        @(Html.Kendo().DatePickerFor(model => model.SanctionPlanValidity).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))<br />
+                        @Html.ValidationMessageFor(model => model.SanctionPlanValidity, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Map Released", htmlAttributes: new { @class = "required" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <div>
+
+                        @(Html.Kendo().DropDownListFor(model => model.MapReleased)
+                      .DataTextField("text")
+                              .DataValueField("text")
+                      .OptionLabel("Select")
+                      .DataSource(source =>
+                      {
+                          source.Read(read =>
+                          {
+                              read.Action("GetPreviousLoanNoc", "PropertyRegistration");
+                          });
+                      })
+                                .HtmlAttributes(new { style = "width:100%" })
+                        )
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Map Revised", htmlAttributes: new { @class = "required" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <div>
+                        @(Html.Kendo().DropDownListFor(model => model.MapRevised)
+                      .DataTextField("text")
+                              .DataValueField("text")
+                      .OptionLabel("Select")
+                      .DataSource(source =>
+                      {
+                          source.Read(read =>
+                          {
+                              read.Action("GetPreviousLoanNoc", "PropertyRegistration");
+                          });
+                      })
+                                .HtmlAttributes(new { style = "width:100%" })
+                        )
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Plot Area (In sq Mtr)")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(m => m.PloatArea, htmlAttributes: new { @class = "lbl-form-control", @readonly = "readonly", @disabled="disabled" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Covered Area (In sq Mtr)")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(m => m.CoveredArea, htmlAttributes: new { @class = "lbl-form-control", @readonly = "readonly", @maxlength = "18", @disabled="disabled" })
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Floor Areas Ratio (FAR)")
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.TextBoxFor(m => m.FloorAreasRation, htmlAttributes: new { @class = "lbl-form-control", @readonly = "readonly", @disabled = "disabled" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Number Of Stories(MAX)", htmlAttributes: new { @class = "required" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <div>
+                        <div>
+                            @Html.TextBoxFor(m => m.NumberOfStories, new { @maxlength = "3", onkeypress = "return IsNumeric(event);", @class = "form-control" })
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Architect Reg No#", htmlAttributes: new { @class = "required" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <div>
+                        @Html.TextBoxFor(m => m.ArchitectRegNo, new { @maxlength = "50", @class = "form-control" })
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    @Html.Label("Name Of Architect", htmlAttributes: new { @class = "required" })
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                    <div>
+                        <div>
+                            @Html.TextBoxFor(m => m.NameOfArchitect, new { @maxlength = "100", @class = "form-control" })
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="box-button text-center view-btn-box">
+            @*<input type="button" id="btnCancel" value="Cancel" class="btn btn-default" onclick="window.history.back()"/>*@
+            <input type="button" id="btnSave" value="Add" class="btn btn-add" />
+        </div>
+    </div>
+
+</div>  
+<script type="text/javascript">
+   
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+   
+    $("#btnSave").click(function () {
+      
+        var rId = $("#RId").val();
+        if (rId == "") {
+            alertify.error("Please select RId.");
+            return false;
+        }
+
+        var BuildingPlanFileNo = $("#BuildingPlanFileNo").val();
+
+       
+        var PropertyUse = $("#PropertyUse").val();
+  
+        var DateOfSubmission = $("#DateOfSubmission").val();
+        var DateOfSanction = $("#DateOfSanction").val();
+        var PurchasableFar = $("#PurchasableFar").val();
+        var SanctionPlanValidity = $("#SanctionPlanValidity").val()
+
+        var MapReleased = $("#MapReleased").val();
+
+        var MapRevised = $("#MapRevised").val()
+
+        var PloatArea = $("#PloatArea").val()
+
+        //var PloatArea11 = $("#lblPloatArea").html()
+      
+        var CoveredArea = $("#CoveredArea").val()
+        var FloorAreasRation = $("#FloorAreasRation").val()
+
+
+        var NumberOfStories = $("#NumberOfStories").val()
+        var ArchitectRegNo = $("#ArchitectRegNo").val();
+
+        var NameOfArchitect = $("#NameOfArchitect").val()
+
+      
+        if (BuildingPlanFileNo == "" || /^[a-zA-Z0-9- ]*$/.test(BuildingPlanFileNo) == false) {
+            alertify.error("Please enter Building Plan File No. in alphanumeric.");
+            return false;
+        }
+        //if (/^[a-zA-Z0-9- ]*$/.test(BuildingPlanFileNo) == false) {
+        //    alertify.error('Building Plan File No. should be alphanumeric');
+        //    return false;
+        //}
+        if (DateOfSubmission == "") {
+            alertify.error("Please enter Date of Submission.");
+            return false;
+        }
+        //Resolved Bug#219 (Indirect Bug)
+        if (DateOfSanction == "") {
+            alertify.error("Please enter Date of Sanction.");
+            return false;
+        }
+        if (MapReleased == "") {
+            alertify.error("Please select Map Released.");
+            return false;
+        }
+        if (MapRevised == "") {
+            alertify.error("Please select Map Revised.");
+            return false;
+        }
+        if (NumberOfStories == "") {
+            alertify.error("Please enter Number Of Stories.");
+            return false;
+        }
+        if (ArchitectRegNo == "") {
+            alertify.error("Please enter Architect RegNo.");
+            return false;
+        }
+        if (/^[a-zA-Z0-9- ]*$/.test(ArchitectRegNo) == false) {
+            alertify.error('Building Plan File No. should be alphanumeric');
+            return false;
+        }
+        if (NameOfArchitect == "") {
+            alertify.error("Please enter Name Of Architect.");
+            return false;
+        }
+        if (DateOfSanction!= "") {
+            if (Date.parse(DateOfSubmission) >= Date.parse(DateOfSanction))
+            {
+                alertify.error("Sanction  date would be greater than submission date.");
+                return false;
+            }
+            if (SanctionPlanValidity != "") {
+
+                if (Date.parse(DateOfSanction) >= Date.parse(SanctionPlanValidity)) {
+                    alertify.error("Sanction Plan Validity date would be greater than submission date and sanction date .");
+                    return false;
+                }
+            }
+        }
+        
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ rId: rId, BuildingPlanFileNo: BuildingPlanFileNo, PropertyUse: PropertyUse, DateOfSubmission: DateOfSubmission, DateOfSanction: DateOfSanction, PurchasableFar: PurchasableFar, SanctionPlanValidity: SanctionPlanValidity, MapReleased: MapReleased, MapRevised: MapRevised, PloatArea: PloatArea, CoveredArea: CoveredArea, FloorAreasRation: FloorAreasRation, NumberOfStories: NumberOfStories, ArchitectRegNo: ArchitectRegNo, NameOfArchitect: NameOfArchitect }),
+                url: '/PropertyRegistration/SaveBuildingPlan1',
+                success: function (result) {
+                    if (result == 1) {
+                        $("#Building2").addClass("child");
+                        alertify.success("Data saved successfully.Please add Building Plan Second section");
+                        $("#RId").data("kendoDropDownList").enable(false);
+                        $("#btnSave").attr('disabled', 'disabled');
+                        @*window.location.href = '@Url.Action("ManageBuildingPlan", "PropertyRegistration")';*@
+                        return false;
+                    }
+                    if (result == 2) {
+                        alertify.error("Building Plan Data already saved .");
+                        return false;
+                    }
+                    if (result == 3) {
+                        alertify.error("Building Plan File No. already saved.");
+                        return false;
+                    }
+                    else {
+                        return true;
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    alert(respText);
+                }
+
+            });
+        
+    });
+ 
+    function IsNumeric(e) {
+       
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+
+        if (ret == false)
+            return false;
+    }
+    </script>

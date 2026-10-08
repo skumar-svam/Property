@@ -1,0 +1,226 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@using NA.PMS.Common;
+    @model NA.PMS.Model.PaymentScheduleModel
+
+    @{
+    ViewBag.Title = "Manage Schedule";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+
+    <div class="manage-installment">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Schedule</h1></div>
+                <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                    <a href="/Revenue/Payment/InstallmentReSchedule" target="_blank"><i class="fa fa-plus"></i> <span> ReSchedule</span></a>
+                    <a href="/Revenue/Payment/InstallmentSchedule" target="_blank"><i class="fa fa-plus"></i> <span> Schedule</span></a>
+                    @*<a href="/Revenue/Payment/Installment" target="_blank"><i class="fa fa-plus"></i> <span> Installment</span></a>*@
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <h2 class="blck-heading" style="margin-bottom:15px;">Search</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-2 col-sm-2 col-xs-12 form-group">
+                            <b>@Html.Label("Department")</b>
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(m => m.DepartmentId)
+                            .Filter("contains")
+                            .DataTextField("Text")
+                            .DataValueField("Id")
+                            .OptionLabel(" --- select ---")
+                            .DataSource(source =>
+                            {
+                                source.Custom()
+                                .ServerFiltering(true)
+                                .ServerPaging(true)
+                                .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                .Transport(transport => transport.Read(read => read.Action("GetDepartmentList", "Finance", new { area = "Revenue" })))
+                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                .PageSize(6);
+                            })
+                            .Events(events => { events.Change("ChangeDepartmentEvent"); })
+                            .HtmlAttributes(new { @class = "input-disabled", style = "width:100%" })
+                            )
+                        </div>
+                        <div class="col-md-4">
+
+                        </div>
+                        <div class="col-md-3">
+                            @*<input type="button" class="k-button" id="btn-remove" value="Remove Multiple" />
+                            <input type="button" class="k-button" id="btn-generate" value="Create Schedule" />*@
+                        </div>
+                    </div>
+                </div>
+
+                <h2 class="blck-heading" style="margin-bottom:0;">Premium Schedule</h2>
+                <div class="col-md-12 k-grid-content">
+                    @(Html.Kendo().Grid<NA.PMS.Model.PaymentScheduleModel>()
+                .Name("InstallmentScheduleGrid")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.ScheduleId).Hidden(true);
+                    columns.Bound(c => c.RegistrationId).Title("Registration Id").Width(140);
+                    //columns.Bound(c => c.PropertyNo).Title("Property");
+                    columns.Bound(c => c.PropertyId).Title("Property Id");
+                    columns.Bound(c => c.PrincipalAmount).Title("Principal");
+                    columns.Bound(c => c.TotalInstallment).Title("Total Installment");
+                    //columns.Bound(c => c.Frequency).Title("Frequency");
+                    columns.Bound(c => c.FrequencyName).Title("Frequency");
+                    columns.Bound(c => c.PeriodOfInstallment).Title("Period");
+                    columns.Bound(c => c.InstallmentStartDate).Title("Start Date").Format("{0:dd-MMM-yyyy}");
+                    //columns.Bound(c => c.TotalBalance).Title("Total Balance").ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+                    columns.Bound(c => c.NormalInterest).Title("NI").Width(50);
+                    columns.Bound(c => c.PenalInterest).Title("PI").Width(50);
+                    //columns.Bound(c => c.TotalIstallmentStatus).Title("Installment Status");
+                    columns.Bound(c => c.OneTimeLeaseRentStatus).Title("OTLR").Width(100);
+                    //columns.Bound(c => c.Id).Title("Edit").ClientTemplate("#if(IsActive==true){# <a href=\"/Revenue/Payment/Installment/#= Id#\" id='e_#=Id#'><span class='glyphicon glyphicon-pencil'></span></a> #}else{# --- #}#").Filterable(false).Sortable(false).Width(50);
+                    columns.Bound(c => c.Id).Title("Delete").ClientTemplate("<label class='hyperlink' onclick='javascript:RemovePremiumSchedule(this)'>Delete<i class='fa fa-remove'></i></label>").Filterable(false).Sortable(false).Width(110);
+                })
+                .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .ClientDetailTemplateId("template").AutoBind(true)
+                .DataSource(dataSource => dataSource
+                    .Ajax().ServerOperation(true)
+                    .Model(model => model.Id(p => p.Id))
+                    .Read(read => read.Action("GetPropertyPremiumScheduleList", "Payment", new { area = "Revenue" }).Data("FilterDepartment")).PageSize(10)
+                    //.Aggregates(aggregates => aggregates.Add(p => p.TotalBalance).Sum())
+                    )
+                    )
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script id="template" type="text/kendo-tmpl">
+        @(Html.Kendo().Grid<NA.PMS.Model.PaymentScheduleModel>()
+            .Name("grid_#=ScheduleId#") // template expression, to be evaluated in the master context
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Hidden(true);
+                columns.Bound(o => o.InstallmentAmount).Title("Installment");//.ClientTemplate("<span>#= ServiceName #<br/><small ><b>Receiving Date:</b>&nbsp;#= CreatedDate#</small></span>");
+                columns.Bound(o => o.InstallmentInterest).Title("Interest");
+                columns.Bound(o => o.InstallmentPeriod).Title("Period");//.ClientTemplate("<label>#=Comment#</label>");
+                columns.Bound(o => o.BalanceAmount).Title("Balance Amount");//.Title("Update Status").ClientTemplate("<label class='lbl-status-action' onclick='javascript:OpenStatusWindow(this)'>#=Status#</label>");
+                columns.Bound(o => o.InstallmentDueDate).Title("Due Date").Format("{0:dd-MMM-yyyy}");
+            })
+            .DataSource(dataSource => dataSource
+                .Ajax()
+                .Read(read => read.Action("GetPropertyPremiumSchedulePaidListById", "Payment", new {area="Revenue", ScheduleId = "#=Id#" }))
+            )
+            .ToClientTemplate()
+        )
+    </script>
+    <script>
+        function dataBound() {
+            this.expandRow(this.tbody.find("tr.k-master-row").first());
+        }
+    </script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#btn-remove').click(function () {
+                RemoveRepeatedSchedule();
+            });
+
+            $('#btn-generate').click(function () {
+                GeneratePremiumSheduleByDepartment();
+            });
+        });
+
+    function ChangeDepartmentEvent() {
+        $("#InstallmentScheduleGrid").data("kendoGrid").dataSource.read();
+    }
+
+
+    function FilterDepartment() {
+        var model = { DepartmentId: $("#DepartmentId").val(), ActionType: "InstallmentRequest" };
+        return model;
+    }
+
+
+    function RemovePremiumSchedule(row) {
+        var tr = $(row).parent().parent();
+        var scheduleId = $(tr).children("td:eq(1)").text();
+        var rid = $(tr).children("td:eq(2)").text();
+        if (rid != "" && scheduleId != "") {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ ScheduleId: scheduleId, RegistrationId: rid }),
+                url: "/Revenue/Payment/RemovePropertyPremiumScheduleById",
+                success: function (result) {
+                    if (result == '@ReturnType.Removed') {
+                            alertify.success("Record has been removed successfully.");
+                            $('#InstallmentScheduleGrid').data('kendoGrid').dataSource.read();
+                        }
+                    },
+                    error: function (ajaxRequest, strError) {
+                        var respText = ajaxRequest.responseText;
+                    }
+                })
+            } else {
+                alertify.error("ScheduleId or RegistrationId not selected.");
+                return false;
+            }
+        }
+
+
+        function RemoveRepeatedSchedule() {
+            var departmentId = $('#DepartmentId').val();
+            if (departmentId != "") {
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ DepartmentId: departmentId}),
+                    url: "/Revenue/Payment/RemovePremiumScheduleByDepartment",
+                    success: function (result) {
+                        if (result == '@ReturnType.Removed') {
+                            alertify.success("Record has been removed successfully.");
+                            $('#InstallmentScheduleGrid').data('kendoGrid').dataSource.read();
+                        }
+                    },
+                    error: function (ajaxRequest, strError) {
+                        var respText = ajaxRequest.responseText;
+                    }
+                })
+            } else {
+                alertify.error("Please select Department.");
+                return false;
+            }
+        }
+
+        function GeneratePremiumSheduleByDepartment() {
+            var departmentId = $('#DepartmentId').val();
+            if (departmentId != "") {
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ DepartmentId: departmentId }),
+                    url: "/Revenue/Payment/GeneratePremiumScheduleByDepartment",
+                    success: function (result) {
+                        if (result == '@ReturnType.Saved') {
+                            alertify.success("Schedule has been generated successfully.");
+                            $('#InstallmentScheduleGrid').data('kendoGrid').dataSource.read();
+                        }
+                    },
+                    error: function (ajaxRequest, strError) {
+                        var respText = ajaxRequest.responseText;
+                    }
+                })
+            } else {
+                alertify.error("Department not selected.");
+                return false;
+            }
+        }
+    </script>

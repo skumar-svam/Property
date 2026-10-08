@@ -1,0 +1,345 @@
+﻿@using Kendo.Mvc.UI
+@using NA.PMS.Common
+@using System.Linq
+
+<div id="kyaReport">
+    <div class="row form-bx" style="padding-bottom:8px;">
+        <div class="col-md-3">
+            <label>Start Date</label>
+            @(Html.Kendo().DatePicker().Name("ChallanStartDate").Events(e => e.Change("ChallanDateChangeEvent")).HtmlAttributes(new { style = "width:90%;" }))
+        </div>
+        <div class="col-md-3">
+            <label>End Date</label>
+            @(Html.Kendo().DatePicker().Name("ChallanEndDate").Events(e => e.Change("ChallanDateChangeEvent")).HtmlAttributes(new { style = "width:90%;" }))
+        </div>
+    </div>
+    @*<div class="row">
+        <div class="col-md-6 demo-section k-content wide">
+            <div id="DivChallanPieChartI" style=""></div>
+        </div>
+        <div class="col-md-6 demo-section k-content wide">
+            <div id="DivChallanDonutChartI" style=""></div>
+        </div>
+    </div>*@
+    <div class="row">
+        <div class="col-md-12 demo-section k-content wide">
+            <div id="DivChallanBarChartI"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12" style="margin-top:20px;">
+            <div class="row rw-spce">
+                <div class="col-md-12">
+                    <h2 class=" blck-heading" style="border-left:1px solid green;border-right:1px solid green;margin-bottom:0;">Status Of Challan</h2>
+                    <div class="col-md-12 k-grid-content">
+                        @(Html.Kendo().Grid<NA.PMS.Model.ChallanViewModel>()
+                            .Name("GridChallanDetails")
+                            .Columns(columns =>
+                            {
+                                columns.Bound(c => c.Department).Title("Department").ClientFooterTemplate("Total Count:");
+                                //columns.Bound(c => c.TotalVerified).Title("Verified").Width(110);//.ClientFooterTemplate("<div>#= sum #</div>");
+                                //columns.Bound(c => c.TotalNotVerified).Title("Not Verified").Width(110);//.ClientFooterTemplate("<div>#= sum #</div>");
+                               
+                                columns.Bound(c => c.TotalChallanCount).Title("Total Generated Challan");//.ClientFooterTemplate("#= sum #");
+                                columns.Bound(c => c.TotalAmount).Title("Total Amount Of Generated Challan");//.ClientFooterTemplate("<div>#= sum #</div>"); 
+                                columns.Bound(c => c.DepositedAmount).Title("Deposited Amount By Challan");//.ClientFooterTemplate("<div>#= sum #</div>");
+                                columns.Bound(c => c.NotDepositedAmount).Title("Not Deposited Amount");//.ClientFooterTemplate("<div>#= sum #</div>");
+                            })
+                            .Resizable(resize => resize.Columns(true))
+                            //.Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(new[] { 10, 50, 100, 500 }).Info(true).PreviousNext(true).Input(true).Numeric(true).ButtonCount(10))
+                            .AutoBind(true)
+                            .DataSource
+                            (
+                                dataSource => dataSource
+                                .Ajax().ServerOperation(true)
+                                .Read(read => read.Action("GetChallanReportsForGraph", "Authority", new { area = "Member" }).Data("FilterParamForGrid"))
+                                //.Aggregates(aggregates =>
+                                //{
+                                //    aggregates.Add(p => p.NotDepositedAmount).Sum();
+                                //    aggregates.Add(p => p.DepositedAmount).Sum();
+                                //    aggregates.Add(p => p.TotalAmount).Sum();
+                                //    aggregates.Add(p => p.TotalChallanCount).Sum();
+                                //})
+                          ))
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script>
+
+    $(document).ready(function () {
+        //GetChallanListForGraph();
+        //CreateBarGraphForServices();
+    });
+
+    function FilterParamForGrid() {
+        return {
+            StartDate: $('#ChallanStartDate').val(),
+            EndDate: $('#ChallanEndDate').val(),
+            FilterType: "ChallanByAmount"
+        }
+    }
+
+    function ChallanDateChangeEvent() {
+        //GetChallanListForGraph();
+        //GetNotVerifedChallanListForGraph();
+        GetChallanListForColumnGraph();
+        $('#GridChallanDetails').data("kendoGrid").dataSource.read();
+    }
+
+    //function CreateChallanPieChart(GraphData) {
+    //    //var date = $('#StatusDate').val();
+    //    $("#DivChallanPieChartI").kendoChart({
+    //        title: {
+    //            text: "Total Generated Challan"
+    //        },
+    //        legend: {
+    //            //position: "bottom",
+    //            visible: false
+    //        },
+    //        dataSource: {
+    //            data: GraphData
+    //        },
+    //        seriesDefaults: {
+    //            labels: {
+    //                visible: true,
+    //                background: "transparent",
+    //                template: "#= category #: \n #= value#"
+    //            }
+    //        },
+    //        series: [{
+    //            type: "pie",
+    //            field: "Value",
+    //            categoryField: "Label"
+    //        }],
+    //        seriesColors: ["#03a9f4", "#ff9800", "#fad84a", "#4caf50", "#FF0000", "#FF00FF", "#000080"],
+    //        tooltip: {
+    //            visible: true,
+    //            template: "#= category #: \n #= value#"
+    //        },
+    //        seriesClick: onChallanPieChartSeriesClickEvent,
+    //    });
+    //}
+
+    ////$(document).bind("kendo:skinChange", GetChallanListForGraph());
+
+    //function onChallanPieChartSeriesClickEvent(e) {
+    //    var dept = e.category;
+    //    $.ajax({
+    //        dataType: 'json',
+    //        type: 'Post',
+    //        contentType: 'application/json; charset=utf-8',
+    //        data: JSON.stringify({ Department: dept, ActionType: dept, FilterType: "ChallanByDepartment" }),
+    //        url: "/Member/Authority/GetChallanReportsForGraph",
+    //        success: function (result) {
+    //            if (result != null) {
+    //                CreateChallanPieChart(result);
+    //                CreateBarGraphForChallan(result);
+    //            }
+    //            else {
+    //                alertify.error("no data found.");
+    //            }
+
+    //        },
+    //        error: function (ajaxRequest, strError) {
+    //            var respText = ajaxRequest.responseText;
+    //        }
+    //    });
+    //}
+
+    //function GetChallanListForGraph() {
+    //    //_StatusDate = $('#StatusDate').val();
+    //    //StartDate: $('#ChallanStartDate').val(),
+    //    //EndDate: $('#ChallanEndDate').val(),
+    //    $.ajax({
+    //        dataType: 'json',
+    //        type: 'Post',
+    //        contentType: 'application/json; charset=utf-8',
+    //        data: JSON.stringify({ StartDate: $('#ChallanStartDate').val(), EndDate: $('#ChallanEndDate').val(), FilterType: "TotalChallan" }),
+    //        url: '/Member/Authority/GetChallanReportsForGraph',
+    //        success: function (result) {
+    //            if (result != null) {
+    //                CreateChallanPieChart(result);
+    //                //CreateBarGraphForChallan(result);
+    //                //CreateChallanDonutChart(result)
+    //            }
+    //        },
+    //        error: function (ajaxRequest, strError) {
+    //            var respText = ajaxRequest.responseText;
+    //            alertify.error("Network error, Please try again later.");
+    //        }
+    //    });
+    //}
+
+    function GetChallanListForColumnGraph() {
+        //_StatusDate = $('#StatusDate').val();
+        //StartDate: $('#ChallanStartDate').val(),
+        //EndDate: $('#ChallanEndDate').val(),
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ StartDate: $('#ChallanStartDate').val(), EndDate: $('#ChallanEndDate').val(), FilterType: "ChallanByStatus" }),
+            url: '/Member/Authority/GetChallanReportsForGraph',
+            success: function (result) {
+                if (result != null) {
+                    //CreateChallanPieChart(result);
+                    CreateBarGraphForChallan(result);
+                    //CreateChallanDonutChart(result)
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Network error, Please try again later.");
+            }
+        });
+    }
+
+    function CreateBarGraphForChallan(GraphData) {
+        $("#DivChallanBarChartI").kendoChart({
+            dataSource: {
+                data: GraphData
+            },
+            title: {
+                text: "Total Generated Challan"
+            },
+            legend: {
+                position: "top",
+                 Visible: true
+            },
+            seriesDefaults: {
+                type: "column",
+                labels: {
+                    visible: true,
+                    background: "transparent",
+                    template: "#= value#"
+                    //template: "#= category #:  #= value#"
+                }
+            },
+            series:
+            [
+                { field: "TotalChallanCount", categoryField: "Department", name:"Total Challan" },
+                { field: "TotalVerified", categoryField: "Department", name: "Verified", color: "blue" },
+                { field: "TotalNotVerified", categoryField: "Department", name: "Not Verified", color: "black" }
+            ],
+            chartArea:{
+                width: 1100
+            },
+            categoryAxis: {
+                labels: {
+                    rotation: -45
+                }
+            },
+            valueAxis: {
+                labels: {
+                    format: "{0:N0}"
+                },
+                majorUnit: 500
+            },
+            tooltip: {
+                //visible: true,
+                //format: "{0:N0}"
+                visible: true,
+                template: "#= category #: \n #= value#"
+            }
+            //seriesClick: onChallanPieChartSeriesClickEvent,
+            //seriesClick: onSeriesClick,
+            //seriesHover: onSeriesHover,
+            //dataBound: onDataBound,
+            //axisLabelClick: onAxisLabelClick,
+            //legendItemClick: onLegendItemClick,
+            //legendItemHover: onLegendItemHover,
+            //plotAreaClick: onPlotAreaClick,
+            //plotAreaHover: onPlotAreaHover,
+            //render: onRender,
+            //dragStart: onDragStart,
+            //drag: onDrag,
+            //dragEnd: onDragEnd,
+            //zoomStart: onZoomStart,
+            //zoom: onZoom,
+            //zoomEnd: onZoomEnd
+        });
+    }
+
+    //function GetNotVerifedChallanListForGraph() {
+    //    //_StatusDate = $('#StatusDate').val();
+    //    $.ajax({
+    //        dataType: 'json',
+    //        type: 'Post',
+    //        contentType: 'application/json; charset=utf-8',
+    //        data: JSON.stringify({ StartDate: $('#ChallanStartDate').val(), EndDate: $('#ChallanEndDate').val(), FilterType: "NotVerifiedChallan" }),
+    //        url: '/Member/Authority/GetChallanReportsForGraph',
+    //        success: function (result) {
+    //            if (result != null) {
+    //                //CreateChallanPieChart(result);
+    //                //CreateBarGraphForChallan(result);
+    //                CreateChallanDonutChart(result)
+    //            }
+    //        },
+    //        error: function (ajaxRequest, strError) {
+    //            var respText = ajaxRequest.responseText;
+    //            alertify.error("Network error, Please try again later.");
+    //        }
+    //    });
+    //}
+
+    //function CreateChallanDonutChart(GraphData) {
+    //    //var date = $('#StatusDate').val();
+    //    $("#DivChallanDonutChartI").kendoChart({
+    //        title: {
+    //            text: "Not Verified Challan"
+    //        },
+    //        legend: {
+    //            //position: "bottom",
+    //            visible: false
+    //        },
+    //        dataSource: {
+    //            data: GraphData
+    //        },
+    //        //seriesDefaults: {
+    //        //    type: "donut",
+    //        //    startAngle: 180
+    //        //},
+    //        //series: [{
+    //        //    //type: "pie",
+    //        //    field: "Value",
+    //        //    categoryField: "Label",
+    //        //    labels: {
+    //        //        visible: true,
+    //        //        background: "transparent",
+    //        //        position: "outsideEnd",
+    //        //        template: "#= category #: \n #= value#"
+    //        //    }
+    //        //}],
+    //        seriesDefaults: {
+    //            labels: {
+    //                visible: true,
+    //                background: "transparent",
+    //                template: "#= category #: \n #= value#"
+    //            }
+    //        },
+    //        series: [{
+    //            type: "pie",
+    //            field: "Value",
+    //            categoryField: "Label"
+    //        }],
+    //        seriesColors: ["#03a9f4", "#ff9800", "#fad84a", "#4caf50", "#FF0000", "#FF00FF", "#000080"],
+    //        tooltip: {
+    //            visible: true,
+    //            template: "#= category #: \n #= value#"
+    //        },
+    //        //seriesClick: onChallanPieChartSeriesClickEvent,
+    //    });
+    //}
+
+</script>
+
+
+
+
+
+
+

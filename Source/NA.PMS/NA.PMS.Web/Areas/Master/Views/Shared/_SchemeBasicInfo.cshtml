@@ -1,0 +1,173 @@
+﻿@model NA.PMS.Model.SchemeViewModel
+@using Kendo.Mvc.UI
+
+<div class="basic-info">
+    <h2 class="blck-heading">Scheme Information</h2>
+    <div class="scheme-form-bx col-md-12 col-sm-12 col-xs-12">
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                <label class="required">Scheme Name</label>
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @Html.TextBoxFor(m => m.SchemeName, new { @class = "form-control", @maxlength = "100", style = "width:100%;" })
+                @Html.ValidationMessageFor(model => model.SchemeName, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                <label class="required">Scheme Type</label>
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @(Html.Kendo().DropDownListFor(m => m.SchemeTypeId)
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel("Select Scheme")
+                    .DataSource(source => source.Read(read => read.Action("GetAllSchemeType", "Scheme")))
+                    .HtmlAttributes(new { style = "width:100%" })
+                )
+                @Html.ValidationMessageFor(model => model.SchemeType)
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-3 form-group">
+                <label class="required">Application Form Fee</label>
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-3 form-group">
+                @(Html.Kendo().NumericTextBoxFor(m => m.ApplicationFormFee)
+                    .Min(0).Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 100%;", @maxlength = "5", @class = "k-label textBoxValueRightAlign" })
+                )
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-3 form-group">
+                <label class="required">Processing Fee</label>
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-2 form-group">
+                @(Html.Kendo().NumericTextBoxFor(m => m.ProcessingFee)
+                    .Min(0).Spinners(false).Step(0).Enable(true)
+                    .HtmlAttributes(new { style = "width: 100%;", @maxlength = "5", @class = "k-label text-right" })
+                )
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                <label class="required">Scheme Start Date</label>
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @(Html.Kendo().DatePickerFor(model => model.SchemeStartDate).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+                @Html.ValidationMessageFor(model => model.SchemeStartDate, "", new { @class = "text-danger" })
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                <label class="required">Scheme End Date</label>
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @(Html.Kendo().DatePickerFor(model => model.SchemeEndDate).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+                @Html.ValidationMessageFor(model => model.SchemeEndDate, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-3 form-group">
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-3 form-group">
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-3 form-group">
+                <button type="button" class="btn btn-add" value="Add" id="btnAddScheme"> Add</button>
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-2 form-group" style="text-align:right;">
+                <button type="button" class="btn btn-add" value="Add" id="btnNext1">Next <i class="glyphicon glyphicon-forward"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#btnAddScheme").click(function () {
+            SubmitSchemeBasicInfo();
+        });
+
+        $('#btnNext1').click(function () {
+            $("#acc2").click();
+        });
+    });
+
+    function SubmitSchemeBasicInfo() {
+        var flag = ValidateSchemeBasicInfo();
+        if (flag) {
+            var basicInfo = {
+                SchemeName: $("#SchemeName").val().trim(),
+                SchemeTypeId: $("#SchemeTypeId").val(),
+                SchemeStartDate: $("#SchemeStartDate").val(),
+                SchemeEndDate: $("#SchemeEndDate").val(),
+                ApplicationFormFee: $("#ApplicationFormFee").val(),
+                ProcessingFee: $("#ProcessingFee").val()
+            };
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ model: basicInfo }),
+                url: "/Scheme/AddScheme",
+                success: function (data) {
+                    if (data != null && data != -1) {
+                        if (data.flag == 1 && data.scheme > 0) {
+                            $("#SchemeId").val(data.SchemeId);
+                            $("#SchemeName").attr("readonly", "true");
+                            $("#SchemeTypeId").attr("readonly", "true");
+                            $("#SchemeStartDate").attr("readonly", "true");
+                            $("#SchemeEndDate").attr("readonly", "true");
+                            $('#btnAddScheme').attr('disabled', 'disabled');
+                            $('#btnNext1').removeAttr('disabled');
+                            //$(".second .fke-link").hide();
+                            //$(".second .tab-section-title").show();
+                            alertify.success("Scheme added successfully");
+                        }
+                        else {
+                            alertify.error("Scheme Name already exists.");
+                        }
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    //alert(respText);
+                    //alertify.error("Scheme added successfully");
+                }
+            });
+        }
+    }
+
+    function ValidateSchemeBasicInfo() {
+        if ($("#SchemeName").val().trim() == "") {
+            alertify.error('Please enter Scheme Name.');
+            return false;
+        }
+        //if (!/^[a-zA-Z0-9 \[\]\{\}\(\)\& \-\\\/ ]*$/g.test(schemeName.val().trim())) {
+        //    alertify.error("Scheme Name should be alphanumeric (with '-', '\' and '/' characters)");
+        //    return false;
+        //}
+        //var selectedValue = $('#SchemeTypeId');
+        if ($('#SchemeTypeId').val() == "") {
+            alertify.error('Please Select Scheme Type.');
+            return false;
+        }
+        if ($("#SchemeStartDate").val() == "") {
+            alertify.error('Please enter Start Date.');
+            return false;
+        }
+        if ($("#SchemeEndDate").val() == "") {
+            alertify.error('Please enter End Date.');
+            return false;
+        }
+        if ($("#ApplicationFormFee").val() == '') {
+            alertify.error('Please enter Form Fee.');
+            return false;
+        }
+        if ($("#ProcessingFee").val() == '') {
+            alertify.error('Please enter Processing Fee.');
+            return false;
+        }
+        if (!(Date.parse($("#SchemeEndDate").val()) > Date.parse($("#SchemeStartDate").val()))) {
+            alertify.error('End Date should be later than Start Date.');
+            return false;
+        }
+        return true;
+    }
+</script>

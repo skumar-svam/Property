@@ -1,0 +1,26 @@
+﻿@model NA.PMS.Model.PropertyCancellationModel
+@using Kendo.Mvc.UI;
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Reason for Restoration")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextAreaFor(can => can.RestorationReason, htmlAttributes: new { @class="form-control"})
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Restoration Charges (INR)")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().NumericTextBoxFor(can => can.RestorationCharges)
+            .Name("RestorationCharges")
+            .Min(0)
+            .Max(9999999999999)
+            .Spinners(false).Step(0)
+            .Enable(true)
+            .HtmlAttributes(new { style = "width: 100%", @maxlength = "13", @class = "k-label schemeForms textBoxValueRightAlign" })
+            )
+        </div>
+    </div>
+</div>

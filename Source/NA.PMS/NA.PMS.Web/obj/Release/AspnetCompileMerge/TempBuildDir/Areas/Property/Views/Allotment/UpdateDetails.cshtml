@@ -1,0 +1,248 @@
+﻿@model NA.PMS.Model.UpdateDetails
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@{
+    ViewBag.Title = "Update Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (Html.BeginForm("UpdateFormDetails", "Allotment", FormMethod.Post, new { enctype = "multipart/form-data", id = "UpdateDetailsform" }))
+{
+    <input type="hidden" id="hdnAppId" />
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Update Details</h1></div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+                </div>
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="col-md-12 content-top-spce">
+                <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                    <h2 class="blck-heading">Registration Id</h2>
+                    <div class="form-bx">
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Registration ID", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(m => m.RID)
+                                .Filter("contains")
+                                .DataTextField("text")
+                                .DataValueField("id")
+                                .OptionLabel("Select")
+                                .DataSource(source =>
+                                {
+                                    source.Custom()
+                                   .ServerFiltering(true)
+                                   .ServerPaging(true)
+                                   .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                   .Transport(transport =>
+                                   {
+                                       transport.Read("GetRIDsForApplication", "Allotment");
+                                   }).Schema(schema =>
+                                   {
+                                       schema.Data("Data")
+                                       .Total("Total");
+                                   }).PageSize(100);
+                                })
+                                .Events(events => { events.Change("RIdChange"); })
+                                .HtmlAttributes(new { @class = "schemeForms", style = "width:100%" })
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            </div>
+                        </div>
+                    </div>
+                    <h2 class="blck-heading" id="transfer_detail_header">Update Details</h2>
+                    <div class="form-bx">
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("First Name", htmlAttributes: new { @class = "" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.FirstName, new { @class = "form-control", @onchange = "FirstNameChange();", @maxlength = "100" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Middle Name")
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.MiddleName, new { @class = "form-control", @maxlength = "100" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Last Name", new { @class = "", id = "lblLastName" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.LastName, new { @class = "form-control", @onchange = "LastNameChange();", @maxlength = "100" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Lease Deed Date", htmlAttributes: new { @class = "" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DatePickerFor(m => m.LeaseDeedDate).DisableDates(DayOfWeek.Sunday).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Area", new { @class = "" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().NumericTextBoxFor(m => m.Area)
+                                    .Min(0)
+                                    .Max(9999999999999999)
+                                    .Spinners(false).Step(0)
+                                    .Enable(true)
+                                    .HtmlAttributes(new { style = "width: 100%", @maxlength = "13", @class = "k-label schemeForms textBoxValueRightAlign" })
+                                )
+                            </div>
+                        </div>
+                        <div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Actual Possession Date", htmlAttributes: new { @class = "" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DatePickerFor(m => m.PossessionDate).DisableDates(DayOfWeek.Sunday).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Property Land Rate", new { @class = "" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().NumericTextBoxFor(m => m.LandRate)
+                                    .Min(0)
+                                    .Max(99999999999999)
+                                    .Spinners(false).Step(0)
+                                    .Enable(true)
+                                    .HtmlAttributes(new { style = "width: 100%", @maxlength = "14", @class = "textBoxValueRightAlign" })
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Property Cost", htmlAttributes: new { @class = "" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().NumericTextBoxFor(m => m.PropertyCost)
+                                    .Min(0)
+                                    .Max(99999999999999)
+                                    .Spinners(false).Step(0)
+                                    .Enable(true)
+                                    .HtmlAttributes(new { style = "width: 100%", @maxlength = "14", @class = "k-label schemeForms textBoxValueRightAlign" })
+                                )
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="box-button text-center">
+                    <input type="button" id="btnBack" value="Back" class="btn btn-default" />
+                    <input type="submit" id="btnUpdate" value="Update Details" class="btn btn-default" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#btnBack").click(function () {
+            window.location.href = '@Url.Action("ManageApplication", "Allotment")';
+        });
+
+    });
+
+    function RIdChange() {
+        var rId = $("#RID").val();
+        if (rId == '') {
+            ClearValues();
+            alertify.error("Please select an RID");
+            return false;
+        }
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rId: rId }),
+            url: '/Allotment/GetFormDetailsByRid',
+            success: function (result) {
+                if (result != null) {
+                    ClearValues();
+                    var Leasedeeddate = $("#LeaseDeedDate").data("kendoDatePicker");
+                    var totalAreaNum = $("#Area").data("kendoNumericTextBox");
+                    var PossessionDate = $("#PossessionDate").data("kendoDatePicker")
+                    var LandRate = $("#LandRate").data("kendoNumericTextBox");
+                    var PropertyCost = $("#PropertyCost").data("kendoNumericTextBox");
+
+                    if (result.LeaseDeedDate != null) {
+                        Leasedeeddate.enable(true)
+                        Leasedeeddate.value(result.LeaseDeedDate);
+                    } else { Leasedeeddate.enable(false); }
+                    if (result.FirstName != null && result.FirstName != "") { $("#FirstName").val(result.FirstName); } else { $("#FirstName").prop('disabled', true); }
+                    if (result.MiddleName != null && result.MiddleName != "") { $("#MiddleName").val(result.MiddleName); } else { $("#MiddleName").prop('disabled', true); }
+                    if (result.LastName != null && result.LastName != "") { $("#LastName").val(result.LastName); } else { $("#LastName").prop('disabled', true); }
+                    if (result.Area > 0) { totalAreaNum.value(result.Area); } else { $("#Area").prop('disabled', true); }
+
+                    if (result.PossessionDate != null) {
+                        PossessionDate.enable(true)
+                        PossessionDate.value(result.PossessionDate);
+                    } else { PossessionDate.enable(false); }
+
+                    if (result.LandRate > 0) { LandRate.value(result.LandRate); } else { $("#LandRate").prop('disabled', true); }
+                    if (result.PropertyCost) {
+                        PropertyCost.value(result.PropertyCost);
+                        $("#PropertyCost").prop('disabled', true);
+                    }
+                }
+                else {
+                    ClearValues();
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            },
+            error: function (obj) {
+                ClearValues();
+                alertify.error("Some error occured. Please try again later.");
+            }
+        });
+    }
+
+    function ClearValues() {
+        var Leasedeeddate = $("#LeaseDeedDate").data("kendoDatePicker");
+        var totalAreaNum = $("#Area").data("kendoNumericTextBox");
+        var PropertyCost = $("#PropertyCost").data("kendoNumericTextBox");
+        var LandRate = $("#LandRate").data("kendoNumericTextBox");
+        var PossessionDate = $("#PossessionDate").data("kendoDatePicker");
+        Leasedeeddate.value('');
+        PossessionDate.value('');
+        $("#FirstName").val('');
+        $("#MiddleName").val('');
+        $("#LastName").val('');
+        totalAreaNum.value(0);
+        PropertyCost.value(0);
+        LandRate.value(0);
+    }
+
+    function FirstNameChange() {
+        if ($("#FirstName").val().trim() == '') {
+            $("#FirstName").val('');
+        }
+    }
+
+    function LastNameChange() {
+        if ($("#LastName").val().trim() == '') {
+            $("#LastName").val('');
+        }
+    }
+</script>

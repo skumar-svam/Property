@@ -1,0 +1,99 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@using NA.PMS.Common;
+@*@model NA.PMS.Model.ServiceViewModel*@
+
+@*@{
+        ViewBag.Title = "ServiceReport";
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }*@
+
+@*<style>
+        #mainMaster{
+            padding-top:30px;
+        }
+    </style>*@
+
+<div id="div-graph-services">
+    <div class="row" style="padding:8px;">
+        <div class="row rw-spce">
+            <div class="col-md-9 col-sm-9 col-xs-9"><h1 class="gridTitle">Service Request Report For All Department</h1></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 col-btn">
+                <button type="submit" id="btnPrintReport" class="btn btn-default" onclick="PrintNDCLetter();">Print</button>
+            </div>
+        </div>
+        <div class="col-md-12" id="divserviceReportForAllDept" style="padding-top:10px;background-color:white;">
+            @*@Html.Raw(Model.HtmlReport)*@
+        </div>
+    </div>
+</div>
+<div id="progressbar" style="width:100%; text-align:center;">
+    <div id="loader" style="position: fixed;top:210px; left:0;  width:100%; height: 100%;  ">
+        <img src="~/Content/Images/ajax_loader_red.gif" style="width:200px;height:200px;" />
+        @*<img src="~/Content/Images/Chimply_progress.gif" style="width:200px;height:200px;background:#e2e3e4;" />*@
+    </div>
+</div>
+@*<div class="ManageRequestServices">
+        <div class="row rw-spce">
+            <div class="col-md-9 col-sm-9 col-xs-9"><h1 class="gridTitle">Service Request Report For All Department</h1></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 col-btn">
+                <button type="submit" id="btnPrintReport" class="btn btn-default" onclick="PrintNDCLetter();">Print</button>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12" id="divserviceReportForAllDept" style="padding-top:10px;background-color:white;">
+            @Html.Raw(Model.HtmlReport)
+        </div>
+    </div>*@
+
+<script type="text/javascript">
+    //$(document).ready(function () {
+
+    //});
+    function PrintNDCLetter() {
+        var contents = document.getElementById("divserviceReportForAllDept").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+    function GetHTMLReportForService() {
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            url: '/Reports/Report/GetHTMLServiceReport',
+            success: function (result) {
+                if (result != "") {
+                    $('#loader').hide();
+                    $('#divserviceReportForAllDept').html(result);
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                $('#loader').hide();
+                alertify.error("Network error, Please try again later.");
+            }
+        });
+    }
+</script>
+
+
+
+
+

@@ -1,0 +1,264 @@
+﻿@model NA.PMS.Model.CostModel
+@using Kendo.Mvc.UI
+@{
+    ViewBag.Title = "CostPartial";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<div class="row">
+    <div class="col-md-6">
+        @Html.Label("Department")
+        @(Html.Kendo().DropDownListFor(model => model.depttID)
+        .DataValueField("id")
+        .DataTextField("text").OptionLabel("Please Select").Events(e => e.Change("DepttChange"))
+        .DataSource(source => source.Read(read => read.Action("GetAllDepartments", "Scheme")))
+        )
+    </div>
+    <div class="col-md-6">
+        @Html.Label("Property Type")
+        @(Html.Kendo().DropDownListFor(model => model.propType)
+        .DataValueField("id")
+        .DataTextField("text").OptionLabel("Please Select")
+        .DataSource(source => source.Read(read => read.Action("GetPropTypes", "Scheme")))
+        )
+    </div>
+</div>
+<br />
+<div class="row">
+    <div class="col-md-6">
+        @Html.Label("Sector")
+        @(Html.Kendo().DropDownListFor(model => model.sector)
+        .DataValueField("id")
+        .DataTextField("text").OptionLabel("Please Select")
+        .DataSource(source => source.Read(read => read.Action("GetSectorsByPropType", "Scheme").Data("AdditionalData")))
+        .CascadeFrom("propType").AutoBind(false).Enable(false)
+        )
+    </div>
+    <div class="col-md-6">
+        @Html.Label("Floor", new { @id = "lblFloor" })
+        @(Html.Kendo().DropDownListFor(model => model.floor)
+                .DataValueField("id")
+                .DataTextField("text").OptionLabel("Please Select")
+        .DataSource(source => source.Read(read => read.Action("GetFloors", "Scheme")))
+        )
+    </div>
+</div>
+<br />
+<div class="row">
+    <div class="col-md-6">
+        @Html.Label("Property Cost", new { @id = "lblPropCost" })
+        @Html.TextBoxFor(m => m.propCost)
+    </div>
+    <div class="col-md-6">
+        @Html.Label("Land Rate (/sq. mtr.)")
+        @Html.TextBoxFor(m => m.landRate)
+        @Html.Label("Civil Cost", new { @id = "lblCivilCost" })
+        @Html.TextBoxFor(m => m.civilCost)
+    </div>
+</div>
+<br />
+<div class="row">
+    <div class="col-md-6">
+        @Html.Label("Total Property Cost", new { @id = "lblTotalPropCost" })
+        @Html.TextBoxFor(m => m.totPropCost)
+    </div>
+    <div class="col-md-6">
+        @Html.Label("Allotment Money", new { @id = "lblPropCost" })
+        @Html.TextBoxFor(m => m.allotmentMoney)
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-6">
+        @Html.Label("Lease Rent (Yearly)", new { @id = "lblLeaseRent" })
+        @Html.TextBoxFor(m => m.leaseRent)
+    </div>
+    <div class="col-md-6">
+
+    </div>
+</div>
+<br />
+<div class="row">
+    <div class="col-md-9"></div>
+    <div class="col-md-3">
+        <input type="button" id="btnAddNew" value="Add" />
+    </div>
+</div>
+<br />
+<div class="k-grid-content">
+    @(Html.Kendo().Grid<NA.PMS.Model.CostModel>()
+                .Name("grdCosts")
+        .Columns(columns =>
+        {
+            //columns.Bound(c => c.id).Width(30).Title("ID").Hidden(true);
+            columns.Bound(c => c.depttName).Width(100).Title("Department");
+            columns.Bound(c => c.depttID).Hidden(true);
+            columns.Bound(c => c.propName).Width(100).Title("Property Type");
+            columns.Bound(c => c.propType).Hidden(true);
+            columns.Bound(c => c.sectorName).Width(100).Title("Sector");
+            columns.Bound(c => c.sector).Hidden(true);
+            columns.Bound(c => c.floorName).Width(100).Title("Floor");
+            columns.Bound(c => c.floor).Hidden(true);
+            columns.Bound(c => c.propCost).Width(100).Title("Total Property Cost");
+            columns.Bound(c => c.allotmentMoney).Width(100).Title("Allotment Money");
+            columns.Bound(c => c.leaseRent).Width(100).Title("Lease Rent");
+            columns.Bound(c => c.civilCost).Width(100).Title("Civil Cost");
+        })
+        .Sortable()
+        .Filterable()
+            //.ToolBar(toolBar =>
+            //{
+            //    toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Add Notification").HtmlAttributes(new { onclick = "javascript:AddNotification(event);", @class = "k-button", id = "AddNotification" });
+            //})
+        .Pageable(pageable => pageable
+                                               .Enabled(true)
+            //.Refresh(true)
+                                               .PageSizes(true)
+                                            )
+        .DataSource(dataSource => dataSource
+            .Ajax().Model(model => model.Id(p => p.depttID))
+             .ServerOperation(true)
+                     .Read(read => read.Action("GetAllCosts", "Scheme")).PageSize(20)
+        )
+    )
+</div>
+<input type="button" value="Save" id="btnSave" />
+@*@(Html.Kendo().Window()
+                   .Name("addCosts")
+               .Title("Add IDR")
+               .Modal(true).Visible(false)
+               .Content(@<text>
+                <div class="row">
+                    @Html.Label("Department")
+                    @Html.TextBoxFor(m => m.depttID, new { @id = "addDeptt" })
+                </div>
+                <div class="row">
+                    @Html.Label("Property Subtype")
+                    @Html.TextBoxFor(m => m.propSubType, new { @id = "addPropSub" })
+                </div>
+                <div class="row">
+                    @Html.Label("Property Cost")
+                    @Html.TextBoxFor(m => m.propCost, new { @id = "addPropCost" })
+                </div>
+                <div class="row">
+                    @Html.Label("Civil Cost")
+                    @Html.TextBoxFor(m => m.civilCost, new { @id = "addCivil" })
+                </div>
+                <div class='row'>
+                    <input type="button" value="Save" class="btn" id="btnSaveWorklog" />
+                </div>
+            </text>)
+                                                .Draggable()
+                                                .Resizable()
+                                                .Width(600)
+                                                .Actions(actions => actions.Close())
+    )*@
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        //$("#lblFloor").hide();
+        //$("#floor").hide();
+        //$("#lblPropCost").hide();
+        //$("#propCost").hide();
+        //$("#lblCivilCost").hide();
+        //$("#civilCost").hide();
+        //$("#lblTotalPropCost").hide();
+        //$("#totPropCost").hide();
+        //$("#lblLeaseRent").hide();
+        //$("#leaseRent").hide();
+        //$("#btnSaveWorklog").click(function () {
+
+        //    $("#addCosts").data("kendoWindow").close();
+        //});
+
+        $("#btnAddNew").click(function () {
+            //var addWindow = $("#addCosts").data("kendoWindow");
+            //addWindow.title("Add Worklog");
+            //$("#addCosts").data("kendoWindow").center();
+            //$("#addCosts").data("kendoWindow").open();
+            if ($("#depttID").val() == '' || $("#depttID").val() == 0 || $("#depttID").val() == null) {
+                alert("Please select a Department");
+                return false;
+            }
+            else if ($("#propType").val() == '' || $("#propType").val() == 0 || $("#propType").val() == null) {
+                alert("Please select a Property Type");
+                return false;
+            }
+            else if ($("#sector").val() == '' || $("#sector").val() == 0 || $("#sector").val() == null) {
+                alert("Please select a Sector");
+                return false;
+            }
+            else if ($("#floor").val() == '' || $("#floor").val() == 0 || $("#floor").val() == null) {
+                alert("Please select a Floor");
+                return false;
+            }
+            else if ($("#propCost").val() == '' || $("#propCost").val() == null) {
+                alert("Please enter Total Property Cost");
+                return false;
+            }
+            else if ($("#civilCost").val() == '' || $("#civilCost").val() == null) {
+                alert("Please enter Civil Cost");
+                return false;
+            }
+            else if ($("#allotmentMoney").val() == '' || $("#allotmentMoney").val() == null) {
+                alert("Please enter Allotment Money");
+                return false;
+            }
+            else if ($("#leaseRent").val() == '' || $("#leaseRent").val() == null) {
+                alert("Please enter Lease Rent (Yearly)");
+                return false;
+            }
+            var grid = $("#grdCosts").data("kendoGrid");
+            var gridData = grid.dataSource.data();
+            var datasource = grid.dataSource;
+            datasource.insert({
+                depttName: $("#depttID").data("kendoDropDownList").text(),
+                depttID: $("#depttID").val(),
+                propName: $("#propType").data("kendoDropDownList").text(),
+                propType: $("#propType").val(),
+                sectorName: $("#sector").data("kendoDropDownList").text(),
+                sector: $("#sector").val(),
+                floorName: $("#floor").data("kendoDropDownList").text(),
+                floor: $("#floor").val(),
+                propCost: $("#propCost").val(),
+                allotmentMoney: $("#allotmentMoney").val(),
+                leaseRent: $("#leaseRent").val(),
+                civilCost: $("#civilCost").val()
+            });
+            $("#depttID").data("kendoDropDownList").value("");
+            $("#propType").data("kendoDropDownList").value("");
+            $("#sector").data("kendoDropDownList").value("");
+            $("#floor").data("kendoDropDownList").value("");
+            $("#propCost").val("");
+            $("#allotmentMoney").val("");
+            $("#leaseRent").val("");
+            $("#civilCost").val("");
+        });
+
+        $("#btnSave").click(function () {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ lst: $("#grdCosts").data("kendoGrid").dataSource._data }),
+                url: "/Scheme/Save",
+                success: function (data) {
+                    alert();
+                }
+
+            });
+        });
+    });
+
+    function AdditionalData() {
+        return {
+            propType: $("#propType").val()
+        };
+    }
+
+    function DepttChange() {
+        var deptt = $("#ddlDeptt").val();
+        if (deptt == 5) {
+
+        }
+    }
+</script>
+

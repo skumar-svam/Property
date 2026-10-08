@@ -1,0 +1,698 @@
+﻿@model NA.PMS.Model.OnlineApplicationFormModel
+@using Kendo.Mvc.UI
+@using NA.PMS.Common
+
+@{
+    ViewBag.Title = "View Online Details";
+    Layout = "~/Views/Shared/_OnlineRequestLayout.cshtml";
+}
+
+@using (Html.BeginForm("OnlineApplicationRequest", "PaymentGateway", FormMethod.Post, new { enctype = "multipart/form-data", id = "userform" }))
+{
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Preview Details</h1></div>
+                </div>
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="tab-pane fade in active" id="one">
+                <div class="col-md-12 content-top-spce">
+                    <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        <h2 class="blck-heading">Personal Information</h2>
+                        <div class="form-bx">
+                            <div class="row">
+                                <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                </div>
+                                <div class="col-md-4 col-sm-3 col-xs-12 form-group rdio-bx">
+                                    <input type="radio" id="rbtnIndividual" name="companyType" value="individual" checked="checked">&nbsp;Individual &nbsp;&nbsp;
+                                    <input type="radio" id="rbtnCompany" name="companyType" value="company" />&nbsp;Others
+                                </div>
+                            </div>
+                            <div class="row" style="padding-bottom:10px;">
+                                <div class="col-md-2"></div>
+                                <div class="col-md-4">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            @if (Model.FileDetails.filePhoto != null)
+                                            {
+                                                <img alt="Image" id="phtoImage" style="border:2px solid #000000;width:100px;height:100px;" src="@Url.Content(Model.FileDetails.filePhoto)" />
+                                            }
+                                        </div>
+                                        <div class="col-md-6">
+                                            @if (Model.FileDetails.fileSign != null)
+                                            {
+                                                <img alt="Candidate Sign" id="phtoImage" style="border:2px solid #000000;width:120px;height:30px;" src="@Url.Content(Model.FileDetails.fileSign)" />
+                                            }
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                            @*<div class="row">
+                <div class="col-md-2"></div>
+                <div class="col-md-4">
+
+                </div>
+            </div>*@
+                            <div class="row">
+                                <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Scheme Name", htmlAttributes: new { @class = "required" })
+                                    @Html.HiddenFor(m => m.IsCompany)
+                                    @Html.HiddenFor(m => m.ApplicationId)
+                                    @*@Html.HiddenFor(m => m.SchemeId)
+                    @Html.HiddenFor(m => m.DepartmentId)*@
+                                </div>
+                                <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                    @Html.TextBoxFor(m => m.SchemeName, new { @class = "form-control", @readonly = "readonly", @disabled="disabled" })
+                                    <div style="display:none">
+                                        @(Html.Kendo().DropDownListFor(model => model.SchemeId)
+                                          .Name("SchemeId")
+                                          .DataTextField("schemeName")
+                                          .DataValueField("schemeId")
+                                          .OptionLabel(" -- Please Select --")
+                                          .DataSource(source => source.Read(read => read.Action("GetSchemeListForOnline", "Allotment")))
+                                          .Enable(true)
+                                          .AutoBind(true)
+                                          .Filter("contains")
+                                          .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" })
+                                        )
+                                        @Html.ValidationMessageFor(model => model.SchemeId, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+                                <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Department", htmlAttributes: new { @class = "required" })
+                                </div>
+                                <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                    @Html.TextBoxFor(m => m.DepartmentName, new { @class = "form-control", @readonly = "readonly", @disabled = "disabled" })
+                                    <div style="display:none">
+                                        @(Html.Kendo().DropDownListFor(model => model.DepartmentId)
+                                          .Name("DepartmentId")
+                                          .DataTextField("DepartmentName")
+                                          .DataValueField("DepartmentId")
+                                          .OptionLabel(" -- Please Select --")
+          .DataSource(source => source.Read(read => read.Action("FilterDepartmentOnSchemeForOnline", "PaymentGateway").Data("FilterDepartment")).ServerFiltering(true))
+                                          .Enable(false)
+                                          .AutoBind(false)
+                                          .Filter("contains")
+                                          .CascadeFrom("SchemeId")
+                                          .HtmlAttributes(new { style = "width:100%", @class = "DisableKeyboardInput" })
+                                        )
+                                        @Html.ValidationMessageFor(model => model.DepartmentId, "", new { @class = "text-danger" })
+                                    </div>
+
+                                </div>
+                            </div>
+                            @*<div class="row">
+
+
+                <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+
+                </div>
+                <div class="col-md-4 col-sm-3 col-xs-12 form-group" style="text-align:right">
+
+                </div>
+            </div>*@
+
+                            @{Html.RenderPartial("_OnlineAppRequestForIndividual", Model);}
+
+                            @{Html.RenderPartial("_OnlineAppRequestForcompany", Model);}
+
+
+                            <div id="CommonInfo">
+                                <div class="row">
+                                    <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                        @Html.Label("Permanent Address", htmlAttributes: new { @class = "required" })
+                                    </div>
+                                    <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                        @Html.TextAreaFor(model => model.PermanentAddress, new { @class = "form-control", @onchange = "PermanentAddressChange();", @maxlength = "500" })
+                                    </div>
+                                    <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                        @Html.Label("Correspondence Address", htmlAttributes: new { @class = "required" })
+                                    </div>
+                                    <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                        @Html.TextAreaFor(model => model.CorrespondingAddress, new { @class = "form-control", @onchange = "CorrespondingAddressChange();", @maxlength = "500" })
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                        @Html.Label("Company Email", htmlAttributes: new { @class = "required", @id = "lblCompanyEmail" })
+                                    </div>
+                                    <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                        @(Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control", @maxlength = "150" } }))
+                                    </div>
+                                    <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                        @Html.Label("Mobile Number", htmlAttributes: new { @class = "required" })
+                                    </div>
+                                    <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                        @Html.TextBoxFor(model => model.MobileNumber, new { @class = "form-control", @maxlength = "10", @onchange = "CheckZeroInSTD();", onkeypress = "return IsNumeric(event);" })
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                        @Html.Label("Phone Number")
+                                    </div>
+                                    <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                        @Html.TextBoxFor(model => model.PhoneNumber, new { @class = "form-control ph-input-sml pull-left", @maxlength = "8", @onchange = "CheckZeroInSTD();", onkeypress = "return IsNumeric(event);" })
+                                        @Html.TextBoxFor(model => model.PhoneNumberP1, new { @class = "form-control ph-input-lg pull-right", @maxlength = "10", @onchange = "CheckZeroInSTD();", onkeypress = "return IsNumeric(event);" })
+                                    </div>
+                                    <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                        @Html.Label("Fax Number")
+                                    </div>
+                                    <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                        @Html.TextBoxFor(model => model.FaxNumber, new { @class = "form-control ph-input-sml pull-left", @maxlength = "8", @onchange = "CheckZeroInSTD();", onkeypress = "return IsNumeric(event);" })
+                                        @Html.TextBoxFor(model => model.FaxNumberP1, new { @class = "form-control ph-input-lg pull-right", @maxlength = "10", @onchange = "CheckZeroInSTD();", onkeypress = "return IsNumeric(event);" })
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                        @Html.Label("Company PAN", htmlAttributes: new { @class = "required", @id = "lblPanNumber" })
+                                    </div>
+                                    <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                        @Html.TextBoxFor(model => model.PanNumber, new { @class = "form-control", @onchange = "PanNumberChange();", @maxlength = "10" })
+                                    </div>
+                                    <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                        @Html.Label("Annual Income", htmlAttributes: new { @class = "required" })
+                                    </div>
+                                    <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                        @Html.TextBoxFor(model => model.AnnualIncome, new { @class = "form-control textBoxValueRightAlign", @maxlength = "15", onkeypress = "return IsNumeric(event);" })
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                        @Html.Label("Area Range", htmlAttributes: new { @class = "required" })
+                                    </div>
+                                    <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                        @Html.TextBoxFor(m => m.AreaRange, new { @class="form-control", @disabled="disabled"})
+                                        <div style="display:none;">
+                                            @(Html.Kendo().DropDownListFor(model => model.Area)
+                                    .DataValueField("id")
+                                    .DataTextField("text")
+                                    .OptionLabel("Please Select")
+                                    .AutoBind(true)
+                                    .Events(events => { events.Change("OnAreaChange"); })
+                                    .Filter("contains")
+        //.CascadeFrom("DepartmentId")
+.DataSource(source => source.Read(read => read.Action("GetFloors", "PaymentGateway").Data("CascadeData")).ServerFiltering(true))
+                                    .HtmlAttributes(new { style = "width: 100%" })
+                                            )
+                                        </div>
+
+                                    </div>
+                                    <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                    </div>
+                                    <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <h2 class="blck-heading">Payment Information</h2>
+                        <div class="form-bx">
+                            <div class="row">
+                                <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Application Form Fee (INR)", htmlAttributes: new { @class = "required" })
+                                </div>
+                                <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                    @Html.TextBoxFor(model => model.ApplicationFee, new { @class = "form-control textBoxValueRightAlign", @maxlength = "15", onkeypress = "return IsNumeric(event);" })
+                                </div>
+                                <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Earnest Money (INR)", htmlAttributes: new { @class = "required" })
+                                </div>
+                                <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                    @Html.TextBoxFor(model => model.earnestMoney, new { @class = "form-control textBoxValueRightAlign", @maxlength = "15", onkeypress = "return IsNumeric(event);" })
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Processing Fee", htmlAttributes: new { @class = "required" })
+                                </div>
+                                <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                    @Html.TextBoxFor(model => model.ProcessingFee, new { @class = "form-control textBoxValueRightAlign", @maxlength = "15", onkeypress = "return IsNumeric(event);" })
+                                </div>
+                                <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Total Amount Payable (INR)", htmlAttributes: new { @class = "required" })
+                                </div>
+                                <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                    @Html.TextBoxFor(model => model.TotalAmount, new { @class = "form-control textBoxValueRightAlign", @maxlength = "15", onkeypress = "return IsNumeric(event);" })
+                                </div>
+                            </div>
+                        </div>
+                        <h2 class="blck-heading">Refund Information</h2>
+                        <div class="form-bx">
+                            <div class="row">
+                                <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Bank Name", htmlAttributes: new { @class = "required" })
+                                </div>
+                                <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                    @(Html.Kendo().DropDownListFor(m => m.RefundBankId).Filter("contains")
+                                        .DataTextField("text")
+                                        .DataValueField("id")
+                                        .OptionLabel("Select")
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("GetAllBanksforOnline", "PaymentGateway");
+                                            });
+                                        })
+                                        .HtmlAttributes(new { @class = "schemeForms", style = "width: 100%" })
+                                    )
+                                </div>
+                                <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Refund Infavour of", htmlAttributes: new { @class = "required" })
+                                </div>
+                                <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                    @Html.TextBoxFor(model => model.RefundInfaverof, new { @class = "form-control", @maxlength = "150" })
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                    @Html.Label("Refund Account No", htmlAttributes: new { @class = "required" })
+                                </div>
+                                <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                    @Html.TextBoxFor(model => model.RefundaccountNo, new { @class = "form-control textBoxValueRightAlign", @maxlength = "16" })
+                                </div>
+                                <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+
+                                </div>
+                                <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                </div>
+                            </div>
+                            <div class="col-md-12 blnk-rw"></div>
+                            <div class="k-grid-content">
+                                @(Html.Kendo().Grid<NA.PMS.Model.ChecklistDocuments>()
+                        .Name("gridDocs")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(c => c.SNo).Title("S.No.").Width(10);
+                            columns.Bound(c => c.DocName).Title("Document Required").Width(100);
+                            columns.Bound(c => c.IsSelected).Width(10).ClientTemplate("<input type='checkbox' #= IsSelected ? checked='checked':'' # class='inpchk' onClick='return false'></input>").Title("Attached").Filterable(false).Sortable(false);//.HeaderTemplate(" <input type='checkbox' id='chkSelectAll' onchange='SelectAll(this)'/>")
+                            columns.Bound(c => c.Id).Hidden(true);
+                        })
+                        .Sortable()
+                        .Filterable()
+                        .Resizable(resize => resize.Columns(true))
+        //.Pageable(pageable => pageable
+        //                                       .Enabled(true)
+        //                                       .Refresh(true)
+        //                                       .PageSizes(true)
+        //                                    )
+                        .AutoBind(true)
+                        .DataSource(dataSource => dataSource
+                        .Ajax().Model(model => model.Id(c => c.Id))
+                        .ServerOperation(false)
+    .Read(read => read.Action("GetApplicationChcklstDocuments", "PaymentGateway").Data("AdditionalData"))//.PageSize(10)
+                        )
+                                )
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="box-button text-center">
+                        <input type="button" id="btnEdit" value="Edit Details" class="btn btn-default" />
+                        <input type="button" id="btnSubmitPayment" value="Proceed to Payment" class="btn btn-add" />
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="three">
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    function FilterDepartment() {
+        return { SchemeId: $("#SchemeId").val() };
+    }
+
+    function AdditionalData() {
+        return { //applicationId: $("#ApplicationId").val()
+            applicationId: $("#ApplicationId").val()
+        };
+    }
+
+    function filterForms() {
+        return {
+            SchemeId: $("#SchemeId").val(),
+            DepartmentId: $("#DepartmentId").val()
+        };
+    }
+
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+    function CheckZeroInSTD() {
+        if ($("#PhoneNumberP1").val() != '' && $("#PhoneNumberP1").val() == 0) {
+            alertify.error("STD should not be 0.");
+            $("#PhoneNumberP1").val('');
+        }
+        if ($("#FaxNumberP1").val() != '' && $("#FaxNumberP1").val() == 0) {
+            alertify.error("STD should not be 0.");
+            $("#FaxNumberP1").val('');
+        }
+        if ($("#PhoneNumber").val() != '' && $("#PhoneNumber").val() == 0) {
+            alertify.error("Phone Number should not be 0.");
+            $("#PhoneNumber").val('');
+        }
+        if ($("#FaxNumber").val() != '' && $("#FaxNumber").val() == 0) {
+            alertify.error("Fax Number should not be 0.");
+            $("#FaxNumber").val('');
+        }
+        if ($("#MobileNumber").val() != '' && $("#MobileNumber").val() == 0) {
+            alertify.error("Mobile Number should not be 0.");
+            $("#MobileNumber").val('');
+        }
+    }
+
+
+    $(document).ready(function () {
+        $("#spanTextId").hide();
+        DisabledEnable();
+        CalculateAmount();
+
+        if ($("#IsCompany").val() == "True" || $("#IsCompany").val() == "true") {
+            $("#rbtnCompany").attr('checked', true);
+        }
+        var radiobtnVal = $('input[name=companyType]:checked', '#userform').val();
+        if (radiobtnVal == "company") {
+            $('#OnlineAppRequestForIndividual').hide();
+            $('#OnlineAppRequestForcompany').show();
+            $("#lblFirstName").text('Company Name');
+            $("#lblPanNumber").text("Company PAN");
+            $("#lblCompanyEmail").text("Company Email");
+            $("#IsCompany").val(true);
+        }
+        else if (radiobtnVal == "individual") {
+            $('#OnlineAppRequestForIndividual').show();
+            $('#OnlineAppRequestForcompany').hide();
+            $("#lblPanNumber").text("PAN");
+            $("#lblCompanyEmail").text("Email");
+            $("#IsCompany").val(false);
+        }
+
+        $('#userform input:radio[name=companyType]').on('change', function () {
+            var radiobtnVal = $('input[name=companyType]:checked', '#userform').val();
+            if (radiobtnVal == "company") {
+                $("#GenderName").val("Company");
+                $('#OnlineAppRequestForIndividual').hide();
+                $('#OnlineAppRequestForcompany').show();
+                $("#lblFirstName").text('Company Name');
+                $("#lblPanNumber").text("Company PAN");
+                $("#lblCompanyEmail").text("Company Email");
+                $("#IsCompany").val(true);
+            }
+            else if (radiobtnVal == "individual") {
+                $('#OnlineAppRequestForIndividual').show();
+                $('#OnlineAppRequestForcompany').hide();
+                $("#lblPanNumber").text("PAN");
+                $("#lblCompanyEmail").text("Email");
+                $("#IsCompany").val(false);
+            }
+        });
+
+        $("#btnSubmitPayment").click(function () {
+            var appId = $("#ApplicationId").val();           
+            window.location = "/Property/PaymentGateway/OnlinePayment/" + appId;
+        });
+
+        $("#btnEdit").click(function () {
+            var appId = $("#ApplicationId").val();
+            window.location = "/Property/PaymentGateway/EditDetails/" + appId;
+        });
+        $("input[type=radio]").attr('disabled', true);
+        $('#DepartmentId').attr('disabled', 'disabled');
+
+        
+
+    });
+
+    function SchemeOrDeptChange(event) {
+        if ($("#SchemeId").val() == "")
+        { $('#IssueDate').data('kendoDatePicker').enable(false); }
+        else
+        {
+            if ($("#DepartmentId").val() == "") {
+                $('#IssueDate').data('kendoDatePicker').enable(true);
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ schemeId: $("#SchemeId").val() }),
+                    url: '/Allotment/GetSchemeDates',
+                    success: function (result) {
+                        if (result != null) {
+                            if (result.SchemeEndDate < result.CurrentDate) {
+                                $("#IssueDate").kendoDatePicker({
+                                    max: result.SchemeEndDate,
+                                    min: result.SchemeStartDate
+                                });
+                            }
+                            else {
+                                $("#IssueDate").kendoDatePicker({
+                                    max: result.CurrentDate,
+                                    min: result.SchemeStartDate
+                                });
+                            }
+                        }
+                        else {
+                            alertify.error("Some error occured. Please try again later.");
+                        }
+                    },
+                    error: function (obj) {
+                        alertify.error("Some error occured. Please try again later.");
+                    }
+                });
+            }
+        }
+        CheckFormNo($("#SchemeId").val(), $("#DepartmentId").val(), $("#FormNo").val());
+    };
+
+    function filterBranches() {
+        return {
+            bankId: $("#BankId").val(),
+            schemeId: $("#SchemeId").val()
+        };
+    }
+
+    function change() {
+        var dob = new Date(kendo.toString(this.value(), 'd'));
+        CheckAge(dob);
+    }
+
+    $('#AnnualIncome').change(function () {
+        CheckAnnualIncome();
+    });
+
+    function CheckAnnualIncome() {
+        var annualIncome = $("#AnnualIncome").val();
+        if (annualIncome != '') {
+            if (annualIncome < 50000) {
+                alertify.error("Annual Income should be graeter than 50000");
+                $("#AnnualIncome").val('')
+                return false;
+            }
+            else {
+                return true;
+            }
+        }
+    }
+
+    function ValidateEmail(email) {
+        var expr = /^([\w-\.]+)@@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.)|(([\w-]+\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\]?)$/;
+        return expr.test(email);
+    };
+
+    function CheckAge(dob) {
+        var today = new Date();
+        var age = today.getTime() - dob.getTime();
+        age = Math.floor(age / (1000 * 60 * 60 * 24 * 365.25));
+        if (age < 18) {
+            alertify.error("Age should be minimum 18 years.");
+            $("#DOB").data('kendoDatePicker').value("")
+            $("#Age").val('');
+            return false;
+        }
+        else {
+            $("#Age").val(age);
+            return true;
+        }
+    }
+
+    $("#btnCancel").click(function () {
+        $('#tOne').click();
+    });
+
+    $("#btnSubmit").click(function () {
+        if (Validate()) {
+            return true;
+        }
+        else { return false; }
+    });
+
+    function Validate() {
+        var bflag = false;
+        if ($("#SchemeId").val() == "") {
+            alertify.error("Please select Scheme");
+            bflag = false;
+        }
+        else if ($("#DepartmentId").val() == "") {
+            alertify.error("Please select Department");
+            bflag = false;
+        }
+        else if ($("#FirstName").val() == "") {
+            alertify.error("Please enter First Name");
+            bflag = false;
+        }
+        else if ($("#LastName").val() == "") {
+            alertify.error("Please enter Last Name");
+            bflag = false;
+        }
+        else if ($("#GenderName").val() == "" && $("#rbtnIndividual").val() == "individual") {
+            alertify.error("Please select Gender");
+            bflag = false;
+        }
+        else if ($("#FatherName").val() == "") {
+            alertify.error("Please select Father Name");
+            bflag = false;
+        }
+        else if ($("#MotherName").val() == "") {
+            alertify.error("Please select Mother Name");
+            bflag = false;
+        }
+        else if ($("#MaritialStatusName").val() == "") {
+            alertify.error("Please select Department");
+            bflag = false;
+        }
+        else if ($("#CategoryId").val() == "") {
+            alertify.error("Please select Category");
+            bflag = false;
+        }
+        else if ($("#OccupationId").val() == "") {
+            alertify.error("Please select Occupation.");
+            bflag = false;
+        }
+        else if ($("#PermanentAddress").val() == "") {
+            alertify.error("Please select Permanent Address.");
+            bflag = false;
+        }
+        else if ($("#CorrespondingAddress").val() == "") {
+            alertify.error("Please select Corresponding Address.");
+            bflag = false;
+        }
+        else if ($("#PanNumber").val() == "") {
+            alertify.error("Please enter PAN.");
+            bflag = false;
+        }
+        else if ($("#AnnualIncome").val() == "") {
+            alertify.error("Please select Annual Income.");
+            bflag = false;
+        }
+        else {
+            bflag = true;
+        }
+        return bflag;
+    }
+
+    $("#ApplicationFee").blur(function () {
+        CalculateAmount();
+    });
+
+    $("#earnestMoney").blur(function () {
+        CalculateAmount();
+    });
+
+    function CalculateAmount() {
+        var applicationFrom = (isNaN(parseFloat($('#ApplicationFee').val()))) ? 0 : parseFloat($('#ApplicationFee').val());
+        var earnestMoney = (isNaN(parseFloat($('#earnestMoney').val()))) ? 0 : parseFloat($('#earnestMoney').val());
+        var processingFee = (isNaN(parseFloat($('#ProcessingFee').val()))) ? 0 : parseFloat($('#ProcessingFee').val());
+        var totalAmount = parseFloat((parseFloat(applicationFrom) + parseFloat(earnestMoney) + parseFloat(processingFee)).toFixed(2));
+        $("#Amount").val(totalAmount);
+    }
+
+    function DisabledEnable() {
+        $("#FirstName").attr("disabled", "disabled");
+        $("#MiddleName").attr("disabled", "disabled");
+        $("#LastName").attr("disabled", "disabled");
+        $("#FatherName").attr("disabled", "disabled");
+        $("#MotherName").attr("disabled", "disabled");
+        $("#PermanentAddress").attr("disabled", "disabled");
+
+        $("#CorrespondingAddress").attr("disabled", "disabled");
+        $("#Email").attr("disabled", "disabled");
+        $("#MobileNumber").attr("disabled", "disabled");
+        $("#PhoneNumber").attr("disabled", "disabled");
+        $("#PhoneNumberP1").attr("disabled", "disabled");
+        $("#FaxNumberP1").attr("disabled", "disabled");
+        $("#FaxNumber").attr("disabled", "disabled");
+        $("#PanNumber").attr("disabled", "disabled");
+        $("#AnnualIncome").attr("disabled", "disabled");
+
+        $("#ApplicationFee").attr("disabled", "disabled");
+        $("#earnestMoney").attr("disabled", "disabled");
+        $("#TotalAmount").attr("disabled", "disabled");
+
+        //$("#SchemeId").data("kendoDropDownList").enable(false);
+        //$("#DepartmentId").data("kendoDropDownList").enable(false);
+        $("#GenderName").data("kendoDropDownList").enable(false);
+        $("#MaritialStatusName").data("kendoDropDownList").enable(false);
+        $("#OccupationId").data("kendoDropDownList").enable(false);
+        $("#CategoryId").data("kendoDropDownList").enable(false);
+        $("#CompanySelType").data("kendoDropDownList").enable(false);        
+        $('#DOB').data('kendoDatePicker').enable(false);
+        $("#CompanyName").attr("disabled", "disabled");
+        $("#SigningAuthority").attr("disabled", "disabled");
+        $("#RegisteredOffice").attr("disabled", "disabled");
+        $("#RefundBankId").data("kendoDropDownList").enable(false);
+        $("#RefundInfaverof").attr("disabled", "disabled");
+        $("#RefundaccountNo").attr("disabled", "disabled");
+        $("#ProcessingFee").attr("disabled", "disabled");
+    }
+
+
+    function OnAreaChange() {
+        if ($("#Area").val() == "") {
+            $('#ApplicationFee').val("");
+            $('#ProcessingFee').val("");
+            $('#earnestMoney').val("");
+            $('#Amount').val("");
+        }
+        else {
+            var id = $("#SchemeId").val();
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ id: id }),                
+                url: '@Url.Action("GetAreaDetails", "PaymentGateway", new { area = "Property" })',
+                success: function (data) {
+                    if (data != null) {
+                        $('#ApplicationFee').val(data.ApplicationFee);
+                        $('#ProcessingFee').val(data.ProcessingFee);
+                        CalculateAmount();
+                        GetEarneshMoney();
+                    }
+                    else {
+                        $('#ApplicationFee').val("");
+                        $('#ProcessingFee').val("");
+                        CalculateAmount();
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    //alert("error");
+                }
+            });
+        }
+    }
+
+
+</script>

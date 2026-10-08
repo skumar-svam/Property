@@ -1,0 +1,421 @@
+﻿@using Kendo.Mvc.UI
+@model NA.PMS.Model.ExtensionDetails
+@using NA.PMS.Common;
+
+<h2 class="blck-heading">Applicant Details</h2>
+<div class="form-bx">
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Registration Id", htmlAttributes: new { @class = "required" })
+            <input type="hidden" id="hdnPropertyNu" />
+            <input type="hidden" id="hdnExtendable" />
+            @Html.HiddenFor(m => m.Status)
+            <input type="hidden" id="hdnRid" value="@Model.Rid" />
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DropDownListFor(model => model.Rid)
+                .DataTextField("text")
+                .DataValueField("id")
+                .OptionLabel("Select")
+                .Filter("contains")
+                .DataSource(source =>
+                {
+                    source.Custom()
+                    .ServerFiltering(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    .Transport(transport =>
+                    {
+                        transport.Read(read => read.Action("GetAllRIDs", "PropertyAllotment").Data("GetRid"));
+                    }).Schema(schema =>
+                    {
+                        schema.Data("Data")
+                        .Total("Total");
+                    }).PageSize(100);
+                })
+            .HtmlAttributes(new { style = "width:100%;" })
+            .Events(m => m.Change("GetPropertyDetails"))
+            )
+        </div>
+
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Request Ref No", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(m => m.OnlineRequestRefNo, htmlAttributes: new { @class = "form-control", onkeypress = "return IsNumeric(event);", @maxlength = "8", @onchange = "RequestIdCheck();" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Property No:", htmlAttributes: new { @id = "_Propno" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span id="propnumber" class="form-control"></span>
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Scheme Name", htmlAttributes: new { @id = "_SchemeName" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span id="SchemeName" class="form-control"></span>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Department", htmlAttributes: new { @id = "_Department" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span id="Department" class="form-control"></span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Applicant Name", htmlAttributes: new { @id = "_ApplicantName" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span id="ApplicantName" class="form-control"></span>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Gender", htmlAttributes: new { @id = "_Gender" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span id="Gender" class="form-control"></span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Father/Husband Name", htmlAttributes: new { @id = "_FatherHusbandName" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span id="FatherHusbandName" class="form-control"></span>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Property Type", htmlAttributes: new { @id = "_PropertyType" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span id="PropertyType" class="form-control"></span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Area", htmlAttributes: new { @id = "_Area" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span id="Area" class="form-control"></span>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Floor", htmlAttributes: new { @id = "_Floor" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span id="Floor" class="form-control"></span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Lease deed Date", htmlAttributes: new { @id = "_Leasedeeddate" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DatePickerFor(m => m.Leasedeeddate).DisableDates(DayOfWeek.Sunday).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Possession Date", htmlAttributes: new { @id = "_Possessiondate" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DatePickerFor(m => m.Possessiondate).DisableDates(DayOfWeek.Sunday).HtmlAttributes(new { @class = "", style = "width:100%" }))
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Build Plan Approved", htmlAttributes: new { @id = "_BuildPlanApproved" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span id="BuildPlanApproved" class="form-control"></span>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        </div>
+    </div>
+
+    @*<div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <h4>@Html.Label("Extension Details", htmlAttributes: new { @id = "_ExtensionDetails" })</h4>
+        </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        </div>
+        </div>*@
+
+
+
+</div>
+
+<h2 class="blck-heading">Extension Details</h2>
+<div class="form-bx">
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Completion Due Date", htmlAttributes: new { @id = "_completiondate", @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @*.DisableDates(DayOfWeek.Sunday)*@
+            @(Html.Kendo().DatePickerFor(m => m.Completion_DueDate).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Extension Given Date", htmlAttributes: new { @id = "_extensiondate", @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @*.DisableDates(DayOfWeek.Sunday)*@
+            @(Html.Kendo().DatePickerFor(m => m.Extension_Due_Date).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Extension Charges", htmlAttributes: new { @id = "_extensioncharges", @class = "required" })<i class="glyphicon fa fa-inr"></i>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(model => model.Extension_Charge, new { @class = "form-control" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+
+    function GetRid() {
+        var regId = $("#hdnRid").val();
+        if (regId == "") { regId = 0; }
+        return {
+            Rid: regId
+        };
+    }
+
+    function GetPropertyDetails() {
+        var rid = $("#Rid").val();
+        $('#SchemeName').empty();
+        $('#Department').empty();
+        $('#ApplicantName').empty();
+        $('#Gender').empty();
+        $('#FatherHusbandName').empty();
+        $('#PropertyType').empty();
+        $('#Area').empty();
+        $('#Floor').empty();
+        $('#Leasedeeddate').empty();
+        $('#Possessiondate').empty();
+        $('#BuildPlanApproved').empty();
+        $('#hdnPropertyNu').val();
+        $('#hdnExtendable').val();
+        //GetKYADetails(rid);
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rid: rid }),
+            url: "/PropertyAllotment/GetPropertyDetails",
+            success: function (data) {
+                if (data != null) {
+                    $('#SchemeName').html(data.SchemeName);
+                    $('#Department').html(data.DepartmentName);
+                    $('#ApplicantName').html(data.ApplicantName);
+                    $('#Gender').html(data.Gender);
+                    $('#FatherHusbandName').html(data.FatherName);
+                    $('#PropertyType').html(data.PropertyType);
+                    $('#Area').html(data.Area);
+                    $('#Floor').html(data.Floor);
+                    $('#propnumber').html(data.PropertyNo);
+                    var Leasedeeddate = $("#Leasedeeddate").data("kendoDatePicker");
+                    Leasedeeddate.value(data.Leasedeeddate);
+                    var Possessiondate = $("#Possessiondate").data("kendoDatePicker");
+                    Possessiondate.value(data.Possessiondate);
+                    //var CompletionDueDate = $("#Completion_DueDate").data("kendoDatePicker");
+                    //CompletionDueDate.value(data.Completion_DueDate);
+                    $('#hdnPropertyNu').val(data.PropertyNo);
+                    $('#hdnExtendable').val(data.ExtendableFlag);
+                    if (data.BuildingPlan == "true") {
+                        $('#BuildPlanApproved').html("Yes");
+                    }
+                    else {
+                        $('#BuildPlanApproved').html("No");
+                    }
+                    if (data.Gender == "company") {
+                        $('#_FatherHusbandName').hide();
+                        $('#FatherHusbandName').hide();
+                    }
+                    else {
+                        $('#_FatherHusbandName').show();
+                        $('#FatherHusbandName').show();
+                    }
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert("error");
+            }
+        });
+    }
+
+    function GetKYADetails(rid) {
+        //var rId = $("#RId").val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ RegistrationId: rid }),
+            url: '/Property/PropertyRegistration/GetKYADetailsForRid',
+            success: function (result) {
+                if (result != null) {
+                    if (result.StatusId == "2") {
+                        alertify.error("Your KYA has been Rejected. Please Complete your KYA again.");
+                        $('#btnSubmitScheme').attr('disabled', 'disabled');
+                        return false;
+                    }
+                    else if (result.StatusId == "" || result.StatusId == null) {
+                        alertify.error("Please Complete your KYA.");
+                        $('#btnSubmitScheme').prop('disabled', true);
+                        return false;
+                    }
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+
+    function validateExtension() {
+        var rid = $("#Rid").val();
+        var completionDueDate = $("#Completion_DueDate").val();
+        var extensionGivenDate = $("#Extension_Due_Date").val();
+        var extensionCharge = $("#Extension_Charge").val().trim();
+        var ExtendableFlag = $("#hdnExtendable").val();
+        var OnlineRequestRefNo = $("#OnlineRequestRefNo").val();
+        var bFlag = false;
+        if (ExtendableFlag == "false") {
+            alertify.error("Already extended property");
+        }
+        else if (rid == "") {
+            alertify.error("Please select Rid.");
+        }
+        else if (OnlineRequestRefNo == "") {
+            alertify.error("Please select Request Ref No.");
+        }
+        else if (OnlineRequestRefNo.length < 3) {
+            alertify.error("Request Ref. No. length must be 3 characters");
+        }
+        else if (completionDueDate == "") {
+            alertify.error("Please select Completion Due Date.");
+        }
+        else if (!checkExtensionDate()) {
+            bflag = false;
+        }
+        else if (extensionGivenDate == "") {
+            alertify.error("Extension Given Date.");
+        }
+        else if (!checkExtensionCompletionDate()) {
+            bflag = false;
+        }
+        else if (extensionCharge == "") {
+            alertify.error("Please enter Extension Charges.");
+        }
+        else if ((isNaN(extensionCharge))) {
+            alertify.error("Please enter numbers in Extension Charges.");
+        }
+        else {
+            bFlag = true;
+        }
+        return bFlag;
+    }
+
+    function checkExtensionDate() {
+        var ExtensionDate = $("#Extension_Due_Date").val();
+        var possessionDate = $("#Possessiondate").val();
+        var flag = false;
+        if ((Date.parse(possessionDate) >= Date.parse(ExtensionDate))) {
+            alertify.error("Extension Date should not be earlier than Possession Date.");
+            flag = false;
+            return flag;
+        }
+        else { flag = true }
+        return flag;
+    }
+
+    function checkExtensionCompletionDate() {
+        var ExtensionDate = $("#Extension_Due_Date").val();
+        var completionDate = $("#Completion_DueDate").val();
+        var flag = false;
+        if ((Date.parse(completionDate) >= Date.parse(ExtensionDate))) {
+            alertify.error("Extension Date should not be earlier than Completion Date.");
+            flag = false;
+            return flag;
+        }
+        else { flag = true }
+        return flag;
+    }
+
+    function RequestIdCheck() {
+        var request = $("#OnlineRequestRefNo").val();
+        rModel = {
+            RequestId: $("#OnlineRequestRefNo").val(),
+            RegistrationId: $("#Rid").val(),
+            ServiceId: "6"
+        }
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ model: rModel }),
+            url: '/Property/PropertyRegistration/IsRequestIdIsExist',
+            success: function (result) {
+                if (result != '@ReturnType.Exist') {
+                    if (result == '@NAStatusId.Completed') {
+                        alertify.error("This Request is Completed");
+                    }
+                    else if (result == '@NAStatusId.Initiated') {
+                        alertify.error("This Request is in Initiated State. Please Forward this request first.");
+                    }
+                    else if (result == '@NAStatusId.Objection') {
+                        alertify.error("This Request in Objection State.");
+                    }
+                    else if (result == '@NAStatusId.Rejected') {
+                        alertify.error("This Request is Rejected");
+                    }
+                    else if (result == '@NAStatusId.Cancelled') {
+                        alertify.error("This Request is cancelled");
+                    }
+                    else if (result == '@NAStatusId.Withdrawn') {
+                        alertify.error("This Request is Withdrawn by Allottee.");
+                    }
+                    else {
+                        alertify.error("Request no. mismatch. Please enter a valid Request No.");
+                    }
+                    $("#OnlineRequestRefNo").val('');
+                }
+
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+    });
+    }
+</script>

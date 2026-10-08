@@ -1,0 +1,310 @@
+﻿@model NA.PMS.Model.RolesModel
+@using Kendo.Mvc.UI;
+@using NA.PMS.Model
+@using NA.PMS.Common
+@{
+    ViewBag.Title = "Manage Roles";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script src="~/Scripts/kendo.aspnetmvc.min.js"></script>
+<style>
+    .k-grid-content {
+        overflow-y: hidden;
+        overflow-x: hidden;
+    }
+    .k-grid .k-pager-sizes .k-dropdown{
+        width:auto;
+    }
+</style>
+
+<div class="ManageAdminRoles">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Roles</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                <a href="#" id="btnAddRole" class="" onclick="javascript:AddRole(event);">Add Role</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.UserManagement.NDARoleViewModel>()
+              .Name("gridRoles")
+              .Columns(columns =>
+              {
+                  columns.Bound(c => c.RoleId).Hidden(true);
+                  columns.Bound(c => c.RoleName).Title("Role Name");
+                  columns.Bound(c => c.RoleType).Title("Role Type");
+                  columns.Bound(c => c.RoleDescription).Title("Description");
+                  columns.Bound(c => c.RoleInDepartment).Title("Role In Department");
+                  columns.Bound(p => p.RoleId).Title("Users Mapping").ClientTemplate("# if (IsActive == true) {#<a href='/Admin/Organization/RoleUsersMapping?RoleId= #=RoleId# &ApplicationId= #=ApplicationId# '>Map Role</a>#} else {#<span style='color:red'>Map Role</span>#} #");
+                  //columns.Bound(c => c.RoleId).ClientTemplate("# if (IsActive == true) {#<a href='" + Url.Action("RoleUsersMapping", "Oragnization", #{# RoleId= #=RoleId#, ApplicationId=#=ApplicationId#}#)">Map Users</a>#} else {#<span>Map Users</span>#} #").Title("User Mapping").Filterable(false);
+                  //columns.Bound(c => c.roleID).ClientTemplate("<a href='" + "/Admin/ManageRoles/ViewDetails/#= RoleId #'><span class='glyphicon glyphicon-eye-open'></span> View</a>").Width(80).Title("View").Filterable(false);
+                  //columns.Bound(c => c.RoleId).ClientTemplate("# if (IsActive == true) {#<a class='gridEdit' href='" + "/SuperAdmin/ManageAdminRoles/EditAdminRole/#= RoleId #'> Edit </a>#} else {#<span class='gridNotEdit'>Edit</span>#} #").Title("Action").Filterable(false);
+                  columns.Bound(c => c.RoleId).Title("Action").ClientTemplate("<label class='hyperlink' onclick='javascript:Deactivate(#= RoleId #);'>#if(IsActive == true){#<span>Deactivate</span>#}else{#<span>Activate</span>#}#</label>");
+              })
+              .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+              .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(new[] { 10, 50, 100, 500 }).Info(true).PreviousNext(true).Input(true).Numeric(true).ButtonCount(10))
+              .DataSource
+              (
+                  dataSource => dataSource
+                      .Ajax()
+                      .Model(model => model.Id(p => p.RoleId))
+                      .ServerOperation(true)
+                      .Group(g=>g.Add(c=>c.RoleType))
+                      .Read(read => read.Action("GetRoleListAsDataSource", "Organization", new { area = "Admin" }))
+                      .PageSize(10)
+              )
+        )
+       
+    </div>
+</div>
+
+
+<div id="window-modal" class="modal fade" data-keyboard="false" data-backdrop="static">
+    <style>
+        .form-group label {
+            padding-left: 10px !important;
+            padding-right: 10px !important;
+        }
+    </style>
+    <div class="modal-dialog" style="min-height:250px; min-width:70%;border-radius:0;">
+        <div class="modal-content" style="border-radius:0;">
+            <div class="modal-body">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <div class="panel-body">
+                    <div class="row form-group">
+                        <div class="col-md-12" style="text-align:center">
+                            <input type="radio" name="role-action" value="Save" />Add &nbsp;&nbsp;
+                            <input type="radio" name="role-action" value="Update" />Update
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-12 form-group col-20">
+                            <label>Ex Role:</label>
+                        </div>
+                        <div class="col-md-3 col-sm-12 form-group col-30">
+                            @(Html.Kendo().DropDownList()
+                                .Name("ddlRoles")
+                                .OptionLabel("---select---")
+                                .DataTextField("Text")
+                                .DataValueField("Id")
+                                //.DataSource(source => source.Read(read => read.Action("GetDepartmentList", "Application", new { area = "Admin" })))
+                                .Filter("contains")
+                                .DataSource(source =>
+                                {
+                                    source.Custom()
+                                    .ServerFiltering(true)
+                                    .ServerPaging(true)
+                                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                    .Transport(transport => transport.Read(read => read.Action("GetMasterDataDropDownListAsDataSource", "Organization", new { area = "Admin" }).Data("FilterRoleForDropDown")))
+                                    .Schema(schema => schema.Data("Data").Total("Total"))
+                                    .PageSize(100);
+                                })
+                                .HtmlAttributes(new { style = "width:100%;" })
+                                .Events(e => e.Change("ddlRolesChangeEvent"))
+                            )
+                        </div>
+                        <div class="col-md-3 col-sm-12 form-group col-20">
+                            <label>Role Type:</label>
+                        </div>
+                        <div class="col-md-3 col-sm-12 form-group col-30">
+                            <input type="text" maxlength="2" id="txtRoleType" class="k-textbox" style="width:100%;" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-12 form-group col-20">
+                            <label>Role Name:</label>
+                        </div>
+                        <div class="col-md-3 col-sm-12 form-group col-30">
+                            <input type="text" maxlength="30" id="txtRoleName" class="k-textbox" style="width:100%;" />
+                        </div>
+                        <div class="col-md-3 col-sm-12 form-group col-20">
+                            <label>Role In Department:</label>
+                        </div>
+                        <div class="col-md-3 col-sm-12 form-group col-30">
+                            <input type="text" maxlength="30" id="txtRoleInDepartment" class="k-textbox" style="width:100%;" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-12 form-group col-20">
+                            <label>Description:</label>
+                        </div>
+                        <div class="col-md-9 col-sm-12 form-group col-80">
+                            <input type="text" maxlength="100" id="txtRoleDescription" class="k-textbox" style="width:100%;" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12 col-sm-12 form-group" style="text-align:right;">
+                            <input type="button" class="k-button" id="btn-save-role" value="Update" style="min-width:80px;" />
+                            <input type="button" class="k-button" id="btn-clear-role" value="Clear" style="min-width:80px;" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('input[type="radio"][name="role-action"]').on("change", function () {
+            var action = $('input[type="radio"][name="role-action"]:checked').val();
+            if (action == "Save") {
+                $('#btn-save-role').val("Add");
+                $('#ddlRoles').data("kendoDropDownList").value('');
+                $('#ddlRoles').data("kendoDropDownList").enable(false);
+            }
+            else {
+                $('#btn-save-role').val("Update");
+                $('#ddlRoles').data("kendoDropDownList").enable(true);
+            }
+        });
+
+        $('#btn-save-role').click(function () {
+            SubmitRoleForm();
+        });
+
+        $('#btn-clear-role').click(function () {
+            ClearRoleInputFields();
+        });
+    });
+
+    function Deactivate(roleid) {
+        $.ajax({
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            type: "POST",
+            data: JSON.stringify({ RoleId: roleid, ActionType: "status", FilterType: "Role", MasterData: "Role" }),
+            url: '/Admin/Organization/SaveMasterDataInfoByType',
+            success: function (data) {
+                $('#gridRoles').data('kendoGrid').dataSource.read();
+            },
+            error: function (msg) {
+                alert("Error Occured-" + msg.responseText);
+            }
+        });
+    }
+
+    function AddRole(event) {
+        event.preventDefault();
+        $('#window-modal').modal('show');
+    }
+
+    function FilterRoleForDropDown() {
+        return {
+            FilterType: "Role",
+            MasterData: "Role"
+        }
+    }
+
+    function ddlRolesChangeEvent() {
+        var roleId = $('#ddlRoles').data("kendoDropDownList").value();
+        if (roleId != undefined && roleId != "") {
+            var rmodel = {
+                MasterData: "Role",
+                FilterType: "Role",
+                RoleId: roleId
+            };
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ model: rmodel }),
+                url: '/Admin/Organization/GetMasterDataInfoByType',
+                success: function (result) {
+                    if (result.ReturnTypeId == '@ReturnType.Success') {
+                        $('#txtRoleType').val(result.RoleType);
+                        $('#txtRoleName').val(result.RoleName);
+                        $('#txtRoleInDepartment').val(result.RoleInDepartment);
+                        $('#txtRoleDescription').val(result.RoleDescription);
+                    }
+                    else if (result == '@ReturnType.None') {
+                        ClearRoleInputFields();
+                        alertify.error("Scheme doesn't exist.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again");
+                }
+            });
+        }
+        else {
+            ClearSchemeInputFields();
+        }
+    }
+
+    function SubmitRoleForm() {
+        var flag = true;
+        var actiontype = $('input[type="radio"][name="role-action"]:checked').val();
+        var roleId = $('#ddlRoles').data("kendoDropDownList").value();
+        var roleName = $('#txtRoleName').val();
+        if (actiontype == "" || actiontype == undefined) {
+            flag = false;
+            alertify.error("Select Action type.");
+            return false;
+        }
+        else if (actiontype == "Update" && roleId == "") {
+            alertify.error("Select Role");
+            return false;
+        }
+        else if (roleName == "") {
+            alertify.error("Enter Role name");
+            flag = false;
+        }
+        else if ($('#txtRoleType').val() == "") {
+            alertify.error("Enter Role Type");
+            flag = false;
+        }
+        else if ($('#txtRoleInDepartment').val() == "") {
+            alertify.error("Enter Role In Department");
+            flag = false;
+        }
+        else if (flag) {
+            var RoleModel = {
+                MasterData: "Role",
+                FilterType: "Role",
+                ActionType: actiontype,
+                RoleId: $('#ddlRoles').data("kendoDropDownList").value(),
+                RoleType: $('#txtRoleType').val(),
+                RoleName: $('#txtRoleName').val(),
+                RoleInDepartment: $('#txtRoleInDepartment').val(),
+                RoleDescription: $('#txtRoleDescription').val()
+            };
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ model: RoleModel }),
+                url: '/Admin/Organization/SaveMasterDataInfoByType',
+                success: function (result) {
+                    if (result.ReturnTypeId == '@ReturnType.Success') {
+                        alertify.success("Department saved successfully.");
+                        ClearRoleInputFields();
+                        $('#ddlRoles').data("kendoDropDownList").dataSource.read();
+                    }
+                    else if (result == '@ReturnType.None') {
+                        alertify.error("Role already exist.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again");
+                }
+            });
+        }
+    }
+
+    function ClearRoleInputFields() {
+        $('#ddlRoles').data("kendoDropDownList").value('');
+        $('#txtRoleType').val('');
+        $('#txtRoleName').val('');
+        $('#txtRoleInDepartment').val('');
+        $('#txtRoleDescription').val('');
+    }
+</script>
+
+

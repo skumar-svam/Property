@@ -1,0 +1,206 @@
+﻿@using Kendo.Mvc.UI
+
+@model NA.PMS.Model.Property.PropertyPossessionModel
+@{
+    ViewBag.Title = "Manage Possession Order";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div>
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Possession Order</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                @*<button type="button" id="btnPrint">Print</button>*@
+                <a href="#" id="btnPrint" class="">Print</a>
+                <a href="#" id="btnBulkPossessionOrder" class="" onclick="javascript: BulkPossessionOrder(event);">Bulk Possession Order</a>
+                <a href="#" id="btnAddPossessionOrder" class="" onclick="javascript: AddPossessionOrder(event);">Add Possession Order</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="k-grid-content">
+
+        @(Html.Kendo().Grid<NA.PMS.Model.Property.PropertyPossessionModel>()
+              .Name("gridPossession")
+              .Columns(columns =>
+                      {
+                          columns.Bound(c => c.IsSelected).Width(30).ClientTemplate("<input type='checkbox' #= IsSelected ? checked='checked':'' # class='inpchk' ></input>").HeaderTemplate(" <input type='checkbox' id='chkSelectAll' onchange='SelectAll(this)'/>").Filterable(false).Sortable(false).Title("");
+                          //columns.Bound(c => c.Rid).Title("Registration Id").Width(150).ClientTemplate("<a href=\"/Property/Possession/ViewPossessionOrder/#= Rid#\" id='v_#=Rid#'  style = 'width: 30px;' >#=Rid#</a>");
+                          columns.Bound(c => c.Rid).Title("Registration Id").Width(150).ClientTemplate("<a href=\"/Property/Possession/ViewPossessionOrder/#= EncryptedRid#\">#=Rid#</a>");
+                          columns.Bound(c => c.DepartmentName).Title("Department Name");
+                          columns.Bound(c => c.SectorName).Title("Sector").Width(100);
+                          columns.Bound(c => c.BlockName).Title("Block").Width(100);
+                          columns.Bound(c => c.PropertyNo).Title("Property No").Width(150);
+                          //columns.Bound(c => c.PropertyNumber).Title("Property Number");
+                          columns.Bound(c => c.PossessionOrderDate).Title("Possession Order Date").Format("{0:dd/MM/yyyy}");
+                          columns.Bound(c => c.PossessionDate).Title("Possession Date").Format("{0:dd/MM/yyyy}");
+                          columns.Bound(c => c.AreaChange).Title("Area Change").Width(110).ClientTemplate("#= AreaChange==null?'No':AreaChange #").Filterable(false).Sortable(false);
+                          //columns.Bound(c => c.Print).ClientTemplate("<input type='checkbox' class='chkbx' ></input>").Title("Print").Width(75).Filterable(false).Sortable(false);
+                      })
+              .Sortable()
+              .Filterable()
+                //.Groupable()
+              .Resizable(resize => resize.Columns(true))
+                //.ToolBar(toolBar =>
+                //{
+                //    toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Add Possession Order").HtmlAttributes(new { onclick = "javascript:AddPossessionOrder(event);", @class = "k-button", id = "btnAddPossessionOrder" });
+                //    toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Bulk Possession Order").HtmlAttributes(new { onclick = "javascript:BulkPossessionOrder(event);", @class = "k-button", id = "btnBulkPossessionOrder" });
+
+              //})
+              .Pageable(pageable => pageable
+                  .Enabled(true)
+                  .Refresh(true)
+                  .PageSizes(true)
+              )
+              .DataSource(dataSource => dataSource
+                  .Ajax()
+                  .Model(model => model.Id(c => c.Rid))
+                          .ServerOperation(true).Sort(sort => sort.Add("Id").Descending())
+                  .Read(read => read.Action("GetAllPossessionProperties", "Possession")).PageSize(20)
+              )
+        )
+    </div>
+
+</div>
+
+@*<div class="panel panel-body">*@
+
+@*PopUp to print*@
+<div id="divPrintPossession" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="width: 50%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">  <b>Possession Order</b></h4>
+            </div>
+            <div class="modal-body" id="divPossessionBody">
+
+            </div>
+            <div style="page-break-after: always;"></div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="submit" id="btnPrintDiv" class="k-button" data-dismiss="modal" onclick="PrintDiv();">Print</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        @{if (TempData["MesgAdd"] != null && TempData["MesgAdd"] != "")
+        {
+            @:alertify.success('Possession order added successfully.');
+                                }
+        }
+    });
+
+    function BulkPossessionOrder(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("AddBulkPossessionOrder", "Possession")';
+    }
+
+    function AddPossessionOrder(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("AddPossessionOrder", "Possession")';
+    }
+
+    var checkedPropertyIds = [];
+    var checkedRIds = [];
+
+    function SelectAll(e) {
+        var state = $(e).is(':checked');
+        if (state == true) {
+            var grid = $('#gridPossession').data("kendoGrid");
+            $.each(grid.dataSource.view(), function () {
+                $(".inpchk").prop('checked', 'checked');
+                if (this['IsSelected'] != state)
+                    this['IsSelected'] = state;
+                checkedRIds.push(this.Rid);
+                checkedPropertyIds.push(this.PropertyId);
+            });
+        } else {
+            $(".inpchk").removeAttr('checked');
+            var grid = $('#gridPossession').data("kendoGrid");
+            $.each(grid.dataSource.view(), function () {
+                this['IsSelected'] = false;
+            });
+        }
+    }
+    var currentDate = new Date().toJSON().slice(0, 10);
+    //select selected checkboxes
+    $(function () {
+        $('#gridPossession').on('change', '.inpchk', function () {
+
+            var checked = $(this).is(':checked');
+            $("#chkSelectAll").removeAttr('checked');
+            if ($('.inpchk:checked').length == $('.inpchk').length) {
+                $("#chkSelectAll").prop('checked', 'checked');
+            }
+            var grid = $('#gridPossession').data().kendoGrid;
+            var dataItem = grid.dataItem($(this).closest('tr'));
+            dataItem.set('IsSelected', checked);
+            checkedRIds.push(dataItem.Rid);
+            checkedPropertyIds.push(this.PropertyId);
+        });
+
+    });
+
+    $("#btnPrint").click(function () {
+        var items = $("#gridPossession").data("kendoGrid").dataSource.data();
+        var rIds = [];
+        var propertyIds = [];
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            if (item.IsSelected == true) {
+                rIds.push(item.Rid);
+                //propertyIds.push(item.PropertyId);
+            }
+        }
+        if (rIds.length > 0) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ rIds: rIds }),
+                url: '/DocParser/PrintBulkPossessionOrder',
+                success: function (result) {
+
+                    $("#divPossessionBody").html(result);
+                    $("#divPrintPossession").modal('show');
+                    //alertify.success("Records added successfully.");
+                },
+                error: function (obj) {
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            });
+        } else {
+            alertify.error("Please select atleast one record to print Possession Order.");
+        }
+
+
+    });
+
+
+    function PrintDiv() {
+        var contents = document.getElementById("divPossessionBody").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+</script>

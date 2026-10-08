@@ -1,0 +1,792 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\EntityFramework.6.4.0\build\EntityFramework.props" Condition="Exists('..\packages\EntityFramework.6.4.0\build\EntityFramework.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{6D60AAB7-CB7B-47BA-B958-FCC7D884790A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>NA.PMS.NICService</RootNamespace>
+    <AssemblyName>NA.PMS.NICService</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <NuGetPackageImportStamp>15e13192</NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Dapper">
+      <HintPath>..\packages\Dapper.1.38\lib\net45\Dapper.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.4.0\lib\net45\EntityFramework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.4.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IKVM.AWT.WinForms">
+      <HintPath>..\packages\BankOfBaroda\IKVM.AWT.WinForms.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Beans">
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.Beans.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Charsets">
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.Charsets.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Corba">
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.Corba.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Core">
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Jdbc">
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.Jdbc.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Management">
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.Management.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Media">
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.Media.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Misc">
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.Misc.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Naming">
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.Naming.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Remoting">
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.Remoting.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Security">
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.SwingAWT">
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.SwingAWT.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Text">
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.Text.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.Util">
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.Util.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.OpenJDK.XML.API">
+      <HintPath>..\packages\BankOfBaroda\IKVM.OpenJDK.XML.API.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.Runtime">
+      <HintPath>..\packages\BankOfBaroda\IKVM.Runtime.dll</HintPath>
+    </Reference>
+    <Reference Include="IKVM.Runtime.JNI">
+      <HintPath>..\packages\BankOfBaroda\IKVM.Runtime.JNI.dll</HintPath>
+    </Reference>
+    <Reference Include="ipaypipe">
+      <HintPath>..\packages\BankOfBaroda\ipaypipe.dll</HintPath>
+    </Reference>
+    <Reference Include="Kendo.Mvc">
+      <HintPath>..\packages\KendoUI\Kendo.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="MiniProfiler">
+      <HintPath>..\packages\MiniProfiler.3.2.0.157\lib\net40\MiniProfiler.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Ninject">
+      <HintPath>..\packages\Ninject.3.2.0.0\lib\net40\Ninject.dll</HintPath>
+    </Reference>
+    <Reference Include="RazorEngine, Version=3.8.2.0, Culture=neutral, PublicKeyToken=9ee697374c7e744a, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\RazorEngine.3.8.2\lib\net45\RazorEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Drawing.Design" />
+    <Reference Include="System.Net" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Web.ApplicationServices" />
+    <Reference Include="System.Web.DynamicData" />
+    <Reference Include="System.Web.Entity" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web.Helpers, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Web.Http, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Web.Http.WebHost, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Web.Mvc, Version=4.0.0.1, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.Mvc.5.2.2\lib\net45\System.Web.Mvc.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Web.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Web.Services" />
+    <Reference Include="System.Web.WebPages, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Web.WebPages.Deployment, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Web.WebPages.Razor, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Context\AccountHeadMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\AccountSubHeadMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\AllotmentMaster.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ApplicationDetail.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ApplicationPaymentDetail.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Audit.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\BankMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\BlockMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\BranchMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Building_Plan_Master.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Building_Plan_Trans.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Challan_Master.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Challan_Trans.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ChecklistMaster.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ChecklistTran.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ChecklistTypeMaster.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\CircleRateMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\CitizenService_Master.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ClientRequest.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Common_Config.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Completion_Details.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\CustomerMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Customer_ServiceRequest.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Customer_ServiceRequestCharges.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Customer_ServiceRequestDocument.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Customer_ServiceStatusTrans.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\DemandNoteDetail.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\DepartmentMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\DepartmentSubMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Director_Request_Master.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Document_Mst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\EmployeeMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\EpassMaster.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ExcessAreaDetailMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Extension_Details.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Firm_Director_Master.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Firm_Master.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Firm_Type_Master.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\FloorMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\FunctionalDetail.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\GPA.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\GroupHousingProjectMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\HEAD_MASTER.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\HEAD_SUB_MASTER.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\InstallmentDuesPayment.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\InstallmentDuesPaymentTran.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\InterestMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Interview_Details.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\KYADetail.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\LeaseRentPayment.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\LeaseRentPaymentTran.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Letter_History.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Letter_Signing_Authority.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\LocationChargeDetailMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\LocationMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Merge_Property_Master.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Merge_Property_Trans.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\MortgageDetail.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\NAPIMS.Context.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>NAPIMS.Context.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\NAPIMS.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\NAPIMS.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>NAPIMS.edmx</DependentUpon>
+    </Compile>
+    <Compile Include="Context\NDCDetailMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\NICServiceMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\NICServiceStatu.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\NICsingalwindowSystem.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\NiveshMitraEntr_Master.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Nominee_Details.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OccupationMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineApplicationDetail.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineApplicationDetails_trans.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineApplicationProcessDetail.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineAreawithRegisandProcfee.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineCheckListMaster.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineCheckLisTran.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineExtensionDetail.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineFirmDirectorMaster.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineFirmRequestMaster.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineFunctionalDetail.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineGPA.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineMortgageDetail.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlinePropertyCancellationDetail.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineRentPermissionDetail.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineSchemeDraw.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineService.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\OnlineTransferMutation.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\online_Director_Master.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\PaymentDetailMaster.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\PaymentDetailTran.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\PaymentDuesCalculatedMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\PaymentLeaseRentMaster.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\PaymentLeaseRentTran.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\PaymentModeMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\PaymentReceiptMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\PaymentReceiptTran.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\PaymentScheduleMaster.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\PaymentScheduleTran.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\PaymentSubTypeMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\PaymentTypeMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\PossessionDetail.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\PRE_FULL_PAYMENT_NDC.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\PRE_PROP_HIRE_PURCHASE.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Process_Master.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Product_Master.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Project_report.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\PropertyCompensationMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\PropertyLocationChargesTran.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\PropertyRateMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\PropertyTransaction.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\PropertyTypeMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Property_Cancellation_Details.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Property_Ledger.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\QuotaMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\RebateMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\RECEIPT_AMOUNT_TRANS.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\RECEIPT_DETAIL_MASTER.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\RECEIPT_SUB_HEAD.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\RECIEPT_HEAD.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\RegistryDetail.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ReligionMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\RentPermissionDetail.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Report_Template_temp.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SchemeAreaMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SchemeBankTran.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SchemeCostTran.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SchemeDepartmentTran.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SchemeMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SchemeNotifTran.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SchemePropTran.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SchemeQuotaTran.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SchemeRebateTran.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SchemeRefundTran.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SchemeTypeMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SectorMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Service.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ServiceCheckList_Master.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ServiceRejectionDetail.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ServiceRequest_Documents.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ServiceStatu.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ServiceStatusTran.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ServiceTran.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SMSServicesMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\StatusMaster.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\SubDepartmentMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Succ_Mut_Trans.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\TemplateMaster.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\temp_cal.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\temp_housing.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Transfer_Type.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\UmApplicationMaster.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\UmDepartmentMaster.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\UmMenuMaster.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\UmRoleAppTran.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\UmRoleMaster.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\UmRoleMasterTran.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\UmUserDepartmentTran.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\UmUserMaster.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\UmUserMasterRole.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\UnsuccessfulApplicantListMaster.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\ValidatedPropertyDetailMst.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Context\Village_Master.cs">
+      <DependentUpon>NAPIMS.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Controller\OnlinePropertyController.cs" />
+    <Compile Include="Controller\NiveshMitraController.cs" />
+    <Compile Include="Controller\NiveshMitraServiceSuperController.cs" />
+    <Compile Include="Controller\NiveshMitraSuperController.cs" />
+    <Compile Include="Controller\NoidaAuthorityController.cs" />
+    <Compile Include="Controller\NoidaAllotmentController.cs" />
+    <Compile Include="Controller\SWPFormController.cs" />
+    <Compile Include="Controller\SWPServiceController.cs" />
+    <Compile Include="Controller\SWPSuperController.cs" />
+    <Compile Include="Helper\FTPHandler.cs" />
+    <Compile Include="Helper\NICServiceApiHelper.cs" />
+    <Compile Include="Helper\NiveshMitraHelper.cs" />
+    <Compile Include="Helper\ParserModificators.cs" />
+    <Compile Include="Helper\StringExtensions.cs" />
+    <Compile Include="Helper\SWPApiServiceProvider.cs" />
+    <Compile Include="Helper\SWPPaymentGateway.cs" />
+    <Compile Include="Helper\SWPHelper.cs" />
+    <Compile Include="Model\AccountViewModel.cs" />
+    <Compile Include="Model\NICFormViewModel.cs" />
+    <Compile Include="Model\SWPApiViewModel.cs" />
+    <Compile Include="Model\SWPFormViewModel.cs" />
+    <Compile Include="Model\SWPServicesViewModel.cs" />
+    <Compile Include="Resource\SWPMessage.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SWPMessage.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Service References\NiveshMitraApiServices\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Helper\PIMSAccount.cs" />
+    <Compile Include="Service References\NiveshMitraApiTestService\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Service References\NiveshMitraDistrictTestApiService\Reference.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Reference.svcmap</DependentUpon>
+    </Compile>
+    <Compile Include="Service\INICFormService.cs" />
+    <Compile Include="Service\INICRequestService.cs" />
+    <Compile Include="Service\ISWPFormService.cs" />
+    <Compile Include="Service\ISWPGeneralService.cs" />
+    <Compile Include="Service\ISWPRequestService.cs" />
+    <Compile Include="Service\NICFormService.cs" />
+    <Compile Include="Service\NICRequestService.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service\SWPFormService.cs" />
+    <Compile Include="Service\SWPGeneralService.cs" />
+    <Compile Include="Service\SWPRequestService.cs" />
+    <Compile Include="Service\TemplateParserService.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <EntityDeploy Include="Context\NAPIMS.edmx">
+      <Generator>EntityModelCodeGenerator</Generator>
+      <LastGenOutput>NAPIMS.Designer.cs</LastGenOutput>
+    </EntityDeploy>
+    <None Include="Context\NAPIMS.edmx.diagram">
+      <DependentUpon>NAPIMS.edmx</DependentUpon>
+    </None>
+    <None Include="packages.config" />
+    <None Include="Properties\DataSources\System.Data.DataSet.datasource" />
+    <None Include="Service References\NiveshMitraApiServices\upswp_niveshmitraservices.wsdl" />
+    <None Include="Service References\NiveshMitraApiTestService\upswp_niveshmitraservices.wsdl" />
+    <None Include="Service References\NiveshMitraDistrictTestApiService\Dist_updation_after_land_allotmt_By_Dpt.wsdl" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Service References\" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadataStorage Include="Service References\NiveshMitraApiServices\" />
+    <WCFMetadataStorage Include="Service References\NiveshMitraApiTestService\" />
+    <WCFMetadataStorage Include="Service References\NiveshMitraDistrictTestApiService\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\NiveshMitraApiServices\upswp_niveshmitraservices.disco" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\NiveshMitraApiServices\configuration91.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\NiveshMitraApiServices\configuration.svcinfo" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Service References\NiveshMitraApiServices\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <EmbeddedResource Include="Resource\SWPMessage.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>SWPMessage.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Context\NAPIMS.Context.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>NAPIMS.edmx</DependentUpon>
+      <LastGenOutput>NAPIMS.Context.cs</LastGenOutput>
+    </Content>
+    <Content Include="Context\NAPIMS.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <DependentUpon>NAPIMS.edmx</DependentUpon>
+      <LastGenOutput>NAPIMS.cs</LastGenOutput>
+    </Content>
+    <None Include="Service References\NiveshMitraDistrictTestApiService\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <None Include="Service References\NiveshMitraDistrictTestApiService\configuration.svcinfo" />
+    <None Include="Service References\NiveshMitraDistrictTestApiService\configuration91.svcinfo" />
+    <None Include="Service References\NiveshMitraDistrictTestApiService\Dist_updation_after_land_allotmt_By_Dpt.disco" />
+    <None Include="Service References\NiveshMitraApiTestService\Reference.svcmap">
+      <Generator>WCF Proxy Generator</Generator>
+      <LastGenOutput>Reference.cs</LastGenOutput>
+    </None>
+    <None Include="Service References\NiveshMitraApiTestService\configuration.svcinfo" />
+    <None Include="Service References\NiveshMitraApiTestService\configuration91.svcinfo" />
+    <None Include="Service References\NiveshMitraApiTestService\upswp_niveshmitraservices.disco" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\EntityFramework.6.4.0\build\EntityFramework.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.4.0\build\EntityFramework.props'))" />
+    <Error Condition="!Exists('..\packages\EntityFramework.6.4.0\build\EntityFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.4.0\build\EntityFramework.targets'))" />
+  </Target>
+  <Import Project="..\packages\EntityFramework.6.4.0\build\EntityFramework.targets" Condition="Exists('..\packages\EntityFramework.6.4.0\build\EntityFramework.targets')" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

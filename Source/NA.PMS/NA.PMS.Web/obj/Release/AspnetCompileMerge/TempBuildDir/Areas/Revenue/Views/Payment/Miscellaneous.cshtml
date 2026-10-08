@@ -1,0 +1,157 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@model NA.PMS.Model.PaymentViewModel
+@{
+    ViewBag.Title = "Miscellaneous Payment";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="ManagePayment">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Miscellaneous Payments </h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12" style="border-left:1px solid #e2e3e4; border-right:1px solid #e2e3e4; ">
+        <div class="row" style="padding-right:30px;">
+            <div class="col-md-3 col-sm-3 col-xs-12   form-group">
+                <label>Registration Id</label>
+                @(Html.Kendo().DropDownListFor(m => m.RegistrationId)
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .Filter("contains")
+                    .OptionLabel("---Select---")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetRegistrationIdList", "Payment", new { area = "Revenue" })))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(100);
+                    })
+                    .Events(events => { events.Change("SearchPaymentDetail"); })
+                    .HtmlAttributes(new { @class = "", style = "width:90%; float:right;" })
+                )
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12   form-group">
+                @Html.Label("Department")
+                @(Html.Kendo().DropDownListFor(model => model.DepartmentId)
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel("--select--")
+                    .Filter("contains")
+                    .DataSource(source => source.Read(read => read.Action("GetDepartmentList", "Payment")))
+                    .HtmlAttributes(new { style = "width:90%;float:right;" })
+                    .Events(e => e.Change("SearchPaymentDetail"))
+                )
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12   form-group">
+                @Html.Label("Payment Type")
+                @(Html.Kendo().DropDownListFor(model => model.PaymentTypeId)
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel("--select--")
+                    .Filter("contains")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerPaging(true)
+                        .ServerFiltering(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetPaymentTypeList", "Payment", new { Area = "Revenue" })))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(100);
+                    })
+                    .HtmlAttributes(new { style = "width:90%; float:right;" })
+                    .Events(e => e.Change("SearchPaymentDetail"))
+                )
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12   form-group">
+                @Html.Label("Payment SubType")
+                @(Html.Kendo().DropDownListFor(model => model.PaymentSubTypeId)
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel("--select--")
+                    .Filter("contains")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerPaging(true)
+                        .ServerFiltering(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetPaymentSubTypeList", "Payment", new { Area = "Revenue" }).Data("FilterPaymentType")))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(100);
+                    })
+                    .CascadeFrom("PaymentTypeId")
+                    .HtmlAttributes(new { style = "width:90%;float:right;" })
+                    .Events(e => e.Change("SearchPaymentDetail"))
+                )
+            </div>
+            
+        </div>
+    </div>
+
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.PaymentViewModel>()
+            .Name("gridPayment")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.EncodedRid).Hidden();
+                columns.Bound(c => c.Id).Hidden();
+                columns.Bound(c => c.RegistrationNo).Title("Registration Id").Width("130");//.ClientTemplate("<a href='" + "/Revenue/Payment/PaymentDetail/#= EncodedRid #'>#=RegistrationNo#</a>");
+                columns.Bound(c => c.DepartmentName).Title("Department").Width("120");
+                columns.Bound(c => c.Applicant).Title("Applicant");
+                columns.Bound(c => c.PaymentType).Title("Type");
+                columns.Bound(c => c.PaymentSubType).Title("Sub Type");
+                columns.Bound(c => c.Amount).Title("Amount").ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+                //columns.Bound(c => c.PaymentMode).Title("Mode");
+                //columns.Bound(c => c.TransactionId).Title("Transaction Id");
+                columns.Bound(c => c.DepositDate).Title("Deposit Date").Format("{0:dd-MM-yyyy}").Width(140);
+            })
+            .Sortable()
+            .Filterable()
+            .Resizable(resize => resize.Columns(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+            .DataSource
+            (
+                dataSource => dataSource
+                .Ajax().Model(model => model.Id(p => p.Id)).ServerOperation(true)//.Sort(sort => sort.Add("RECEIPT_ID").Descending())
+                .Read(read => read.Action("GetMiscellaneousPaymentList", "Payment").Data("FilterParameter")).Sort(s => s.Add("Id").Descending()).PageSize(10)
+                .Aggregates(aggregates => aggregates.Add(p => p.Amount).Sum())
+            )
+        )
+    </div>
+</div>
+
+<script type="text/javascript">
+    function FilterParameter() {
+        return {
+            RegistrationId : $('#RegistrationId').val(),
+            DepartmentId : $('#DepartmentId').val(),
+            PaymentTypeId: $('#PaymentTypeId').val(),
+            PaymentSubTypeId: $('#PaymentSubTypeId').val()
+        }
+    }
+
+    function SearchPaymentDetail() {
+        $('#gridPayment').data("kendoGrid").dataSource.read();
+    }
+
+    function FilterPaymentType() {
+        return { id: $('#PaymentTypeId').val() }
+    }
+
+    function SearchPaymentDetail() {
+        $('#gridPayment').data("kendoGrid").dataSource.read();
+    }
+</script>
+
+
+

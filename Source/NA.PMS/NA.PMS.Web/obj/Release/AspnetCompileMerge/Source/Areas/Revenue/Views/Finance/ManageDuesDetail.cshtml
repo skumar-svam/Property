@@ -1,0 +1,141 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@model NA.PMS.Model.LeaseRentViewModel
+
+@{
+    ViewBag.Title = "Manage Dues Detail";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="ManageLeaseDeed">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Dues Detail</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                <a href="/Revenue/Finance/LeaseRentPayment" target="_blank"><i class="fa fa-plus"></i> <span>Lease Rent Payment</span></a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12" style="border:solid #e2e3e4; border-width:0 1px 1px">
+        <h2 class="blck-heading">Search</h2>
+        <div class="row" style="padding:0 30px;">
+            <div class="col-md-2 col-sm-2 col-xs-12 ">
+                <b>@Html.Label("Department")</b>
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 ">
+                @(Html.Kendo().DropDownListFor(m => m.DepartmentId)
+                    .Name("DepartmentId")
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel(" -- Please Select --")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetDepartmentList", "Finance")))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(6);
+                    })
+                    .Events(events => { events.Change("ChangeInDepartmentEvent"); })
+                    .HtmlAttributes(new { @class = "input-disabled", style = "width:100%" })
+                )
+            </div>
+            <div class="col-md-7">
+                <ul class="nav nav-tabs content-tabs" id="ulProperty" role="tablist" style="float:right;">
+                    <li class="active"><a href="#one" role="tab" data-toggle="tab">Lease Rent</a></li>
+                    <li><a href="#two" role="tab" data-toggle="tab">NDC</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 tab-content">
+        <div class="row tab-pane fade in active" id="one">
+            <h2 class="blck-heading" style="margin-bottom: 0px;">Lease Rent Details</h2>
+            <div class="k-grid-content">
+                @(Html.Kendo().Grid<NA.PMS.Model.LeaseRentViewModel>()
+                .Name("GridLeaseRentDetails")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.Id).Hidden(true);
+                    columns.Bound(c => c.RentId).Title("Id").Width(50);
+                    columns.Bound(c => c.RegistrationId).Title("RID");
+                    columns.Bound(c => c.PropertyNo).Title("Prop No");
+                    columns.Bound(c => c.PremiumPaidStatus).Title("Premium Paid");
+                    columns.Bound(c => c.IsLeaseRentPaid).Title("Lease Rent Paid");
+                    columns.Bound(c => c.LeaseRentPremium).Title("Lease Rent Per Year");
+                    columns.Bound(c => c.PaidUptoDate).Title("Lease Rent Paid Upto").Format("{0:dd-MMM-yyyy}");
+                    columns.Bound(c => c.TotalBalance).Title("Total Balance").ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+                    columns.Bound(c => c.Status).Title("Status");
+                    columns.Bound(c => c.RentId).Title("Edit").Width(50).ClientTemplate("#if(IsActive==false){#<a href=\"/Revenue/Finance/LeaseRentPayment/#= RentId#\" target='_blank' id='e_#=RentId#'><span class='glyphicon glyphicon-pencil'></span></a> #}else{# --- #}#").Filterable(false).Sortable(false);
+                    columns.Bound(c => c.RentId).Title("View").Width(50).ClientTemplate("<a href=\"/Revenue/Finance/LeaseRentDetail/#= RentId#\" target='_blank' id='e_#=RentId#'><span class='glyphicon glyphicon-eye-open'></span></a>").Filterable(false).Sortable(false);
+                })
+                .Sortable()
+                .Filterable()
+                .Resizable(resize => resize.Columns(true))
+                .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .DataSource(dataSource => dataSource
+                        .Ajax().ServerOperation(true)
+                        .Model(model => model.Id(p => p.Id))
+                        .Read(read => read.Action("GetLeaseRentDuesDetail", "Finance", new { area="Revenue"}).Data("FilterParamForLeaseRent")).PageSize(10)
+                        .Aggregates(aggregates => aggregates.Add(p => p.TotalBalance).Sum())
+                        )
+                )
+            </div>
+        </div>
+
+
+        <div class="row tab-pane fade" id="two">
+            <h2 class="blck-heading" style="margin-bottom: 0px;">NDC Details</h2>
+            <div class="k-grid-content">
+                @(Html.Kendo().Grid<NA.PMS.Model.LeaseRentViewModel>()
+                    .Name("GridNDCDetails")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(c => c.RentId).Title("Id").Width(50);
+                        columns.Bound(c => c.RegistrationId).Title("RID");
+                        columns.Bound(c => c.PropertyNo).Title("Prop No");
+                        columns.Bound(c => c.PremiumPaidStatus).Title("Premium Paid");
+                        columns.Bound(c => c.IsLeaseRentPaid).Title("Lease Rent Paid");
+                        columns.Bound(c => c.NDCDate).Title("NDC Date").Format("{0:dd-MMM-yyyy}");
+                        columns.Bound(c => c.ChallanDate).Title("Challan Date").Format("{0:dd-MMM-yyyy}");
+                        columns.Bound(c => c.Status).Title("Status");
+                        columns.Bound(c => c.RentId).Title("Edit").Width(50).ClientTemplate("#if(IsActive==false){# <a href=\"/Revenue/Finance/LeaseRentPayment/#= RentId#\" target='_blank' id='e_#=RentId#'><span class='glyphicon glyphicon-pencil'></span></a> #}else{# --- #}#").Filterable(false).Sortable(false);
+                        columns.Bound(c => c.RentId).Title("View").Width(50).ClientTemplate("<a href=\"/Revenue/Finance/LeaseRentDetail/#= RentId#\" target='_blank' id='e_#=RentId#'><span class='glyphicon glyphicon-eye-open'></span></a>").Filterable(false).Sortable(false);
+                    })
+                    .Sortable()
+                    .Filterable()
+                    .Resizable(resize => resize.Columns(true))
+                    .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                    .DataSource(dataSource => dataSource
+                        .Ajax().ServerOperation(true)
+                        .Model(model => model.Id(p => p.Id))                       
+                        .Read(read => read.Action("GetLeaseRentDuesDetail", "Finance").Data("FilterParamForNDC")).PageSize(10)
+                    )
+                )
+            </div>
+        </div>
+    </div>
+   
+    </div>
+
+    <script type="text/javascript">
+    function ChangeInDepartmentEvent() {
+        $("#GridLeaseRentDetails").data("kendoGrid").dataSource.read();
+        $("#GridNDCDetails").data("kendoGrid").dataSource.read();
+    }
+
+    function FilterParamForNDC() {
+        @*var model = { DepartmentId: $("#DepartmentId").val(), IsLeaseRentPaid: '@NA.PMS.Common.NDCOptions.Id_Yes' }*@
+        var model = { DepartmentId: $("#DepartmentId").val(), IsLeaseRentPaid: true };
+            return model;
+    }
+
+    function FilterParamForLeaseRent() {
+        var model = { DepartmentId: $("#DepartmentId").val(), IsLeaseRentPaid: false };
+        return model;
+    }
+    </script>

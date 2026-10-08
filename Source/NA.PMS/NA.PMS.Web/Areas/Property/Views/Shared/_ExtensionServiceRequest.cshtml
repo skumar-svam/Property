@@ -1,0 +1,36 @@
+﻿@using Kendo.Mvc.UI;
+@using NA.PMS.Model
+<br />
+<div class="col-md-12 col-sm-12 col-xs-12 form-bx">
+    @*<div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="_FormID">Extension Due Date </label> </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="ElblEDueD" class="form-control"></label></div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="_ApplicantName">Extension Given Date </label>  </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="ElblEGivenD" class="form-control"></label></div>
+        </div>*@
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<ExtensionDetails>()
+                .Name("gvExtensionServiceRequest")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.Extension_Due_Date).Title("Extension Due Date");
+                    columns.Bound(c => c.Extension_Given_Date).Title("Extension Given Date");
+                })
+                .Sortable()
+                .Filterable()
+                .Pageable
+                    (
+                        pageable => pageable
+                        .Enabled(true)
+                        .PageSizes(true)
+                     )
+                .DataSource
+                (
+                     dataSource => dataSource
+                    .Ajax().Model(model => model.Id(p => p.Rid))
+                    .ServerOperation(true)
+                    .Read(read => read.Action("GetExtensionServiceReqByRid", "CitizenRequests", new { area = "Member" }).Data("GetRid")).PageSize(20)
+                 ).AutoBind(false)
+        )
+    </div>
+</div>

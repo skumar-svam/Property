@@ -1,0 +1,157 @@
+﻿@model NA.PMS.Model.RolesModel
+@using Kendo.Mvc.UI;
+@using NA.PMS.Model
+
+@{
+    ViewBag.Title = "Manage Roles";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style>
+    /*#btnAddRole {
+        float: right;
+        width: 130px;
+    }*/
+    .linkcss:hover{
+        cursor:pointer;
+    }
+    .k-grid-content{
+        overflow-y:hidden;
+        overflow-x:hidden;
+    }
+</style>
+
+<div class="ManageApplicationRole">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage User Roles</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                <a href="#" id="btnAddRole" class="" onclick="javascript:AddRole(event);">Add Role</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    @Html.HiddenFor(model => model.ViewName)
+
+    <div class="k-grid-content">
+        @(Html.Kendo().Grid<RolesModel>()
+              .Name("gridRoles")
+              .Columns(columns =>
+              {
+                  //columns.Bound(c => c.ApplicationId).Hidden(true).Width(30);
+                  columns.Bound(c => c.RoleName).ClientTemplate("<a href='" + "/Admin/ManageRoles/ViewDetails/#= RoleId #'>#=RoleName#</a>");
+                  columns.Bound(c => c.ApplicationName);
+                  columns.Bound(p => p.RoleId).ClientTemplate("# if (IsActive == true) {#<a href='" + Url.Action("MenuMapping", "MenuMapping") + "?rId=#= RoleId #&appID=#=ApplicationId#'" + ">Map Role</a>#} else {#<span>Map Role</span>#} #").Title("Menu Mapping").Filterable(false);
+                  columns.Bound(c => c.RoleId).ClientTemplate("# if (IsActive == true) {#<a href='" + "/Admin/Application/MapApplicationsRole/" + "?rId=#= RoleId #&appID=#=ApplicationId#'" + ">Map Users</a>#} else {#<span>Map Users</span>#} #").Title("User Mapping").Filterable(false);
+                  columns.Bound(c => c.RoleId).HeaderHtmlAttributes(new { style = "text-align:center;" }).HtmlAttributes(new { style = "text-align:center;" }).ClientTemplate("# if (IsActive == true) {#<a class='gridEdit' href='" + "/Admin/ManageRoles/EditRole/#= RoleId #'> Edit </a>#}else {#<span class='gridNotEdit'>Edit</span>#} #").Title("Action").Filterable(false);
+                  //columns.Bound(c => c.RoleId).Title("Status").ClientTemplate("<a href='##' onclick='javascript:Deactivate(#= RoleId #);'><span class='glyphicon glyphicon-remove'></span> Deactivate</a>").Width(90).Filterable(false);
+                  columns.Bound(c => c.IsActive).HeaderHtmlAttributes(new { style = "text-align:center;" }).Title("Activate/DeActivate").ClientTemplate(
+                      "# if (IsActive == true) {#<a id=\"activate\" runat=\"server\" href='javascript: void(0);' onclick=\"role.StatusActivate(this,'#= RoleId#','true');\" " + "><label class='hyperlinkcss'>DeActivate</label></a># }else{#<a id=\"deactivate\" runat=\"server\" href='javascript: void(0);' onclick=\"role.StatusActivate(this,'#= RoleId#','false');\" " + "><label class='hyperlinkcss'>Activate</label></a>#} #").Sortable(false).HtmlAttributes(new { @style = "cursor:pointer; text-align:center" });
+              })
+              .Sortable()
+              .Filterable()
+                //.ToolBar(toolBar =>
+                //{
+                //    toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Add Role").HtmlAttributes(new { onclick = "javascript:AddRole(event);", @class = "k-button", id = "btnAddRole" });
+                //})
+              .Resizable(resize => resize.Columns(true))
+              .Pageable
+              (
+                  pageable => pageable
+                      .Enabled(true)
+                      .Refresh(true)
+                      .PageSizes(true)
+              )
+              .Groupable()
+              .DataSource
+              (
+                  dataSource => dataSource
+                      .Ajax()
+                      .Model(model => model.Id(p => p.RoleId))
+                      .ServerOperation(true)
+                              .Read(read => read.Action("GetUserRolesToMappedByUserId", "ManageRoles"))
+                      .PageSize(10)
+              )
+        )
+       
+    </div>
+</div>
+
+
+
+<div id="myModal" class="modal fade" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog  modal-sm" style="margin:150px auto">
+        <div class="modal-content">
+            <!-- dialog body -->
+            <div class="modal-body">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <div>
+                    @Html.Label("Title", new { @class = "", @id = "Title" })
+                </div>
+            </div>
+
+            <!-- dialog buttons -->
+            <div class="modal-footer footerbtn">
+                <button type="button" id="Deactivatebtn" usrid="" status="" class="k-button" data-dismiss="modal" onclick="role.DeActivateRole();">Yes</button>
+                <button type="button" class="k-button" data-dismiss="modal">No</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    function AddRole(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("AddRole", "ManageRoles")';
+    }
+
+    var role = new function () {
+        this.DeActivateRole = function () {
+            var roleId = $("#Deactivatebtn").attr("roleId");
+            var status = $("#Deactivatebtn").attr("status");
+            var viewN = $("#ViewName").val();
+            $.ajax({
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                type: "POST",
+                @*url: '@Url.Action("DeActivateRole", "ManageRoles")',*@
+                //data: { roleId: roleId, status: status, viewN: viewN },
+                data: JSON.stringify({ roleId: roleId, status: status, viewN: viewN }),
+                url: '/ManageRoles/DeActivateRole',
+                success: function (result) {
+                    $('#gridRoles').data('kendoGrid').dataSource.read();
+                    $('#gridRoles').data('kendoGrid').refresh();
+                    $("#Deactivatebtn").attr("roleId", "");
+                    $("#Deactivatebtn").attr("status", "");
+                },
+                error: function (msg) {
+                    alert("Error Occured-" + msg.responseText);
+                }
+            });
+        };
+        this.StatusActivate = function (e, id, status) {
+            $('#myModal').modal('show');
+            $("#Deactivatebtn").attr("roleId", id);
+            $("#Deactivatebtn").attr("status", status);
+            if (e.id === "deactivate") {
+                $("#Title").text("Do you want to activate this Role?");
+            } else {
+                $("#Title").text("Do you want to deactivate this Role?");
+            }
+        };
+    }
+    $(document).ready(function () {
+        $("#ViewName").val("ManageRoles");
+
+        @{if (TempData["MesgAdd"] != null && TempData["MesgAdd"] != "")
+         {
+               @:alertify.success('Changes saved successfully.');
+                                       }}
+        @{if (TempData["MesgEdit"] != null && TempData["MesgEdit"] != "")
+       {
+           @:alertify.success('Changes saved successfully.');
+                                       }}
+    });
+</script>

@@ -1,0 +1,65 @@
+﻿@using Kendo.Mvc.UI
+
+<div class="row">
+    <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+        @Html.Label("Module")
+        @(Html.Kendo().DropDownList()
+                      .Name("ddModuleName")
+                      .Filter("contains")
+                      .DataTextField("text")
+                      .DataValueField("text")
+                      .OptionLabel(" -- Please Select --")
+                      .DataSource(source => source.Read(read => read.Action("GetAuditModuleName", "Application")))
+                      .HtmlAttributes(new { style = "width: 100%" })
+         )
+    </div>
+    <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+        @Html.Label("Action")
+        @(Html.Kendo().DropDownList()
+                      .Name("ddActionName")
+                      .Filter("contains")
+                      .DataTextField("text")
+                      .DataValueField("text")
+                      .OptionLabel(" -- Please Select --")
+                      .DataSource(source => source.Read(read => read.Action("GetAuditActionName", "Application")))
+                      .HtmlAttributes(new { style = "width: 100%" })
+        )
+    </div>
+    <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+        @Html.Label("Username")
+        @(Html.Kendo().DropDownList()
+                      .Name("ddUserName")
+                      .Filter("contains")
+                      .DataTextField("text")
+                      .DataValueField("id")
+                      .OptionLabel(" -- Please Select --")
+                      .DataSource(source => source.Read(read => read.Action("GetAuditUserName", "Application")))
+                      .HtmlAttributes(new { style = "width: 100%" })
+        )
+    </div>
+    <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+        @Html.Label("From Date")
+        @(Html.Kendo().DatePicker().Name("ddStartDate").HtmlAttributes(new { style = "width:100%" }))
+    </div>
+    <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+        @Html.Label("To Date")
+        @(Html.Kendo().DatePicker().Name("ddEndDate").HtmlAttributes(new { style = "width:100%" }))
+    </div>
+    <div class="col-md-2 col-sm-6 col-xs-12 form-group" style="text-align:center">
+        @Html.Label(" ")<br />
+        <input type="button" class="btn btn-add" value="Search" id="btnAdvanceSearch" />
+    </div>
+</div>
+
+
+<script>
+    function FilterAuditAction(){
+        return { moduleName: $('#ddModuleName').val() };
+    }
+    function FilterAuditUserName() {
+        return {
+            moduleName: $('#ddModuleName').val(),
+            actionName: $('#ddActionName').val()
+        }
+    }
+</script>

@@ -1,0 +1,78 @@
+﻿@model NA.PMS.Model.MortgageModel
+@using Kendo.Mvc.UI;
+@{
+    ViewBag.Title = "ManageMortgage";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    #btnAddMortgage {
+        float: right;
+        width: 130px;
+    }
+
+    .linkcss:hover {
+        cursor: pointer;
+    }
+    .k-grid-content{
+        overflow-y:hidden;
+        overflow-x:hidden;
+    }
+</style>
+<div class="ManageMortgage">
+   
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Mortgage</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                <a href="#" id="btnAddApplication" class="" onclick="javascript: Mortgage(event);">Add Mortgage</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.MortgageModel>()
+              .Name("gridMortgage")
+              .Columns(columns =>
+              {
+                  columns.Bound(c => c.RequestNo).Width(120).ClientTemplate("<a href='" + "/Property/PropertyRegistration/MortgageRequestStatus/#= EncodedParameter #'>#=RequestNo#</a>").Filterable(false);
+                  columns.Bound(c => c.RID).Title("Registration Id").Width(150);
+                  columns.Bound(c => c.SchemeName).Title("Scheme Name");
+                  columns.Bound(c => c.DepartmentName).Title("Department Name");
+                  columns.Bound(c => c.ApproveDate).Title("Approved/Rejected Date").Format("{0:dd/MM/yyyy}");
+                  columns.Bound(c => c.MortgageDate).Title("Request Date").Format("{0:dd/MM/yyyy}");
+                  columns.Bound(c => c.StatusName).Title("Status");
+                  columns.Bound(c => c.ApplicantName).Title("Applicant's Name");
+                  columns.Bound(c => c.MortgageType).Title("Mortgage Type");
+              })
+              .Sortable()
+              .Filterable()
+              //.ToolBar(toolBar =>
+              //{
+              //    toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Add Mortgage").HtmlAttributes(new { onclick = "javascript:Mortgage(event);", @class = "k-button", id = "btnAddMortgage" });
+              //})
+              .Resizable(resize => resize.Columns(true))
+              .Pageable
+              (
+                pageable => pageable
+                .Enabled(true)
+                .Refresh(true)
+                .PageSizes(true)
+              )
+              .Groupable()
+              .DataSource
+              (
+                dataSource => dataSource
+                .Ajax().Model(model => model.Id(p => p.RequestNo))
+                .ServerOperation(true).Sort(sort => sort.Add("RequestNo").Descending()).Read(read => read.Action("GetAllMortgage", "PropertyRegistration"))
+                .PageSize(10)
+              )
+        )
+    </div>
+</div>
+<script type="text/javascript">
+    function Mortgage(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("AddMortgage", "PropertyRegistration")';
+    }
+</script>

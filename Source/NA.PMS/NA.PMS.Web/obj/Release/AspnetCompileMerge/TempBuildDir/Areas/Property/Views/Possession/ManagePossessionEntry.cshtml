@@ -1,0 +1,68 @@
+﻿@using Kendo.Mvc.UI
+
+@model NA.PMS.Model.Property.PropertyPossessionModel
+@{
+    ViewBag.Title = "Manage Possession Entry";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div>
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Possession Entry</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                <a href="#" id="btnAddPossessionEntry" class="" onclick="javascript: AddPossessionEntry(event);">Add Possession Entry</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+
+  
+        <div class="k-grid-content">
+
+            @(Html.Kendo().Grid<NA.PMS.Model.Property.PropertyPossessionModel>()
+              .Name("gridPossession")
+              .Columns(columns =>
+              {
+                  //columns.Bound(c => c.Rid).Title("Registration Id").Width(150).ClientTemplate("<a href=\"/Property/Possession/ViewPossessionEntry/#= Rid#\" id='v_#=Rid#'  style = 'width: 30px;' >#=Rid#</a>");
+                  columns.Bound(c => c.Rid).Title("Registration Id").Width(150).ClientTemplate("<a href=\"/Property/Possession/ViewPossessionEntry/#= EncryptedRid#\">#=Rid#</a>");
+                  columns.Bound(c => c.DepartmentName).Title("Department");
+                  columns.Bound(c => c.SectorName).Title("Sector").Width(100);
+                  columns.Bound(c => c.BlockName).Title("Block").Width(100);
+                  columns.Bound(c => c.PropertyNo).Title("Property No").Width(150);
+                  //columns.Bound(c => c.PropertyNumber).Title("Property No");
+                  columns.Bound(c => c.PossessionOrderDate).Title("Possession Order Date").Format("{0:dd/MM/yyyy}");
+                  columns.Bound(c => c.PossessionDate).Title("Possession Date").Format("{0:dd/MM/yyyy}");
+                  columns.Bound(c => c.AreaChange).Title("Area Change").Width(150).ClientTemplate("#= AreaChange==null?'No':AreaChange #");
+                  //columns.Bound(c => c.Print).ClientTemplate("<input type='checkbox' class='chkbx' ></input>").Title("Print").Width(75).Filterable(false).Sortable(false);
+              })
+              .Sortable()
+              .Filterable()
+              .Resizable(resize => resize.Columns(true))
+              //.ToolBar(toolBar =>
+              //{
+              //    toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Add Possession Entry").HtmlAttributes(new { onclick = "javascript:AddPossessionEntry(event);", @class = "k-button", id = "btnAddPossessionEntry" });
+              //})
+              .Pageable(pageable => pageable
+                  .Enabled(true)
+                  .Refresh(true)
+                  .PageSizes(true)
+              )
+              //.Groupable()
+              .DataSource(dataSource => dataSource
+                  .Ajax().Model(model => model.Id(c => c.Rid))
+                          .ServerOperation(true).Sort(sort => sort.Add("Id").Descending())
+                                  .Read(read => read.Action("GetAllPossessionEntryProperties", "Possession")).PageSize(20)
+              )
+            )
+        </div>
+    </div>
+
+    <script type="text/javascript">
+
+        function AddPossessionEntry(event) {
+            event.preventDefault();
+            window.location.href = '@Url.Action("AddPossessionEntry", "Possession")';
+        }
+    </script>

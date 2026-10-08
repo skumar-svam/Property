@@ -1,0 +1,188 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@model NA.PMS.Model.LeaseRentViewModel
+
+@{
+    ViewBag.Title = "Lease Rent Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="ManageLeaseRentList">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Lease Rent Report</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                @*<a href="/Revenue/Payment/LeaseRent" id="btnAddLeaseDeed" target="_blank"><i class="fa fa-plus"></i> <span> Add Lease Rent</span></a>*@
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+
+    <div class="col-md-12 content-top-spce">
+        <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            <h2 class="blck-heading" style="margin-bottom:15px;">Search</h2>
+            <div class="form-bx">
+                <div class="row">                  
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <b>@Html.Label("Department")</b>
+                        @(Html.Kendo().DropDownListFor(m => m.DepartmentId)
+                            .Filter("contains")
+                            .DataTextField("Text")
+                            .DataValueField("Id")
+                            .OptionLabel(" --- select ---")
+                            .DataSource(source =>
+                            {
+                                source.Custom()
+                                .ServerFiltering(true)
+                                .ServerPaging(true)
+                                .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                .Transport(transport => transport.Read(read => read.Action("GetDepartmentList", "Finance", new { area = "Revenue" })))
+                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                .PageSize(6);
+                            })
+                            .Events(events => { events.Change("ChangeDepartmentEvent"); })
+                            .HtmlAttributes(new { @class = "input-disabled", style = "width:90%; float:right;" })
+                        )
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label>Session Year</label>
+                        @(Html.Kendo().DropDownListFor(model=>model.FinancialYear)
+                            //.Name("DDLFinancialYear")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel(" --- Select ---")
+                            .BindTo(new List<SelectListItem>() {
+                                new SelectListItem() { Text = "2015-2016", Value = "2015-2016" },
+                                new SelectListItem() { Text = "2016-2017", Value = "2016-2017" },
+                                new SelectListItem() { Text = "2017-2018", Value = "2017-2018" }
+                            })
+                            .HtmlAttributes(new { style = "width: 90%; float:right;" })
+                            .Events(e => e.Change("ChangeDepartmentEvent"))
+                        )
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label>Receipt Type</label>
+                        @(Html.Kendo().DropDownListFor(model=>model.ActionType)
+                            //.Name("DDLActionType")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .OptionLabel(" --- Select ---")
+                            .BindTo(new List<SelectListItem>() {
+                                new SelectListItem() { Text = "Lease Rent", Value = "Lease Rent" }
+                            })
+                            .HtmlAttributes(new { style = "width: 90%; float:right;" })
+                            .Events(e => e.Change("ChangeDepartmentEvent"))
+                        )
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="blck-heading" style="margin-bottom: 0px;">Lease Rent Details</h2>
+            <div class="k-grid-content">
+                @(Html.Kendo().Grid<NA.PMS.Model.Sp_AccountReport_Receipt_list_Result>()
+                .Name("GridLeaseRentReport")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.RECEIPT_ID).Title("Receipt Id");
+                    columns.Bound(c => c.RID_NO).Title("Registration Id");
+                    //columns.Bound(c => c.DEPT_CODE).Title("Department");
+                    columns.Bound(c => c.PROPERTY_NUMBER).Title("Property");
+                    columns.Bound(c => c.AMOUNT_PAID).Title("Lease Rent (<span class='fa fa-rupee'></span>)").ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+                    columns.Bound(c => c.DEPOSIT_DATE).Title("Deposit Date").Format("{0:dd-MMM-yyyy}");
+                    //columns.Bound(c => c.RECEIPT_HEAD_ID).Title("Receipt Head");
+                    columns.Bound(c => c.Account).Title("Receipt Head");
+                    //columns.Bound(c => c.PaidUptoDate).Title("Paid Upto Date").Format("{0:dd-MMM-yyyy}");
+                    //columns.Bound(c => c.TotalBalance).Title("Total Balance (<span class='fa fa-rupee'></span>)").ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+                    //columns.Bound(c => c.Id).Title("Edit").ClientTemplate("#if(IsActive==false){# <a href=\"/Revenue/Payment/LeaseRent/#= Id#\" id='e_#=Id#'><span class='glyphicon glyphicon-pencil'></span></a> #}else{# --- #}#").Filterable(false).Sortable(false).Width(50);
+                    //columns.Bound(c => c.Id).Title("View").ClientTemplate("<a href=\"/Revenue/Finance/ViewLeaseDeedDetails/#= Id#\" id='e_#=Id#'><span class='glyphicon glyphicon-eye-open'></span></a>").Filterable(false).Sortable(false).Width(50);
+                })
+                .Sortable()
+                .Filterable()
+                .Resizable(resize => resize.Columns(true))
+                .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .Model(model => model.Id(p => p.RECEIPT_ID))
+                        .ServerOperation(true)
+                        .Read(read => read.Action("GetLeaseRentReportDetails", "Finance", new { area = "Revenue" }).Data("FilterParam")).PageSize(10)
+                        .Aggregates(aggregates => aggregates.Add(p => p.AMOUNT_PAID).Sum())
+                    )
+                )
+            </div>
+
+
+
+            @*<div class="k-grid-content">
+                @(Html.Kendo().Grid<NA.PMS.Model.LeaseRentViewModel>()
+                .Name("GridLeaseRentReport")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.Id).Hidden(true);
+                    columns.Bound(c => c.RegistrationId).Title("Registration Id");
+                    columns.Bound(c => c.Department).Title("Department");
+                    columns.Bound(c => c.PropertyNo).Title("Property");
+                    columns.Bound(c => c.LeaseRentPremium).Title("Lease Rent (<span class='fa fa-rupee'></span>)");
+                    columns.Bound(c => c.RevisedDate).Title("Revise Date").Format("{0:dd-MMM-yyyy}");
+                    columns.Bound(c => c.PremiumPaidStatus).Title("Premium Paid");
+                    columns.Bound(c => c.IsLeaseRentPaid).Title("Lease Rent Paid");
+                    columns.Bound(c => c.PaidUptoDate).Title("Paid Upto Date").Format("{0:dd-MMM-yyyy}");
+                    columns.Bound(c => c.TotalBalance).Title("Total Balance (<span class='fa fa-rupee'></span>)").ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+                    columns.Bound(c => c.Id).Title("Edit").ClientTemplate("#if(IsActive==false){# <a href=\"/Revenue/Payment/LeaseRent/#= Id#\" id='e_#=Id#'><span class='glyphicon glyphicon-pencil'></span></a> #}else{# --- #}#").Filterable(false).Sortable(false).Width(50);
+                    //columns.Bound(c => c.Id).Title("View").ClientTemplate("<a href=\"/Revenue/Finance/ViewLeaseDeedDetails/#= Id#\" id='e_#=Id#'><span class='glyphicon glyphicon-eye-open'></span></a>").Filterable(false).Sortable(false).Width(50);
+                })
+                .Sortable()
+                .Filterable()
+                .Resizable(resize => resize.Columns(true))
+                .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .DataSource(dataSource => dataSource
+                    .Ajax()
+                    .Model(model => model.Id(p => p.Id))
+                    .ServerOperation(true)
+                    .Read(read => read.Action("GetLeaseRentReportDetails", "Finance", new { area = "Revenue" }).Data("LeaseRent")).PageSize(10)
+                    .Aggregates(aggregates => aggregates.Add(p => p.TotalBalance).Sum())
+                    )
+                )
+            </div>*@
+        </div>
+    </div>
+
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var departmentId = $("#DepartmentId").val();
+        var financialYear = $("#FinancialYear").val();
+        var actionType = $("#ActionType").val();
+
+        @*if ('@Model.FinancialYear' != null || '@Model.FinancialYear' != '') {
+            var fy = '@Model.FinancialYear';
+            $("#DDLFinancialYear").data("kendoDropDownList").value(fy);
+        }*@
+    });
+
+
+    function ChangeDepartmentEvent() {
+            departmentId = $("#DepartmentId").val();
+            financialYear = $("#FinancialYear").val();
+            actionType = $("#ActionType").val();
+            $("#GridLeaseRentReport").data("kendoGrid").dataSource.read();
+        }
+
+        function FilterParam() {
+            var model = {
+                DepartmentId: $("#DepartmentId").val() == "" ? 4 : $("#DepartmentId").val(),
+                FinancialYear: $("#FinancialYear").val() == "" ? "2017-2018" : $("#FinancialYear").val(),
+                ActionType: $("#ActionType").val() == "" ? "Lease Rent" : $("#ActionType").val()
+            }
+            return model;
+        }
+
+        function LeaseRent() {
+            var model = { DepartmentId: $("#DepartmentId").val(), PremiumPaidStatus: '@NA.PMS.Common.NDCOptions.Id_No' };
+        return model;
+    }
+</script>

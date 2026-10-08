@@ -1,0 +1,303 @@
+﻿@model NA.PMS.Model.OnlinePaymentViewModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@using NoidaAuthority.PMS.Common;
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutOnline.cshtml";
+}
+
+
+<style>
+    .col-md-4 {
+        margin-top: 0%;
+        /* width: 38.3333%; */
+    }
+
+    .alertify-notifier.ajs-bottom {
+        bottom: 40px;
+    }
+</style>
+
+@using (Html.BeginForm("Index", "Payment", new { area = "Online" }, FormMethod.Post, new { enctype = "multipart/form-data", id = "paymentform" }))
+{
+    <div id="div-payment" class="col-md-10 col-md-offset-1">
+        <div class="row form-group">
+            <div class="col-md-12">
+                <h2>Pay Online</h2>
+            </div>
+            <div>
+                @Html.HiddenFor(model => model.DepartmentId)
+                @Html.HiddenFor(model => model.RegistrationId)
+                @Html.HiddenFor(model => model.ChallanId)
+                @Html.HiddenFor(model => model.ChallanRefId)
+                @Html.HiddenFor(model => model.ServiceName)
+                @Html.HiddenFor(model => model.Email)
+                @Html.HiddenFor(model => model.ChallanDate)
+                @Html.HiddenFor(model => model.ActionType)
+                @Html.HiddenFor(model => model.BankId, htmlAttributes: new {  })
+                @Html.HiddenFor(model => model.BankName, htmlAttributes: new { })
+                @Html.HiddenFor(model => model.AddressI, htmlAttributes: new { })
+            </div>
+        </div>
+
+        <div class="row form-group">
+            <div class="col-md-2">
+                <label>TransactionId</label>
+            </div>
+            <div class="col-md-4">
+                @Html.TextBoxFor(model => model.TransactionId, htmlAttributes: new { @class = "k-textbox not-editable", @maxlength = "25", style = "width:100%" })
+            </div>
+            <div class="col-md-2">
+                <label>Processing Fee</label>
+            </div>
+            <div class="col-md-4">
+                @Html.TextBoxFor(model => model.Amount, htmlAttributes: new { @class = "k-textbox not-editable", @maxlength = "10", style = "width:100%" })
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-md-2">
+                <label>Name</label>
+            </div>
+            <div class="col-md-4">
+                @Html.TextBoxFor(model => model.Applicant, htmlAttributes: new { @class = "k-textbox not-editable", style = "width:100%" })
+            </div>
+            <div class="col-md-2">
+                <label>Product Info</label>
+            </div>
+            <div class="col-md-4">
+                @Html.TextBoxFor(model => model.ProductInfo, htmlAttributes: new { @class = "k-textbox not-editable", @maxlength = "50", style = "width:100%" })
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-md-2">
+                <label>Mobile No</label>
+            </div>
+            <div class="col-md-4">
+                @Html.TextBoxFor(model => model.MobileNo, htmlAttributes: new { @class = "k-textbox", @maxlength = "10", @minlength = "10", style = "width:100%" })
+            </div>
+            <div class="col-md-2">
+                <label>Email</label>
+            </div>
+            <div class="col-md-4">
+                @Html.TextBoxFor(model => model.Email, htmlAttributes: new { @class = "k-textbox", @maxlength = "25", style = "width:100%" })
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-md-2">
+                <label>Product Info</label>
+            </div>
+            <div class="col-md-4">
+                @Html.TextBoxFor(model => model.ProductInfo, htmlAttributes: new { @class = "k-textbox not-editable", @maxlength = "50", style = "width:100%" })
+            </div>
+            <div class="col-md-2">
+                <label>City</label>
+            </div>
+            <div class="col-md-4">
+                @Html.TextBoxFor(model => model.City, htmlAttributes: new { @class = "k-textbox", @maxlength = "50", style = "width:100%" })
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-md-2">
+                <label>State</label>
+            </div>
+            <div class="col-md-4">
+                @Html.TextBoxFor(model => model.State, htmlAttributes: new { @class = "k-textbox", @maxlength = "50", style = "width:100%" })
+            </div>
+            <div class="col-md-2">
+                <label>Country</label>
+            </div>
+            <div class="col-md-4">
+                @Html.TextBoxFor(model => model.Country, htmlAttributes: new { @class = "k-textbox", @maxlength = "50", style = "width:100%" })
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-md-2">
+                <label>Zipcode</label>
+            </div>
+            <div class="col-md-4">
+                @Html.TextBoxFor(model => model.Zipcode, htmlAttributes: new { @class = "k-textbox", @maxlength = "50", style = "width:100%" })
+            </div>
+            <div class="col-md-2">
+                <label>RequestId</label>
+            </div>
+            <div class="col-md-4">
+                @Html.TextBoxFor(model => model.OnlineRequestId, htmlAttributes: new { @class = "k-textbox", @maxlength = "8", style = "width:100%" })
+            </div>
+        </div>
+        <div class="row form-group" id="div-pay-fee">
+            <div class="col-md-6" id="divPaymentType">
+                <label>Select Bank:</label>
+                <input type="radio" name="bank" value='@Model.BankName' checked> @Model.BankName &nbsp;&nbsp;&nbsp;
+                @*<input type="radio" name="bank" value="BOB"> Bank of Baroda <br>*@
+            </div>
+            <div class="col-md-6" style="">              
+                <input type="button" value="PAY" id="btn-pay-online" style="min-width:110px;"/>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-10 col-md-offset-1" id="div-challan">
+        <div class="row form-group">
+            <div class="col-md-12" style="height:450px; overflow:auto;background:#fff; border:1px solid black;">
+                <div id="div-challan-body" style="padding:20px;">
+                    @Html.Raw(Model.HtmlContent)
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+
+<script>
+    @{
+        if (TempData["Success"] != null || TempData["Success"] == "")
+        {
+            @:alertify.success('Payment already done');
+        }
+
+        if (TempData["FailedTraxaction"] != null || TempData["FailedTraxaction"] == "")
+        {
+            @:alertify.error("Transaction failed.");
+        }
+        if (TempData["MismatchTraxaction"] != null || TempData["MismatchTraxaction"] == "")
+        {
+            @:alertify.error("Transaction Mismatch.");
+        }
+        if (TempData["ErrorInTraxaction"] != null || TempData["ErrorInTraxaction"] == "")
+        {
+            @:alertify.error("Error in Transaction.");
+        }
+    }
+</script>
+
+<script>
+    $(document).ready(function () {
+        //$('#BankId').val(2);
+
+        $(".not-editable").keydown(function (event) {
+            return false;
+        });
+
+        if ($("input[name='OnlinePaymentModel.Amount']").val() == "" || $("input[name='OnlinePaymentModel.Amount']").val() == 0) {
+
+        }
+
+        $('#paymentform input:radio[name="OnlinePaymentModel.PaymentType"]').on('change', function () {
+            TogglePaymentType();
+        });
+
+        $('#btn-pay-online').click(function () {
+            //$('#BankId').val(2);
+            $('#paymentform').submit();
+            //$.ajax({
+            //    dataType: 'json',
+            //    type: 'Post',
+            //    contentType: 'application/json; charset=utf-8',
+            //    data: JSON.stringify({ OnlineRequestId: $("input[name='OnlineRequestId']").val() }),
+            //    url: '/Customer/Payment/IsProcessingFeePaid',
+            //    success: function (result) {
+            //        if (result == true) {
+            //            alertify.success("Processing fee already paid.");
+            //        }
+            //        else {
+            //            $('#paymentform').submit();
+            //        }
+            //    },
+            //    error: function (objAjaxRequest, strError) {
+            //        var respText = objAjaxRequest.responseText;
+            //        alertify.error("Some Error in save database.");
+            //    }
+            //});
+
+            //var payType = $('input[name="bank"]:checked', '#paymentform').val();
+            //if (payType.trim() == "Online") {
+            //    var flag = ValidateInputs();
+            //    if (flag) {
+            //        $.ajax({
+            //            dataType: 'json',
+            //            type: 'Post',
+            //            contentType: 'application/json; charset=utf-8',
+            //            data: JSON.stringify({ OnlineRequestId: $("input[name='OnlineRequestId']").val() }),
+            //            url: '/Customer/Payment/IsProcessingFeePaid',
+            //            success: function (result) {
+            //                if (result == true) {
+            //                    alertify.success("Processing fee already paid.");
+            //                }
+            //                else {
+            //                    $('#paymentform').submit();
+            //                }
+            //            },
+            //            error: function (objAjaxRequest, strError) {
+            //                var respText = objAjaxRequest.responseText;
+            //                alertify.error("Some Error in save database.");
+            //            }
+            //        });
+            //    }
+            //    else {
+
+            //    }
+            //}
+            //else {
+            //    PrintChallan();
+            //}
+        });
+    });
+
+    function ValidateInputs() {
+        var flag = true;
+        if ($("input[name='OnlinePaymentModel.TransactionId']").val().trim() == "") {
+            alertify.error("Please enter Transaction Id");
+            return flag = false;
+        }
+        if ($("input[name='OnlinePaymentModel.Amount']").val().trim() == "") {
+            alertify.error("Please enter Processing fee");
+            return flag = false;
+        }
+        if ($("input[name='OnlinePaymentModel.MobileNo']").val().trim() == "") {
+            alertify.error("Please enter Mobile No");
+            return flag = false;
+        }
+        if ($("input[name='OnlinePaymentModel.Email']").val().trim() == "") {
+            alertify.error("Please enter Email Id");
+            return flag = false;
+        }
+        return flag;
+    }
+
+    function TogglePaymentType() {
+        var formType = $('input[name="OnlinePaymentModel.PaymentType"]:checked', '#paymentform').val();
+        if (formType.trim() == "Online") {
+            $('#btn-pay-online').val('Pay Online');
+        }
+        else {
+            $('#btn-pay-online').val('Print Challan');
+        }
+        $('#btn-pay-online').show();
+    }
+
+    function PrintChallan() {
+        var contents = document.getElementById("div-challan-body").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<style>.td-amount {padding-right: 30px;}#div-challan-body {padding: 5px;font-size:10pt;}#authorityChallan {border: 1px solid black;padding: 5px;} .h4-dept{margin-top:0px; margin-bottom:0px;}.h4-noida{margin-bottom:2px;}</style>');
+        frameDoc.document.write('</head><body style="font-size:10pt;">');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+</script>
+

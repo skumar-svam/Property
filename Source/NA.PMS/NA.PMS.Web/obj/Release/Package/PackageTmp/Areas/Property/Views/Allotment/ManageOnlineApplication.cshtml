@@ -1,0 +1,52 @@
+﻿@model NA.PMS.Model.OnlineApplicationFormModel
+@using Kendo.Mvc.UI;
+@{
+    ViewBag.Title = "ManageOnlineApplication";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="ManageAllotment">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Online Application</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.OnlineApplicationFormModel>()
+                          .Name("gridOnlineApplicationDetail")
+                  .Columns(columns =>
+                  {
+                      columns.Bound(c => c.ApplicationId).ClientTemplate("<a href='" + "/Property/Allotment/ViewOnlineApplication/#= ApplicationId #'>#= ApplicationId #</a>").Title("Application Id").Width(150);
+                      columns.Bound(c => c.ApplicationId).Hidden(true);
+                      columns.Bound(c => c.SchemeName).Title("Scheme Name");
+                      columns.Bound(c => c.DepartmentName).Title("Department Name");
+                      columns.Bound(c => c.FirstName).Title("Name");
+                      columns.Bound(c => c.GenderName).Title("Gender");
+                      columns.Bound(c => c.DOB).Title("DOB").Format("{0:dd-MM-yyyy}");
+                      columns.Bound(c => c.Status).Title("Status");                    
+                  })
+                  .Sortable()
+                  .Filterable()
+                    .Resizable(resize => resize.Columns(true))
+                  .Pageable
+                  (
+                    pageable => pageable
+                    .Enabled(true)
+                    .Refresh(true)
+                    .PageSizes(true)
+                )
+                   .Groupable()
+                  .DataSource
+                  (
+                      dataSource => dataSource
+                                                  .Ajax().Model(model => model.Id(p => p.ApplicationId))
+                          .ServerOperation(true)
+                                          .Read(read => read.Action("GetOnlineApplications", "Allotment"))
+                          .PageSize(10)
+                  )
+        )
+    </div>
+</div>

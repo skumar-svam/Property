@@ -1,0 +1,303 @@
+﻿@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+
+<form action="">
+
+</form>
+
+<div class="panel-body">
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Property Id:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DropDownList()
+                .Name("PPropertyId")
+                .DataTextField("text")
+                .DataValueField("id")
+                .OptionLabel("---select---")
+                .Filter("contains")
+                .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => { transport.Read("GetPropertyIdList", "Report"); })
+                        .Schema(schema => { schema.Data("Data").Total("Total"); })
+                        .PageSize(100);
+                    }
+                 )
+                .Events(events => { events.Change("GetPropertyDetailsById"); })
+                .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label class="">Parent Property:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().ComboBox()
+                .Name("PParentPropertyId")
+                .DataTextField("text")
+                .DataValueField("id")
+                .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => { transport.Read("GetPropertyIdList", "Report"); })
+                        .Schema(schema => { schema.Data("Data").Total("Total"); })
+                        .PageSize(100);
+                    }
+                 )
+                .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Sector:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().ComboBox()
+                .Name("PSector")
+                .DataTextField("text")
+                .DataValueField("id")
+                .DataSource(source =>source.Read(read =>read.Action("GetAllSectors", "Report")))
+                .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Block:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().ComboBox()
+                .Name("PBlock")
+                .DataTextField("text")
+                .DataValueField("id")
+                .DataSource(source => source.Read(read => read.Action("GetAllBlocks", "Report")))
+                .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label class="">Plot No:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="100" id="PPlotNo" class="k-textbox" />
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Floor Area:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().ComboBox()
+                .Name("PFloor")
+                .DataTextField("text")
+                .DataValueField("id")
+                .DataSource(source => source.Read(read =>read.Action("GetAllFloorTypes", "Report")))
+                .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Property Cost:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="10" id="PPropertyCost" class="k-textbox" />
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Civil Cost:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="10" id="PCivilCost" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Total Cost:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="10" id="PTotalCost" class="k-textbox" />
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Covered Area:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="10" id="PCoveredArea" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Actual Area:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="10" id="PActualArea" class="k-textbox" />
+        </div>
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Total Area:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="10" id="PTotalArea" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row">
+
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Land Rate(sqm):</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="10" id="PLandRate" class="k-textbox" />
+        </div>        
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Allotment Money:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            <input type="text" maxlength="10" id="PAllotmentMoney" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+            <label>Registry:</label>
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().ComboBox()
+                .Name("PRegistry")
+                .DataTextField("text")
+                .DataValueField("id")
+                .DataSource(source =>source.Read(read =>read.Action("GetAllRegistryType", "Report")))
+                .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+            
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 form-group" style="text-align:right;">
+            <input type="button" id="btnUpdateProperty" value="Update" class="k-button" />
+            <input type="button" id="btnClearProperty" value="Clear" class="k-button" />
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#btnUpdateProperty').click(function () {
+            var pid = $('#PPropertyId').val();
+            if (pid != "" && pid.length == 8) {
+                UpdatePropertyDetail();
+            }
+            else {
+                alertify.error("Check property Id");
+            }
+        });
+
+        $('#btnClearProperty').click(function () {
+            ClearPropertyDetails();
+        });
+    });
+
+    function GetPropertyDetailsById() {
+        var pid = $('#PPropertyId').val();
+        
+        if (pid != "" ) {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ propertyId: pid }),
+                url: '@Url.Action("GetPropertyDetailsById", "Report")',
+                success: function (result) {
+                    if (result != null) {
+                        $('#PParentPropertyId').data("kendoComboBox").value(result.ParentPropertyId);
+                        $('#PSector').data("kendoComboBox").value(result.SectorId);
+                        $('#PBlock').data("kendoComboBox").value(result.BlockId);
+                        $('#PFloor').data("kendoComboBox").value(result.FloorId);
+                        $('#PPlotNo').val(result.PlotNo);
+                        $('#PLandRate').val(result.PropertyRate);
+                        $('#PPropertyCost').val(result.PropertyCost);
+                        $('#PCivilCost').val(result.CivilCost);
+                        $('#PTotalCost').val(result.TotalPropertyCost);
+                        $('#PCoveredArea').val(result.CoveredArea);
+                        $('#PActualArea').val(result.ActualArea);
+                        $('#PTotalArea').val(result.TotalArea);
+                        $('#PRegistry').data("kendoComboBox").value(result.Registry);;
+                        $('#PAllotmentMoney').val(result.AllotmentMoney);
+                    }
+                    if (result == '@ReturnType.NotExist') {
+                        alertify.error("PropertyId Id doesn't exist");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Please try again.");
+                }
+            });
+        }
+    }
+
+    function UpdatePropertyDetail() {
+        var Pmodel = {
+            PropertyId : $('#PPropertyId').val(),
+            ParentPropertyId : $('#PParentPropertyId').val(),
+            SectorId : $('#PSector').val(),
+            BlockId : $('#PBlock').val(),
+            PlotNo : $('#PPlotNo').val(),
+            FloorAreaId : $('#PFloor').val(),
+            PropertyRate : $('#PLandRate').val(),
+            PropertyCost : $('#PPropertyCost').val(),
+            CivilCost : $('#PCivilCost').val(),
+            TotalPropertyCost : $('#PTotalCost').val(),
+            CoveredArea : $('#PCoveredArea').val(),
+            ActualArea : $('#PActualArea').val(),
+            TotalArea : $('#PTotalArea').val(),
+            Registry : $('#PRegistry').val(),
+            AllotmentMoney : $('#PAllotmentMoney').val()
+        };
+        
+        $.ajax({
+            type: "post",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ model : Pmodel }),
+            url: '@Url.Action("UpdatePropertyDetail", "Report")',
+            success: function (result) {
+                if (result == '@ReturnType.Success') {
+                    alertify.success("Property detail updated successfully.");
+                    ClearPropertyDetails();
+                }
+                if (result == '@ReturnType.NotExist') {
+                    alertify.error("Property doesn't exist successfully.");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Please try again.");
+            }
+        });
+    }
+
+    function ClearPropertyDetails() {
+        //$('#PPropertyId').data("kendoComboBox").value('');
+        //$('#PParentProperty').data("kendoComboBox").value('');
+        $('#PSector').data("kendoComboBox").value('');
+        $('#PBlock').data("kendoComboBox").value('');
+        $('#PPlotNo').val('');
+        $('#PFloor').data("kendoComboBox").value('');
+        $('#PLandRate').val('');
+        $('#PPropertyCost').val('');
+        $('#PCivilCost').val('');
+        $('#PTotalCost').val('');
+        $('#PCoveredArea').val('');
+        $('#PActualArea').val('');
+        $('#PTotalArea').val('');
+        $('#PRegistry').data("kendoComboBox").value('');
+        $('#PAllotmentMoney').val('');
+        $('#PParentPropertyId').data("kendoComboBox").value('');
+    }
+
+</script>

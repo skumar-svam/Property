@@ -1,0 +1,122 @@
+﻿@model NA.PMS.Model.MortgageModel
+@using Kendo.Mvc.UI;
+@{
+    ViewBag.Title = "MortgageRequestApproval";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div id="divMortgageApproval">
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Mortgage Request Approval</h1></div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 mandatory"></div>
+                </div>
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="col-md-12 content-top-spce">
+                <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                    <h2 class="blck-heading">Mortgage Information</h2>
+                    <div class="form-bx">
+                        <input type="hidden" id="hdnRid" value="@Model.RID" />
+                        @{Html.RenderPartial("_AddEditMortgage", Model);}
+
+                    </div>
+                    <div>
+                        <input type="hidden" id="hdnAcceptReject" />
+                    </div>
+                </div>
+                <div class="box-button text-center">
+                    <button type="button" value="Cancel" id="btnBack" class="btn btn-default" onclick="javascript: window.location = '@Url.Action("ApprovalMortgage", "PropertyRegistration")';">Back</button>
+                    <button type="button" class="btn btn-default" value="Submit" id="btnSubmitApprove">Approve</button>
+                    <button type="button" class="btn btn-default" value="Submit" id="btnSubmitReject">Reject</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        GetPreviousMortgageBankDetails();
+        $("#OnlineRequestNo").attr("readonly", "readonly");
+        var datepicker = $("#ApproveDate").data("kendoDatePicker");
+        datepicker.readonly();
+        $("#RID").data("kendoDropDownList").enable(false);
+        GetPropertyDetails();
+
+        $("#btnSubmitApprove").click(function () {
+            OpenCommentPostPopUp();
+            $('#hdnAcceptReject').val('');
+            $('#hdnAcceptReject').val('true');
+        });
+        $("#btnSubmitReject").click(function () {
+            OpenCommentPostPopUp();
+            $('#hdnAcceptReject').val('');
+            $('#hdnAcceptReject').val('false');
+        });
+
+        $("#divAssineRequetApproval").kendoWindow({
+            modal: true,
+            title: "Assign Request to Approver",
+            visible: false,
+            width: "40%"
+        });
+        $("div[id='divCommentPost']").kendoWindow({
+            title: "Comment for Service",
+            modal: true,
+            visible: false,
+            width: "40%"
+        });
+
+        $("#btnBack").click(function () {
+            var PendencyReq = '@Request.QueryString["pr"]';
+            if (PendencyReq == 'true') {
+                window.location.href = '@Url.Action("PendencyReport", "Report", new { Area = "Reports" })';
+            }
+            else { window.location.href = '@Url.Action("ApprovalMortgage", "PropertyRegistration")'; }
+        });
+    });
+
+    function OpenCommentPostPopUp() {
+        var win = $("#divCommentPost").data("kendoWindow");
+        win.center();
+        win.open();
+    }
+    function CloseCommnetPostPopUp() {
+        var win = $("#divCommentPost").data("kendoWindow");
+        win.close();
+    }
+
+    $("#btnCommentPostApprove").click(function () {
+        //var requestNo = $("#ApplicationId").val();
+        var requestNo = $("#RequestNo").val();
+        var comment = $("#Comment").val();
+        var acceptReject = $('#hdnAcceptReject').val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ requestNo: requestNo, comment: comment, acceptReject: acceptReject }),
+            //url: '/Allotment/SaveCommentByApplicationID',
+            url: '/PropertyRegistration/SaveCommentByRequestID',
+            success: function (result) {
+                if (result == true) {
+                    window.location.href = '@Url.Action("ApprovalMortgage", "PropertyRegistration")';;
+                    return false;
+                }
+                else {
+                    alertify.error("Comment not updated.");
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                alertify.error("Some error occured. Please try again later.");
+                //alert(respText);
+            }
+        });
+    });
+</script>
+

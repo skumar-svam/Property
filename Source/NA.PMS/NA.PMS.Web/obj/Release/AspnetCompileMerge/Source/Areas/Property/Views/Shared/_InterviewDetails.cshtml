@@ -1,0 +1,304 @@
+﻿@model NA.PMS.Model.InterviewDetailsModel 
+@using Kendo.Mvc.UI;
+
+<style>
+    .hide {
+        display: none !important;
+    }
+
+    .show {
+        display: block !important;
+    }
+
+    .disable_a_href {
+        pointer-events: none;
+    }
+</style>
+
+<h2 class="blck-heading">Select Scheme-Department</h2>
+<div class="form-bx">
+    
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Scheme Name", htmlAttributes: new { @class="required"})
+            @Html.HiddenFor(m => m.ApplicationId)
+            @Html.HiddenFor(m => m.Id)
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <div id="lblSchemeNameDrop">
+                @(Html.Kendo().DropDownListFor(model => model.SchemeId)
+                      .Name("SchemeId")
+                              .DataTextField("SchemeName")
+                              .DataValueField("SchemeId")
+                      .OptionLabel(" -- Please Select --")
+                              .DataSource(source => source.Read(read => read.Action("GetSchemeList", "PropertyRegistration")))
+                      .Enable(true)
+                      .AutoBind(true)
+                      .Filter("contains")
+                      .HtmlAttributes(new { style = "width:100%;" })
+                )
+                @Html.ValidationMessageFor(model => model.SchemeId, "", new { @class = "text-danger" })
+
+            </div>
+            <div id="lblSchemeName" class="hide">
+                @Html.DisplayFor(model => model.SchemeName)
+            </div>
+
+        </div>
+
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Department Name", htmlAttributes: new { @class="required"})
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <div id="lblDepartmentDrop">
+                @(Html.Kendo().DropDownListFor(model => model.DepartmentId)
+                              .Name("DepartmentId")
+                              .DataTextField("DepartmentName")
+                              .DataValueField("DepartmentId")
+                      .OptionLabel(" -- Please Select --")
+                              .DataSource(source => source.Read(read => read.Action("FilterDepartmentOnScheme", "PropertyRegistration").Data("FilterDepartment"))
+                                                          .ServerFiltering(true))
+                      .Enable(false)
+                      .AutoBind(false)
+                              .Filter("contains")
+                              .CascadeFrom("SchemeId")
+                      .HtmlAttributes(new { style = "width:100%;" })
+                )
+
+                @Html.ValidationMessageFor(model => model.DepartmentId, "", new { @class = "text-danger" })
+            </div>
+            <div id="lblDepartmentId" class="hide">
+                @Html.DisplayFor(model => model.DepartmentName)
+            </div>
+
+        </div>
+
+            
+        </div>
+    
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Form Number:", htmlAttributes: new { @class="required",@id="_FormID"})
+            @*<label id="_FormID">Form Number: </label><span class="text-danger">*</span>*@
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <div id="lblFormDrop">
+                @(Html.Kendo().DropDownListFor(m => m.FormNo)
+                                            .Name("FormNo")
+                                    .Filter("contains")
+                                    .DataTextField("id")
+                                    .DataValueField("text")
+                                      .OptionLabel("Select")
+
+                                    .DataSource(source =>
+                                    {
+                                        source.Read(read =>
+                                        {
+                                            read.Action("GetAllForms", "PropertyRegistration").Data("filterForms");
+                                        }).ServerFiltering(true);
+                                    }).CascadeFrom("DepartmentId,SchemeId")
+                                    .HtmlAttributes(new { style = "width:100%;" })
+                                    .Events(m => m.Change("GetApplicantDetails"))
+                )
+                @Html.ValidationMessageFor(model => model.FormNo, "", new { @class = "text-danger" })
+            </div>
+            <div id="lblForm" class="hide">
+                @Html.DisplayFor(model => model.FormNo)
+            </div>
+
+        </div>
+    </div>
+
+    </div>
+
+   <h2 class="blck-heading">Applicant Details</h2>
+<div class="form-bx">  
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Applicant's Name")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <div id="lblApNa">
+                @Html.DisplayFor(m => m.ApplicationName)
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Gender")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <div id="lblGender">
+                @Html.DisplayFor(m => m.Gender)
+            </div>
+        </div>
+    </div>
+  
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Father's/Husband's Name")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <div id="lblReNa">
+                @Html.DisplayFor(m => m.RelationName)
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Address")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <div id="lblAddress">
+                @Html.DisplayFor(m => m.Address)
+            </div>
+        </div>
+    </div>
+</div>
+
+<h2 class="blck-heading">Interview Details</h2>
+<div class="form-bx">
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Interview Date")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DatePickerFor(model => model.InterviewDate).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))<br />
+            @Html.ValidationMessageFor(model => model.InterviewDate, "", new { @class = "text-danger" })
+        </div>
+        <div class="col-md-2 col-sm-2 col-xs-12 form-group">
+            @Html.Label("Upload File")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <input type="file" accept=".doc, .docx" onchange="UploadFileSelection(this)" id="fileUploadId" name="uploadExcel" />
+            
+        </div>
+        <div class="col-md-1 col-sm-2 col-xs-12 form-group" style="text-align:right;">
+            <input type="button" value="Upload" id="btnUpload" class="btn btn-default" />
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Interview Details")
+        </div>
+        <div class="col-md-9 col-sm-9 col-xs-12 form-group">
+            <div id="lblInterviewDetails">
+                @(Html.Kendo().EditorFor(model => model.InterviewDetails)
+                .Name("InterviewDetails")
+                .HtmlAttributes(new { style = "height:240px; width:100%; overflow:auto;"  })
+                .Resizable(resizable => resizable.Content(true).Toolbar(true))
+                )
+            </div>
+
+        </div>
+       
+    </div>
+ 
+</div>
+
+    <script>
+        function FilterDepartment() {
+            return { SchemeId: $("#SchemeId").val() };
+        }
+        function filterForms() {
+            return {
+                SchemeId: $("#SchemeId").val(),
+                DepartmentId: $("#DepartmentId").val()
+            };
+        }
+        function GetApplicantDetails() {
+            if ($('#FormNo').val() == "") {
+                //RemoveApplicantDetails();
+            }
+            else {
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ formno: $("#FormNo").val(), schemeID: $("#SchemeId").val(), departmentID: $("#DepartmentId").val() }),
+                    // url: "/Allotment/GetApplicantDetails",
+                    url: '@Url.Action("GetApplicantDetailsForInterview", "PropertyRegistration")',
+                    success: function (result) {
+                        if (result != null) {
+                            $("#lblApNa").html(result.ApplicationName);
+                            $("#lblGender").html(result.Gender);
+                            $("#lblReNa").html(result.RelationName);
+                            $("#lblAddress").html(result.Address);
+                            $("#lblArea").html(result.Area);
+                            $("#ApplicationId").val(result.ApplicationId);
+                            //$("#lblFloor").html(result.Floor);
+
+                            //$("#FunctionalDueDate").data("kendoDatePicker").value(result.FunctionalDueDate);
+                            
+                        }
+                        else {
+                            ClearValues();
+                            alertify.error("Some error occured. Please try again later.");
+                        }
+                    },
+                  
+                    error: function (objAjaxRequest, strError) {
+                        var respText = objAjaxRequest.responseText;
+                        //alert(respText);
+                    }
+                });
+            }
+        }
+        @*$("#fileUploadId").click(function () {
+            alert("Anuj");
+           // window.location.href = '@Url.Action("ManageInterviewDetails", "PropertyRegistration")';
+        });*@
+
+        $('#fileUploadId').change(function (event) {
+            //because this is single file upload I use only first index
+            var f = this.files[0];
+
+            //here I CHECK if the FILE SIZE is bigger than 8 MB (numbers below are in bytes)
+            if (f.size > 150000 || f.fileSize > 150000) {
+                //show an alert to the user
+                alertify.error("Allowed file size exceeded. (Max. 150 KB)")
+
+                //reset file upload control
+                this.value = null;
+            }
+        });
+
+        $('#btnUpload').click(function () {
+            
+            var formData = new FormData();
+            var file = $('#fileUploadId')[0];
+            var file2 = $('#fileUploadId')[0];
+            if (file == "") {
+                alertify.error("Please select file");
+            }
+            if (file.size > 150000) {
+                alertify.error("Allowed file size exceeded. (Max. 150 KB)");
+                return false;
+            }
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                data: formData,
+                //data: { uploadFile: file },
+                url: '/PropertyRegistration/UploadDocumnetDoc',
+                cache: false,
+                contentType: false,
+                processData: false,
+                success: function (result) {
+                    if (result == 'null') {
+                        alertify.error("Please select file");
+                    }
+                    else {
+                        $("#InterviewDetails").data("kendoEditor").value(result);
+                    }
+                },
+                error: function (err) {
+                    //alert(err.statusText);
+                    alertify.error("Data field is not valid");
+                    $('#loadingImg').css("display", "none");
+                    file.value = null;
+                }
+            });
+
+
+        });
+
+    </script>

@@ -1,0 +1,490 @@
+﻿@model NA.PMS.Model.Scheme
+@using Kendo.Mvc.UI
+
+@{
+    ViewBag.Title = "Edit Scheme";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<script src="~/Scripts/kendo.aspnetmvc.min.js"></script>
+<!--Accordion-->
+<style>
+    .schemeMasterGrids {
+        color: blue;
+        text-decoration: underline;
+    }
+
+        .schemeMasterGrids:hover {
+            color: blue;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+    h5.accordion {
+        background-color: #444;
+        color: white;
+        cursor: pointer;
+        padding: 8px;
+        width: 100%;
+        text-align: left;
+        border: none;
+        outline: none;
+        transition: 0.4s;
+        font-weight: bold;
+    }
+
+        h5.accordion.active, h5.accordion:hover {
+            background-color: #ddd;
+        }
+
+    div.panel {
+        padding: 0 18px;
+        background-color: white;
+        display: none;
+    }
+
+        div.panel.show {
+            display: block !important;
+        }
+</style>
+<script>
+    $(function () {
+        $("#tabs").tabs();
+        //var tabs = $("#tabs").tabs();
+        //tabs.find(".ui-tabs-nav").sortable({
+        //    axis: "x",
+        //    stop: function () {
+        //        tabs.tabs("refresh");
+        //    }
+        //});
+    });
+</script>
+<div class="col-md-12 SchemeEdition">
+    @using (Html.BeginForm())
+    {
+        @Html.AntiForgeryToken()
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Edit Scheme: @Html.DisplayFor(model => model.schemeName)</h1></div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div id="tabs">
+                    <ul>
+                        <li class="first"><span class="fke-link">Scheme</span><a class="accordion-section-title" href="#accordion-1" id="acc1">Scheme</a></li>
+                        <li class="second"><span class="fke-link">Department</span><a class="accordion-section-title" href="#accordion-2" id="acc2">Department</a></li>
+                        <li class="third"><span class="fke-link">Cost</span><a class="accordion-section-title" href="#accordion-5" id="acc3">Cost</a></li>
+                        <li class="fourth"><span class="fke-link">Bank</span><a class="accordion-section-title color-box2" href="#accordion-6" id="acc4">Bank </a></li>
+                        <li class="fifth"><span class="fke-link">Schedule for Land Development</span><a class="accordion-section-title color-box2" href="#accordion-7" id="acc5">Schedule for Land Development</a></li>
+                        <li class="sixth"><span class="fke-link">Quota</span><a class="accordion-section-title color-box2" href="#accordion-3" id="acc6">Quota</a></li>
+                        <li class="seventh"><span class="fke-link">Rebate</span><a class="accordion-section-title color-box2" href="#accordion-4" id="acc7">Rebate</a></li>
+                    </ul>
+                    <div id="accordion-1" class="accordion-section-content" style="padding:0px;">
+                        <div class="col-md-12">
+                            @*<div class="col-md-12 blnk-rw"></div>*@
+                            <h2 class="blck-heading">Scheme Information</h2>
+                            <div class="scheme-form-bx col-md-12 col-sm-12 col-xs-12">
+                                <div class="row">
+                                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                        @Html.HiddenFor(model => model.completed, htmlAttributes: new { @id = "IsCompleted" })
+                                        @Html.HiddenFor(model => model.isSchemeActive)
+                                        @Html.LabelFor(model => model.schemeName, htmlAttributes: new { @class = "required" })
+                                        @Html.HiddenFor(model => model.isDepttExists)
+                                        @Html.HiddenFor(model => model.isCostExists)
+                                        @Html.HiddenFor(model => model.isBankExists)
+                                        @Html.HiddenFor(model => model.isLandExists)
+                                    </div>
+                                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                        @Html.TextBoxFor(model => model.schemeName, new { @class = "form-control", @readonly = "readonly", style = "width:100%;" })<br />
+                                        @Html.ValidationMessageFor(model => model.schemeName, "", new { @class = "text-danger" })
+                                    </div>
+                                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                        @Html.LabelFor(model => model.schemeType, htmlAttributes: new { @class = "required" })
+                                    </div>
+                                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                        @(Html.Kendo().DropDownListFor(m => m.schemeType)
+                                    .Name("schemeType")
+                                    .DataTextField("text")
+                                    .DataValueField("id")
+                                    .OptionLabel("Select")
+                                    .HtmlAttributes(new { @readonly = "readonly", style = "width:100%" })
+                                    .DataSource(source =>
+                                    {
+                                        source.Read(read =>
+                                        {
+                                            read.Action("GetAllSchemeType", "Scheme");
+                                        });
+                                    })
+                                        )
+                                        @Html.ValidationMessageFor(model => model.schemeType, "", new { @class = "text-danger" })
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                        @Html.LabelFor(model => model.startDate, htmlAttributes: new { @class = "required" })
+                                    </div>
+                                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                        @(Html.Kendo().DatePickerFor(model => model.startDate).HtmlAttributes(new { style = "width:100%" }))
+                                        @Html.ValidationMessageFor(model => model.startDate, "", new { @class = "text-danger" })
+                                    </div>
+                                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                        @Html.LabelFor(model => model.endDate, htmlAttributes: new { @class = "required" })
+                                    </div>
+                                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                        @(Html.Kendo().DatePickerFor(model => model.endDate).HtmlAttributes(new { style = "width:100%" }))
+                                        @Html.ValidationMessageFor(model => model.endDate, "", new { @class = "text-danger" })
+                                        @Html.HiddenFor(model => model.scheId)
+                                        @Html.HiddenFor(model => model.endDate, htmlAttributes: new { @id = "hdnEndDate1" })
+                                    </div>
+                                </div>
+                                <br />
+                                <div class="row">
+                                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                        @Html.Label("Form Fee", new { @class = "required" })
+                                    </div>
+                                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                        @(Html.Kendo().NumericTextBoxFor(m => m.FormFee)
+.Name("FormFee")
+                        .Min(0)
+            .Spinners(false).Step(0)
+                        .Enable(true)
+                        .HtmlAttributes(new { style = "width: 100%;", @maxlength = "5", @class = "k-label textBoxValueRightAlign" })
+                                        )
+                                    </div>
+                                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    </div>
+                                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                    </div>
+                                </div>
+                                <div class="row scheme-rw-btn">
+                                    <div class="col-md-4 col-sm-4 col-xs-4 text-left">
+
+                                    </div>
+                                    <div class="col-md-4 col-sm-4 col-xs-4 text-center">
+                                        <input type="button" id="btnAddScheme" value="Update" class="btn btn-add" />
+                                    </div>
+                                    <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+                                        <button type="button" class="btn btn-add" value="Add" id="btnNext1">Next <i class="glyphicon glyphicon-forward"></i></button>
+                                    </div>
+                                </div>
+                                @*<div class="col-md-3 col-sm-3 col-xs-2 form-group">
+
+                                    </div>*@
+                            </div>
+                        </div>
+                    </div>
+                    <div id="accordion-2" class="accordion-section-content" style="padding:0px">
+                        @{ Html.RenderPartial("_Department", Model.Departments);}
+                    </div>
+                    <div id="accordion-3" class="accordion-section-content" style="padding:0px;">
+                        @{Html.RenderPartial("_Quota", Model.Quotas);}
+                    </div>
+                    <div id="accordion-4" class="accordion-section-content" style="padding:0px;">
+                        @{Html.RenderPartial("_Rebate", Model.Rebate);}
+                    </div>
+                    <div id="accordion-5" class="accordion-section-content" style="padding:0px;">
+                        @{Html.RenderPartial("_CostModel", Model.costModel);}
+                    </div>
+                    <div id="accordion-6" class="accordion-section-content" style="padding:0px;">
+                        @{Html.RenderPartial("_Banks", Model.Banks);}
+                    </div>
+                    <div id="accordion-7" class="accordion-section-content" style="padding:0px;">
+                        @{Html.RenderPartial("_LandDevelopmentSchedule", Model.LandDevelopmentScheduleModel);}
+                    </div>
+                </div>
+                @*<div class="accordion">
+                        <div class="accordion-section">
+                            <a class="accordion-section-title" href="#accordion-1" id="acc1"><i class="fa fa-chevron-right" aria-hidden="true"></i> Scheme</a>
+
+                        </div>
+                        <div class="accordion-section">
+                            <a class="accordion-section-title color-box2" href="#accordion-2">
+                                <i class="fa fa-chevron-right" aria-hidden="true"></i> Department
+                            </a>
+
+                        </div>
+                        <div class="accordion-section">
+                            <a class="accordion-section-title color-box2" href="#accordion-3"><i class="fa fa-chevron-right" aria-hidden="true"></i> Quota</a>
+
+                        </div>
+                        <div class="accordion-section">
+                            <a class="accordion-section-title color-box2" href="#accordion-4"><i class="fa fa-chevron-right" aria-hidden="true"></i> Rebate</a>
+
+                        </div>
+                        <div class="accordion-section">
+                            <a class="accordion-section-title color-box2" href="#accordion-5"><i class="fa fa-chevron-right" aria-hidden="true"></i> Cost</a>
+
+                        </div>
+                        <div class="accordion-section">
+                            <a class="accordion-section-title color-box2" href="#accordion-6"><i class="fa fa-chevron-right" aria-hidden="true"></i> Bank</a>
+
+                        </div>
+                        <div class="accordion-section">
+                            <a class="accordion-section-title color-box2" href="#accordion-7"><i class="fa fa-chevron-right" aria-hidden="true"></i> Schedule for Land Development</a>
+
+                        </div>
+                    </div>*@
+            </div>
+        </div>
+    }
+</div>
+<div class="row">
+    <div class="col-md-12" style="text-align:right;padding-top:10px;">
+        <button type="button" class="btn btn-add" value="Submit" id="btnSubmitScheme" onclick="SumbitScheme();"> Activate Scheme </button>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function AdditionalData() {
+        return { schemeId: $("#scheId").val() };
+    }
+    $(document).ready(function () {
+        function close_accordion_section() {
+            jQuery('.accordion .accordion-section-title').removeClass('active');
+            jQuery('.accordion .accordion-section-content').slideUp(300).removeClass('open');
+        }
+        if ($('#scheId').val() != 0) {
+            $(".first .fke-link").hide();
+            $(".first .accordion-section-title").show();
+        }
+
+        jQuery('.accordion-section-title').click(function (e) {
+            // Get anchor tag value
+            var currentAttrValue = jQuery(this).attr('href');
+            //alert(currentAttrValue)
+
+            if (jQuery(e.target).is('.active')) {
+                close_accordion_section();
+                $(this).find('.fa-chevron-down').removeClass('fa-chevron-down').addClass('fa-chevron-right')
+            } else {
+                close_accordion_section();
+
+                // Add active class to section title
+                $(this).find('.fa-chevron-right').removeClass('fa-chevron-right').addClass('fa-chevron-down')
+                jQuery(this).addClass('active');
+                // Open up the hidden content panel
+                jQuery('.accordion ' + currentAttrValue).slideDown(300).addClass('open');
+            }
+            e.preventDefault();
+        });
+
+        $("#gridDepartment").data("kendoGrid").dataSource.read();
+        $("#gridQuota").data("kendoGrid").dataSource.read();
+        $("#gridBanks").data("kendoGrid").dataSource.read();
+        $("#gridReb").data("kendoGrid").dataSource.read();
+        $("#grdCosts").data("kendoGrid").dataSource.read();
+        $("#grdLandDevelopment").data("kendoGrid").dataSource.read();
+        $("#btnAddScheme").click(function () {
+            var validationMaster = ValidateMasterScheme();
+            if (validationMaster) {
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ schemeId: $("#scheId").val().trim(), startDate: $("#startDate").val().trim(), endDate: $("#endDate").val().trim(), formFee: $("#FormFee").val() }),
+                    url: "/Scheme/UpdateScheme",
+                    success: function (data) {
+                        if (data != null && data != '') {
+                            if (data.flag == true) {
+                                $("#scheId").val(data.scheme);
+                                $("#schemeName").attr("readonly", "true");
+                                $("#schemeType").attr("readonly", "true");
+                                $("#hdnEndDate1").val($("#endDate").val());
+                                alertify.success("Scheme updated successfully");
+                            }
+                            else {
+                                alertify.error("Cannot update as Scheme is already in use.");
+                            }
+                        }
+                    },
+                    error: function (objAjaxRequest, strError) {
+                        var respText = objAjaxRequest.responseText;
+                        //alert(respText);
+                    }
+                });
+            }
+        });
+        IsSchemeCompleted();
+        $('#btnNext1').click(function () {
+            $("#acc2").click();
+        });
+        var isDepartment = $("#isDepttExists").val();
+        var isCosts = $("#isCostExists").val();
+        var isBanks = $("#isBankExists").val();
+        var isLandDevelopment = $("#isLandExists").val();
+        if (isDepartment == "True") {
+            $(".second .fke-link").hide();
+            $(".second .accordion-section-title").show();
+            $('#btnNext2').removeAttr('disabled');
+            $('#btnPre2').removeAttr('disabled');
+        }
+        else {
+            $(".second .fke-link").show();
+            $(".second .accordion-section-title").hide();
+        }
+        if (isCosts == "True") {
+            $(".third .fke-link").hide();
+            $(".third .accordion-section-title").show();
+            $('#btnNext3').removeAttr('disabled');
+            $('#btnPre3').removeAttr('disabled');
+        }
+        else {
+            $(".third .fke-link").show();
+            $(".third .accordion-section-title").hide();
+        }
+        if (isBanks == "True") {
+            $(".fourth .fke-link").hide();
+            $(".fourth .accordion-section-title").show();
+            $('#btnNext4').removeAttr('disabled');
+            $('#btnPre4').removeAttr('disabled');
+        }
+        else {
+            $(".fourth .fke-link").show();
+            $(".fourth .accordion-section-title").hide();
+        }
+        if (isLandDevelopment == "True") {
+            $(".fifth .fke-link").hide();
+            $(".sixth .fke-link").hide();
+            $(".seventh .fke-link").hide();
+            $(".fifth .accordion-section-title").show();
+            $(".sixth .accordion-section-title").show();
+            $(".seventh .accordion-section-title").show();
+            $('#btnNext5').removeAttr('disabled');
+            $('#btnPre5').removeAttr('disabled');
+        }
+        else {
+            $(".fifth .fke-link").show();
+            $(".fifth .accordion-section-title").hide();
+            $(".sixth .fke-link").hide();
+            $(".seventh .fke-link").hide();
+            $(".sixth .accordion-section-title").show();
+            $(".seventh .accordion-section-title").show();
+        }
+        $('#btnPre21').hide();
+        $('#btnNext21').hide();
+        $('#btnPre31').hide();
+        $('#btnNext31').hide();
+        $('#btnPre41').hide();
+        $('#btnNext41').hide();
+        $('#btnPre51').hide();
+        $('#btnNext51').hide();
+        $('#btnPre61').hide();
+        $('#btnNext61').hide();
+        $('#btnPre71').hide();
+    });
+    function SumbitScheme() {
+        //debugger;
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ schemeId: $("#scheId").val() }),
+            url: "/Scheme/ActivateScheme",
+            success: function (data) {
+                if (data != null && data != '') {
+                    if (data == true) {
+                        alertify.success("Scheme activated successfully");
+                        window.location.href = '@Url.Action("Manage", "Scheme")';
+                    }
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+
+    function RebindDepartmentDdl() {
+        $("#quotaDepartmentId").data("kendoDropDownList").dataSource.read();
+        $("#rebatedepartment").data("kendoDropDownList").dataSource.read();
+        $("#depttID").data("kendoDropDownList").dataSource.read();
+        $("#LandDevelopmentDepartmentId").data("kendoDropDownList").dataSource.read();
+    }
+
+    function IsSchemeCompleted() {
+        var isSchemeActive = $("#isSchemeActive").val();
+        if (isSchemeActive == "True") {
+            $('#btnSubmitScheme').removeAttr('disabled');
+        }
+        else {
+            $('#btnSubmitScheme').attr('disabled', 'disabled');
+        }
+    }
+
+    function IsSchemeCompletedByRemove(status) {
+        if (status) {
+            $('#btnSubmitScheme').removeAttr('disabled');
+        }
+        else {
+            $('#btnSubmitScheme').attr('disabled', 'disabled');
+        }
+    }
+
+    function ActivateScheme() {
+        var gridDepartment = $("#gridDepartment").data("kendoGrid").dataSource.data();
+        var grdCosts = $("#grdCosts").data("kendoGrid").dataSource.data();
+        //var rebatedepartment = $("#gridReb").data("kendoGrid").dataSource.data();
+        var grdBanks = $("#gridBanks").data("kendoGrid").dataSource.data();
+        //var grdQuota = $("#gridQuota").data("kendoGrid").dataSource.data();
+        var grdLandDevelopment = $("#grdLandDevelopment").data("kendoGrid").dataSource.data();
+        if (gridDepartment.length > 0 && grdCosts.length > 0 && grdBanks.length > 0 && grdLandDevelopment.length > 0) {
+            $('#btnSubmitScheme').removeAttr('disabled');
+        }
+        else {
+            $('#btnSubmitScheme').attr('disabled', 'disabled');
+        }
+    }
+
+    function ValidateMasterScheme() {        
+        var schemeName = $("#schemeName");
+        if (schemeName.val() == "") {
+            alertify.error('Please enter Scheme Name.');
+            return false;
+        }
+        var selectedValue = $('#schemeType');
+        if (selectedValue.val() == "") {
+            alertify.error('Please Select Scheme Type.');
+            return false;
+        }
+        var startdate = $("#startDate").val();
+        var enddate = $("#endDate").val();
+        var formFee = $("#FormFee").val();
+        if (startdate == "") {
+            alertify.error('Please enter Start Date.');
+            return false;
+        }
+        if (enddate == "") {
+            alertify.error('Please enter End Date.');
+            return false;
+        }
+        if (formFee == '' || formFee == null) {
+            alertify.error('Please enter Form Fee.');
+            return false;
+        }
+        if (!(Date.parse(enddate) > Date.parse(startdate))) {
+            alertify.error('End Date should be later than Start Date.');
+            return false;
+        }
+        if (!checkEndDate()) {
+            return false;
+        }
+        return true;
+    }
+
+    function checkEndDate() {
+        var endDate = new Date($("#endDate").val());
+        var schemeEndDate = new Date($("#hdnEndDate1").val());
+        var flag = false;
+        if (schemeEndDate > endDate) {
+            alertify.error("Scheme end date should not be earlier than current end date.");
+            flag = false;
+        }
+        else { flag = true }
+        return flag;
+    }
+</script>

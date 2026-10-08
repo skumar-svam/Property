@@ -1,0 +1,369 @@
+﻿@*@model NA.PMS.Model.KYAViewModel*@
+@using Kendo.Mvc.UI
+@using NA.PMS.Common
+@using System.Linq
+
+<div id="kyaReport">
+    <div class="row" style="padding-bottom:8px;">
+        <div class="col-md-3">
+            <label>Department</label>
+            @(Html.Kendo().DropDownList()
+                .Name("DDLKYADepartmentId")
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .OptionLabel(" --- Select ---")
+                .BindTo(new List<SelectListItem>() {
+                    new SelectListItem() { Text = "Institutional", Value = "1" },
+                    new SelectListItem() { Text = "Industrial", Value = "4" },
+                    new SelectListItem() { Text = "Commercial", Value = "2" },
+                    new SelectListItem() { Text = "Residential", Value = "3" },
+                    new SelectListItem() { Text = "Housing", Value = "5" },
+                    new SelectListItem() { Text = "Group Housing", Value = "6" },
+                    new SelectListItem() { Text = "5 % Abadi", Value = "7" }
+                })
+                .Events(e => e.Change("KYAParameterChangeEvent"))
+                .HtmlAttributes(new { style = "width: 90%;" })
+            )
+        </div>
+        <div class="col-md-3">
+            <label>Start Date</label>
+            @(Html.Kendo().DatePicker().Name("KYAStartDate")
+                    .Events(e => e.Change("KYAParameterChangeEventII"))
+                    .HtmlAttributes(new { style = "width:90%;" })
+            )
+        </div>
+        <div class="col-md-3">
+            <label>End Date</label>
+            @(Html.Kendo().DatePicker().Name("KYAEndDate")
+                    .Events(e => e.Change("KYAParameterChangeEventII"))
+                    .HtmlAttributes(new { style = "width:90%;" })
+            )
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 demo-section k-content wide">
+            <div id="DivKYAChart-I" style="width:100%;"></div>
+        </div>
+        <div class="col-md-6 demo-section k-content wide">
+            <div id="DivKYAChart-II" style="width:100%;"></div>
+        </div>
+    </div>
+
+
+
+    <div class="row">
+        <div class="col-md-12">
+            <h2 class=" blck-heading" style="border-left:1px solid green;border-right:1px solid green;margin-bottom:0;">Detail Status Of KYA</h2>
+            <div class="col-md-12 k-grid-content">
+                @(Html.Kendo().Grid<NA.PMS.Model.KYAViewModel>()
+                    .Name("GridKYADetailStatus")
+                    .Columns(columns =>
+                    {
+                        //columns.Bound(c => c.StatusDate).Hidden(true);
+                        columns.Bound(c => c.Department).Title("Department").ClientFooterTemplate("Total Count:");
+                        columns.Bound(c => c.TotalKYA).Title("Total KYA").ClientFooterTemplate("#=sum#");
+                        columns.Bound(c => c.ApprovedKYA).Title("Approved KYA").ClientFooterTemplate("<div>#= sum #</div>");
+                        columns.Bound(c => c.PendingKYA).Title("Pending KYA").ClientFooterTemplate("<div>#= sum #</div>");
+                        columns.Bound(c => c.RejectedKYA).Title("Rejected KYA").ClientFooterTemplate("<div>#= sum #</div>");
+                        columns.Bound(c => c.ForwardKYA).Title("Forward KYA").ClientFooterTemplate("<div>#= sum #</div>");
+                        columns.Bound(c => c.CancelAfterTransferKYA).Title("Canceled KYA").ClientFooterTemplate("<div>#= sum #</div>");
+                        columns.Bound(c => c.DateMar).Title("Average Days").ClientFooterTemplate("<div>Avg: #= kendo.toString(average, '0.00') #</div>");//Gap Between submit date and approve date
+                    })
+                    .Resizable(resize => resize.Columns(true))
+                    .AutoBind(true)
+                    .DataSource
+                    (
+                        dataSource => dataSource
+                        .Ajax()
+                            //.Model(model => model.Id(p => p.Id))
+                        .ServerOperation(true)
+                        .Read(read => read.Action("GetKYADetailStatusList", "Authority", new { area = "Member" }).Data("FilterKYAParameter"))
+                            //.Read(read => read.Action("GetKYAFormListCount", "Authority", new { area = "Member" }).Data("FilterKYAParameter"))
+                            //.Sort(s => s.Add(x => x.Id).Descending())
+                        .Aggregates(aggregates =>
+                        {
+                            aggregates.Add(p => p.TotalKYA).Sum();
+                            aggregates.Add(p => p.ApprovedKYA).Sum();
+                            aggregates.Add(p => p.PendingKYA).Sum();
+                            aggregates.Add(p => p.RejectedKYA).Sum();
+                            aggregates.Add(p => p.ForwardKYA).Sum();
+                            aggregates.Add(p => p.CancelAfterTransferKYA).Sum();
+                            aggregates.Add(p => p.DateMar).Average();
+                        })
+                    ))
+            </div>
+        </div>
+
+    </div>
+    <div class="row" style="margin-top:15px;">
+        <div class="col-md-3 form-group">
+            @Html.Label("Total Approved Forms(in %)")
+        </div>
+        <div class="col-md-3 form-group">
+            @Html.TextBox("AverageKYAForm", "", new { @class = "k-textbox", style = "width:100%;" })
+        </div>
+        <div class="col-md-3 form-group">
+            @Html.Label("Status On Date")
+        </div>
+        <div class="col-md-3 form-group">
+            @(Html.Kendo().DatePicker().Name("StatusDate").Events(e => e.Change("ChangeDate")).HtmlAttributes(new { style = "width:100%;" }))
+        </div>
+    </div>
+
+
+</div>
+
+<script>
+
+    $(document).ready(function () {
+       
+        //SubmittedKYAForms();
+        //SubmittedKYAFormsII();
+        //KYAParameterChangeEvent();
+    });
+
+    function FilterKYAParameter() {
+        return {
+            DepartmentId: $('#DDLKYADepartmentId').val(),
+            StartDate: $('#KYAStartDate').val(),
+            EndDate: $('#KYAEndDate').val(),
+            FilterType: "Total"
+        }
+    }
+
+    function ChangeDate() {
+        //debugger;
+        var _StatusDate = $('#StatusDate').val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ StatusDate: _StatusDate }),
+            url: '/Member/Authority/GetKYAFormListCount',
+            success: function (result) {
+                if (result != null) {
+                    CreateKYATotalCountChart(result);
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Network error, Please try again later.");
+            }
+        });
+    }
+
+    function KYAParameterChangeEvent() {
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            //data: JSON.stringify({ StatusDate: _StatusDate }),
+            url: '/Member/Authority/GetAverageApprovedForm',
+            success: function (result) {
+                if (result != null) {
+                    $('#AverageKYAForm').val(result);
+                    //SubmittedKYAForms();
+                    SubmittedKYAFormsII();
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Network error, Please try again later.");
+            }
+        });
+    }
+
+    function KYAParameterChangeEventII() {
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            //data: JSON.stringify({ StatusDate: _StatusDate }),
+            url: '/Member/Authority/GetAverageApprovedForm',
+            success: function (result) {
+                if (result != null) {
+                    $('#AverageKYAForm').val(result);
+                    SubmittedKYAForms();
+                    SubmittedKYAFormsII();
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Network error, Please try again later.");
+            }
+        });
+    }
+
+    function SubmittedKYAForms() {
+        //_StatusDate = $('#StatusDate').val();
+        var kya = {
+            DepartmentId: $('#DDLKYADepartmentId').val(),
+            StartDate: $('#KYAStartDate').val(),
+            EndDate: $('#KYAEndDate').val(),
+            FilterType: "TotalKYA"
+        };
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            //data: JSON.stringify({ StatusDate: _StatusDate }),
+            data: JSON.stringify({ model: kya }),
+            url: '/Member/Authority/GetKYAFormListCount',
+            success: function (result) {
+                if (result != null) {
+                    CreateKYATotalCountChart(result);
+                    //CreateKYAStatusCountChart(result)
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Network error, Please try again later.");
+            }
+        });
+    }
+
+    function CreateKYATotalCountChart(GraphData) {
+        var date = $('#StatusDate').val();
+        $("#DivKYAChart-I").kendoChart({
+            title: {
+                text: "Total KYA Forms"
+            },
+            legend: {
+                //position: "bottom",
+                visible: false
+            },
+            dataSource: {
+                data: GraphData
+            },
+            series: [{
+                type: "pie",
+                field: "TotalKYA",
+                categoryField: "Department",
+                //explodeField: "explode"
+            }],
+            seriesDefaults: {
+                labels: {
+                    visible: true,
+                    background: "transparent",
+                    template: "#= category #: \n #= value#"
+                }
+            },
+            seriesColors: ["#03a9f4", "#ff9800", "#fad84a", "#4caf50", "#FF0000", "#FF00FF", "#000080"],
+            tooltip: {
+                visible: true,
+                template: "#= category #: \n #= value#"
+            },
+            seriesClick: TotalKYAPieChartSeriesClickEvent,
+            plotAreaClick: KYAPieChartPlotAreaClickEvent,
+        });
+    }
+
+    function TotalKYAPieChartSeriesClickEvent(e) {
+        //alert(kendo.format("Series click :{0} ({1}): {2}", e.series.field, e.category, e.value));
+        //var id = null;
+        //window.location.href = "/Member/ServiceRequest/RedirectServiceRequestByType?id=" + id + "&service=" + e.category;
+        var DepartmentId = $('#DDLKYADepartmentId').val();
+        var department = $('#DDLKYADepartmentId').val() == "" ? "" : $('#DDLKYADepartmentId').data("kendoDropDownList").text();
+        var startDate = $('#KYAStartDate').val();
+        var endDate = $('#KYAEndDate').val();
+        //window.location.href = "/Member/Authority/RedirectManageKYA?id=" + id + "&status=" + e.category;
+        window.location.href = "/Reports/Report/ManageKYA?department=" + e.category + "&startDate=" + startDate + "&endDate=" + endDate;
+    }
+
+    function KYAPieChartPlotAreaClickEvent(e) {
+        alert("refresh");
+        //$("#DivKYAChart-I").data("kendoChart").redraw();
+        $("#DivKYAChart-I").data("kendoChart").refresh();
+    }
+
+
+    function SubmittedKYAFormsII() {
+        //_StatusDate = $('#StatusDate').val();
+        var kyaII = {
+            DepartmentId: $('#DDLKYADepartmentId').val(),
+            StartDate: $('#KYAStartDate').val(),
+            EndDate: $('#KYAEndDate').val(),
+            FilterType: "Status"
+        };
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            //data: JSON.stringify({ StatusDate: _StatusDate }),
+            data: JSON.stringify({ model: kyaII }),
+            url: '/Member/Authority/GetKYAFormListCount',
+            success: function (result) {
+                if (result != null) {
+                    //CreateKYATotalCountChart(result);
+                    CreateKYAStatusCountChart(result)
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Network error, Please try again later.");
+            }
+        });
+    }
+
+    function CreateKYAStatusCountChart(GraphData) {
+        var date = $('#StatusDate').val();
+        $("#DivKYAChart-II").kendoChart({
+            title: {
+                text: "Status of KYA Forms"
+            },
+            legend: {
+                //position: "bottom",
+                visible: false
+            },
+            dataSource: {
+                data: GraphData
+            },
+            series: [{
+                type: "pie",
+                field: "TotalKYA",
+                categoryField: "Status",
+                //explodeField: "explode"
+            }],
+            seriesDefaults: {
+                labels: {
+                    visible: true,
+                    background: "transparent",
+                    template: "#= category #: \n #= value#"
+                }
+            },
+            seriesColors: ["#03a9f4", "#ff9800", "#fad84a", "#4caf50", "#FF0000", "#FF00FF", "#000080"],
+            tooltip: {
+                visible: true,
+                template: "#= category #: \n #= value#"
+            },
+            seriesClick: KYAStatusPieChartSeriesClickEvent,
+            plotAreaClick: KYAStatusPieChartPlotAreaClickEvent,
+        });
+    }
+
+    function KYAStatusPieChartSeriesClickEvent(e) {
+        //alert(kendo.format("Series click :{0} ({1}): {2}", e.series.field, e.category, e.value));
+        var id = 17;
+        var DepartmentId= $('#DDLKYADepartmentId').val();
+        var department = $('#DDLKYADepartmentId').val() == "" ? "" : $('#DDLKYADepartmentId').data("kendoDropDownList").text();
+        var startDate= $('#KYAStartDate').val();
+        var endDate= $('#KYAEndDate').val();
+        //window.location.href = "/Member/Authority/RedirectManageKYA?id=" + id + "&status=" + e.category;
+        window.location.href = "/Reports/Report/ManageKYA?id=" + id + "&status=" + e.category +"&department="+department+"&startDate="+startDate+"&endDate="+endDate;
+    }
+
+    function KYAStatusPieChartPlotAreaClickEvent(e) {
+        alert("refresh");
+        //$("#DivKYAChart-I").data("kendoChart").redraw();
+        $("#DivKYAChart-II").data("kendoChart").refresh();
+    }
+    //$(document).bind("kendo:skinChange", SubmittedKYAForms());
+    //$(document).bind("kendo:skinChange", SubmittedKYAFormsII());
+
+</script>
+
+
+
+
+
+

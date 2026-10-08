@@ -1,0 +1,198 @@
+﻿@model NA.PMS.Model.OnlineFormViewModel
+@using Kendo.Mvc.UI
+@using NA.PMS.Common
+
+@{
+    ViewBag.Title = "Update Document";
+    if (Session["WBasicDetailsNIC"] != null || Model.AppType == Constants.AppType)
+    {
+        Layout = "~/Views/Shared/_LayoutNIC.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_LayoutOnline.cshtml";
+    }
+}
+
+<style>
+    .k-upload .k-upload-button{       
+        margin:0;
+    }
+    .k-dropzone{
+        padding:0;
+    }
+</style>
+
+@using (Html.BeginForm("UpdateDocument", "Application", FormMethod.Post, new { enctype = "multipart/form-data", id = "applicationform" }))
+{
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Upadate Document</h1></div>
+            <div class="col-md-6 col-sm-6 col-xs-12 mandatory"><h1 class="gridTitle">Form No :- @Model.ApplicationFormId</h1></div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 content-top-spce" id="first-form">
+        <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            <h2 class="blck-heading" style="margin-bottom:6px;">Upload Document/PDF</h2>
+            <div class="form-bx">
+                <div>
+                    @Html.HiddenFor(model => model.Id)
+                    @Html.HiddenFor(model => model.ApplicationFormId)
+                    @Html.HiddenFor(model => model.EncryptedFormId)
+                    @Html.HiddenFor(model => model.SchemeId)
+                    @Html.HiddenFor(model => model.DepartmentId)
+                    @Html.HiddenFor(model => model.ApplicantType)
+                    @Html.HiddenFor(model => model.StrDocList)
+                    @Html.HiddenFor(model => model.DocList)
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="row">
+                            <div class="col-md-4 col-sm-6 col-xs-12 form-group">
+                                @Html.Label("Scheme Name", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-8 col-sm-6 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.SchemeName, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 col-sm-6 col-xs-12 form-group">@Html.Label("Department", htmlAttributes: new { @class = "required" })</div>
+                            <div class="col-md-8 col-sm-6 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.Department, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 col-sm-6 col-xs-12 form-group">@Html.Label("Applicant", htmlAttributes: new { @class = "required" })</div>
+                            <div class="col-md-8 col-sm-6 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.Applicant, htmlAttributes: new { @class = "form-control", placeholder = "", @readonly = "readonly" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt-lt4">
+                                @Html.Label("Area Range", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-8 col-sm-3 col-xs-12 form-group col-prnt-lt4">
+                                @Html.TextBoxFor(model => model.AreaRange, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-prnt-lt4">
+                                @Html.Label("Upload Files", htmlAttributes: new { @class = "" })
+                            </div>
+                            <div class="col-md-8 col-sm-3 col-xs-12 form-group col-prnt-lt4">
+                                @*@(Html.Kendo().Upload().Name("files").HtmlAttributes(new { aria_label = "files", @class = "k-upload-custom" }))*@
+
+                                <input name="files" id="files" type="file" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6" style="">
+                        <div class="row">
+                            <div class="col-md-4 col-sm-6 col-xs-12">
+
+                            </div>
+                            <div class="col-md-8 col-sm-6 col-xs-12 form-group">
+                                <div class="row">
+                                    <div class="col-md-12 text-right" style="margin-bottom:5px;">
+                                        <img id="userphoto" src="@Model.UserImage" alt="your image" height="150px" width="140px" name="userImage2" />
+                                    </div>
+                                    <div class="col-md-12 text-right">
+                                        <img id="signature" src="@Model.SignImage" alt="your sign" height="40px" width="140px" name="usersign" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <h4>Console log</h4>
+                        <div class="console"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="box-button text-center">
+        <input type="button" id="btnCancel" value="Back" class="btn btn-default" onclick="window.history.back()" />
+        @{
+            if (Model.IsApplicationFeePaid != true && Model.PropertyTypeId == 1)
+            {
+                <button type="submit" class="k-button k-primary">Submit</button>
+            }       
+        }
+    </div>
+}
+
+
+
+
+
+<script>
+    function onSelect(e) {
+        kendoConsole.log("Select :: " + getFileInfo(e));
+    }
+
+    function onUpload(e) {
+        kendoConsole.log("Upload :: " + getFileInfo(e));
+    }
+
+    function onSuccess(e) {
+        kendoConsole.log("Success (" + e.operation + ") :: " + getFileInfo(e));
+    }
+
+    function onError(e) {
+        kendoConsole.log("Error (" + e.operation + ") :: " + getFileInfo(e));
+    }
+
+    function onComplete(e) {
+        kendoConsole.log("Complete");
+    }
+
+    function onCancel(e) {
+        kendoConsole.log("Cancel :: " + getFileInfo(e));
+    }
+
+    function onRemove(e) {
+        kendoConsole.log("Remove :: " + getFileInfo(e));
+    }
+
+    function onProgress(e) {
+        kendoConsole.log("Upload progress :: " + e.percentComplete + "% :: " + getFileInfo(e));
+    }
+
+    function getFileInfo(e) {
+        return $.map(e.files, function (file) {
+            var info = file.name;
+
+            // File size is not available in all browsers
+            if (file.size > 0) {
+                info += " (" + Math.ceil(file.size / 1024) + " KB)";
+            }
+            return info;
+        }).join(", ");
+    }
+
+    $(document).ready(function () {
+        $("#files").kendoUpload({
+            async: {
+                saveUrl: "save",
+                removeUrl: "remove",
+                autoUpload: true
+            },
+            cancel: onCancel,
+            complete: onComplete,
+            error: onError,
+            progress: onProgress,
+            remove: onRemove,
+            select: onSelect,
+            success: onSuccess,
+            upload: onUpload
+        });
+    });
+</script>

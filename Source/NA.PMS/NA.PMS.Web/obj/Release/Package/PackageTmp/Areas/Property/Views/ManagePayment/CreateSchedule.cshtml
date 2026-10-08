@@ -1,0 +1,475 @@
+﻿@model NA.PMS.Model.PaymentScheduleModel
+@using Kendo.Mvc.UI;
+@using NA.PMS.Common;
+@{
+    ViewBag.Title = "Create Schedule";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .float-left{
+        float:right;
+    }
+    .float-right{
+        float:right;
+    }
+</style>
+
+<div class="col-lg-12 col-md-12 col-sm-12">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Create Payment Schedule</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+            </div>
+        </div>
+
+        <div class="col-md-12 blnk-rw"></div>     
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <h2 class="blck-heading">Allottee Details</h2>
+                <div class="form-bx">
+                    <div>
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        @Html.HiddenFor(m => m.ScheduleId)
+                        @Html.HiddenFor(m => m.ApplicantType)
+                        @Html.HiddenFor(m => m.Department)
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Registration Id", htmlAttributes: new { @id = "" })
+                            @(Html.Kendo().DropDownListFor(model => model.RegistrationId)
+                                .DataTextField("text")
+                                .DataValueField("id")
+                                .OptionLabel("---Select---")
+                                .Filter("contains")
+                                .DataSource(source =>
+                                {
+                                    source.Custom()
+                                    .ServerFiltering(true)
+                                    .ServerPaging(true)
+                                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                    .Transport(transport => transport.Read(read => read.Action("GetRIDsForManageAccountDetailsByDataSource", "PropertyRegistration", new { Area = "Property" })))
+                                    .Schema(schema => schema.Data("Data").Total("Total"))
+                                    .PageSize(100);
+                                })
+                                .HtmlAttributes(new { style = "width:90%; float:right" })
+                                .Events(m => m.Change("GetPaymentDetails"))
+                            )
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            @Html.Label("Allottee Name:")
+                            @Html.TextBoxFor(model => model.Applicant, htmlAttributes: new { @class = "form-control float-left", @readonly = "readonly", style="width:90%;" })
+                        </div>
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            @Html.Label("Property No:")
+                            @Html.TextBoxFor(model => model.PropertyNo, htmlAttributes: new { @class = "form-control float-left", @readonly = "readonly", style = "width:90%;" })
+                        </div>
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            @Html.Label("Property Type:")
+                            @Html.TextBoxFor(model => model.PropertyType, htmlAttributes: new { @class = "form-control float-left", @readonly = "readonly", style = "width:90%;" })
+                        </div>
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            @Html.Label("Allotment Date")
+                            @(Html.Kendo().DatePickerFor(model => model.AllotmentDate).HtmlAttributes(new { style = "width:90%; float:right;", @Readonly = "readonly" }))
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            @Html.Label("Principal Amount", htmlAttributes: new { @id = "", @class = "k-label required" })
+                            @Html.TextBoxFor(model => model.PrincipalAmount, new { @class = "form-control float-right", style="width:90%;" })
+                        </div>
+                        
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            @Html.Label("Normal Interest(%)", htmlAttributes: new { @id = "", @class = "k-label required" })
+                            @Html.TextBoxFor(model => model.NormalInterest, htmlAttributes: new { @class = "form-control interest-rate float-right", @maxlength = "5", style = "width:90%;" })
+                        </div>
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            @Html.Label("Penal Interest(%)", htmlAttributes: new { @id = "", @class = "k-label required" })
+                            @Html.TextBoxFor(model => model.PenalInterest, htmlAttributes: new { @class = "form-control interest-rate float-right", @maxlength = "5", style = "width:90%;" })
+                        </div>   
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            @Html.Label("Total Installment", htmlAttributes: new { @id = "", @class = "k-label required" })
+                            @Html.TextBoxFor(model => model.TotalInstallment, new { @class = "text-right form-control", @maxlength = "3", style = "width:90%;float:right;" })
+                            @Html.ValidationMessageFor(model => model.TotalInstallment, "", new { @class = "text-danger" })
+                        </div>                     
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            @Html.Label("Frequency", htmlAttributes: new { @id = "", @class = "k-label required" })
+                            @(Html.Kendo().DropDownListFor(m => m.Frequency)
+                                .DataTextField("text")
+                                .DataValueField("id")
+                                .OptionLabel("---Select---")
+                                .Filter("contains")
+                                .DataSource(source => source.Read(read => read.Action("GetAllFrquency", "Scheme", new { Area = "Master" })))
+                                .Events(m => m.Change("GetInstallmentDetails"))
+                                .HtmlAttributes(new { style = "width:90%; float:right; " })
+                            )
+                            @Html.ValidationMessageFor(model => model.Frequency, "", new { @class = "text-danger" })
+                        </div>                        
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            @Html.Label("Period of Installment", htmlAttributes: new { @id = "", @class = "k-label required" })
+                            @Html.TextBoxFor(model => model.PeriodOfInstallment, new { @class = "form-control float-right", style = "width:90%;" })
+                        </div>
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            @Html.Label("Premium Amount", htmlAttributes: new { @id = "", @class = "k-label required" })
+                            @Html.TextBoxFor(model => model.PremiumAmount, new { @class = "form-control float-right", style = "width:90%;" })
+                        </div>
+                        <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                            @Html.Label("Installment Start Date", htmlAttributes: new { @id = "", @class = "k-label required" })
+                            @(Html.Kendo().DatePickerFor(m => m.InstallmentStartDate).DisableDates(DayOfWeek.Sunday).HtmlAttributes(new { @class = "float-right", style = "width:90%;" }))
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box-button text-center">
+                <input type="button" id="btnCancel" value="Cancel" class="btn btn-default" />
+                <input type="submit" value="Calculate" id="btnSubmit" class="btn btn-add" />
+                <input type="submit" value="Remove" id="btnRemove" class="btn btn-danger" />
+            </div>
+        </div>
+
+        
+        
+        <div class="col-md-12 k-grid-content PaymentDetailsGrid">
+            @(Html.Kendo().Grid<NA.PMS.Model.PaymentScheduleModel>()
+            .Name("gridPaymentSchedule")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Hidden(true);
+                columns.Bound(c => c.InstallmentNo).Title("Installment No").Width(80);
+                columns.Bound(c => c.InstallmentDueDate).Title("Installment Due Date").Format("{0:dd/MM/yyyy}").Width(80);
+                columns.Bound(c => c.InstallmentAmount).Title("Installment Amount").Width(80);
+                columns.Bound(c => c.InstallmentInterest).Title("Installment Interest").Width(80);
+                columns.Bound(c => c.TotalBalanceAmount).Title("Total Amount").Width(80);
+                columns.Bound(c => c.PrincipalAmount).Title("Principal Amount").Width(80);
+            })
+            .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+            .Editable(editable => editable.Mode(GridEditMode.InCell))           
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))        
+            .ToolBar(toolbar =>toolbar.Save())
+            .DataSource
+            (
+                dataSource => dataSource
+                .Ajax()
+                .Batch(true)
+                .Model(model =>
+                {
+                    model.Id(c => c.Id);
+                    model.Field(c => c.InstallmentDueDate).Editable(false);
+                    model.Field(c => c.InstallmentNo).Editable(false);
+                    model.Field(c => c.TotalBalanceAmount).Editable(false);
+                    model.Field(c => c.PrincipalAmount).Editable(false);
+                })
+                .Model(model => model.Id(p => p.Id))
+                .ServerOperation(true)
+
+                .Events(events => events.RequestEnd("onRequestEnd"))
+                .Read(read => read.Action("GetPaymentSchedule", "ManagePayment").Data("AdditionalInfo"))
+                .Update("PaymentSchedule_Update", "ManagePayment")
+                .PageSize(20)
+            )
+            )
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {      
+        $(".PaymentDetailsGrid").hide();
+        $("#btnSubmit").attr("disabled", "disabled");
+        $("#btnRemove").attr("disabled", "disabled");
+        //checkInstallment();
+
+        $("#btnSubmit").click(function () {
+            SubmitPaymentScheduleForm();
+        });
+
+        $("#btnRemove").click(function () {
+            RemovePaymentScheduleDetail();
+        });
+
+        $("#TotalInstallment").blur(function () {
+            GetInstallmentDetails()
+        });
+
+        $("#NormalInterest").blur(function () {
+            var flag = CheckInterestRate($("#NormalInterest").val());
+            if (flag = false) {
+                $("#NormalInterest").val('');
+            }
+        });
+
+        $("#PenalInterest").blur(function () {
+            var flag = CheckInterestRate($("#PenalInterest").val());
+            if (flag = false) {
+                $("#PenalInterest").val('');
+            }
+        });
+
+        $("#btnCancel").click(function () {
+
+        });
+    });
+
+    function AdditionalInfo() {
+        var regId = $('#RegistrationId').val() != "" ? $('#RegistrationId').val() : 0;
+        return {
+            rid: regId
+        }
+    }
+
+    function GetPaymentDetails() {
+        var rid = $("#RegistrationId").val();
+        $('#gridPaymentSchedule').data('kendoGrid').dataSource.read();
+        $('#gridPaymentSchedule').data('kendoGrid').refresh();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rid: rid }),
+            url: "/Property/ManagePayment/GetPayScheduleInformation",
+            success: function (result) {
+                if (result != null) {
+                    //ClearFieldsValue();
+
+                    $("#Applicant").val(result.Applicant);
+                    $("#PropertyNo").val(result.PropertyNo);
+                    $("#PropertyType").val(result.PropertyType);
+                    $("#Department").val(result.Department);
+                    $("#ApplicantType").val(result.ApplicantType);
+                    $("#AllotmentDate").data("kendoDatePicker").value(result.AllotmentDate);
+                    if (result.ScheduleId != null && result.ScheduleId != 0) {
+                        $("#ScheduleId").val(result.ScheduleId);
+                        $("#PrincipalAmount").val(result.PrincipalAmount);
+                        $("#PenalInterest").val(result.PenalInterest);
+                        $("#NormalInterest").val(result.NormalInterest);
+                        $("#Frequency").data("kendoDropDownList").value(result.Frequency);
+                        $("#TotalInstallment").val(result.TotalInstallment);
+                        $("#PeriodOfInstallment").val(result.PeriodOfInstallment);
+                        $("#PremiumAmount").val(result.PremiumAmount);
+                        $("#InstalmentStartDate").data("kendoDatePicker").value(result.InstalmentStartDate);
+                        FieldsReadonly(true);
+                        $("#btnSubmit").attr("disabled", true);
+                        $("#btnRemove").attr("disabled", false);
+                        $(".PaymentDetailsGrid").show();
+                    } else {
+                        $(".PaymentDetailsGrid").hide();
+                        FieldsReadonly(false);
+                        $("#btnSubmit").attr("disabled", false);
+                        $("#btnRemove").attr("disabled", true);
+                    }
+                } else { alertify.error("no data found."); }
+
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+            }
+        });
+    }
+
+
+
+    function SubmitPaymentScheduleForm() {
+        if (ValidateScheduleInputFields()) {
+            var nRegId = parseInt($('#RegistrationId').val());
+            var nBalancePremium = null;//$("#BalancePremium").val();
+            var npenalInterest = parseFloat($("#PenalInterest").val()).toFixed(2);
+            var nnormalInterest = parseFloat($("#NormalInterest").val()).toFixed(2);
+            var nfrequency = parseInt($("#Frequency").data("kendoDropDownList").value());
+            var nInstalmentStartDate = $("#InstalmentStartDate").data("kendoDatePicker").value();
+            var nnoInstallment = parseInt($("#TotalInstallment").val());
+            var nPAmount = parseFloat($("#PrincipalAmount").val()).toFixed(2);
+            var nPeroidofInstallment = parseInt($("#PeriodOfInstallment").val());
+            var ObjPaymentSchedule = { RegistrationId: nRegId, PrincipalAmount: nPAmount, PremiumBalance: nBalancePremium, PenalInterest: npenalInterest, NormalInterest: nnormalInterest, Frequency: nfrequency, TotalInstallment: nnoInstallment, PeriodOfInstallment: nPeroidofInstallment, InstalmentStartDate: nInstalmentStartDate };
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ model: ObjPaymentSchedule }),
+                url: "/Property/ManagePayment/AddPaymentSchedule",
+                success: function (result) {
+                    if (result == '@ReturnType.Success') {
+                        alertify.success("Payment Schedule created successfully.");
+                        $("#gridPaymentSchedule").data("kendoGrid").dataSource.read();
+                        $("#btnSubmit").attr("disabled", true);
+                        $("#btnRemove").attr("disabled", false);
+                        $(".PaymentDetailsGrid").show();
+                        FieldsReadonly(true);
+                    }
+                    else if (result == '@ReturnType.Failed') {
+                        alertify.error("Schedule is not created, try again.");
+                        $("#gridPaymentSchedule").data("kendoGrid").dataSource.read();
+                    }
+                    else if (result == '@ReturnType.None') {
+                        alertify.error("Select Registration Id.");
+                        $("#gridPaymentSchedule").data("kendoGrid").dataSource.read();
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                }
+            });
+        }
+    }
+
+    function RemovePaymentScheduleDetail() {
+        var nRegId = parseInt($('#RegistrationId').val());
+        var nScheduleId = $("#ScheduleId").val();
+        if (nRegId != "" && nScheduleId != "") {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ Rid: nRegId, ScheduleId: nScheduleId }),
+                url: "/Property/ManagePayment/RemovePayScheduleInformation",
+                success: function (result) {
+                    if (result != null) {
+                        if (result == true) {
+                            alertify.success("Record has been removed successfully.");
+                            setTimeout(function () {
+                                window.location.href = '@Url.Action("CreateSchedule", "ManagePayment")';
+                            }, 2500);
+                        }
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                }
+            })
+        } else {
+            alertify.error("select registration no.");
+            return false;
+        }
+    }
+
+
+
+    function onRequestEnd(e) {
+        if (e.type == "update") {
+            if (!e.response.Errors) {
+                alertify.success("Record has been updated successfully.");
+                $("#gridPaymentSchedule").data("kendoGrid").dataSource.read();
+            }
+            else {
+                alertify.error("Record not Saved.");
+                $("#gridPaymentSchedule").data("kendoGrid").dataSource.read();
+            }
+        }
+    }
+
+    function CheckInterestRate(rate) {
+        if (rate > 99.99 || rate < -1) {
+            alertify.error("Interest rate can't be more than 99.99 or less than 0");
+            return false;
+        }
+        else {
+            return true;
+        }
+    }
+
+
+    function GetInstallmentDetails() {
+        var rid = $("#RegistrationId").val();
+        var principal = $("#PrincipalAmount").val();
+        if (rid != "" && principal != "") {
+            var totalInstallment = $('#TotalInstallment').val();
+            var frequency = $("#Frequency").data("kendoDropDownList").value();
+            if (totalInstallment == "" || totalInstallment <= 0) {
+                alertify.error("Enter Total Installment greater than 0");
+                $('#PremiumAmount').val('');
+                $('#PeriodOfInstallment').val('');
+                return false;
+            }
+            else if (frequency == "") {
+                alertify.error("Select Frequency.");
+                $('#PremiumAmount').val('');
+                $('#PeriodOfInstallment').val('');
+                return false;
+            }
+            else if (totalInstallment != "" && frequency != "") {
+                var premium = parseFloat(parseFloat(principal) / (parseInt(totalInstallment) * parseInt(frequency))).toFixed(2);
+                var period = parseInt(12 / parseInt(frequency));
+                $('#PremiumAmount').val(premium);
+                $('#PeriodOfInstallment').val(period);
+            }
+            else {
+                $('#PremiumAmount').val('');
+                $('#PeriodOfInstallment').val('');
+            }
+        }
+    }
+
+    function ValidateScheduleInputFields() {
+        var flag = true;
+        if ($('#RegistrationId').val() == "") {
+            flag = false;
+            alertify.error("Select Registration Id");
+        }
+        if ($.trim($('#PrincipalAmount').val()) == "") {
+            flag = false;
+            alertify.error("Enter Principal Amount");
+        }
+        if ($.trim($('#NormalInterest').val()) == "") {
+            flag = false;
+            alertify.error("Enter Normal interest");
+        }
+        if ($.trim($('#PenalInterest').val()) == "") {
+            flag = false;
+            alertify.error("Enter penal interest");
+        }
+        if ($.trim($('#TotalInstallment').val()) == "") {
+            flag = false;
+            alertify.error("Enter total interest");
+        }
+        if ($.trim($('#Frequency').val()) == "") {
+            flag = false;
+            alertify.error("Select frequency");
+        }
+        if ($.trim($('#InstalmentStartDate').val()) == "") {
+            flag = false;
+            alertify.error("Enter Installment Start Date");
+        }
+        return flag;
+    }
+
+    function ClearFieldsValue() {
+        $("#PremiumAmount").val('');
+        $("#PenalInterest").val('');
+        $("#NormalInterest").val('');
+        $("#Frequency").data("kendoDropDownList").value('');
+        $("#InstalmentStartDate").data("kendoDatePicker").value('');
+        $("#TotalInstallment").val('');
+        $("#PrincipalAmount").val('');
+        $("#PeriodOfInstallment").val('');
+    }
+
+    function FieldsReadonly(status) {
+        if (status == true) $("#Frequency").data("kendoDropDownList").enable(false);
+        else $("#Frequency").data("kendoDropDownList").enable(true);
+
+        if (status == false) status = false;
+        else status = "readonly";
+
+        $("#PremiumAmount").attr("readonly", status);
+        $('#PenalInterest').attr("readonly", status);
+        $("#NormalInterest").attr("readonly", status);
+        $("#InstalmentStartDate").attr("readonly", status);
+        $("#TotalInstallment").attr("readonly", status);
+        $("#PrincipalAmount").attr("readonly", status);
+        $("#PeriodOfInstallment").attr("readonly", "readonly");
+
+    }
+
+
+</script>

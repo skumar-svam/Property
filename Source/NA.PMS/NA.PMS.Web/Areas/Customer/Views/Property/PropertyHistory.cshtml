@@ -1,0 +1,157 @@
+﻿@using Kendo.Mvc.UI;
+@model NA.PMS.Model.CustomerDetailViewModel
+
+@{
+    ViewBag.Title = "Property History";
+    Layout = "~/Views/Shared/_LayoutCustomer.cshtml";
+}
+
+<div class="container-content">
+    <div>
+        @Html.HiddenFor(model=>model.CustomerModel.RegistrationId)
+    </div>
+    <div class="col-md-12">
+        <div class="row row-heading">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="h1-title">Property History</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 text-right">
+                <h1 class="h1-title">Registration No : @Model.CustomerModel.RegistrationId</h1>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 hr-div"></div>
+
+    <div class="col-md-12 content-border">
+        <div class="col-md-12">
+            <ul class="nav nav-tabs content-tabs" id="ulProperty" role="tablist">
+                <li class="active"><a href="#one" role="tab" data-toggle="tab">Transfer</a></li>
+                <li><a href="#two" role="tab" data-toggle="tab">Mortgage</a></li>
+                <li><a href="#three" role="tab" data-toggle="tab">Extension</a></li>
+                <li><a href="#four" role="tab" data-toggle="tab">Scheduled Date</a></li>
+            </ul>
+        </div>
+
+        <div class="col-md-12 tabbable tab-content" id="divProperty">
+            <div class="row tab-pane fade in active" id="one">
+                <div class="col-md-12 k-grid-content">
+                   @(Html.Kendo().Grid<NA.PMS.Model.TransferViewModel>()
+                        .Name("TransferHistoryGrid")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(c => c.RegistrationId).Hidden(true);
+                            columns.Bound(c => c.Transferee).Title("Transferee");
+                            columns.Bound(c => c.TransfereeAddress).Title("Transferee Address");
+                            columns.Bound(c => c.TransferDate).Title("Transfer Date").Format("{0:dd/MM/yyyy}");
+                            columns.Bound(c => c.Applicant).Title("Applicant");
+                            columns.Bound(c => c.ApplicantAddress).Title("Applicant Address.");
+                            columns.Bound(c => c.TransferStatus).Title("Status").Width(100);
+                            columns.Bound(c => c.TransferType).Title("Type").Width(100);
+                        })
+                        .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                        .AutoBind(true)
+                        .DataSource
+                        (
+                             dataSource => dataSource
+                            .Ajax().Model(model => model.Id(p => p.RegistrationId))
+                            .ServerOperation(true)
+                            .Read(read => read.Action("GetTransferHistoryDataListById", "Property", new { area = "Customer" }).Data("AdditionalInfo"))
+                            .PageSize(10)
+                        )
+                )
+                </div>
+            </div>
+
+            <div class="row tab-pane fade" id="two">
+                <div class="col-md-12 k-grid-content">
+                   @(Html.Kendo().Grid<NA.PMS.Model.MortgageViewModel>()
+                        .Name("MortgageHistoryGrid")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(c => c.RegistrationId).Hidden(true);
+                            columns.Bound(c => c.BankName).Title("Bank");
+                            columns.Bound(c => c.BranchAddress).Title("Branch");
+                            columns.Bound(c => c.MortgageDate).Title("Mortgage Date").Width(130).Format("{0:dd/MM/yyyy}");
+                            columns.Bound(c => c.ProcessingFee).Title("Charge").Width(130);
+                            columns.Bound(c => c.SanctionedAmount).Title("Sanctioned Amount.").Width(140);
+                            columns.Bound(c => c.ValidUpto).Title("Vlidity").Width(130).Format("{0:dd/MM/yyyy}");
+                            columns.Bound(c => c.MortgageStatus).Title("Status").Width(120);
+                        })
+                        .Sortable()
+                        .Filterable()
+                        .Resizable(resize => resize.Columns(true))
+                        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                        .AutoBind(true)
+                        .DataSource
+                        (
+                             dataSource => dataSource
+                            .Ajax().Model(model => model.Id(p => p.RegistrationId))
+                            .ServerOperation(true)
+                            .Read(read => read.Action("GetMortgageHistoryDataListById", "Property", new { area = "Customer" }).Data("AdditionalInfoM"))
+                            .PageSize(10)
+                        )
+                )
+                </div>
+            </div>
+
+            <div class="row tab-pane fade" id="three">
+                <div class="col-md-12 k-grid-content" id="hdnRescheduleGrid">
+                   @(Html.Kendo().Grid<NA.PMS.Model.ExtensionViewModel>()
+                        .Name("ExtensionHistoryGrid")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(c => c.RegistrationId).Hidden(true);
+                            columns.Bound(c => c.ExtensionGivenDate).Title("Given Date").Format("{0:dd/MM/yyyy}");
+                            columns.Bound(c => c.ExtensionDueDate).Title("Due Date").Format("{0:dd/MM/yyyy}");
+                            columns.Bound(c => c.CompletionDueDate).Title("Completion Due Date").Format("{0:dd/MM/yyyy}");
+                            columns.Bound(c => c.ExtensionCharge).Title("Charge");
+                            columns.Bound(c => c.ApprovedDate).Title("Approved").Format("{0:dd/MM/yyyy}");
+                            columns.Bound(c => c.ExtensionStatus).Title("Status");
+                        })
+                        .Sortable()
+                        .Filterable()
+                        .Resizable(resize => resize.Columns(true))
+                        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                        .AutoBind(true)
+                        .DataSource
+                        (
+                             dataSource => dataSource
+                            .Ajax().Model(model => model.Id(p => p.RegistrationId))
+                            .ServerOperation(true)
+                                    .Read(read => read.Action("GetExtensionHistoryDataListById", "Property", new { area = "Customer" }).Data("AdditionalInfoE"))
+                            .PageSize(10)
+                        )
+                )
+                </div>
+            </div>
+
+            <div class="row tab-pane fade" id="four">
+                <div class="col-md-12 k-grid-content">
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function AdditionalInfo() {
+        return {
+            rid: $('#CustomerModel_RegistrationId').val()
+            //rid: 20000133
+        }
+    }
+
+    function AdditionalInfoM() {
+        return {
+            rid: $('#CustomerModel_RegistrationId').val()
+            //rid: 40005318// 90100459
+        }
+    }
+    function AdditionalInfoE() {
+        return {
+            rid: $('#CustomerModel_RegistrationId').val()
+            //rid: 40011757// 90100459
+        }
+    }
+</script>
+

@@ -1,0 +1,50 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@using NA.PMS.Common;
+@model NA.PMS.Model.ServiceViewModel
+
+@{
+    ViewBag.Title = "ServiceReport";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="ManageRequestServices">
+    <div class="row rw-spce">
+        <div class="col-md-9 col-sm-9 col-xs-9"><h1 class="gridTitle">Service Request Report For All Department</h1></div>  
+        <div class="col-md-3 col-sm-3 col-xs-12 col-btn">
+            <button type="submit" id="btnPrintReport" class="btn btn-default" onclick="PrintNDCLetter();">Print</button>
+        </div>      
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12" id="divserviceReport" style="padding-top:10px;background-color:white;">
+        @Html.Raw(Model.HtmlReport)
+    </div>
+</div>
+
+<script type="text/javascript">
+    function PrintNDCLetter() {
+        var contents = document.getElementById("divserviceReport").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+</script>
+     
+
+
+

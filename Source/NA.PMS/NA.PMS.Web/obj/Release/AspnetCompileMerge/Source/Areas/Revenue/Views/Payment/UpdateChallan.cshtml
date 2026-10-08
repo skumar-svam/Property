@@ -1,0 +1,602 @@
+﻿@model NA.PMS.Model.PaymentViewModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@using NA.PMS.Common;
+
+@{
+    ViewBag.Title = "UpdateChallan";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    #gridPayment {
+        padding: 0;
+    }
+
+    .k-widget.k-window {
+        padding: 0;
+    }
+
+    .k-window-content.k-content {
+        padding: 0;
+    }
+
+    .k-window-titlebar.k-header {
+        background: #299a8b;
+        color: #ffffff;
+        border-radius: 0;
+    }
+
+    .col-for-label {
+        margin-right: -40px;
+        margin-left: 25px;
+    }
+
+    .displace-right {
+        /*margin-left: 80px;*/
+    }
+</style>
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row rw-spce">
+        <div class="col-sm-8"><h1 class="gridTitle">Payment for Allotted Property</h1></div>
+        <div class="col-sm-4 col-btn">
+            <a href="#" id="btnShowPayment" class="" onclick="javascript:ShowPaymentModal(event);">Show Payment</a>
+        </div>
+    </div>
+
+    <div class="col-md-12 blnk-rw"></div>
+
+    @using (Html.BeginForm("SaveChallanDetails", "Payment", FormMethod.Post, new { area="Revenue",enctype = "multipart/form-data", id = "PaymentForm" }))
+    {
+        <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            <h2 class="blck-heading">Add Payment</h2>
+            <div class="form-bx">
+                <div class="row">
+                    
+                    @Html.HiddenFor(model => model.FirstName)
+                    @Html.HiddenFor(model => model.MiddleName)
+                    @Html.HiddenFor(model => model.LastName)
+                    @Html.HiddenFor(model => model.SectorId)
+                    @Html.HiddenFor(model => model.SectorName)
+                    @Html.HiddenFor(model => model.BlockId)
+                    @Html.HiddenFor(model => model.BlockName)
+                    @Html.HiddenFor(model => model.DepartmentId)
+                    @Html.HiddenFor(model => model.Department)
+                    @Html.HiddenFor(model => model.PropertyId)
+                    @Html.HiddenFor(model => model.PlotNo)
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+                        <label>Registration Id:</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @(Html.Kendo().DropDownListFor(model => model.RegistrationId)
+                              .DataTextField("Name")
+                              .DataValueField("Value")
+                              .OptionLabel(" -- Please Select --")
+                              .Filter("contains")
+                              .AutoBind(true)
+                              .Enable(true)
+                              .DataSource(source =>
+                                {
+                                    source.Custom()
+                                    .ServerFiltering(true)
+                                    .ServerPaging(true)
+                                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                    .Transport(transport =>
+                                    {
+                                        transport.Read(read => read.Action("GetAllottedPropertyRidListReq", "PropertyRegistration", new { area = "Property" }));
+                                    }).Schema(schema =>
+                                    {
+                                        schema.Data("Data")
+                                        .Total("Total");
+                                    }).PageSize(100);
+                                })
+                              .HtmlAttributes(new { style = "width:100%" })
+                              .Events(e => e.Change("GetAllottedPropertyDetails"))
+                        )
+                    </div>
+
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+                        <label>Bank</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @*@Html.TextBoxFor(model => model.BANK_ID, new { @class = "form-control", @maxlength = "20" })*@
+                        @(Html.Kendo().DropDownListFor(model => model.BankId)
+                              .DataTextField("Name")
+                              .DataValueField("Value")
+                              .OptionLabel(" -- Please Select --")
+                              .Filter("contains")
+                              .AutoBind(true)
+                              .Enable(true)
+                  .DataSource(source => source.Read(read => read.Action("GetBankNamesForPayment", "PropertyRegistration", new { area = "Property" })))
+                              .HtmlAttributes(new { style = "width:100%" })
+)
+</div>
+<div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+    <label>Challan ID</label>
+</div>
+<div class="col-md-3 col-sm-3 col-xs-12 form-group">
+    @Html.TextBoxFor(model => model.ChallanId, new { @class = "form-control integer-only", @maxlength = "20" })
+</div>
+</div>
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+        <label>Applicant's Name</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.TextBoxFor(model => model.AllotteeName, new { @class = "form-control", @maxlength = "" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+        <label>Property No</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.TextBoxFor(model => model.PropertyNumber, new { @class = "form-control", @maxlength = "20" })
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group"><label>Receipt Type</label></div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @(Html.Kendo().DropDownListFor(model => model.ReceiptHeadId)
+                              .DataTextField("Name")
+                              .DataValueField("Value")
+                              .OptionLabel(" -- Please Select --")
+                              .Filter("contains")
+                              .AutoBind(true)
+                              .Enable(true)
+                              .DataSource(source => source.Read(read => read.Action("GetPropertyPaymentType", "PropertyRegistration", new { area="Property"})))
+                              .HtmlAttributes(new { style = "width:100%" })
+        )
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+        <label>Receipt Sub Type</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @(Html.Kendo().DropDownListFor(model => model.ReceiptSubHeadId)
+                              .DataTextField("Name")
+                              .DataValueField("Value")
+                              .OptionLabel(" -- Please Select --")
+                              .Filter("contains")
+                              .AutoBind(true)
+                              .Enable(true)
+                              .DataSource(source => source.Read(read => read.Action("GetPropertySubPaymentType", "PropertyRegistration", new { area="Property"}).Data("FilterHeadId")).ServerFiltering(true))
+                              .CascadeFrom("ReceiptHeadId")
+                              .HtmlAttributes(new { style = "width:100%" })
+        )
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+        <label>Receipt No</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.TextBoxFor(model => model.ReceiptId, new { @class = "form-control integer-only", @maxlength = "12" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+        <label>Amount</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.TextBoxFor(model => model.DepositAmount, new { @class = "form-control integer-only", @maxlength = "22" })
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+        <label>Deposit Date</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @(Html.Kendo().DatePickerFor(model => model.DepositDate)
+                              .HtmlAttributes(new { style = "width: 100%;", @class = "DisableKeyboardInput" }))
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+        <label>Entry Date</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @(Html.Kendo().DatePickerFor(model => model.EntryDate)
+                  .HtmlAttributes(new { style = "width: 100%;", @class = "DisableKeyboardInput" }).Events(e => e.Change("ValidateEntryDate")))
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-3 col-sm-3 col-xs-12 col-for-label form-group">
+        <label>Depositor's Name</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.TextBoxFor(model => model.DepositorName, new { @class = "form-control", @maxlength = "100" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 col-for-label  form-group">
+        <label>Address</label>
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.TextBoxFor(model => model.CorresspondentAddress, new { @class = "form-control", @maxlength = "" })
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12 form-group k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.PaymentViewModel>()
+                .Name("TempChallanGrid")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.RefId).Title("SNo.").Width(50);
+                    columns.Bound(c => c.ReceiptHeadName).Title("Head");
+                    columns.Bound(c => c.ReceiptSubHeadName).Title("Sub Head");
+                    columns.Bound(c => c.DepositAmount).Title("Paid Amount").Width(110).Sortable(false);
+                    columns.Bound(c => c.DepositDate).Title("Deposit Date").Width(110).Sortable(false);
+                    columns.Bound(c => c.RefId).Title(" ").Width(110).ClientTemplate("<label class='hyperlink' onclick='javascript:RemoveTempChallan(#=RefId#)'>Delete<i class='fa fa-remove'></i></label>").Filterable(false).Sortable(false);
+                })
+                .Resizable(resize => resize.Columns(true))
+                .DataSource(dataSource => dataSource
+                    .Ajax().ServerOperation(true).Batch(true)
+                    .Model(p => p.Id(m => m.Id))
+                    .Read(read => read.Action("GetSavedTempChallanDetailByReceiptId", "Payment", new { area = "Revenue" }).Data("FilterRegistrationId"))
+                    )
+        )
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12 form-group" style="text-align:right">
+        <input type="button" class="k-button" value="Add" id="btn-challan-amount" />
+    </div>
+</div>
+</div>
+</div>
+        <div class="box-button text-center">
+            @*<input type="reset" id="btnReset" value="Reset" class="btn btn-default" style="margin-left:25px;" />*@
+            <input type="submit" id="btnSubmit" value="Add" class="btn btn-add" style="margin-right:25px;" />
+        </div>
+    }
+
+</div>
+
+<div id="divPropertyPayment">
+    <div class="row">
+        <div class="col-md-12 k-grid-content">
+            @(Html.Kendo().Grid<NA.PMS.Model.AllottedPropertyPaymentModel>()
+            .Name("gridPayment")
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.RECEIPT_ID).Title("Receipt ID");
+                columns.Bound(c => c.RID_NO).Title("Registration Id");
+                columns.Bound(c => c.DEPARTMENT_NAME).Title("Department");
+                columns.Bound(c => c.ALLOTEE_NAME).Title("Applicant");
+                columns.Bound(c => c.PROPERTY_NUMBER).Title("Property No.");
+                columns.Bound(c => c.AMOUNT).Title("Amount");
+                columns.Bound(c => c.DEPOSIT_DATE).Title("Deposit Date").Format("{0:dd-MM-yyyy}");
+                columns.Bound(c => c.ENTRY_DATE).Title("Entry Date").Format("{0:dd-MM-yyyy}");
+            })
+            .Sortable()
+            .Filterable()
+            .Groupable()
+                    //.Events(e => e.DataBound("onDataBound"))
+            .Resizable(resize => resize.Columns(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+            .DataSource
+            (
+                dataSource => dataSource
+                    .Ajax().Model(model => model.Id(p => p.RECEIPT_ID)).ServerOperation(true)//.Sort(sort => sort.Add("RECEIPT_ID").Descending())
+                    .Read(read => read.Action("GetPropertyPaymentDetails", "PropertyRegistration", new { area="Property"})).PageSize(12)//.Group(g => g.Add(r => r.RID_NO))
+            )
+            )
+        </div>
+    </div>
+
+
+    <div class="row" style="padding-top:15px;padding-bottom:15px;text-align:center">
+        <div class="col-sm-12">
+            <button id="btnPopupCancel" class="btn btn-add">close</button>
+        </div>
+    </div>
+
+</div>
+
+
+
+<script>
+    $(document).ready(function () {
+        @*@{if (TempData["MesgAdd"] != null && TempData["MesgAdd"] != "")
+        {
+            if ((bool)TempData["MesgAdd"] == true)
+            {
+                @:alertify.success('Payment added successfully.');
+                                                    }
+            else
+            {
+                @:alertify.error('Payment is not added, try again.');
+                                                            }
+        }
+        }*@
+
+
+
+        $('#btn-challan-amount').click(function () {
+            if (ValidateChallanData()) {
+                SaveChallanTempData();
+            }
+        });
+    });
+
+    $('#divPropertyPayment').kendoWindow({
+        modal: true,
+        title: "Payment against Registration Id",
+        visible: false,
+        width: "90%", height: "90%"
+    });
+
+    $('#btnShowPayment').click(function () {
+        $('#gridPayment').data("kendoGrid").dataSource.read();
+        var win = $("#divPropertyPayment").data("kendoWindow");
+        win.center();
+        win.open();
+    });
+
+    $('#btnPopupCancel').click(function () {
+        $("#divPropertyPayment").data("kendoWindow").close();
+    });
+
+    function FilterRegistrationId() {
+        var model = { RegistrationId: $("#RegistrationId").val(), ReceiptId: $('#ReceiptId').val() };
+        return model;
+    }
+
+    function FilterHeadId() {
+        return { receiptId: $('#ReceiptHeadId').val() }
+    }
+
+    function GetAllottedPropertyDetails() {
+        var rId = $('#RegistrationId').val();
+        if (rId != "") {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ rid: rId }),
+                url: '@Url.Action("GetAllottedPropertyDetail", "PropertyRegistration", new { area="Property"})',
+                success: function (result) {
+                    if (result != null) {
+                        //ClearInputField();
+                        $('#AllotteeName').val(result.ALLOTEE_NAME);
+                        $('#PropertyNumber').val(result.SECTOR + "/" + result.BLOCK + "-" + result.PROPERTY_NUMBER);
+                        $('#FirstName').val(result.FIRST_NAME);
+                        $('#MiddleName').val(result.MIDDLE_NAME);
+                        $('#LastName').val(result.LAST_NAME);
+                        $('#SectorId').val(result.SECTOR_ID);
+                        $('#SectorName').val(result.SECTOR);
+                        $('#BlockId').val(result.BLOCK_ID);
+                        $('#BlockName').val(result.BLOCK);
+                        $('#DepartmentId').val(result.DEPARTMENT_ID);
+                        $('#Department').val(result.DEPARTMENT_NAME);
+                        $('#PlotNo').val(result.PROPERTY_NUMBER);
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Please try again.");
+                }
+            });
+        }
+        else {
+            //ClearInputField();
+            //alertify.error("Please select Registration Id");
+        }
+    }
+
+    $('#btnSubmit').click(function () {
+        if (ValidateReceiptDetails()) {
+            //SaveChallanTempData();
+            $('#btnSubmit').submit();
+        }
+    });
+
+    $(".integer-only").keydown(function (e) {
+        // Allow: backspace, delete, tab, escape, enter and .
+        if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110]) !== -1 ||
+            // Allow: Ctrl+A, Command+A
+            (e.keyCode === 65 && (e.ctrlKey === true || e.metaKey === true)) ||
+            // Allow: home, end, left, right, down, up
+            (e.keyCode >= 35 && e.keyCode <= 40)) {
+            // let it happen, don't do anything
+            return;
+        }
+        // Ensure that it is a number and stop the keypress
+        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+            e.preventDefault();
+        }
+    });
+
+    function ValidateEntryDate() {
+        var depositdate = $('#DepositDate').val();
+        var entrydate = $('#EntryDate').val();
+        var today = '@DateTime.Now.ToString()';
+        if (new Date(depositdate) > new Date(entrydate)) {
+            alertify.error("Entry date should not be earlier than deposit date");
+            return false;
+        }
+        if (new Date(entrydate) > new Date(today)) {
+            alertify.error("Entry date should not be future date.");
+            return false;
+        }
+    }
+
+    function ClearInputField() {
+        //$('#AllotteeName').html("");
+        //$('#PropertyNumber').text('');
+        $('#ReceiptHeadId').data("kendoDropDownList").value('');
+        $('#ReceiptsubHeadId').data("kendoDropDownList").value('');
+        $('#DepositAmount').val('');
+        //$('#BankId').data("kendoDropDownList").value('');
+        //$('#CHALLAN_ID').val('');
+        //$('#DEPOSIT_DATE').data("kendoDatePicker").value('');
+        //$('#ENTRY_DATE').data("kendoDatePicker").value('');
+        //$('#DepositorName').val('');
+        //$('#CorresspondentAddress').val('');
+    }
+
+    function ValidateChallanData() {
+        var flag = true;
+        if ($('#RegistrationId').val() == "") {
+            alertify.error("Please select RegistrationId");
+            return flag = false;
+        }
+        if ($('#ReceiptId').val() == "") {
+            alertify.error("Please select Receipt Id");
+            return flag = false;
+        }
+        if ($('#ReceiptHeadId').val() == "") {
+            alertify.error("Please select Receipt head");
+            return flag = false;
+        }
+        if ($('#ReceiptSubHeadId').val() == "") {
+            alertify.error("Please select Receipt sub head");
+            return flag = false;
+        }
+        if ($('#DepositDate').val() == "") {
+            alertify.error("Please enter Deposit Date");
+            return flag = false;
+        }
+        if ($('#DepositAmount').val() == "") {
+            alertify.error("Please enter Deposit Amount");
+            return flag = false;
+        }
+        //if ($('#DepartmentId').val() == "") {
+        //    alertify.error("Please Select Department");
+        //    return flag = false;
+        //}
+        return flag;
+    }
+
+    function ValidateReceiptDetails() {
+        var flag = true;
+        if ($('#RegistrationId').val() == "") {
+            alertify.error("Please select RegistrationId");
+            return flag = false;
+        }
+        if ($('#ReceiptId').val() == "") {
+            alertify.error("Please select Receipt Id");
+            return flag = false;
+        }
+        if ($('#DepositDate').val() == "") {
+            alertify.error("Please enter Deposit Date");
+            return flag = false;
+        }
+        if ($('#BankId').val() == "") {
+            alertify.error("Please Select Bank");
+            return flag = false;
+        }
+        if ($('#ChallanId').val() == "") {
+            alertify.error("Please Select ChallanId");
+            return flag = false;
+        }
+        if ($('#DepositorName').val() == "") {
+            alertify.error("Please Enter Depositor Name");
+            return flag = false;
+        }
+        if ($('#CorresspondentAddress').val() == "") {
+            alertify.error("Please Enter Address");
+            return flag = false;
+        }
+        if ($('#DepositDate').val() == "") {
+            alertify.error("Please Select Deposit Date");
+            return flag = false;
+        }
+        if ($('#EntryDate').val() == "") {
+            alertify.error("Please Select Entry Date");
+            return flag = false;
+        }
+        if ($('#AllotteeName').val() == "") {
+            alertify.error("Please Select Entry Date");
+            return flag = false;
+        }
+        if ($('#PropertyNumber').val() == "") {
+            alertify.error("Please Select Entry Date");
+            return flag = false;
+        }
+
+        return flag;
+    }
+
+    function SaveChallanTempData() {
+        //var kendoWidget = $('.kendo-popup-window').data("kendoWindow");
+        //kendo.ui.progress(kendoWidget.element, true);
+        var paymodel = {
+            RegistrationId: $('#RegistrationId').val(),
+            DepartmentId: $('#DepartmentId').val(),
+            ReceiptHeadId: $('#ReceiptHeadId').val(),
+            ReceiptHeadName: $('#ReceiptHeadId').data("kendoDropDownList").text(),
+            ReceiptSubHeadId: $('#ReceiptSubHeadId').val(),
+            ReceiptSubHeadName: $('#ReceiptSubHeadId').data("kendoDropDownList").text(),
+            DepositDate: $('#DepositDate').val(),
+            DepositAmount: $('#DepositAmount').val(),
+            ChallanId: $('#ChallanId').val(),
+            ReceiptId: $('#ReceiptId').val()
+        };
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ model: paymodel }),
+            url: "/Revenue/Payment/SaveTempChallanDetailsByReceiptId",
+            success: function (result) {
+                if (result == '@ReturnType.Saved') {
+                    $('#TempChallanGrid').data('kendoGrid').dataSource.read();
+                    //$('.kendo-popup-window').data("kendoWindow").close();
+                    //kendo.ui.progress(kendoWidget.element, false);
+                    alertify.success("Record has been saved successfully.");
+                }
+                if (result == '@ReturnType.None') {
+                    $('#TempChallanGrid').data('kendoGrid').dataSource.read();
+                    //kendo.ui.progress(kendoWidget.element, false);
+                    //$('.kendo-popup-window').data("kendoWindow").close();
+                    alertify.error("Records aren't saved.");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+            }
+        })
+    }
+
+    function SavePaymentDetail() {
+        //var kendoWidget = $('.kendo-popup-window').data("kendoWindow");
+        //kendo.ui.progress(kendoWidget.element, true);
+        var paymodel = {
+            RegistrationId: $('#RegistrationId').val(),
+            DepartmentId: $('#DepartmentId').val(),
+            DepositDate: $('#DepositDate').val(),
+            DepositAmount: $('#DepositAmount').val(),
+            ChallanId: $('#ChallanId').val(),
+            ReceiptId: $('#ReceiptId').val()
+        };
+        var formData = new FormData($('PaymentForm').get(0));
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            //contentType: 'application/json; charset=utf-8',
+            //data: JSON.stringify({ model: paymodel }),
+            contentType: false, // Not to set any content header
+            processData: false, // Not to process data
+            data: formData,
+            url: "/Revenue/Payment/SaveChallanDetails",
+            success: function (result) {
+                if (result == '@ReturnType.Updated') {
+                    //ClearChallanInputFields();
+                    //$('#InstallmentScheduleGrid').data('kendoGrid').dataSource.read();
+                    //$('.kendo-popup-window').data("kendoWindow").close();
+                    //kendo.ui.progress(kendoWidget.element, false);
+                    alertify.success("Record has been updated successfully.");
+                }
+                if (result == '@ReturnType.None') {
+                    //$('#InstallmentScheduleGrid').data('kendoGrid').dataSource.read();
+                    //kendo.ui.progress(kendoWidget.element, false);
+                    //$('.kendo-popup-window').data("kendoWindow").close();
+                    alertify.error("Records aren't updated.");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+            }
+        })
+    }
+</script>
+

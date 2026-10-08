@@ -1,0 +1,45 @@
+﻿@using NA.PMS.Model
+@using Kendo.Mvc.UI;
+<div class="k-grid-content">
+    @(Html.Kendo().Grid<AllotmentModel>()
+                  .Name("gridAllotmentPartial")
+                  .Columns(columns =>
+                  {
+                      columns.Bound(c => c.RID).Hidden(true);
+
+                      columns.Bound(c => c.RID).ClientTemplate("<a href='" + "/Property/PropertyAllotment/PropertyDetails/#= RID #'>#= RID #</a>").Title("RID").Filterable(false);
+
+                      columns.Bound(c => c.SchemeName).Title("Scheme Name");
+                      columns.Bound(c => c.DepartmentName).Title("Department Name");
+                      columns.Bound(c => c.PropertyNumber).Title("Property No.");
+                      columns.Bound(c => c.ApplicantName).Title("Applicant's Name");
+                      columns.Bound(c => c.AllotmentDate).Title("Allotment Date").Format("{0:dd-MM-yyyy}");
+                      columns.Bound(c => c.isStatus).Title("Staus").Title("Status");
+
+                      columns.Bound(c => c.RID).ClientTemplate("<a class='gridEdit' href='" + "/Property/Allotment/EditAllotment/#= RID #'>Edit</a>").Title("Action").Filterable(false);
+
+                      columns.Bound(c => c.RID).HeaderHtmlAttributes(new { style = "text-align:center;" }).HtmlAttributes(new { style = "text-align:center;" }).Title("Cancel Request").ClientTemplate("#if(isStatus == 'Approved'){#<span class='gridNotEdit'>Cancel</span>#} else{#<a class='gridEdit' onclick='javascript:CancelAllotment(this);'>Cancel</a> #}#").Filterable(false).Sortable(false);
+                  })
+                  .Sortable()
+                  .Filterable()
+                           //.Events(e => e.DataBound("onDataBound"))
+                .Resizable(resize => resize.Columns(true))
+                  .Pageable
+                  (
+                           pageable => pageable
+                          .Enabled(true)
+                          .Refresh(true)
+                          .PageSizes(true)
+                          )
+                                    .Groupable()
+                  .DataSource
+                  (
+                      dataSource => dataSource
+                                          .Ajax().Model(model => model.Id(p => p.RID))
+                          .ServerOperation(true)
+                          .Read(read => read.Action("GetAllotmentPartial", "Allotment"))
+                          .PageSize(10)
+                  )
+    )
+</div>
+

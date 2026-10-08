@@ -1,0 +1,305 @@
+﻿@model NA.PMS.Model.Refund
+@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@{
+    ViewBag.Title = "Refund";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    @@media (max-width:480px) {
+        #resetbtn {
+            padding-top: 5px;
+        }
+    }
+</style>
+@using (Html.BeginForm("SaveRefundForScheme", "ManageRefunds", FormMethod.Post, new { enctype = "multipart/form-data", id = "userform" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Edit Refund</h1></div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+                </div>
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="col-md-12 content-top-spce">
+                <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                    <h2 class="blck-heading">Refund Information</h2>
+
+                    <div class="form-bx">
+                        <div>
+                            @Html.HiddenFor(model=>model.RefundId)
+                        </div>
+                        <div class="row">
+                            <div class=" col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.LabelFor(model => model.SchemeName, htmlAttributes: new { @class = "required font-bold" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(model => model.SchemeId)
+                                    //.BindTo(Model.SchemeCollection)
+                                  .Name("SchemeId")
+                                  .DataTextField("schemeName")
+                                  .DataValueField("schemeId")
+                                  .OptionLabel(" -- Please Select --")
+                                  .DataSource(source => source.Read(read => read.Action("GetAllSchemesForRefund", "ManageRefunds")))
+                                  .Enable(true)
+                                  .AutoBind(true)
+                                  .HtmlAttributes(new { style = "width: 100%; height:100%" })
+                                )
+                                @(Html.ValidationMessageFor(model => model.SchemeId))
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Department", htmlAttributes: new { @class = "required font-bold" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+                                @(Html.Kendo().DropDownListFor(model => model.DepartmentId)
+                                  .Name("DepartmentId")
+                                  .DataTextField("DepartmentName")
+                                  .DataValueField("DepartmentId")
+                                  .OptionLabel(" -- Please Select --")
+                                  .DataSource(source => source.Read(read => read.Action("GetDepartmentOnSchemeForRefund", "ManageRefunds").Data("FilterDepartment"))
+                                                              .ServerFiltering(true))
+                                  .Enable(false)
+                                  .AutoBind(false)
+                                  .CascadeFrom("SchemeId")
+                                  .HtmlAttributes(new { style = "width: 100%; height:100%" })
+                                )
+                                @(Html.ValidationMessageFor(model => model.DepartmentId))
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Unit", htmlAttributes: new { @class = "required font-bold" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(model => model.Unit)
+                                         //.Name("Unit")
+                                        .DataTextField("UnitName")
+                                        .DataValueField("UnitValue")
+                                        .OptionLabel("Select")
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("GetUnitTypeForRefund", "ManageRefunds");
+                                            });
+                                        })
+                                        .HtmlAttributes(new { style = "width: 100%; height:100%" })
+                                )
+                                @(Html.ValidationMessageFor(model => model.Unit))
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Deduction", htmlAttributes: new { @class = "required font-bold", id = "lbl-deduction" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.Deduction, new { @class = "form-control textBoxValueRightAlign" })
+                                @(Html.ValidationMessageFor(model => model.Deduction))
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Interest Rate", htmlAttributes: new { @class = "required font-bold" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                
+                                @(Html.Kendo().NumericTextBoxFor(model => model.InterestRate)
+                                          .Name("InterestRate")
+                                          .Min(0)
+                                          .Max(99)
+                  .Spinners(false).Step(0)
+                                          .Enable(true)
+                                          //.Placeholder("Integer")
+                                  .HtmlAttributes(new { style = "width: 100%", @class = "textBoxValueRightAlign" })
+                                )
+                                @*@Html.EditorFor(model => model.InterestRate, new { htmlAttributes = new { @class = "form-control", @maxlength = "2" } })*@
+                                @(Html.ValidationMessageFor(model => model.InterestRate))
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Days After Interest", htmlAttributes: new { @class = "required font-bold" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.DaysAfterInterest, new { @class = "form-control textBoxValueRightAlign", @maxlength = "5" })
+                                @(Html.ValidationMessageFor(m => m.DaysAfterInterest))
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Deduction Apply On", htmlAttributes: new { @class = "required font-bold" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @*@Html.DropDownList("DeductionApplyOn", EnumHelper.GetSelectList(typeof(DeductionApplyOn)),"Select Deduction",new { @class = "form-control" })*@
+                                @(Html.Kendo().DropDownListFor(model => model.DeductionApplyOn)
+                                        .Name("DeductionApplyOn")
+                                        .DataTextField("TypeName")
+                                        .DataValueField("TypeValue")
+                                        .OptionLabel("Select")
+                                        .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("GetDeductionApplyOnForRefund", "ManageRefunds");
+                                            });
+                                        })
+                                        .HtmlAttributes(new { style = "width: 100%; height:100%" })
+                                )
+                                @(Html.ValidationMessageFor(m => m.DeductionApplyOn))
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Refund Description", htmlAttributes: new { @class = "required font-bold" })
+                            </div>
+
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.RefundDescription, new { @class = "form-control", @maxlength = "150" })
+                                @(Html.ValidationMessageFor(m => m.RefundDescription))
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Refund Lock Period(In Days)", htmlAttributes: new { @class = "required font-bold" })
+
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.RefundLockPeriod, new { @class = "form-control textBoxValueRightAlign", @maxlength = "5" })
+                                @(Html.ValidationMessageFor(m => m.RefundLockPeriod))
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="box-button text-center">
+                    @Html.ActionLink("Cancel", "ManageRefund", "ManageRefunds", new { @class = "btn btn-default" })
+                    <input type="button" value="Update" id="btnSubmit" class="btn btn-add" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+<script src="~/Scripts/_references.js"></script>
+<script>
+
+    //$(function () {
+    //    $("form").kendoValidator();
+    //});
+
+    function FilterDepartment() {
+        return { SchemeId: $("#SchemeId").val() };
+    }
+
+
+    $(document).ready(function () {
+        if ($("#Unit").val() == "INR") {
+            $("#Deduction").attr('maxlength', '15');
+        }
+        if ($("#Unit").val() == "P") {
+            $("#Deduction").attr('maxlength', '5');
+        }
+        $('#Unit').change("click", function () {
+            if ($("#Unit").val() == "INR") {
+                $("#Deduction").attr('maxlength', '15');
+            }
+            if ($("#Unit").val() == "P") {
+                $("#Deduction").attr('maxlength', '5');
+            }
+            if ($("#Unit").val() == "Select") {
+                $("#Deduction").attr('maxlength', '0');
+            }
+        });
+
+        //$('#Unit').data("kendoDropDownList").enable = false;
+
+
+
+    });
+
+    $('#Deduction').blur(function () {
+        if ($('#Deduction').val() != "") {
+            var deduction = $('#Deduction').val();
+            if ($("#Unit").val() == "INR") {
+                if (deduction >= 0 && deduction <= 999999999999) {
+                    $('#Deduction').val(parseFloat($('#Deduction').val()).toFixed(2));
+                    //return true;
+                }
+                else {
+                    alertify.error("With unit INR, maximum deduction should be of 12 digits");
+                    $('#Deduction').Focus();
+                    return false;
+                }
+            }
+            if ($("#Unit").val() == "P") {
+                if (deduction >= 0 && deduction <= 99) {
+                    $('#Deduction').val(parseFloat($('#Deduction').val()).toFixed(2));
+                    //return true;
+                }
+                else {
+                    alertify.error("With unit P, deduction can't be more than 99");
+                    return false;
+                }
+            }
+        }
+    });
+
+
+    $('#btnSubmit').click(function () {
+        var deduction = $('#Deduction').val();
+        if ($('#SchemeId').val() == "") {
+            alertify.error("Please select Scheme");
+            return false;
+        }
+        if (deduction != "") {
+            if ($("#Unit").val() == "INR") {
+                if (deduction >= 0 && deduction <= 999999999999) {
+                    $('#Deduction').val(parseFloat($('#Deduction').val()).toFixed(2));
+                    $("#userform").submit();
+                    //return true;
+                }
+                else {
+                    alertify.error("With unit INR, maximum deduction should be of 12 digits");
+                    $('#Deduction').Focus();
+                    return false;
+                }
+            }
+            if ($("#Unit").val() == "P") {
+                if (deduction >= 0 && deduction <= 99) {
+                    $('#Deduction').val(parseFloat($('#Deduction').val()).toFixed(2));
+                    $("#userform").submit();
+                    //return true;
+                }
+                else {
+                    alertify.error("With unit P, deduction can't be more than 99");
+                    return false;
+                }
+            }
+        }
+        else {
+            alertify.error('Please enter Deduction value.');
+            return false;
+        }
+
+        //$("#userform").submit();
+    });
+
+    $("#InterestRate").keydown(function (e) {
+        // Allow: backspace, delete, tab, escape, enter and .
+        if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110, 190]) !== -1 ||
+            // Allow: Ctrl+A, Command+A
+            (e.keyCode === 65 && (e.ctrlKey === true || e.metaKey === true)) ||
+            // Allow: home, end, left, right, down, up
+            (e.keyCode >= 35 && e.keyCode <= 40)) {
+            // let it happen, don't do anything
+            return;
+        }
+        // Ensure that it is a number and stop the keypress
+        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+            e.preventDefault();
+        }
+    });
+
+</script>

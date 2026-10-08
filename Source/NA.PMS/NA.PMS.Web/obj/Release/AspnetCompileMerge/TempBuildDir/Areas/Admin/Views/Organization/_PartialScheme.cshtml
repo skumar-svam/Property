@@ -1,0 +1,232 @@
+﻿@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions
+
+
+<div class="panel-body">
+    <div class="row form-group">
+        <div class="col-md-12" id="Application" style="text-align:center">
+            @*<input type="radio" name="scheme-action" value="Save" />Add &nbsp;&nbsp;*@
+            <input type="radio" name="scheme-action" value="Update" checked="checked"/>Update
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-3 col-sm-12 form-group col-20">
+            <label>Ex Scheme Type:</label>
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-30">
+            @(Html.Kendo().DropDownList()
+                .Name("ddlScheme")
+                .OptionLabel("---select---")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .DataSource(source =>
+                {
+                    source.Custom()
+                    .ServerFiltering(true)
+                    .ServerPaging(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    .Transport(transport => transport.Read(read => read.Action("GetMasterDataDropDownListAsDataSource", "Organization", new { area = "Admin" }).Data("FilterScheme")))
+                    .Schema(schema => schema.Data("Data").Total("Total"))
+                    .PageSize(100);
+                })
+                .HtmlAttributes(new { style = "width:100%;" })
+                .Events(e=>e.Change("ddlSchemeChangeEvent"))
+            )
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-20">
+            <label>Scheme Name</label>
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-30">
+            <input type="text" maxlength="30" id="txtSchemeName" class="k-textbox" style="width:100%;" />
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-3 col-sm-12 form-group col-20">
+            <label>Scheme Start Date</label>
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-30">
+            <input id="txtSchemeStartDate" class="k-datepicker" style="width:100%;" />
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-20">
+            <label>Scheme End Date:</label>
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-30">
+            <input id="txtSchemeEndDate" class="k-datepicker" style="width:100%;" />
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-3 col-sm-12 form-group col-20">
+            <label>Scheme Form Fee</label>
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-30">
+            <input type="text" maxlength="30" id="txtSchemeFormFee" class="k-textbox" style="width:100%;"/>
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-20">
+            <label>Processing Fee:</label>
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-30">
+            <input type="text" maxlength="30" id="txtProcessingFee" class="k-textbox" style="width:100%;"/>
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-12" style="text-align:right">
+            <input type="button" id="btn-scheme-save" class="k-button" value="Update" style="min-width:80px;" />
+            <input type="button" id="btn-scheme-clear" class="k-button" value="Clear" style="min-width:80px;" />
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $(".k-datepicker").kendoDatePicker();
+        //$("#txtSchemeEndDate").kendoDatePicker();
+
+        $('input[type="radio"][name="scheme-action"]').on("change", function () {
+            var action = $('input[type="radio"][name="scheme-action"]:checked').val();
+            if (action == "Save") {
+                $('#btn-scheme-save').val("Add");
+                $('#ddlScheme').data("kendoDropDownList").value('');
+                $('#ddlScheme').data("kendoDropDownList").enable(false);
+            }
+            else {
+                $('#btn-scheme-save').val("Update");
+                $('#ddlScheme').data("kendoDropDownList").enable(true);
+            }
+        });
+
+
+        $('#btn-scheme-save').click(function () {
+            SubmitSchemeInfo();
+        });
+
+        $('#btn-scheme-clear').click(function () {
+            ClearSchemeInputFields();
+        });
+    });
+
+    function FilterScheme() {
+        return {
+            FilterType: "OnlineScheme",
+            MasterData: "OnlineScheme"
+        }
+    }
+
+    function ddlSchemeChangeEvent() {
+        var schemeId = $('#ddlScheme').data("kendoDropDownList").value();
+        if (schemeId != undefined && schemeId != "") {
+            var smodel = {
+                MasterData: "OnlineScheme",
+                FilterType: "OnlineScheme",
+                SchemeId: schemeId
+            };
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ model: smodel }),
+                url: '/Admin/Organization/GetMasterDataInfoByType',
+                success: function (result) {
+                    if (result.ReturnTypeId == '@ReturnType.Success') {
+                        $('#txtSchemeName').val(result.SchemeName);
+                        $('#txtSchemeStartDate').data("kendoDatePicker").value(result.StartDate);
+                        $('#txtSchemeEndDate').data("kendoDatePicker").value(result.EndDate);
+                        $('#txtSchemeFormFee').val(result.SchemeFormFee);
+                        $('#txtProcessingFee').val(result.ProcessingFee);
+                    }
+                    else if (result == '@ReturnType.None') {
+                        ClearSchemeInputFields();
+                        alertify.error("Scheme doesn't exist.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again");
+                }
+            });
+        }
+        else {
+            ClearSchemeInputFields();
+        }
+    }
+
+    function SubmitSchemeInfo() {
+        var flag = true;
+        var actiontype = $('input[type="radio"][name="scheme-action"]:checked').val();
+        var schemeId = $('#ddlScheme').data("kendoDropDownList").value();
+        var schemeName = $('#txtSchemeName').val();
+        var schemeStartDate = $('#txtSchemeStartDate').val();
+        var schemeEndDate = $('#txtSchemeEndDate').val();
+        if (actiontype == "" || actiontype == undefined) {
+            flag = false;
+            alertify.error("Select Action type.");
+            return false;
+        }
+        if (schemeId == "") {
+            alertify.error("Select Scheme Name");
+            flag = false;
+        }
+        else if (schemeName == "") {
+            alertify.error("Enter Scheme name");
+            flag = false;
+        }
+        else if (schemeStartDate == "") {
+            alertify.error("Select Scheme Start Date");
+            flag = false;
+        }
+        else if (schemeEndDate == "") {
+            alertify.error("Enter Scheme End Date");
+            flag = false;
+        }
+        else if ($('#txtSchemeFormFee').val() == "") {
+            alertify.error("Enter Scheme Form Fee");
+            flag = false;
+        }
+        else if ($('#txtProcessingFee').val() == "") {
+            alertify.error("Enter Processing Fee");
+            flag = false;
+        }
+        if (flag) {
+            var SchemeModel = {
+                MasterData: "OnlineScheme",
+                ActionType: actiontype,
+                SchemeId: $('#ddlScheme').data("kendoDropDownList").value(),
+                SchemeName: $('#txtSchemeName').val(),
+                StartDate: $('#txtSchemeStartDate').val(),
+                EndDate: $('#txtSchemeEndDate').val(),
+                SchemeFormFee: $('#txtSchemeFormFee').val(),
+                ProcessingFee: $('#txtProcessingFee').val()
+            };
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ model: SchemeModel }),
+                url: '/Admin/Organization/SaveMasterDataInfoByType',
+                success: function (result) {
+                    if (result.ReturnTypeId == '@ReturnType.Success') {
+                        alertify.success("Scheme saved successfully.");
+                        ClearSchemeInputFields();
+                        $('#ddlScheme').data("kendoDropDownList").dataSource.read();
+                    }
+                    else if (result == '@ReturnType.None') {
+                        alertify.error("Scheme doesn't exist.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again");
+                }
+            });
+        }
+    }
+
+    function ClearSchemeInputFields() {
+        $('#ddlScheme').data("kendoDropDownList").value('');
+        $('#txtSchemeName').val('');
+        $('#txtSchemeStartDate').data("kendoDatePicker").value('');
+        $('#txtSchemeEndDate').data("kendoDatePicker").value('');
+        $('#txtSchemeFormFee').val('');
+        $('#txtProcessingFee').val('');
+    }
+</script>

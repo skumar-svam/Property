@@ -1,0 +1,69 @@
+﻿
+@using Kendo.Mvc.UI;
+@{
+    ViewBag.Title = "ViewAllUsers";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>View Users</h2>
+
+
+    <div class="k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.UsersModel>()
+              .Name("gridViewAllUsers")              
+              .Columns(columns =>
+              {
+                  columns.Bound(c => c.applicationName).Width(60).Title("Application Name");
+                  columns.Bound(c => c.roleName).Width(60).Title("Role Name");
+                  columns.Bound(c => c.empID).Width(70).Title("Employee/User ID");
+                  columns.Bound(c => c.firstName).Width(50).Title("First Name");
+                  columns.Bound(c => c.lastName).Width(50).Title("Last Name"); ;
+                  columns.Bound(c => c.mobile).Width(50).Title("Mobile");
+                  columns.Bound(c => c.email).Width(50).Title("Email");
+                  columns.Bound(c => c.strDeptts).Width(50).Title("Department");
+                  columns.Bound(c => c.empID).Title("Action").Width(50).ClientTemplate("<a href=\"/SuperAdmin/ManageUsers/ViewUser/#= id#\" id='v_#=id#'  style = 'width: 30px;' >View</a>").Filterable(false).Sortable(false);
+                  columns.Bound(c => c.id).Title("").ClientTemplate("#if(isActive == true){#  <a onclick='javascript:LockUnlockToggle(this);'>Grant</a> #} else{#<a onclick='javascript:LockUnlockToggle(this);'>Revoke</a>#}#").Width(50).Filterable(false).Sortable(false);
+                  columns.Bound(c => c.isActive).Hidden(true).Width(35);
+              })
+                      .Sortable()
+                .Filterable()
+                        .Resizable(resize => resize.Columns(true))
+                      .Pageable(pageable => pageable
+                                                       .Enabled(true)
+                                                       .Refresh(true)
+                                                       .PageSizes(true)
+                                                    )
+                      .DataSource(dataSource => dataSource
+                            .Ajax().Model(model => model.Id(p => p.id))
+                     .ServerOperation(true)
+                                            .Read(read => read.Action("ViewAllUsers_Read", "ManageUsers")).PageSize(20)
+              )
+        )
+    </div>
+
+<script type="text/javascript">
+    function LockUnlockToggle(row) {        
+        var tr = $(row).parent().parent();
+        var id = $(tr).children("td:eq(2)").text();       
+        var isActive = $(tr).children("td:eq(10)").text();        
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ id: id, isActive: isActive }),
+            url: '/ManageUsers/LockUnlockToggle',
+            success: function (result) {
+                if (result == true) {
+                    $("#gridViewAllUsers").data("kendoGrid").dataSource.read();
+                    alert("User updated successfully.");
+                }
+                else
+                    alert("Some error occured. Please try again later.");
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+</script>

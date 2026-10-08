@@ -1,0 +1,688 @@
+﻿@using Kendo.Mvc.UI
+@model NA.PMS.Model.BuildingPlanModel 
+<style>
+  
+    .linkCss {
+        color: #337ab7;
+        text-decoration: underline;
+    }
+
+        .linkCss:hover {
+            color: #337ab7;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+</style>
+<fieldset>
+    <legend>Building Details</legend>
+    <div class="row">
+        <div class="col-md-3">
+            @Html.Label("Name Of Tower*")
+
+        </div>
+        <div class="col-md-3">
+            <div id="lblScNa">
+                @Html.TextBoxFor(m => m.NameOfTower, new { @maxlength="100"})
+
+            </div>
+        </div>
+        <div class="col-md-3">
+            @Html.Label("Covered Area (Multi Floors)*")
+        </div>
+        <div class="col-md-3">
+            <div id="lblDeNa">
+                <div class="col-md-3">
+                    @(Html.Kendo().NumericTextBoxFor(m => m.CoveredAreaMultiFloors)
+                                                .Name("CoveredAreaMultiFloors")
+                                .Min(0)
+                                .Max(999999999)
+                                        .Spinners(false).Step(0)
+                                .Enable(true)
+                                .HtmlAttributes(new { style = "width: 180px", @maxlength = "7", @class = "k-label schemeForms textBoxValueRightAlign" })
+                    )
+                    @*@Html.TextBoxFor(m => m.CoveredAreaMultiFloors, new { @maxlength="18"})*@
+                </div>
+            </div>
+        </div>
+    </div>
+    <br />
+    <div class="row">
+        <div class="col-md-3">
+            @Html.Label("Building Height (Meter)*")
+        </div>
+        <div class="col-md-3">
+            <div>
+                @(Html.Kendo().NumericTextBoxFor(m => m.BuildingHeight)
+                                                        .Name("BuildingHeight")
+                                .Min(0)
+                                .Max(99999)
+                                        .Spinners(false).Step(0)
+                                .Enable(true)
+                                .HtmlAttributes(new { style = "width: 180px", @maxlength = "3", @class = "k-label schemeForms textBoxValueRightAlign" })
+                )
+               @*@Html.TextBoxFor(m => m.BuildingHeight, new { @maxlength="8"})*@
+            </div>
+        </div>
+        <div class="col-md-3">
+            @Html.Label("Covered Area (Ground Floor)*")
+        </div>
+        <div class="col-md-3">
+            <div id="lblDateOfSanction">
+                @(Html.Kendo().NumericTextBoxFor(m => m.CoveredAreaGroundFloor)
+                                        .Name("CoveredAreaGroundFloor")
+                                .Min(0)
+                                .Max(999999999)
+                                        .Spinners(false).Step(0)
+                                .Enable(true)
+                                .HtmlAttributes(new { style = "width: 180px", @maxlength = "7", @class = "k-label schemeForms textBoxValueRightAlign" })
+                )
+                @*@Html.TextBoxFor(m => m.CoveredAreaGroundFloor, new { @maxlength="18"})*@
+            </div>
+
+        </div>
+    </div>
+    <br />
+    <div class="row">
+        <div class="col-md-3">
+            @Html.Label("Number Of Stories*")
+        </div>
+        <div class="col-md-3">
+            <div id="lblReNa">
+                @Html.TextBoxFor(m => m.NumberOfStories2, new { @maxlength="3"})
+               </div>
+        </div>
+      
+        <div class="row">
+            <div class="col-md-10"></div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-default" value="Add" id="btnBuilding"> Add</button>
+                @*<button type="button" class="btn-primary" value="Add" id="btnAddScheme"><i class="fa fa-plus-square" aria-hidden="true"></i> Add</button>*@
+                <br />
+            </div>
+        </div>
+    </div>
+    <br />
+    <div class="k-grid-content">
+        @Html.HiddenFor(c => c.RId)
+        @(Html.Kendo().Grid<NA.PMS.Model.BuildingPlanModel>()
+                        .Name("gridBuildingDetails")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.NameOfBuilding).Width(100).Title("Name Of Building");
+            columns.Bound(c => c.TotalCoveredAreaAllFloor).Width(100).Title("Total Covered Area");
+            columns.Bound(c => c.BuildingHeight).Width(100).Title("Building Height");
+            columns.Bound(c => c.TotalCoveredAreaGroundFloor).Width(100).Title("Covered Area");
+            columns.Bound(c => c.NoOfStories).Width(100).Title("No Of Stories");
+            columns.Bound(c => c.RequestNo).Title("Action").ClientTemplate("<a onclick='javascript:RemoveBuildingDetails(\"#=RequestNo#\");'class='linkCss'>Remove</a>").Width(50).Filterable(false).Sortable(false);
+              })
+        .Sortable()
+        .Filterable()
+                .Resizable(resize => resize.Columns(true))
+                //.ToolBar(toolBar =>
+                //{
+                //    toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Add Request").HtmlAttributes(new { onclick = "javascript:AddCompletionReq(event);", @class = "k-button", id = "btnRequest" });
+                //})
+        .Pageable(pageable => pageable
+                                               .Enabled(true)
+                                               .Refresh(true)
+                                               .PageSizes(true)
+                                            )
+        .DataSource(dataSource => dataSource
+                .Ajax().Model(model => model.Id(c => c.RequestNo))
+        .ServerOperation(true)
+                                        .Read(read => read.Action("GetBuildingDetail", "PropertyRegistration").Data("AdditionalInfo")).PageSize(20)
+        )
+        )
+    </div>
+    @*<div class="k-grid-content">
+
+        @(Html.Kendo().Grid<NA.PMS.Model.PropertyCompletionModel>()
+                        .Name("gridBuildingDetails")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.NameOfBuilding).Width(100).Title("Name Of Building");
+            columns.Bound(c => c.TotalCoveredAreaAllFloor).Width(100).Title("Total Covered Area");
+            columns.Bound(c => c.BuildingHeight).Width(100).Title("Building Height");
+            columns.Bound(c => c.TotalCoveredAreaGroundFloor).Width(100).Title("Covered Area");
+            columns.Bound(c => c.NoOfStories).Width(100).Title("No Of Stories");
+           })
+        .Sortable()
+        .Filterable()
+                .Resizable(resize => resize.Columns(true))
+                //.ToolBar(toolBar =>
+                //{
+                //    toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Add Request").HtmlAttributes(new { onclick = "javascript:AddCompletionReq(event);", @class = "k-button", id = "btnRequest" });
+                //})
+        .Pageable(pageable => pageable
+                                               .Enabled(true)
+                                               .Refresh(true)
+                                               .PageSizes(true)
+                                            )
+        .DataSource(dataSource => dataSource
+        .Ajax().Model(model => model.Id(c => c.RId))
+        .ServerOperation(true)
+                                                        .Read(read => read.Action("GetBuildingDetail", "PropertyRegistration").Data("AdditionalInfo")).PageSize(20)
+        )
+        )
+    </div>*@
+    </fieldset>
+        <br />
+        <fieldset>
+            <legend>
+               Add Building Plan Charges
+            </legend>
+            <br />
+            <div class="row">
+                <div class="col-md-3">
+                    @Html.Label("Charge*")
+                </div>
+                <div class="col-md-3">
+                    <div>
+                        @(Html.Kendo().DropDownListFor(model => model.Charges )
+                      .DataTextField("text")
+                                      .DataValueField("id")
+                      .OptionLabel("Select")
+                      .DataSource(source =>
+                      {
+                          source.Read(read =>
+                          {
+                              read.Action("GetChargesType", "PropertyRegistration");
+                          });
+                      })
+
+                        )
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    @Html.Label("Fee Amount*")
+                </div>
+                <div class="col-md-3">
+                    <div id="lblDateOfSanction">
+                        @*@Html.TextBoxFor(m => m.FeeAmount, new { @maxlength="18"})*@
+                        @(Html.Kendo().NumericTextBoxFor(m => m.FeeAmount)
+                                .Name("FeeAmount")
+                                .Min(0)
+                                .Max(999999999999999)
+                                        .Spinners(false).Step(0)
+                                .Enable(true)
+                                .HtmlAttributes(new { style = "width: 180px", @maxlength = "13", @class = "k-label schemeForms textBoxValueRightAlign" })
+                        )
+                    </div>
+
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-md-10"></div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-default" value="Add" id="btnAddBPCharges"> Add</button>
+                    @*<button type="button" class="btn-primary" value="Add" id="btnAddScheme"><i class="fa fa-plus-square" aria-hidden="true"></i> Add</button>*@
+                    <br />
+                </div>
+            </div>
+            <br />
+            <div class="k-grid-content">
+
+                @(Html.Kendo().Grid<NA.PMS.Model.BuildingPlanModel>()
+                    .Name("gridBuildingCharge")
+    .Columns(columns =>
+    {
+        columns.Bound(c => c.ChargesName).Title("Charges");
+        columns.Bound(c => c.FeeAmount).Title("Free Amount");
+        columns.Bound(c => c.Status).Title("Status");
+        columns.Bound(c => c.RequestNo).Title("Action").ClientTemplate("<a onclick='javascript:RemoveBuildingCharge(\"#=RequestNo#\");'class='linkCss'>Remove</a>").Filterable(false).Sortable(false);
+    })
+    .Sortable()
+    .Filterable()
+            .Resizable(resize => resize.Columns(true))
+                        //.ToolBar(toolBar =>
+                        //{
+                        //    toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Add Request").HtmlAttributes(new { onclick = "javascript:AddCompletionReq(event);", @class = "k-button", id = "btnRequest" });
+                        //})
+    .Pageable(pageable => pageable
+                                           .Enabled(true)
+                                           .Refresh(true)
+                                           .PageSizes(true)
+                                        )
+    .DataSource(dataSource => dataSource
+    .Ajax().Model(model => model.Id(c => c.RId))
+    .ServerOperation(true)
+                    .Read(read => read.Action("GetChargesDemanded", "PropertyRegistration").Data("AdditionalInfo")).PageSize(20)
+    )
+                )
+            </div>
+            @*<div class="k-grid-content">
+
+                @(Html.Kendo().Grid<NA.PMS.Model.PropertyCompletionModel>()
+                .Name("gridCompletion1")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.ChargesName).Title("Charges");
+            columns.Bound(c => c.FeeAmount).Title("Free Amount");
+            columns.Bound(c => c.Status).Title("Status");
+        })
+        .Sortable()
+        .Filterable()
+                .Resizable(resize => resize.Columns(true))
+                    .Pageable(pageable => pageable
+                                               .Enabled(true)
+                                               .Refresh(true)
+                                               .PageSizes(true)
+                                            )
+        .DataSource(dataSource => dataSource
+        .Ajax().Model(model => model.Id(c => c.RId))
+        .ServerOperation(true)
+                                .Read(read => read.Action("GetBuildingPlan", "PropertyRegistration")).PageSize(20)
+        )
+                )
+            </div>*@
+        </fieldset>
+<br />
+        <fieldset>
+            <legend>NOC Details</legend>
+            <div class="row">
+                <div class="col-md-3">
+                    @Html.Label("NOC Type*")
+                </div>
+                <div class="col-md-3">
+                    <div>
+                        @(Html.Kendo().DropDownListFor(model => model.NocType )
+                      .DataTextField("text")
+                                      .DataValueField("id")
+                      .OptionLabel("Select")
+                      .DataSource(source =>
+                      {
+                          source.Read(read =>
+                          {
+                              read.Action("GetNOCType", "PropertyRegistration");
+                          });
+                      })
+
+                        )
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    @Html.Label("Submitted*")
+                </div>
+                <div class="col-md-3">
+                    <div id="lblDateOfSanction">
+                        @(Html.Kendo().DropDownListFor(model => model.Submitted )
+                      .DataTextField("text")
+                              .DataValueField("text")
+                      .OptionLabel("Select")
+                      .DataSource(source =>
+                      {
+                          source.Read(read =>
+                          {
+                              read.Action("GetPreviousLoanNoc", "PropertyRegistration");
+                          });
+                      })
+
+                        )
+                    </div>
+
+                </div>
+            </div>
+
+            <br />
+            <div class="row">
+                <div class="col-md-10"></div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-default" value="Add" id="btnNOC"> Add</button>
+                    @*<button type="button" class="btn-primary" value="Add" id="btnAddScheme"><i class="fa fa-plus-square" aria-hidden="true"></i> Add</button>*@
+                    <br />
+                </div>
+            </div>
+            <br />
+            <div class="k-grid-content">
+
+                @(Html.Kendo().Grid<NA.PMS.Model.BuildingPlanModel>()
+                    .Name("gridNOCType")
+    .Columns(columns =>
+    {
+        columns.Bound(c => c.NOC).Title("NOC");
+        columns.Bound(c => c.SubmitStatus).Title("Submit Status");
+        columns.Bound(c => c.RequestNo).Title("Action").ClientTemplate("<a onclick='javascript:RemoveNOCType(\"#=RequestNo#\");'class='linkCss'>Remove</a>").Filterable(false).Sortable(false);
+    })
+    .Sortable()
+    .Filterable()
+            .Resizable(resize => resize.Columns(true))
+                        //.ToolBar(toolBar =>
+                        //{
+                        //    toolBar.Custom().Text("<i class='fa fa-plus-square' aria-hidden='true'></i> Add Request").HtmlAttributes(new { onclick = "javascript:AddCompletionReq(event);", @class = "k-button", id = "btnRequest" });
+                        //})
+    .Pageable(pageable => pageable
+                                           .Enabled(true)
+                                           .Refresh(true)
+                                           .PageSizes(true)
+                                        )
+    .DataSource(dataSource => dataSource
+    .Ajax().Model(model => model.Id(c => c.RId))
+    .ServerOperation(true)
+                    .Read(read => read.Action("GetNOCDetail", "PropertyRegistration").Data("AdditionalInfo")).PageSize(20)
+    )
+                )
+            </div>
+            <br />
+        </fieldset>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-9"></div>
+        <div class="col-md-3">
+            <input type="button" id="btnSubmit" value="Submit" class="btn btn-block btn-default" />
+            @*<input type="button" value="Back" id="btnBack" />*@
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function AdditionalInfo() {
+        return {
+            rid: $('#RId').val()
+        }
+    }
+    $("#btnBuilding").click(function () {
+
+        var rId = $("#RId").val();
+
+        var NameOfTower = $("#NameOfTower").val();
+        var CoveredAreaMultiFloors = $("#CoveredAreaMultiFloors").val();
+
+        var BuildingPlanFileNo = $("#BuildingPlanFileNo").val();
+        alert("BuildingPlanFileNo=" + BuildingPlanFileNo)
+        var BuildingHeight = $("#BuildingHeight").val();
+        var CoveredAreaGroundFloor = $("#CoveredAreaGroundFloor").val();
+        var NumberOfStories2 = $("#NumberOfStories2").val();
+
+
+        if (rId == "") {
+            alertify.error("Please select RId.");
+            return false;
+        }
+        if (NameOfTower == "") {
+            alertify.error("Please enter Name Of Tower.");
+            return false;
+        }
+        if (CoveredAreaMultiFloors == "") {
+            alertify.error("Please enter Covered Area Multi Floors.");
+            return false;
+        }
+
+        if (BuildingHeight == "") {
+            alertify.error("Please select Building Height.");
+            return false;
+        }
+        if (CoveredAreaGroundFloor == "") {
+            alertify.error("Please select Covered Area Ground Floor.");
+            return false;
+        }
+        if (NumberOfStories2 == "") {
+            alertify.error("Please enter Number Of Stories.");
+            return false;
+        }
+
+        //if (user != "") {
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rId: rId, NameOfTower: NameOfTower, CoveredAreaMultiFloors: CoveredAreaMultiFloors, BuildingHeight: BuildingHeight, CoveredAreaGroundFloor: CoveredAreaGroundFloor, NumberOfStories2: NumberOfStories2 }),
+            url: '/PropertyRegistration/SaveBuildingDetails',
+            success: function (result) {
+                if (result == 1) {
+                    $("#NameOfTower").val("");
+                    $("#CoveredAreaMultiFloors").data("kendoNumericTextBox").value("");
+                    $("#BuildingHeight").data("kendoNumericTextBox").value("");
+                    $("#CoveredAreaGroundFloor").data("kendoNumericTextBox").value("");
+                                    
+                    $("#NumberOfStories2").val("");
+                    $("#gridBuildingDetails").data("kendoGrid").dataSource.read();
+                    alertify.success("Data saved successfully.");
+
+                    @*window.location.href = '@Url.Action("ManageBuildingPlan", "PropertyRegistration")';*@
+                    return false;
+                }
+                if (result == 2) {
+                    alertify.error("Building Details already saved .");
+                    return false;
+                }
+                if (result == 3) {
+                    alertify.error("Number of stories in  Building plan details would be less than or equal to No of Stories (Max) in tab 1.");
+                    return false;
+                }
+                else {
+                    alertify.error("Some Error in save database.");
+                    //return true;
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+
+        });
+    });
+
+    $("#btnAddBPCharges").click(function () {
+
+        var rId = $("#RId").val();
+
+        var Charges = $("#Charges").val();
+        var FeeAmount = $("#FeeAmount").val();
+
+
+
+        if (rId == "") {
+            alertify.error("Please select RId.");
+            return false;
+        }
+        if (Charges == "") {
+            alertify.error("Please select Charges.");
+            return false;
+        }
+        if (FeeAmount == "") {
+            alertify.error("Please enter Fee Amount.");
+            return false;
+        }
+
+
+        //if (user != "") {
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rId: rId, Charges: Charges, FeeAmount: FeeAmount }),
+            url: '/PropertyRegistration/SaveBuildingCharge',
+            success: function (result) {
+                if (result == 1) {
+                    $("#Charges").data("kendoDropDownList").value("");
+                    $("#FeeAmount").data("kendoNumericTextBox").value("");
+                      $("#gridBuildingCharge").data("kendoGrid").dataSource.read();
+                    alertify.success("Data saved successfully.");
+                    return false;
+                }
+                if (result == 2) {
+                    alertify.error("Building Charge already saved .");
+                    return false;
+                }
+                else {
+                    return true;
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                alertify.error("Some Error in save database.");
+            }
+
+        });
+
+    });
+
+    $("#btnNOC").click(function () {
+
+        var rId = $("#RId").val();
+
+        var NocType = $("#NocType").val();
+        var Submitted = $("#Submitted").val();
+
+
+
+        if (rId == "") {
+            alertify.error("Please select RId.");
+            return false;
+        }
+        if (NocType == "") {
+            alertify.error("Please select Noc Type.");
+            return false;
+        }
+        if (Submitted == "") {
+            alertify.error("Please select Submitted.");
+            return false;
+        }
+
+
+        //if (user != "") {
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rId: rId, NocType: NocType, Submitted: Submitted }),
+            url: '/PropertyRegistration/SaveNOCType',
+            success: function (result) {
+                if (result == 1) {
+                    $("#NocType").data("kendoDropDownList").value("");
+                    $("#Submitted").data("kendoDropDownList").value("");
+
+                    $("#gridNOCType").data("kendoGrid").dataSource.read();
+                    alertify.success("Data saved successfully.");
+                    return false;
+                }
+                if (result == 2) {
+                    alertify.error("Building Plan Data already saved .");
+                    return false;
+                }
+                else {
+                    return true;
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                alert(respText);
+            }
+
+        });
+
+    });
+    function RemoveBuildingDetails(RequestNo) {
+
+        var removeNotification = confirm('Are you sure you want to remove ?');
+        var rId = $("#RId").val();
+        if (removeNotification) {
+            $.ajax({
+                url: '@(Url.Action("RemoveBuildingDetails", "PropertyRegistration"))',
+                type: 'POST',
+                data: { RequestNo: RequestNo, rId: rId },
+                success: function (result) {
+                    if (result == true) {
+                        $('#gridBuildingDetails').data('kendoGrid').dataSource.read();
+                        $('#gridBuildingDetails').data('kendoGrid').refresh();
+                        alertify.success("Record deleted successfully.");
+                    }
+                    else {
+                        alert("Building Details not removed");
+                        return false;
+                    }
+                }
+            });
+        }
+        else {
+            return false;
+        }
+    }
+    function RemoveBuildingCharge(RequestNo) {
+        var removeNotification = confirm('Are you sure you want to remove ?');
+        var rId = $("#RId").val();
+        if (removeNotification) {
+            $.ajax({
+                url: '@(Url.Action("RemoveBPCharges", "PropertyRegistration"))',
+                type: 'POST',
+                data: { RequestNo: RequestNo, rId: rId },
+                success: function (result) {
+                    if (result == true) {
+                        $('#gridBuildingCharge').data('kendoGrid').dataSource.read();
+                        $('#gridBuildingCharge').data('kendoGrid').refresh();
+                        alertify.success("Record deleted successfully.");
+                    }
+                    else {
+                        alert("Building Charge not removed");
+                        return false;
+                    }
+                }
+            });
+        }
+        else {
+            return false;
+        }
+    }
+    function RemoveNOCType(RequestNo) {
+        var removeNotification = confirm('Are you sure you want to remove ?');
+        var rId = $("#RId").val();
+        if (removeNotification) {
+            $.ajax({
+                url: '@(Url.Action("RemoveNocType", "PropertyRegistration"))',
+                type: 'POST',
+                data: { RequestNo: RequestNo, rId: rId },
+                success: function (result) {
+                    if (result == true) {
+                        $('#gridNOCType').data('kendoGrid').dataSource.read();
+                        $('#gridNOCType').data('kendoGrid').refresh();
+                        alertify.success("Record deleted successfully.");
+                    }
+                    else {
+                        alert("NOC Type not removed");
+                        return false;
+                    }
+                }
+            });
+        }
+        else {
+            return false;
+        }
+    }
+
+    $("#btnSubmit").click(function () {
+
+        var rId = $("#RId").val();
+        if (rId == "") {
+            alertify.error("Please select RId.");
+            return false;
+        }
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rId: rId}),
+            url: '/PropertyRegistration/SubmitBuildingPlan',
+            success: function (result) {
+                if (result == 1) {
+
+                    alertify.success("Data saved successfully.");
+                    window.location.href = '@Url.Action("ManageBuildingPlan", "PropertyRegistration")';
+                    return false;
+                }
+                if (result == 0) {
+                    alertify.error("Building Plan Data not saved .");
+                    return false;
+                }
+                else {
+                    return true;
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                alert(respText);
+            }
+
+        });
+
+    });
+</script>

@@ -1,0 +1,484 @@
+﻿@model NA.PMS.Model.LeaseRentViewModel
+@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+
+@{
+    ViewBag.Title = "Lease Rent Payment";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .form-control.width-95{
+        width:95%;
+        float:right;
+    }
+    .form-control.width-90{
+        width:90%;
+        float:right;
+    }
+</style>
+
+@using (Html.BeginForm("SaveLeaseRentPayment", "Finance", FormMethod.Post, new { enctype = "multipart/form-data", id = "PaymentForm" }))
+{
+<div class="col-lg-12 col-md-12 col-sm-12">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Add/Edit Lease Rent</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <h2 class="blck-heading">Lease Rent Payment Detail</h2>
+                <div class="form-bx">
+                    <div class="row">
+                        @Html.HiddenFor(m => m.RentId)
+                        @Html.HiddenFor(m => m.DepartmentId)
+                        @Html.HiddenFor(m => m.PropertyId)
+                        @Html.HiddenFor(m => m.ApproverId, htmlAttributes: new { @id="hdn-approverid"})
+                        @Html.HiddenFor(m => m.IsTotalInstallmentPaid)
+                        @Html.HiddenFor(m => m.IsOneTimeLeaseRentPaid)
+                        @(Html.Kendo().DatePickerFor(model => model.RegistryDate).HtmlAttributes(new { style = "display:none;"}))
+                    </div>              
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Registration Id", htmlAttributes: new { @class = "" })
+                            @if (Model.RentId > 0)
+                            {
+                                @Html.TextBoxFor(m => m.RegistrationId, htmlAttributes: new { @class = "form-control width-90", @Readonly = "readonly" })
+                            }
+                            else
+                            {
+                                @(Html.Kendo().DropDownListFor(m => m.RegistrationId)
+                                .Name("RegistrationId")
+                                .DataTextField("text")
+                                .DataValueField("id")
+                                .Filter("contains")
+                                .OptionLabel("---Select---")
+                                .DataSource(source =>
+                                {
+                                    source.Custom()
+                                    .ServerFiltering(true)
+                                    .ServerPaging(true)
+                                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                    .Transport(transport =>transport.Read(read => read.Action("GetRegistrationNoByDepartment", "Finance")))
+                                    .Schema(schema =>schema.Data("Data").Total("Total")).PageSize(100);
+                                })
+                               .Events(events => { events.Change("GetApplicantDetails"); })
+                               .HtmlAttributes(new { @class = "", style = "width:90%;float:right;" })
+                                )
+                            }
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Sector:")
+                            @Html.TextBoxFor(model => model.Sector, htmlAttributes: new { @class = "form-control width-90", @Readonly = "readonly" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Block:")
+                            @Html.TextBoxFor(model => model.Block, htmlAttributes: new { @class = "form-control width-90", @Readonly = "readonly" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("PlotNo:")
+                            @Html.TextBoxFor(model => model.PlotNo, htmlAttributes: new { @class = "form-control width-90", @Readonly = "readonly" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                            @Html.Label("Allottee:", htmlAttributes: new { @class = "" })
+                            @Html.TextAreaFor(model => model.Applicant, htmlAttributes: new { @class = "form-control width-95", @Readonly = "Readonly",style="height:30px; width:95%" })
+                        </div>
+                        <div class="col-md-6 col-sm-6 col-xs-12 form-group">
+                            @Html.Label("Address:", htmlAttributes: new { @class = "" })
+                            @Html.TextAreaFor(model => model.Address, htmlAttributes: new { @class = "form-control width-95", @Readonly = "readonly", style = "height:30px;width:95%;" })
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Is Total Premium Paid:", htmlAttributes: new { @class = "required" })
+                            @(Html.Kendo().DropDownListFor(m => m.TotalPremiumPaidStatus)
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .DataSource(source => source.Read(read => read.Action("GetYesNoStatus", "Finance")))
+                                .HtmlAttributes(new { @class = "width-90", style = "width:90%;float:right;"})
+                                .Events(e=>e.Change("ChangeInTotalPremiumPaidStatus"))
+                            )
+                        </div>
+
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Is One Time Lease Rent Paid:", htmlAttributes: new { @class = "required" })
+                            @(Html.Kendo().DropDownListFor(m => m.OneTimePaidStatus)
+                                .OptionLabel("---Select---")
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                               .DataSource(source => source.Read(read => read.Action("GetYesNoStatus", "Finance")))
+                               .Events(events => { events.Change("LeaseRentStatusChange"); })
+                                .HtmlAttributes(new { @class = " width-90", style = "width:90%;float:right;" })
+                            )
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Challan No:", htmlAttributes: new { @class = "" })
+                            @Html.TextBoxFor(model => model.ChallanId, htmlAttributes: new { @class = "form-control width-90" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Challan Date:", htmlAttributes: new { @class = "" })
+                            @(Html.Kendo().DatePickerFor(model => model.ChallanDate).HtmlAttributes(new { @class = " width-90", style = "width:90%;float:right;" }))
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group col-ndc">
+                            @Html.Label("NDC Date:", htmlAttributes: new { @class = "required" })
+                            @(Html.Kendo().DatePickerFor(model => model.NDCDate).HtmlAttributes(new { @class = " width-90", style = "width:90%;float:right;" }))
+                        </div>
+                    </div>
+
+                    <div class="row row-lease-rent">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Lease Deed Date")
+                            @(Html.Kendo().DatePickerFor(m => m.LeaseDeedDate).HtmlAttributes(new { @class = "input-disabled", style = "width:90%;float:right;" }))
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Lease Transfer Date")
+                            @(Html.Kendo().DatePickerFor(m => m.TransferLeaseDate).HtmlAttributes(new { @class = "input-disabled", style = "width:90%;float:right;" }))
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Lease Rent Per Year")
+                            @Html.TextBoxFor(model => model.LeaseRentPremium, new { @class = "form-control text-right width-90", @maxlength = "16", onkeypress = "return IsNumeric(event);" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Revised Rate Per Year (%)")
+                            @Html.TextBoxFor(model => model.RevisedRate, new { @class = "form-control text-right width-90", @maxlength = "16", onkeypress = "return IsNumeric(event);" })
+                        </div>
+                    </div>
+                    <div class="row row-lease-rent">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Panel Interest")
+                            @Html.TextBoxFor(model => model.PanelInterest, new { @class = "form-control text-right width-90", @maxlength = "16", onkeypress = "return IsNumeric(event);" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Lease Rent Paid Upto", htmlAttributes: new { @class = "required" })
+                            @(Html.Kendo().DatePickerFor(m => m.PaidUptoDate).HtmlAttributes(new { @class = "input-disabled GPAField", style = "width:90%;float:right;" }))
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Last Paid UPO (Year)")
+                            @Html.TextBoxFor(model => model.PremiumPaidDuration, new { @class = "form-control width-90", @maxlength = "50" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Lease Rent Revised Date", htmlAttributes: new { @class = "required" })
+                            @(Html.Kendo().DatePickerFor(m => m.RevisedDate).HtmlAttributes(new { @class = "input-disabled GPAField", style = "width:90%;float:right;" }))
+                        </div>
+                    </div>
+                    <div class="row row-lease-rent">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Balance Amount")
+                            @Html.TextBoxFor(model => model.BalanceAmount, new { @class = "form-control text-right width-90", @maxlength = "16", onkeypress = "return IsNumeric(event);" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Balance Interest")
+                            @Html.TextBoxFor(model => model.BalanceInterest, new { @class = "form-control text-right width-90", @maxlength = "16", onkeypress = "return IsNumeric(event);" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("GST Interest Part")
+                            @Html.TextBoxFor(model => model.GstAmount, new { @class = "form-control text-right width-90", @maxlength = "16", onkeypress = "return IsNumeric(event);" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Balance Date")
+                            @(Html.Kendo().DatePickerFor(m => m.BalanceUptoDate).HtmlAttributes(new { @class = "input-disabled GPAField", style = "width:90%;float:right;" }))
+                        </div>
+                    </div>  
+                    <div class="row row-lease-rent">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group col-paid">
+                            @Html.Label("Revised After(in yr)", htmlAttributes: new { @class = "required" })
+                            @(Html.Kendo().DropDownListFor(m => m.RevisedRateAfterYear)
+                            .OptionLabel("---Select---")
+                            .DataTextField("Text")
+                            .DataValueField("Id")
+                            .DataSource(source => source.Read(read => read.Action("GetYearsList", "Payment", new { area = "Revenue" })))
+                            .HtmlAttributes(new { @class = "", style = "width:90%; float:right;" })
+                            )
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group col-challan">
+                            @Html.Label("Previous Balance", htmlAttributes: new { @class = "required" })
+                            @Html.TextBoxFor(model => model.PreviousBalance, new { @class = "form-control text-right", @maxlength = "16", style = "width:90%; float:right;" })
+                        </div>
+                        
+                    </div>  
+                </div>
+                
+            </div>
+            <div class="box-button text-center">
+                <input type="button" id="btn-cancel" value="Cancel" class="btn btn-default" />
+                <input type="button" id="btn-update-leaserent" value="Add Lease Rent Details" class="btn btn-add" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id='ApproverWindow' class='popup-window'>
+    <div class="container-fluid">
+        <div class="row topSpace">
+            <div class="col-md-3 col-md-offset-1">
+                @Html.Label("Approver: ")
+            </div>
+            <div class="col-md-6">
+                @(Html.Kendo().DropDownListFor(model => model.ApproverId)
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .Filter("contains")
+                .OptionLabel("--Select--")
+                //.DataSource(source =>source.Read(read =>read.Action("GetAssineTo", "Allotment", new { area = "Property" })))
+                .DataSource(source =>
+                {
+                    source.Custom()
+                    .ServerFiltering(true)
+                    .ServerPaging(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    .Transport(transport => transport.Read(read => read.Action("GetApproverIdList", "Finance", new { area="Revenue"})))
+                    .Schema(schema => schema.Data("Data").Total("Total")).PageSize(100);
+                })
+                .HtmlAttributes(new { style = "width:100%" })
+                )
+            </div>
+        </div>
+        <div class="row topSpace bottomSpace">
+            <div class="col-md-6 col-md-offset-4">
+                <button type='submit' id="btnRequetForApproval" class='btn btn-default' value='Save'>Submit</button>
+                <button type='button' class='btn btn-default' value='Cancel' onclick="CloseApproverWindow();">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+}
+
+
+<script type="text/javascript">
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+
+    $(document).ready(function () {
+        $('.row-lease-rent').hide();
+        $('.col-ndc').hide();
+        $('#TotalPremiumPaidStatus').val("Y");
+
+        //In Edit mode
+        var rid = $('#RegistrationId').val().trim();
+        if (rid != "" && rid.length == 8) {
+            GetApplicantDetails();
+        }
+        var rentId = $("#RentId").val();
+        if (rentId > 0) {
+            var status = $('#OneTimePaidStatus').val();
+            if (status == "N") {
+                $('.col-ndc').hide();
+                $(".row-lease-rent").show()
+            }
+            else if (status == "Y") {
+                $('.col-ndc').show();
+                $(".row-lease-rent").hide()
+            }
+            $("#OneTimePaidStatus").data("kendoDropDownList").enable(false);
+            $("#btn-update-leaserent").val("Update and Re-Submit Request for Approval");
+        }
+
+        $("#ApproverWindow").kendoWindow({
+            modal: true,
+            title: "Assign Request to Approver",
+            visible: false,
+            //width: "30%"
+        });
+
+        $("#btn-update-leaserent").click(function () {
+            //OpenApproverWindow();
+            SubmitLeaseRentForm();
+        });
+
+        $("#btn-cancel").click(function () {
+            window.location.href = '@Url.Action("ManageDuesDetail", "Finance", new { area="Revenue"})';
+        });
+
+        $("#btnRequetForApproval").click(function () {
+            SubmitLeaseRentForm();
+        });
+    });
+
+    function ChangeInTotalPremiumPaidStatus() {
+        if ($('#TotalPremiumPaidStatus').val() == "Y") $('#IsTotalInstallmentPaid').val(true);
+        else $('#IsTotalInstallmentPaid').val(false);
+    }
+
+    function SubmitLeaseRentForm() {
+        var flag = ValidateInputFields();
+        if (flag == true) {
+            var formData = new FormData($('form').get(0));
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                //contentType: 'application/json; charset=utf-8',
+                //data: JSON.stringify(data),
+                contentType: false, // Not to set any content header
+                processData: false, // Not to process data
+                data: formData,
+                url: '/Revenue/Finance/SaveLeaseRentPaymentByRegistrationId',
+                success: function (result) {
+                    if (result == '@ReturnType.Saved') {
+                        alertify.success("Data saved successfully.");
+                        window.location.href = '@Url.Action("ManageDuesDetail", "Finance", new { area="Revenue"})';
+                    }
+                    else if (result == '@ReturnType.Updated') {
+                        alertify.success("Data updated successfully.");
+                        window.location.href = '@Url.Action("ManageDuesDetail", "Finance", new { area="Revenue"})';
+                    }
+                    else if (result == '@ReturnType.Exist') {
+                        //CloseApproverWindow();
+                        alertify.error("Data already exists for this rid.");
+                    }
+                    else if (result == '@ReturnType.NotExist') {
+                        //CloseApproverWindow();
+                        alertify.error("Data not exists for this rid.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                }
+            });
+        }
+        else {
+            //alertify.error("Select Approver.");
+        }
+    }
+
+    function ValidateInputFields() {
+        var flag = true;
+        if ($("#RegistrationId").val() == "" || $("#RegistrationId").val() == undefined) {
+            alertify.error("Please select a Registration Id.");
+            flag = false;
+        }
+        //if ($('#ChallanDate') == "") {
+        //    alertify.error("Please enter Challan date.");
+        //    flag = false;
+        //}        
+        if ($('#OneTimePaidStatus').val() == "N") {
+            if ($("#LeaseRentPremium").val().trim() == "") {
+                alertify.error("Please select Lease Rent Per Year.");
+                flag = false;
+            }
+            if ($("#RevisedRateAfterYear").val() == "") {
+                alertify.error("Please enter Revised After ");
+                flag = false;
+            }
+            if ($("#PreviousBalance").val() == "") {
+                alertify.error("Please enter Previous Balance ");
+                flag = false;
+            }
+            //if ($("#ChallanId").val() == "") {
+            //    alertify.error("Please enter ChallanNo.");
+            //    flag = false;
+            //}
+        }
+        else if ($('#OneTimePaidStatus').val() == "Y") {
+            if ($('#NDCDate') == "") {
+                alertify.error("Please enter ndc date.");
+                flag = false;
+            }
+        }
+        return flag;
+    }
+
+    function OpenApproverWindow() {
+        var win = $("#ApproverWindow").data("kendoWindow");
+        win.center();
+        win.open();
+    }
+
+    function CloseApproverWindow() {
+        var win = $("#ApproverWindow").data("kendoWindow");
+        win.close();
+    }
+
+    function LeaseRentStatusChange() {
+        var status = $('#OneTimePaidStatus').val();
+        if (status == "N") {
+            $('.col-ndc').hide();
+            $(".row-lease-rent").show()
+            $('#IsOneTimeLeaseRentPaid').val(false);
+        }
+        else if (status == "Y") {
+            $('.col-ndc').show();
+            $(".row-lease-rent").hide();
+            $('#IsOneTimeLeaseRentPaid').val(true);
+        }
+        else {
+            $('.col-ndc').hide();
+            $(".row-lease-rent").hide();
+            $('#IsOneTimeLeaseRentPaid').val(false);
+            alertify.error("select one time lease rent.");
+        }
+    }
+
+    function GetApplicantDetails() {
+        var rid = $('#RegistrationId').val().trim();
+        if (rid != "" && rid.length == 8) {
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify({ RegistrationId: rid, ActionType: "Registered" }),
+                //url: "/Revenue/Finance/GetApplicantDetailsForNDC",
+                url: "/Revenue/Finance/GetPropertyDetailsById",
+                success: function (result) {
+                    if (result != null) {
+                        $('#Applicant').val(result.Applicant);
+                        $('#DepartmentId').val(result.DepartmentId);
+                        $('#PropertyId').val(result.PropertyId);
+                        $('#PropertyNo').val(result.PropertyNo);
+                        $('#Address').val(result.CorrespondAddress);
+                        $('#Mobile').val(result.MobileNo);
+                        $('#Email').val(result.Email);
+                        $('#Sector').val(result.SectorName);
+                        $('#Block').val(result.BlockName);
+                        $('#PlotNo').val(result.PlotNo);
+                        $('#RegistryDate').data("kendoDatePicker").value(result.RegistryDate);
+                    }
+                    else {
+                        alertify.error("Provider failed to connect, try again");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again later.");
+                }
+            });
+        }
+    }
+
+    function ClearValues() {
+        $("#RegistrationId").data("kendoDropDownList").value('');
+        $("#OneTimePaidStatus").data("kendoDropDownList").value('');
+        $("#LeaseDeedDate").data("kendoDatePicker").value('');
+        $("#TransferLeaseDate").data("kendoDatePicker").value('');
+        $("#LeaseRentPremium").val('');
+        $("#RevisedRate").val('');
+        $("#PanelInterest").val('');
+        $("#PaidUptoDate").data("kendoDatePicker").value('');
+        $("#PremiumPaidDuration").val('');
+        $("#RevisedDate").data("kendoDatePicker").value('');
+        $("#BalanceAmount").val('');
+        $("#BalanceInterest").val('');
+        $("#GstAmount").val('');
+        $("#BalanceUptoDate").data("kendoDatePicker").value();
+        $('#PreviousBalance').val('');
+        $('#RevisedRateAfterYear').data("kendoDropDownList").value('');
+        $('#ChallanId').val('');
+        $("#NDCDate").data("kendoDatePicker").value('');
+        $("#ChallanDate").data("kendoDatePicker").value('');
+    }
+</script>

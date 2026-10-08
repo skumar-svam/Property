@@ -1,0 +1,48 @@
+﻿@model NA.PMS.Model.ExtensionDetails
+@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@{
+    ViewBag.Title = "Manage Extension Approval";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="ExtensionForm">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-3 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Extension Request</h1></div>
+            <div class="col-md-9 col-sm-12 col-xs-12 col-btn">
+                
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.ExtensionDetails>()
+                .Name("gridExtensionDetails")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.Id).Title("Request No").ClientTemplate("<a href='" + "/Property/PropertyAllotment/ViewExtensionApproval/#= Id #'>#=Id#</a>").Width(130).Filterable(false);
+                    columns.Bound(c => c.Rid).Title("Registration Id");
+                    columns.Bound(c => c.DepartmentName).Title("Department");
+                    columns.Bound(c => c.SectorName).Title("Sector").Width(100);
+                    columns.Bound(c => c.BlockName).Title("Block").Width(100);
+                    columns.Bound(c => c.PropertyNo).Title("Property No").Width(150);
+                    //columns.Bound(c => c.PropertyNumber).Title("Property No");
+                    columns.Bound(c => c.Created_Date).Title("Requested Date").Format("{0:dd/MM/yyyy}");
+                    columns.Bound(c => c.Approved_Date).Title("Approved Date").Format("{0:dd/MM/yyyy}");
+                    columns.Bound(c => c.AssignTo).Title("Assigned To");
+                    columns.Bound(c => c.StatusName).Title("Status").Width(130);
+                })
+        .Sortable()
+        .Filterable()
+        .Resizable(resize => resize.Columns(true))
+        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+        .DataSource(dataSource => dataSource
+                        .Ajax()
+                        .Model(model => model.Id(p => p.Id))
+                                        .ServerOperation(true).Sort(sort => sort.Add("Id").Descending())
+                                .Read(read => read.Action("GetExtensionApprovalDetails", "PropertyAllotment")).PageSize(20)
+                    )
+        )
+    </div>
+</div>

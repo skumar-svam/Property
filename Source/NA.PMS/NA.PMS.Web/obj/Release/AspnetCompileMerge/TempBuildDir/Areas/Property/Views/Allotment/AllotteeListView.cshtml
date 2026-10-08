@@ -1,0 +1,626 @@
+﻿@model NA.PMS.Model.AllotteeListModel
+
+@using Kendo.Mvc.UI;
+@using NA.PMS.Model
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.Title = "View Allottee List";
+}
+<style>
+    .hide {
+        display: none !important;
+    }
+
+    .show {
+        display: block !important;
+    }
+
+    .disable_a_href {
+        pointer-events: none;
+    }
+</style>
+
+<div id="divAllotteeList">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">View Allottee List</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                <div style="text-align :right ;display: inline; padding-bottom  :4px;" class="hide" id="divComment">
+                    @if (Model.Status == "Approved")
+                    {
+                        <i style="font-size: 18px; " class=" glyphicon glyphicon-ok-sign" aria-hidden="true"></i>
+                        <strong style="color: lightgreen;font-size: 18px; padding-right: 10px; ">  @Html.DisplayFor(model => model.Status)</strong>
+                    }
+                    else
+                    {
+                        <strong style="color: red;font-size: 16px; padding-right: 10px; "><i class="glyphicon glyphicon-remove-sign" aria-hidden="true"></i>  @Html.DisplayFor(model => model.Status)</strong>
+                    }
+                    <a href='javascript:void(0);' alt="click to open Check List popup" class="btn btn-default" id="frcontractreviewchklstlink">View Comments</a>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            @*<input type="hidden" value="@ViewBag.id" id="hdnIdVal" />*@
+            @Html.HiddenFor(model => model.DepartmentId)
+            @Html.HiddenFor(model => model.SchemeId)
+            @Html.HiddenFor(model => model.Status)
+            @Html.HiddenFor(model => model.AllotmentDate)
+            @*@Html.HiddenFor(model => model.ApplicationId)*@
+            @Html.AntiForgeryToken()
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<AllotteeListModel>()
+            .Name("gvAllottee")
+            .Columns(columns =>
+                    {
+                        columns.Bound(c => c.EncryptedAppId).Hidden(true);
+                        columns.Bound(c => c.EncryptedPropRefId).Hidden(true);
+                        columns.Bound(c => c.RID).Title("RID").Filterable(true);
+                        columns.Bound(c => c.PropertyNo).Title("Property No.").ClientTemplate("<a onclick='javascript:OpenPropertyWindow(this);' style='cursor:pointer;'>#=PropertyNo#</a");
+                        columns.Bound(c => c.FormNo).Title("Form No.").ClientTemplate("<a onclick='javascript:OpenWindow(this);' style='cursor:pointer;'>#=FormNo#</a");
+                        columns.Bound(c => c.ApplicantName).Title("Applicant's Name");
+                        columns.Bound(c => c.DepartmentName).Title("Department");
+                        columns.Bound(c => c.ProperyType).Title("Property Type");
+                        columns.Bound(c => c.EarnestMoney).Title("Earnest Money");
+                        columns.Bound(c => c.AllotmentMoney).Title("Allotment Money");
+                        columns.Bound(c => c.AllotmentDate).Title("Allotment Date").Format("{0:dd/MM/yyyy}");
+                        columns.Bound(c => c.Area).Title("Area");
+                        columns.Bound(c => c.PropertyId).Hidden(true);
+                    })
+            .Sortable()
+            .Filterable()
+            .Events(c => c.DataBound("onDataBound"))
+            .Pageable
+            (
+            pageable => pageable
+            .Enabled(true)
+            .Refresh(true)
+            .PageSizes(true)
+            )
+            .Groupable()
+            .DataSource
+            (
+            dataSource => dataSource
+            .Ajax().Model(model => model.Id(p => p.SchemeId))
+            .ServerOperation(true).Sort(sort => sort.Add("RID").Descending())
+            .Read(read => read.Action("AllotteeListView", "Allotment").Data("AdditionalData")).PageSize(10)
+            )
+        )
+    </div>
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-md-12" style="text-align :right ; padding-top :20px;">
+                <input type="button" id="btnCancel" value="Cancel" class="btn btn-default" />
+                <input type="submit" value="Print" id="btnPrint" class="btn btn-default" />
+
+                @if (Model.Status == "Not Submitted" || Model.Status == "Rejected")
+                {
+                    <a href='javascript:void(0);' alt="click to open Check List popup" class="btn btn-default" id="btnSubmitForApprovallink">Submit for approval</a>
+                }
+
+                @if (Model.Status == "InProgress")
+                {
+                    <input type="submit" value="Submit for approval" class="btn btn-default" disabled="disabled" />
+                    @*<input type="submit" value="Submit for approval" class="btn-primary" disabled="disabled" />*@
+                    @*<a href='javascript:void(0);' alt="click to open Check List popup" class="btn" style=" background-color :lightgreen ;" id="btnSubmitForApprovallink">Submit for approval</a>*@
+                }
+
+                @if (Model.Status == "Approved")
+                {
+                    <button type="button" id="btnallotMoney" value="allotMoney" class="btn btn-default">Bulk Allotment Money Challan</button>
+                    <input type="submit" value="Bulk Payment Schedule" id="btnBulkPaymentSchedule" class="btn btn-default" />
+                    <input type="submit" value="Bulk Allotment Letter" id="btnBulkAllotmentLetter" class="btn btn-default" />
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id='DivCommentView' class="col-md-12">
+    <div class="row" style="margin-top:20px;">
+        <div class="col-md-3 col-sm-4 col-xs-12 form-group">
+            @Html.Label("From :")
+        </div>
+        <div class="col-md-9 col-sm-8 col-xs-12 form-group">
+            @Html.DisplayFor(model => model.From)
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-4 col-xs-12 form-group">
+            @Html.Label("Date :")
+        </div>
+        <div class="col-md-9 col-sm-8 col-xs-12 form-group">
+            @Html.DisplayFor(model => model.SubmittedDate)
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-4 col-xs-12 form-group">
+            @Html.Label("Comment:")
+        </div>
+        <div class="col-md-9 col-sm-8 col-xs-12 form-group">
+            @Html.TextAreaFor(model => model.Comment, new { style = "height:100px;margin:0;padding:0;", disabled = "disabled", @class = "form-control" })
+        </div>
+    </div>
+    <div class="row" style="margin-top:0px;">
+        <div class="col-md-12 col-sm-12 col-xs-12 form-group" style="text-align:center">
+            @*<button type='submit' id="btnComments" class='btn btn-default' value='Save'>Save</button>*@
+            <button type='button' class='btn btn-default' style="align-items :center; " value='Cancel' onclick="CloseCommnetPopUp();">Close</button>
+            @*<button type='button' class='btn-primary' style="align-items :center; " value='Cancel' onclick="CloseCommnetPopUp();">Close</button>*@
+        </div>
+    </div>
+</div>
+
+<div id='divAssineRequetApproval' class='col-md-12 adminfeediv'>
+    <div class="row" style="margin-top:20px; margin-bottom:25px;">
+        <div class="col-md-3 col-sm-4 col-xs-12 col-for-label form-group">
+            @Html.Label("Assign To:")
+        </div>
+        <div class="col-md-6 col-sm-8 col-xs-12 form-group">
+            @(Html.Kendo().DropDownListFor(model => model.User)
+                    .Name("User")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .Filter("contains")
+                    .OptionLabel("Select")
+                    .DataSource(source =>
+                    {
+                        source.Read(read =>
+                        {
+                            //read.Action("GetAssineTo", "Allotment");
+                            read.Action("GetAssineToByDepttId", "PropertyRegistration").Data("AdditionalDataDeptt");//Bug#189 - Resolved
+                        });
+                    })
+                    .HtmlAttributes(new { style = "width:100%;" })
+            )
+            @Html.ValidationMessageFor(model => model.User)
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-4 col-xs-12 col-for-label form-group">
+
+        </div>
+        <div class="col-md-9 col-sm-8 col-xs-12 form-group">
+            <button type='submit' id="btnRequetForApproval" class='btn btn-default' value='Save'>Submit</button>
+            <button type='button' class='btn btn-default' value='Cancel' onclick="CloseCommnetPopUpForApproval();">Close</button>
+        </div>
+    </div>
+</div>
+
+<div id="divPrintChallan" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="width: 65%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">  <b>Allotment Challan</b></h4>
+            </div>
+            <div class="modal-body" id="divAllotmentChallanBody">
+
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="submit" id="btnPrintDiv" class="k-button" data-dismiss="modal" onclick="PrintDiv();">Print</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="divPrintAllotmentLetter" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="width: 65%">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">  <b>Payment Schedule</b></h4>
+            </div>
+            <div class="modal-body" id="divAllotmentLetterBody">
+
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="submit" id="btnPrintDiv" class="k-button" data-dismiss="modal" onclick="PrintDivAllLetter();">Print</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="dialog"></div>
+
+<script type="text/javascript">
+    var encryptedAppId;
+    var encryptedRefId;
+    function onDataBound(e) {
+        var total = e.sender.dataSource.total()
+        if (total == 0) {
+            $("#btnSubmitForApprovallink").addClass("disable_a_href");
+            $("#btnPrint").attr("disabled", "disabled");
+            $("#btnallotMoney").attr("disabled", "disabled");
+            $("#btnBulkAllotmentMoneyChallan").attr("disabled", "disabled");
+            $("#btnBulkPaymentSchedule").attr("disabled", "disabled");
+            $("#btnBulkAllotmentLetter").attr("disabled", "disabled");
+        }
+        //else {
+        //    $("#btnSubmitForApprovallink").removeAttr("disable_a_href");
+        //    $("#btnSubmitForApprovallink").removeAttr("disabled");
+        //    $("#btnPrint").removeAttr("disabled");
+        //}
+    }
+    function OpenPropertyWindow(row) {
+        var tr = $(row).parent().parent();
+        var encryptedPropRefId = $(tr).children("td:eq(1)").text();
+        $("#dialog").data("kendoWindow").refresh(
+    {
+        url: '/Property/Allotment/PartialViewProperty/' + encryptedPropRefId
+    });
+        $("#dialog").data("kendoWindow").open();
+        //$("#dialog").data("kendoWindow").show();
+    }
+    function OpenWindow(row) {
+        var tr = $(row).parent().parent();
+        var encryptedAppId = $(tr).children("td:eq(0)").text();
+        //encryptedAppId = $(id).parent().parent().prev().prev().prev().text();
+        $("#dialog").data("kendoWindow").refresh(
+    {
+    });
+        $("#dialog").data("kendoWindow").refresh(
+    {
+        url: '/Property/Allotment/PartialViewApplication/' + encryptedAppId
+    });
+        $("#dialog").data("kendoWindow").open();
+        //$("#dialog").data("kendoWindow").show();
+    }
+
+    function PrintDiv() {
+        var contents = document.getElementById("divAllotmentChallanBody").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+    function PrintDivAllLetter() {
+        var contents = document.getElementById("divAllotmentLetterBody").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+    function AdditionalData() {
+        var idVal = $("#SchemeId").val();
+        var depid = $("#DepartmentId").val();
+        var allotmentDate = $("#AllotmentDate").val();
+        return { idVal: idVal, depid: depid, allotmentDate: allotmentDate };
+    }
+
+    function AdditionalDataDeptt() {
+        return {
+            depttId: $("#DepartmentId").val()
+        };
+    }
+    function onClose(e) {
+        $("#dialog").data("kendoWindow").content("");
+    }
+    $(document).ready(function () {
+        $("#dialog").kendoWindow({
+            width: "1000px",
+            height: "500px",
+            iframe: true,
+            visible: false,
+            close: onClose,
+            actions: [
+                "Pin",
+                "Minimize",
+                "Maximize",
+                "Close"
+            ]
+        }).data("kendoWindow").center();
+
+        var Status = $("#Status").val();
+        if (Status == "Approved" || Status == "Rejected") {
+            $("#divComment").addClass("show");
+        }
+        else {
+            $("#divComment").addClass("hide");
+        }
+
+        $("div[id='DivCommentView']").kendoWindow({
+            title: "Comment",
+            modal: true,
+            visible: false,
+            width: "40%"
+        });
+        $("div[id='divAssineRequetApproval']").kendoWindow({
+            modal: true,
+            title: "Assign Request to Approver",
+            visible: false,
+            width: "40%"
+        });
+        $("div[id='divCommentPost']").kendoWindow({
+            modal: true,
+            visible: false,
+            width: "40%"
+        });
+
+        $("a#frcontractreviewchklstlink").click(function () {
+            OpenFRContractReviewChkLstPopUp()
+        });
+        $("a#btnSubmitForApprovallink").click(function () {
+            OpenAssineRequetApprovalPopUp()
+        });
+        $("a#btnApproval").click(function () {
+            OpenCommentPostPopUp()
+        });
+        $("a#btnReject").click(function () {
+            OpenCommentPostPopUp()
+        });
+
+
+
+        $("#btnRequetForApproval").click(function () {
+            var schemeId = $("#SchemeId").val();
+            var depid = $("#DepartmentId").val();
+            //var applicationId = $("#ApplicationId").val();
+            var allotmentDate = $("#AllotmentDate").val();
+            var user = $("#User").val();
+            //alert(user);
+            if (user != "") {
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ schemeId: schemeId, depid: depid, user: user, allotmentDate: allotmentDate }),
+                    url: '/Allotment/SubmitForApproval',
+                    success: function (result) {
+                        if (result == true) {
+                            alertify.success("Changes saved successfully.");
+                            window.location.href = '@Url.Action("ManageAllottee", "Allotment")';;
+                            //return false;
+                        }
+                        else {
+                            alertify.error("Some error occurred. Please try again after some time.");
+                            //return true;
+                        }
+                    },
+                    error: function (objAjaxRequest, strError) {
+                        var respText = objAjaxRequest.responseText;
+                        alertify.error("Some error occurred. Please try again after some time.");
+                        //alert(respText);
+                    }
+                });
+            }
+            else {
+                alertify.error("Please Select Assign To");
+            }
+        });
+
+        $("#btnallotMoney").click(function () {
+            var dataSource = $("#gvAllottee").data("kendoGrid").dataSource;
+            dataSource.pageSize(dataSource.total());
+            var items = dataSource.data();
+            var propIds = [];
+            var schemeId = $("#SchemeId").val();
+            var deptId = $("#DepartmentId").val();
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                propIds.push(item.RID);
+            }
+            if (propIds.length > 0) {
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ propIds: propIds, schemeId: schemeId, deptId: deptId }),
+                    url: '/DocParser/PrintBulkAllotmentChallans',
+                    success: function (result) {
+                        $("#divAllotmentChallanBody").html(result);
+                        $("#divPrintChallan").modal('show');
+                    },
+                    error: function (obj) {
+                        alertify.error("Some error occured. Please try again later.");
+                    }
+                });
+            }
+            else {
+                alertify.error("No data in Grid to print.");
+            }
+        });
+
+        $("#btnCancel").click(function () {
+            window.location.href = '@Url.Action("ManageAllottee", "Allotment")';
+        });
+
+        $("#btnBulkAllotmentLetter").click(function () {
+            var dataSource = $("#gvAllottee").data("kendoGrid").dataSource;
+            dataSource.pageSize(dataSource.total());
+            var items = dataSource.data();
+            var rIds = [];
+            var schemeId = $("#SchemeId").val();
+            var deptId = $("#DepartmentId").val();
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                rIds.push(item.RID);
+            }
+            if (rIds.length > 0) {
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ rIds: rIds }),
+                    url: '/Allotment/PrintBulkAllotmentLetter',
+                    success: function (result) {
+                        $("#divAllotmentLetterBody").html(result);
+                        $("#divPrintAllotmentLetter").modal('show');
+                    },
+                    error: function (obj) {
+                        alertify.error("Some error occured. Please try again later.");
+                    }
+                });
+            }
+            else {
+                alertify.error("No data in Grid to print.");
+            }
+        });
+
+        $("#btnBulkPaymentSchedule").click(function () {
+            var dataSource = $("#gvAllottee").data("kendoGrid").dataSource;
+            dataSource.pageSize(dataSource.total());
+            var items = dataSource.data();
+            var rIds = [];
+            var schemeId = $("#SchemeId").val();
+            var deptId = $("#DepartmentId").val();
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                rIds.push(item.RID);
+            }
+            if (rIds.length > 0) {
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ rIds: rIds }),
+                    url: '/Allotment/PrintBulkAllotmentPaymnetSchedule',
+                    success: function (result) {
+                        $("#divAllotmentLetterBody").html(result);
+                        $("#divPrintAllotmentLetter").modal('show');
+                    },
+                    error: function (obj) {
+                        alertify.error("Some error occured. Please try again later.");
+                    }
+                });
+            }
+            else {
+                alertify.error("No data in Grid to print.");
+            }
+        });
+        function printGrid() {
+            var GridDestination = $("#gvAllottee").data("kendoGrid");
+            var dataSource = $("#gvAllottee").data("kendoGrid").dataSource;
+            dataSource.pageSize(dataSource.total());
+            var gridElement = $('#gvAllottee'),
+                printableContent = '',
+                win = window.open('', '', 'width=800, height=500, resizable=1, scrollbars=1'),
+                doc = win.document.open();
+            GridDestination.pager.element.hide();
+            var htmlStart =
+                    '<!DOCTYPE html>' +
+                    '<html>' +
+                    '<head>' +
+                    '<meta charset="utf-8" />' +
+                    //'<title>Kendo UI Grid</title>' +
+                    '<link href="http://kendo.cdn.telerik.com/' + kendo.version + '/styles/kendo.common.min.css" rel="stylesheet" /> ' +
+                    '<style>' +
+                    'html { font: 11pt sans-serif; }' +
+                    '.k-grid { border-top-width: 0; }' +
+                    '.k-grid, .k-grid-content { height: auto !important; }' +
+                    '.k-grid-content { overflow: visible !important; }' +
+                    'div.k-grid table { table-layout: auto; width: 100% !important; }' +
+                    '.k-grid .k-grid-header th { border-top: 1px solid; }' +
+                    '.k-grouping-header, .k-grid-toolbar, .k-grid-pager > .k-link { display: none; }' +
+                    // '.k-grid-pager { display: none; }' + // optional: hide the whole pager
+                    '</style>' +
+                    '</head>' +
+                    '<body>';
+
+            var htmlEnd =
+                    '</body>' +
+                    '</html>';
+
+            var gridHeader = gridElement.children('.k-grid-header');
+            if (gridHeader[0]) {
+                var thead = gridHeader.find('thead').clone().addClass('k-grid-header');
+                printableContent = gridElement
+                    .clone()
+                        .children('.k-grid-header').remove()
+                    .end()
+                        .children('.k-grid-content')
+                            .find('table')
+                                .first()
+                                    .children('tbody').before(thead)
+                                .end()
+                            .end()
+                        .end()
+                    .end()[0].outerHTML;
+            } else {
+                printableContent = gridElement.clone()[0].outerHTML;
+            }
+
+            doc.write(htmlStart + printableContent + htmlEnd);
+            doc.close();
+            win.print();
+            dataSource.pageSize(20);
+            GridDestination.pager.element.show();
+        }
+        $("#btnPrint").click(function () {
+            printGrid();
+            //var dataSource = $("#gvAllottee").data("kendoGrid").dataSource;
+            //dataSource.pageSize(dataSource.total());
+            //setTimeout(function () { PrintPage(); }, 1000);
+        });
+
+
+
+    });
+    function OpenFRContractReviewChkLstPopUp() {
+        var win = $("#DivCommentView").data("kendoWindow");
+        win.center();
+        win.open();
+    }
+    function OpenCommentPostPopUp() {
+        var win = $("#divCommentPost").data("kendoWindow");
+        win.center();
+        win.open();
+    }
+
+    function OpenAssineRequetApprovalPopUp() {
+        var win = $("#divAssineRequetApproval").data("kendoWindow");
+        win.center();
+        win.open();
+    }
+
+    function CloseCommnetPopUp() {
+        var win = $("#DivCommentView").data("kendoWindow");
+        win.close();
+    }
+    function CloseCommnetPopUpForApproval() {
+        var win = $("#divAssineRequetApproval").data("kendoWindow");
+        win.close();
+    }
+    function PrintPage() {
+        var printContent = document.getElementById('gvAllottee');
+        var printWindow = window.open("All Records", "Print Panel", 'left=50000,top=50000,width=0,height=0');
+        printWindow.document.write(printContent.innerHTML);
+        printWindow.document.close();
+        printWindow.focus();
+        printWindow.print();
+        var dataSource = $("#gvAllottee").data("kendoGrid").dataSource;
+        dataSource.pageSize(20);
+    }
+</script>

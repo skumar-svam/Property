@@ -1,0 +1,220 @@
+﻿@model NA.PMS.Model.KYAViewModel
+@using Kendo.Mvc.UI
+@using NA.PMS.Common
+@using System.Linq
+
+@{
+    ViewBag.Title = "KYA Reports";
+    //Layout = "~/Views/Shared/_Layout.cshtml";
+    var userInfo = HttpContext.Current.Session["CurrentUser"] as NA.PMS.Web.Models.CurrentUserDetail;
+    if (userInfo != null)
+    {
+        Layout = "~/Views/Shared/_Layout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/_Blank.cshtml";
+    }
+}
+
+
+<div id="kyaReport">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">KYA REPORTS</h1></div>
+        </div>
+    </div>
+    <div class="col-md-12  blnk-rw"></div>
+    <div class="col-md-12">
+        <div class="row form-group" style="margin-top:10px;">
+            <div class="col-md-2">
+                @Html.Label("Status On Date")
+            </div>
+            <div class="col-md-2">
+                @(Html.Kendo().DatePickerFor(model => model.StatusDate)
+                    .Events(e => e.Change("ChangeDate"))
+                    .HtmlAttributes(new { style = "width:95%;" })
+                    //.Format("dd/MM/yyyy")
+                        //.Value(DateTime.Now)
+                )
+
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="row rw-spce">
+            <div class="col-md-12" style="text-align:center;">
+                @*<h2 class=" blck-heading" style="border-left:1px solid green;border-right:1px solid green;">No Of KYA Submitted</h2>*@
+            </div>
+
+            <div class="demo-section k-content wide" style="margin-top:40px;">
+                <div id="DivPieChart"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-1" style="margin-top:40px;"></div>
+
+    <div class="col-md-7" style="margin-top:40px;">
+        <div class="row rw-spce">
+            <div class="col-md-12">
+                <h2 class=" blck-heading" style="border-left:1px solid green;border-right:1px solid green;margin-bottom:0;">Detail Status Of KYA</h2>
+                <div class="col-md-12 k-grid-content">
+                    @(Html.Kendo().Grid<NA.PMS.Model.KYAViewModel>()
+            .Name("GridKYADetailStatus")
+            .Columns(columns =>
+            {
+                //columns.Bound(c => c.StatusDate).Hidden(true);
+                columns.Bound(c => c.Department).Title("Department").ClientFooterTemplate("Total Count:");
+                columns.Bound(c => c.TotalKYA).Title("Total KYA").ClientFooterTemplate("#=sum#");
+                columns.Bound(c => c.ApprovedKYA).Title("Approved KYA").ClientFooterTemplate("<div>#= sum #</div>");
+                columns.Bound(c => c.PendingKYA).Title("Pending KYA").ClientFooterTemplate("<div>#= sum #</div>");
+                columns.Bound(c => c.RejectedKYA).Title("Rejected KYA").ClientFooterTemplate("<div>#= sum #</div>");
+                columns.Bound(c => c.ForwardKYA).Title("Forward KYA").ClientFooterTemplate("<div>#= sum #</div>");
+                columns.Bound(c => c.CancelAfterTransferKYA).Title("Canceled KYA").ClientFooterTemplate("<div>#= sum #</div>");
+                columns.Bound(c => c.DateMar).Title("Average Days").ClientFooterTemplate("<div>Avg: #= kendo.toString(average, '0.00') #</div>");//Gap Between submit date and approve date
+            })
+            .Resizable(resize => resize.Columns(true))
+            //.Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+            .AutoBind(true)
+            .DataSource
+            (
+                dataSource => dataSource
+                .Ajax()
+                    //.Model(model => model.Id(p => p.Id))
+                .ServerOperation(true)
+                .Read(read => read.Action("GetKYADetailStatusList", "Authority", new { area = "Member" }))
+                    //.Sort(s => s.Add(x => x.Id).Descending())
+                .PageSize(10)
+                .Aggregates(aggregates =>
+                {
+                    aggregates.Add(p => p.TotalKYA).Sum();
+                    aggregates.Add(p => p.ApprovedKYA).Sum();
+                    aggregates.Add(p => p.PendingKYA).Sum();
+                    aggregates.Add(p => p.RejectedKYA).Sum();
+                    aggregates.Add(p => p.ForwardKYA).Sum();
+                    aggregates.Add(p => p.CancelAfterTransferKYA).Sum();
+                    aggregates.Add(p => p.DateMar).Average();
+                })
+            ))
+                </div>
+            </div>
+        </div>
+        <div class="row form-group">
+            <div class="col-md-4">
+                @Html.Label("Total Approved Forms(in %)")
+            </div>
+            <div class="col-md-3">
+                @Html.TextBoxFor(m => m.AverageKYAForm, htmlAttributes: new { @class = "form-control" })
+            </div>
+        </div>
+    </div>
+</div>
+    <script>
+
+        $(document).ready(function () {
+            var userInfo = '@HttpContext.Current.Session["CurrentUser"]';
+            if (userInfo == '' || userInfo == null) {
+                $('#kyaReport').css({ "margin": "40px" });
+            }
+            //if ($('#StatusDate').val() != null) {
+            //    var currentDate = new Date();
+            //    $('#StatusDate').data("kendoDatePicker").value(currentDate), 'dd/MM/yyyy';
+            //    SubmittedKYAForms(StatusDate);
+            //}
+            SubmittedKYAForms();
+            GetAverageApprovedKYA();
+        });
+
+        function ChangeDate() {
+            var _StatusDate = $('#StatusDate').val();
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ StatusDate: _StatusDate }),
+                url: '/Member/Authority/GetKYAFormListCount',
+                success: function (result) {
+                    if (result != null) {
+                        createChart(result);
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    alertify.error("Network error, Please try again later.");
+                }
+            });
+        }
+
+        function createChart(GraphData) {
+            var date = $('#StatusDate').val();
+            $("#DivPieChart").kendoChart({
+                title: {                   
+                    //text: "Submitted KYA Forms On: " + date
+                    text: "Submitted KYA Forms"
+                    },
+                legend: {
+                    position: "bottom"
+                },
+                dataSource: {
+                    data: GraphData
+                },
+                series: [{
+                    type: "pie",
+                    field: "Count",
+                    categoryField: "Department",
+                    //explodeField: "explode"
+                }],
+                seriesColors: ["#03a9f4", "#ff9800", "#fad84a", "#4caf50", "#FF0000", "#FF00FF", "#000080"],
+                tooltip: {
+                    visible: true,
+                    template: "#= category #: \n #= value#"
+                }
+            });
+        }
+        // $(document).bind("kendo:skinChange", SubmittedKYAForms);
+
+        function SubmittedKYAForms() {
+            _StatusDate = $('#StatusDate').val();
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ StatusDate: _StatusDate }),
+                url: '/Member/Authority/GetKYAFormListCount',
+                success: function (result) {
+                    if (result != null) {
+                        createChart(result);
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    alertify.error("Network error, Please try again later.");
+                }
+            });
+        }
+
+        function GetAverageApprovedKYA() {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                //data: JSON.stringify({ StatusDate: _StatusDate }),
+                url: '/Member/Authority/GetAverageApprovedForm',
+                success: function (result) {
+                    if (result != null) {
+                        $('#AverageKYAForm').val(result);
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    alertify.error("Network error, Please try again later.");
+                }
+            });
+        }
+    </script>
+
+
+
+
+

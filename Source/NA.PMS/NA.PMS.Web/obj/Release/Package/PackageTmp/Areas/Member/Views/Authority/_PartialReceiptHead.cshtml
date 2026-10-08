@@ -1,0 +1,200 @@
+﻿@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions
+
+<div class="panel-body">
+    <div class="row form-group">
+        <div class="col-md-12" id="ApplicationMenu" style="text-align:center">
+            <input type="radio" name="receipt-action" value="AddReceiptHead" />Add Receipt Head &nbsp;&nbsp;
+            <input type="radio" name="receipt-action" value="UpdateReceiptHead" />Update Receipt Head &nbsp;&nbsp;
+            <input type="radio" name="receipt-action" value="AddReceiptSubHead" />Add Receipt Sub Head &nbsp;&nbsp;
+            <input type="radio" name="receipt-action" value="UpdateReceiptSubHead" />Update Receipt Sub Head
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-5">
+            @Html.Label("Payment Receipt Head", htmlAttributes: new { style="padding:0;"})
+            @(Html.Kendo().DropDownList()
+                .Name("ddl-ReceiptHeadId")
+                .Filter("contains")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .OptionLabel(" -- Select --")
+                .DataSource(source =>
+                {
+                    source.Custom()
+                    .ServerFiltering(true).ServerPaging(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    //.Transport(transport => transport.Read(read => read.Action("GetReceiptSubHeadListAsDataSource", "Authority", new { area = "Member" }).Data("FilterReceiptId")))
+                    .Transport(transport => transport.Read(read => read.Action("GetReceiptHeadListAsDataSource", "Authority", new { area = "Member" })))
+                    .Schema(schema => schema.Data("Data").Total("Total")).PageSize(100);
+                })
+              //.Events(e => e.Change("ChangeReceiptHead"))
+                .HtmlAttributes(new { style = "width:100%;float:right;", @class = "input-disabled" })
+            )
+        </div>
+        <div class="col-md-2">
+
+        </div>
+        <div class="col-md-5">
+            @Html.Label("Payment Receipt SubHead", htmlAttributes: new { style = "padding:0;" })
+            @(Html.Kendo().DropDownList()
+                .Name("ddl-ReceiptSubHeadId")
+                .Filter("contains")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .OptionLabel(" -- Select --")
+                .DataSource(source =>
+                {
+                    source.Custom()
+                    .ServerFiltering(true).ServerPaging(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    .Transport(transport => transport.Read(read => read.Action("GetReceiptSubHeadListAsDataSource", "Authority", new { area = "Member" }).Data("FilterReceiptIdII")))
+                    .Schema(schema => schema.Data("Data").Total("Total")).PageSize(100);
+                })
+                .CascadeFrom("ddl-ReceiptHeadId")
+                //.Events(e => e.Change("ChangeReceiptHead"))
+                .HtmlAttributes(new { style = "width:100%;float:right;", @class = "input-disabled" })
+            )
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-12">
+            <label id="lbl-receipt-head" style="padding:0;">Receipt Head</label>
+            <input type="text" class="k-textbox" id="txt-receipt-head" style="width:100%;" />
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-12 text-right">
+            <input type="button" class="k-button" value="Add Receipt Head" style="min-width:120px;" id="btn-save-receipt" />
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+
+        $('input[type="radio"][name="receipt-action"]').on("change", function () {
+            var action = $('input[type="radio"][name="receipt-action"]:checked').val();
+            if (action == "AddReceiptHead") {
+                $('#btn-save-receipt').val("Add Receipt Head");
+                $('#lbl-receipt-head').text("New Receipt Head");
+                $('#ddl-ReceiptHeadId').data("kendoDropDownList").value('');
+            }
+            else if (action == "UpdateReceiptHead") {
+                $('#btn-save-receipt').val("Update Receipt Head");
+                $('#lbl-receipt-head').text("New Receipt Head");
+            }
+            else if (action == "AddReceiptSubHead") {
+                $('#btn-save-receipt').val("Add Receipt Sub Head");
+                $('#lbl-receipt-head').text("New Receipt Sub Head");
+            }
+            else if (action == "UpdateReceiptSubHead") {
+                $('#btn-save-receipt').val("Update Receipt Sub Head");
+                $('#lbl-receipt-head').text("New Receipt Sub Head");
+            }
+        });
+
+        $('#btn-save-receipt').click(function () {
+            SaveReceiptDetail();
+        });
+
+    });
+
+    function FilterReceiptIdII() {
+        return { receiptId: $('#ddl-ReceiptHeadId').val() };
+    }
+
+
+
+
+    function SaveReceiptDetail() {
+        var flag = true;
+        var actiontype = $('input[type="radio"][name="receipt-action"]:checked').val();
+        var headId = $('#ddl-ReceiptHeadId').data("kendoDropDownList").value();
+        var subheadId = $('#ddl-ReceiptSubHeadId').data("kendoDropDownList").value();
+        var head = $('#txt-receipt-head').val();
+        if (actiontype == "" || actiontype == undefined) {
+            flag = false;
+            alertify.error("Select Action type.");
+            return false;
+        }
+        if (actiontype == "AddReceiptHead") {
+            if (head == "") {
+                alertify.error("Enter receipt head name");
+                flag = false;
+            }
+        }
+        if (actiontype == "UpdateReceiptHead") {
+            if (headId == "" || headId == undefined) {
+                alertify.error("Select receipt head.");
+                flag = false;
+            }
+            if (head == "") {
+                alertify.error("Enter receipt head name");
+                flag = false;
+            }
+        }
+        if (actiontype == "AddReceiptSubHead") {
+            if (headId == "" || headId == undefined) {
+                alertify.error("Select receipt head.");
+                flag = false;
+            }
+            if (head == "") {
+                alertify.error("Enter sub head name");
+                flag = false;
+            }
+        }
+        if (actiontype == "UpdateReceiptSubHead") {
+            if (headId == "" || headId == undefined) {
+                alertify.error("Select receipt head.");
+                flag = false;
+            }
+            if (subheadId == "" || subheadId == undefined) {
+                alertify.error("Select receipt sub head.");
+                flag = false;
+            }
+            if (head == "") {
+                alertify.error("Enter sub head name");
+                flag = false;
+            }
+        }
+        if (flag) {
+            var ReceiptModel = {
+                ActionType: actiontype,
+                ReceiptHeadId: headId,
+                ReceiptSubHeadId: subheadId,
+                ReceiptHeadName: head,
+                ReceiptSubHeadName: head
+            };
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ model: ReceiptModel }),
+                url: '@Url.Action("SavePaymentReceiptHeadDetail", "Authority", new { area = "Member" })',
+                success: function (result) {
+                    if (result == '@ReturnType.Saved') {
+                        alertify.success("Receipt added successfully.");
+                        $('#ddl-ReceiptHeadId').data("kendoDropDownList").dataSource.read();
+                        $('#ddl-ReceiptSubHeadId').data("kendoDropDownList").dataSource.read();
+                    }
+                    else if (result == '@ReturnType.Updated') {
+                        alertify.success("Receipt updated successfully.");
+                        $('#ddl-ReceiptHeadId').data("kendoDropDownList").dataSource.read();
+                        $('#ddl-ReceiptSubHeadId').data("kendoDropDownList").dataSource.read();
+                    }
+                    else if (result == '@ReturnType.None') {
+                        alertify.error("Provider failed to save, try again.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again");
+                }
+            });
+        }
+    }
+
+
+</script>

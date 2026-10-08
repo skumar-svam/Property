@@ -1,0 +1,39 @@
+﻿@model NA.PMS.Model.TransferModel
+@using Kendo.Mvc.UI;
+
+<div class="col-md-12 k-grid-content">
+    @Html.HiddenFor(m => m.RId)
+    @(Html.Kendo().Grid<NA.PMS.Model.TransferModel>()
+              .Name("gridtransferModel")
+              .Columns(columns =>
+              {
+                  columns.Bound(c => c.TransfereeFirstName).Title("Transferee Name");
+                  columns.Bound(c => c.DepttName).Title("Department");
+                  columns.Bound(c => c.Sector).Title("Sector").Width(100);
+                  columns.Bound(c => c.Block).Title("Block").Width(100);
+                  columns.Bound(c => c.PropertyNo).Title("Property No").Width(150);
+                  columns.Bound(c => c.TransferDate).Title("Transfer Date").Format("{0:dd/MM/yyyy}");
+                  columns.Bound(c => c.ApplicantName).Title("Transferor Name");
+                  columns.Bound(c => c.TransfereeCorrespondenceAdd).Title("Correspondence Add.");
+                  columns.Bound(c => c.Status).Title("Status").Width(100);
+                  columns.Bound(c => c.RId).Hidden(true);
+              })
+              .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+              .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+              .AutoBind(true)
+              .DataSource
+              (
+                 dataSource => dataSource
+                .Ajax().Model(model => model.Id(p => p.RId))
+                .ServerOperation(true)
+                .Read(read => read.Action("GetTransferHistoryDetail", "PropertyRegistration").Data("additionalPropInfo"))
+                .PageSize(10)
+              )
+    )
+</div>
+
+<script type="text/javascript">
+    function additionalPropInfo() {
+        return { rid: $('#Rid').val() };
+    }
+</script>

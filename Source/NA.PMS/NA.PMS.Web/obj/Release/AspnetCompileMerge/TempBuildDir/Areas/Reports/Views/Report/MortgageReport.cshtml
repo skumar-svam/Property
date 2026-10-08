@@ -1,0 +1,130 @@
+﻿@model NA.PMS.Model.MortgageModel
+@using Kendo.Mvc.UI;
+
+@{
+    ViewBag.Title = "Mortgage Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="MortgageReport">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Mortgage Report</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+        <div class="row">
+            <div class="col-md-2 col-sm-2 col-xs-12 form-group text-right">
+                @Html.Label("Scheme")
+                @(Html.Kendo().DropDownListFor(model => model.SchemeId)
+                      .DataTextField("schemeName")
+                      .DataValueField("schemeId")
+                      .OptionLabel(" -- Please Select --")
+                      .DataSource(source => source.Read(read => read.Action("SchemeListForAllotment", "Allotment", new { Area = "Property" })))
+                      .Enable(true)
+                      .AutoBind(true)
+                      .Filter("contains")
+                      .HtmlAttributes(new { style = "width:95%;" })
+                )
+            </div>
+            <div class="col-md-2 col-sm-2 col-xs-12 form-group text-right">
+                @Html.Label("Department")
+                @(Html.Kendo().DropDownListFor(model => model.DepartmentId)
+                      .DataTextField("DepartmentName")
+                      .DataValueField("DepartmentId")
+                      .OptionLabel(" -- Please Select --")
+                      .DataSource(source => source.Read(read => read.Action("FilterDepartmentOnScheme", "PropertyAllotment", new { Area = "Property" }).Data("FilterDepartment"))
+                                                          .ServerFiltering(true))
+                      .Enable(false)
+                      .AutoBind(false)
+                      .Filter("contains")
+                      .CascadeFrom("SchemeId")
+                       .HtmlAttributes(new { style = "width:95%;" })
+                )
+            </div>
+            <div class="col-md-2 col-sm-2 col-xs-12 form-group text-right">
+                @Html.Label("From Date")
+                @(Html.Kendo().DatePickerFor(m => m.FromDate).Max(DateTime.Now).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:95%" }))
+            </div>
+            <div class="col-md-2 col-sm-2 col-xs-12 form-group text-right">
+                @Html.Label("To Date")
+                @(Html.Kendo().DatePickerFor(m => m.ToDate).Max(DateTime.Now).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:95%" }))
+            </div>
+            <div class="col-md-2 col-sm-2 col-xs-12 form-group text-center">
+                @Html.Label(" ", htmlAttributes: new { style="width:100%"})
+                <input type="button" value="Search" id="btnSearch" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.MortgageModel>()
+                  .Name("gridMortgageReport")
+                  .ToolBar(tools => tools.Excel())
+                  .Excel(excel => excel
+                    .FileName("MortgageReport.xlsx")
+                    .AllPages(true)
+                    .Filterable(true)
+                    //.ProxyURL(Url.Action("Excel_Export_Save", "PropertyAllotment"))
+                   )
+                    .ToolBar(tools => tools.Pdf())
+                            .Pdf(pdf => pdf
+                            .AllPages()
+                            .AvoidLinks()
+                            .PaperSize("A4")
+                            .Scale(0.8)
+                            .Margin("2cm", "1cm", "1cm", "1cm")
+                            .Landscape()
+                            .RepeatHeaders()
+                            .TemplateId("page-template")
+                            .FileName("Mortgage.pdf")
+                            .ProxyURL(Url.Action("Pdf_Export_Save", "Report"))
+                        )
+                  .Columns(columns =>
+                  {
+                      columns.Bound(c => c.SchemeName).Title("Scheme Name");
+                      columns.Bound(c => c.DepartmentName).Title("Department Name");
+                      columns.Bound(c => c.PropertyNumber).Title("Property No");
+                      columns.Bound(c => c.MortgageDate).Title("Request Date").Format("{0:dd/MM/yyyy}");
+                      columns.Bound(c => c.ApplicantName).Title("Applicant's Name");
+                      columns.Bound(c => c.MortgageType).Title("Mortgage Type");
+                  })
+                  .Sortable()
+                  .Filterable()
+                  .Resizable(resize => resize.Columns(true))
+                  .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                  .DataSource
+                  (
+                       dataSource => dataSource.Ajax().Model(model => model.Id(p => p.RequestNo))
+                                      .ServerOperation(true).Read(read => read.Action("GetMortgageReports", "Report").Data("additionalInfo"))
+                      .PageSize(10)
+                  )
+        )
+    </div>
+</div>
+
+<script type="text/javascript">
+    function FilterDepartment() {
+        return { SchemeId: $("#SchemeId").val() };
+    }
+
+    $(document).ready(function () {
+        $("#btnSearch").click(function () {
+            $("#gridMortgageReport").data("kendoGrid").dataSource.read();
+        });
+    });
+
+
+    function additionalInfo() {
+        return {
+            fromDate: $("#FromDate").val(),
+            toDate: $("#ToDate").val(),
+            schemeId: $("#SchemeId").val(),
+            departmentId: $("#DepartmentId").val()
+        }
+    }
+
+</script>

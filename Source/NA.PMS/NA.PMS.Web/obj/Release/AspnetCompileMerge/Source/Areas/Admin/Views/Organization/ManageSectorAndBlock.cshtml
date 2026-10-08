@@ -1,0 +1,128 @@
+﻿@using Kendo.Mvc.UI;
+@using NA.PMS.Model
+
+@{
+    ViewBag.Title = "Manage Sector & Block";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script src="~/Scripts/kendo.aspnetmvc.min.js"></script>
+<style>
+    .k-grid-content {
+        overflow-y: hidden;
+        overflow-x: hidden;
+    }
+</style>
+
+<div class="ManageAdminRoles">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Sector And Block</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                <a href="#" id="btnAddRole" class="" onclick="javascript:AddApplication(event);">Add Sector/Block</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+
+    <div class="col-md-12 k-grid-content">
+        <div class="row">
+            <div class="col-md-6" style="width:49% !important;">
+                <h2 class="blck-heading" style="margin-bottom:0px;">Noida Sectors</h2>
+                @(Html.Kendo().Grid<NA.PMS.UserManagement.NDAMasterDataViewModel>()
+                  .Name("gridApplication")
+                  .Columns(columns =>
+                  {
+                      columns.Bound(c => c.Id).Hidden(true);
+                      columns.Bound(c => c.SectorId).Title("Sector Id");
+                      columns.Bound(c => c.SectorName).Title("Sector Name");
+                      columns.Bound(c => c.Id).Title("Status").ClientTemplate("<label class='hyperlink' onclick='javascript:Deactivate(#= SectorId #);'>#if(IsActive == true){#<span>Deactivate</span>#}else{#<span>Activate</sapn>#}#</label>");
+                  })
+                  .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                  //.Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(new[] { 10, 50, 100, 500 }).Info(true).PreviousNext(true).Input(true).Numeric(true).ButtonCount(3))
+                  .Pageable(pageable => pageable.Enabled(true).Refresh(true).Info(true).PreviousNext(true).Input(true).Numeric(true).ButtonCount(5))
+                  .DataSource
+                  (
+                      dataSource => dataSource
+                          .Ajax()
+                          .Model(model => model.Id(p => p.Id))
+                          .ServerOperation(true)
+                          .Read(read => read.Action("GetSectorAndBlockListAsDataSource", "Organization", new { area = "Admin" }).Data("FilterSector"))
+                          .PageSize(10)
+                  )
+                )
+            </div>
+           
+            <div class="col-md-6" style="width:49% !important; float:right;">
+                <h2 class="blck-heading" style="margin-bottom:0px;">Noida Blocks</h2>
+                @(Html.Kendo().Grid<NA.PMS.UserManagement.NDAMasterDataViewModel>()
+                  .Name("gridBlock")
+                  .Columns(columns =>
+                  {
+                      columns.Bound(c => c.Id).Hidden(true);
+                      columns.Bound(c => c.BlockId).Title("Block Id");
+                      columns.Bound(c => c.BlockName).Title("Block Name");
+                      columns.Bound(c => c.Id).Title("Status").ClientTemplate("<label class='hyperlink' onclick='javascript:Deactivate(#= BlockId #);'>#if(IsActive == true){#<span>Deactivate</span>#}else{#<span>Activate</sapn>#}#</label>");
+                  })
+                  .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                  //.Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(new[] { 10, 50, 100, 500 }).Info(true).PreviousNext(true).Input(true).Numeric(true).ButtonCount(3))
+                  .Pageable(pageable => pageable.Enabled(true).Refresh(true).Info(true).PreviousNext(true).Input(true).Numeric(true).ButtonCount(5))
+                  .DataSource
+                  (
+                      dataSource => dataSource
+                          .Ajax()
+                          .Model(model => model.Id(p => p.Id))
+                          .ServerOperation(true)
+                          .Read(read => read.Action("GetSectorAndBlockListAsDataSource", "Organization", new { area = "Admin" }).Data("FilterBlock"))
+                          .PageSize(10)
+                  )
+                )
+            </div>
+        </div>
+        
+       
+    </div>
+</div>
+
+
+<div id="window-modal" class="modal fade" data-keyboard="false" data-backdrop="static">
+    <div class="modal-dialog" style="min-height:250px; min-width:70%;border-radius:0;">
+        <div class="modal-content" style="border-radius:0;">
+            <div class="modal-body">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                @{Html.RenderPartial("_PartialApplication");}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function Deactivate(appid) {
+        $.ajax({
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            type: "POST",
+            data: JSON.stringify({ ApplicationId: appid, ActionType: "Status", FilterType: "Application" }),
+            url: '/Admin/Organization/SaveMasterDataInfoByType',
+            success: function (data) {
+                $('#gridApplication').data('kendoGrid').dataSource.read();
+            },
+            error: function (msg) {
+                alert("Error Occured-" + msg.responseText);
+            }
+        });
+    }
+
+    function AddApplication(event) {
+        event.preventDefault();
+        $('#window-modal').modal('show');       
+    }
+
+    function FilterSector(){
+        return {MasterData: "Sector"}
+    }
+    function FilterBlock(){
+        return {MasterData: "Block"}
+    }
+</script>
+

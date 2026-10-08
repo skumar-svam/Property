@@ -1,0 +1,283 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@using NA.PMS.Common;
+
+@{
+    ViewBag.Title = "Manage NDC";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    #ChallanWindow{
+        display:none;
+    }
+    .hyperlink.verify{
+        font-weight: bold;
+        color: blue;
+    }
+</style>
+<div id="divManageNDC">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">No Dues Certificate</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                <a href="/Revenue/Finance/NDC" class="" target="_blank">Generate NDC</a>
+                @*<a href="/Member/Authority/NDCForm"  class="" target="_blank">Generate NDC</a>*@
+                <a href="#" id="AddRentRequest" class="" onclick="javascript: GenerateNoDuesCertificate(event);">Generate No Dues Certificate</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 row blnk-rw"></div>
+    <div class="col-md-12">
+        <ul class="nav nav-tabs content-tabs" id="ulProperty" role="tablist">
+            <li><a href="#one" role="tab" data-toggle="tab">NDC OLD</a></li>
+            <li class="active"><a href="#two" role="tab" data-toggle="tab">NDC After 2018</a></li>
+        </ul>
+    </div>
+    <div class="col-md-12 tab-content">
+        <div class="tab-pane fade" id="one">
+            <div class="col-md-12 k-grid-content">
+                @(Html.Kendo().Grid<NA.PMS.Model.NDCVeiwModel>()
+                    .Name("NDCGrid")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(c => c.Id).Hidden();
+                        columns.Bound(c => c.RegistrationId).Title("Registration Id");
+                        columns.Bound(c => c.Applicant).Title("Applicant");
+                        columns.Bound(c => c.EntryDate).Title("Request Date").Format("{0:dd-MM-yyyy}");
+                        columns.Bound(c => c.NDCDate).Title("Issue Date").Format("{0:dd-MM-yyyy}");
+                        columns.Bound(c => c.Status).Title("Status");
+                    })
+                        .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                        .DataSource(dataSource => dataSource
+                        .Ajax().Model(model => model.Id(p => p.Id))
+                        .ServerOperation(true).Sort(sort => sort.Add("Id").Descending())
+                        .Read(read => read.Action("GetNoDuesCertificateList", "Report", new { area = "Reports" })).PageSize(10)
+                    )
+                )
+            </div>
+        </div>
+
+        <div class="tab-pane fade in active" id="two">
+            <div class="col-md-12 k-grid-content">
+                @(Html.Kendo().Grid<NA.PMS.Model.NDCVeiwModel>()
+                    .Name("NDCGrid2")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(c => c.Id).Hidden();
+                        columns.Bound(c => c.RegistrationId).Title("Registration Id").Width(100);
+                        columns.Bound(c => c.Department).Title("Department").Width(100);
+                        columns.Bound(c => c.Applicant).Title("Applicant");
+                        columns.Bound(c => c.Sector).Title("Sector").Width(100);
+                        columns.Bound(c => c.Block).Title("Block").Width(100);
+                        columns.Bound(c => c.PlotNo).Title("Plot No").Width(100);
+                        //columns.Bound(c => c.CreatedDate).Title("Request Date").Format("{0:dd-MM-yyyy}");
+                        columns.Bound(c => c.NDCDate).Title("Issue Date").Width(100).Format("{0:dd-MM-yyyy}");
+                        columns.Bound(c => c.Status).Title("Status").Width(100);
+                        columns.Bound(c => c.TemplateContent).Hidden();
+                        //columns.Bound(c => c.Id).Title("NDC Letter").Width(100).ClientTemplate("<center><a onclick='javascript:ViewNDCLetter(#=Id#);'><span class='fa fa-print'></span></a></center> ");
+                        columns.Bound(c => c.Id).Title("NDC Letter").Width(100).ClientTemplate("#if(StatusId == 1){# <center><a onclick='javascript:ViewNDCLetter(#=Id#);'><span class='fa fa-print'></span></a></center>#}# ");
+                        columns.Bound(c => c.Id).Title("Edit").Width(100).ClientTemplate("#if(IsLetterIssued == null || IsLetterIssued == false){#<center><a href='" + "/Member/Authority/EditNDCLetter/#= Id #'><span class='fa fa-edit'></span></a></center>#}else{#<label>Issued</label>#}#  ");
+                        columns.Bound(c => c.IsLetterIssued).Title("Action").Width(100).ClientTemplate("#if(IsActive == true){ if(IsLetterIssued == true){#<label>Issued</label>#}else{#<label class='hyperlink verify' onclick='javascript:UpdateRemarks(#=RegistrationId#,#=Id#)'>Generated</label>#}}else{#<label>Cancelled</label>#}#");
+                    })
+                        .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                        //.ClientDetailTemplateId("template")
+                        //.AutoBind(true)
+                        .DataSource(dataSource => dataSource
+                        .Ajax().Model(model => model.Id(p => p.Id))
+                        .ServerOperation(true).Sort(sort => sort.Add("Id").Descending())
+                        .Read(read => read.Action("GetNDCGeneratedListAsDataSource", "Authority", new { area = "Member" })).PageSize(10)
+                    )
+                )
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="divLetterBodyModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="padding-top:20px;">
+    <div class="modal-dialog" style="width: 65%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title"><b><span id="LetterHeading"></span></b></h4>
+            </div>
+            <div class="modal-body" id="divmodalbody" style="overflow:auto; height:480px;">
+                @*<div>
+                    <input type="hidden" name="btype" id="code128" value="code128">
+                    <input type="hidden" id="bgColor" value="#FFFFFF" size="7">
+
+                    <input type="hidden" id="color" value="#000000" size="7">
+
+                    <input type="hidden" id="barWidth" value="1" size="3">
+
+                    <input type="hidden" id="barHeight" value="50" size="3">
+
+                    <input type="hidden" id="moduleSize" value="5" size="3">
+
+                    <input type="hidden" id="quietZoneSize" value="1" size="3">
+
+                    <input type="hidden" name="rectangular" id="rectangular">
+                    <input type="hidden" id="posX" value="10" size="3">
+
+                    <input type="hidden" id="posY" value="20" size="3">
+                    <input type="hidden" id="css" name="renderer" value="css" checked="checked">
+
+                </div>*@
+                @*<div id="barcodeTarget" class="barcodeTarget"></div>*@
+                @*<canvas id="canvasTarget" width="100" height="100"></canvas>*@
+                <div id="divLetterBody"></div>
+
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="submit" id="btnPrintLetter" class="k-button" data-dismiss="modal" onclick="PrintNDCLetter();">Print</button>
+                @*<input type="button" onclick="generateBarcode();" value="&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Generate the barcode&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;">*@
+                @*<button type="button" id="downloadLetter" class="k-button">Download</button>*@
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="col-md-12 popup-window" id="ChallanWindow" style="height:470px;background:url(/Content/Images/boxed-bg.jpg) repeat; overflow:auto;">
+    <div class="row form-group" style="overflow:auto">
+        <style>
+            .td-amount {
+                padding-right: 30px;
+            }
+
+            #divChallanBody2 {
+                padding: 5px;
+            }
+
+            #authorityChallan {
+                border: 1px solid black;
+                padding: 5px;
+            }
+        </style>
+        <div id="divLetterBody"></div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-12" style="text-align:center">
+            <button type="button" class="k-button" onclick="PrintNDCLetter();" style="width:100px;">Print</button>
+            <button type="button" class="k-button" onclick="CloseChallan();" style="width:100px;">Close</button>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        @{
+            if (TempData["ndc"] != null && TempData["ndc"] != "")
+            {
+                if ((int)TempData["ndc"] == ReturnType.Updated)
+                {
+                    @:alertify.success('Detail for NDC Updated successfully.');
+                }
+                else if ((int)TempData["ndc"] == ReturnType.Saved)
+                {
+                    @:alertify.success('Detail for NDC added successfully.');
+                }
+                else
+                {
+                    @:alertify.error('Detail for NDC added fail');
+                        }
+            }
+         }
+
+        //$('.popup-window').kendoWindow({
+        //    modal: true,
+        //    title: "NDC Letter",
+        //    actions: false, // [ "Minimize", "Maximize"],
+        //    visible: false,
+        //    width: "70%"
+        //});
+    });
+
+    function GenerateNoDuesCertificate(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("NoDuesCertificate", "Report")';
+    }
+
+    function ViewNDCLetter(row) {
+        $.ajax({
+            type: "post",
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            data: JSON.stringify({ Id:row }),
+            url: '/Member/Authority/GetNDCLetter',
+            success: function (result) {
+                if (result != null) {
+                    $("#divLetterBody").html(result);
+                    $("#divLetterBodyModal").modal('show');
+                    //$('#barcode').kendoBarcode({
+                    //    value: "10000013",
+                    //    height: "50"
+                    //});
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Network Error.");
+            }
+        });
+        //var tr = $(row).parent().parent();
+        //var content = $(tr).children("td:eq(10)").text();
+        //$("#divLetterBody").html(content);
+        //$("#divLetterBodyModal").modal('show');
+
+        //$(".popup-window").data("kendoWindow").open();
+        //$(".popup-window").data("kendoWindow").center();
+    }
+
+    function PrintNDCLetter() {
+        var contents = document.getElementById("divLetterBody").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+    function UpdateRemarks(rid,id) {
+        $.ajax({
+            type: "post",
+            dataType: "json",
+            contentType: "application/json;charset=utf-8",
+            data: JSON.stringify({ RegistrationId: rid,Id:id }),
+            url: '/Member/Authority/UpdateRemarksForNDCLetter',
+            success: function (result) {
+                if (result == '@ReturnType.Updated') {
+                    alertify.success("Letter Issued Successfully");
+                    $("#NDCGrid2").data("kendoGrid").dataSource.read();
+                }
+                else {
+                    alertify.error("Can't Issue Letter.");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Network error.");
+            }
+        });
+    }
+
+    function EditNDCLetter(row) {
+
+    }
+</script>

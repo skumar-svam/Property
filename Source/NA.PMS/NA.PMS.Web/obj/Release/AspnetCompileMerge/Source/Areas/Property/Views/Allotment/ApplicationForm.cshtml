@@ -1,0 +1,257 @@
+﻿@model NA.PMS.Model.FormViewModel
+@using Kendo.Mvc.UI;
+@using NA.PMS.Model
+
+@{
+    ViewBag.Title = "Applications";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .bulkDialog {
+        display: none;
+    }
+
+  
+
+    .disable_a_href {
+        pointer-events: none;
+    }
+
+    .k-grid-content {
+        overflow-y: hidden;
+        overflow-x: hidden;
+    }
+    k-grid .group-column{
+        background:#e19cf5;
+    }
+</style>
+
+<div class="application-form">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-3 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Applications</h1></div>
+            <div class="col-md-9 col-sm-12 col-xs-12 col-btn">
+                <a href="/Property/Allotment/AddApplication" target="_blank">New Allotment Application</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12" style="border:solid #e2e3e4; border-width:0 1px 1px">
+        <div class="row" style="padding:10px 30px 0 0;">
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                @Html.Label("Scheme Name")
+                @(Html.Kendo().DropDownListFor(m => m.SchemeId)
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel(" -- Select --")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetMasterSearchParameterAsDataSource", "Allotment", new { area = "Property" }).Data("FilterSchemeParameter")))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(100);
+                    })
+                    .Events(events => { events.Change("ChangeInScheme"); })
+                    .HtmlAttributes(new { @class = "input-disabled", style = "width:90%; float:right;" })
+                )
+            </div>
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                @Html.Label("Department")
+                @(Html.Kendo().DropDownListFor(m => m.DepartmentId)
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel(" -- Select --")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetMasterSearchParameterAsDataSource", "Allotment", new { area = "Property" }).Data("FilterDepartmentParameter")))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(100);
+                    })
+                    .Events(events => { events.Change("ChangeInDepartment"); })
+                    .HtmlAttributes(new { @class = "input-disabled", style = "width:90%; float:right;" })
+                )
+            </div>
+
+            <div class="col-md-3 col-sm-6 col-xs-12 form-group">
+                @Html.Label("Application Form")
+                @(Html.Kendo().DropDownListFor(model => model.ApplicationId)
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel(" -- Select --")
+                    .Enable(true)
+                    .AutoBind(true)
+                    .Filter("contains")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetMasterSearchParameterAsDataSource", "Allotment", new { area = "Property" }).Data("FilterApplicationParameter")))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(100);
+                    })
+                    .HtmlAttributes(new { style = "width:90%; float:right;", @class = "input-disabled" })
+                    .Events(e => e.Change("ChangeInApplicationForm"))
+                )
+            </div>
+            
+        </div>
+    </div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<FormViewModel>()
+                .Name("gridApplicationForm")
+                .ToolBar(tools => tools.Excel())
+                .Excel(excel => excel.FileName("ServiceRequestList.xlsx").ProxyURL(Url.Action("Excel_Export_Save", "Allotment")).AllPages(true).Filterable(true))
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.Id).Hidden(true);
+                    columns.Bound(c => c.ApplicationId).Visible(false);
+                    columns.Bound(c => c.EncryptedFormId).Visible(false);
+                    columns.Bound(c => c.RegistrationId).Title("RegistrationId").Width(140).Sortable(false);
+                    columns.Bound(c => c.FormNo).Title("Form No").Width(110);//.ClientTemplate("<a href='/Property/Allotment/ViewApplicationForm/#=EncryptedAppId#'>#=FormNo#</a>");
+                    columns.Bound(c => c.Department).Title("Department").Width(130).Sortable(false);
+                    columns.Bound(c => c.SchemeName).Title("Scheme Name");//.ClientTemplate("<a href='/Master/Scheme/ViewScheme/#= EncodedParameter #'>#= SchemeName #</a>");                    
+                    columns.Bound(c => c.Applicant).Title("Applicant");
+                    columns.Bound(c => c.MobileNo).Title("Mobile No").Width(120);
+                    columns.Bound(c => c.IsFormAllotted).Title("Status").Width(100).ClientTemplate("#=FormStatus#");
+                    //columns.Bound(c => c.ApplicationId).Width(150).ClientTemplate("# if (IsAllotted != 1 && SchemeStatus != 26 && BankId != 4) { # <a class='gridEdit' href='" + "/Property/Allotment/EditApplicationForm/#= EncryptedAppId #'>Edit </a> # } else {#<span class='gridNotEdit'>Edit</span>#} #").Title("Edit").Filterable(false);
+                })
+                .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                .ClientDetailTemplateId("template").AutoBind(true)
+                .DataSource
+                (
+                     dataSource => dataSource
+                    .Ajax().ServerOperation(true)
+                    .Model(model => model.Id(p => p.Id))
+                    .Sort(x => x.Add(c=>c.CreatedDate).Descending())
+                    .Read(read => read.Action("GetApplicationFormList", "Allotment", new { area = "Property" }).Data("FilterSearchParameter")).PageSize(10)
+                 )
+        )
+    </div>
+</div>
+
+<script id="template" type="text/kendo-tmpl">
+    @(Html.Kendo().Grid<NA.PMS.Model.FormViewModel>()
+            .Name("grid_#=Id#") // template expression, to be evaluated in the master context
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Hidden(true);
+                columns.Bound(c => c.ApplicationId).Title("Application Id").Width(120);
+                columns.Bound(c => c.PropertyId).Title("Property Id").Width(120);
+                columns.Bound(c => c.BankName).Title("Bank").Width(120);
+                columns.Bound(c => c.PaymentType).Title("Mode").Width(120);
+                columns.Bound(c => c.DDNo).Title("DD").Width(120);
+                columns.Bound(c => c.UTR).Title("UTR").Width(150);
+                columns.Bound(c => c.DepositedAmount).Title("Amount (<span class='fa fa-rupee'></span>)").Width(110);
+                columns.Bound(c => c.CorrespondAddress).Title("Address");                
+                //columns.Bound(c => c.IsPropertyAllotted).Title("Status").Width(120).ClientTemplate("#if(IsPropertyAllotted==true){#<label>Allotted</label>#}else{#<label>Not Allotted</label>#}#");
+            })
+            .DataSource(dataSource => dataSource
+                .Ajax()
+                .PageSize(10)
+                .Read(read => read.Action("GetApplicationFormList", "Allotment", new { area = "Property", ApplicationId = "#=ApplicationId#" }))
+            )
+            .ToClientTemplate()
+    )
+</script>
+<script>
+    function dataBound() {
+        this.expandRow(this.tbody.find("tr.k-master-row").first());
+    }
+</script>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+       
+    });
+
+
+    function ChangeInDropdownFilter() {
+        $('#SchemeId').data('kendoDropDownList').dataSource.read();
+        $('#DepartmentId').data('kendoDropDownList').dataSource.read();
+        $('#ApplicationId').data('kendoDropDownList').dataSource.read();
+        $('#gridApplicationForm').data('kendoGrid').dataSource.read();
+    }
+
+    function ChangeInScheme() {
+        //$('#ActionType').val("Scheme");
+        ChangeInDropdownFilter();
+    }
+    function FilterSchemeParameter() {
+        return {
+            ActionType: "Scheme",
+            SchemeId: $('#SchemeId').val(),
+            DepartmentId: $('#DepartmentId').val()
+        };
+    }
+
+    function ChangeInDepartment() {
+        //$('#ActionType').val("Department");
+        ChangeInDropdownFilter();
+    }
+    function FilterDepartmentParameter() {
+        return {
+            ActionType: "Department",
+            SchemeId: $('#SchemeId').val(),
+            DepartmentId: $('#DepartmentId').val()
+        };
+    }
+
+    function ChangeInApplicationForm() {
+        //$('#ActionType').val("Sector");
+        ChangeInDropdownFilter();
+    }
+    function FilterApplicationParameter() {
+        return {
+            ActionType: "ApplicationForm",
+            SchemeId: $('#SchemeId').val(),
+            DepartmentId: $('#DepartmentId').val()
+        };
+    }
+
+    function FilterSearchParameter() {
+        return {
+            SchemeId: $('#SchemeId').val(),
+            DepartmentId: $('#DepartmentId').val(),
+            ApplicationId: $('#ApplicationId').val()
+        };
+    }
+
+    function PrintDiv() {
+        var contents = document.getElementById("divDrawSlipBody").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+</script>
+

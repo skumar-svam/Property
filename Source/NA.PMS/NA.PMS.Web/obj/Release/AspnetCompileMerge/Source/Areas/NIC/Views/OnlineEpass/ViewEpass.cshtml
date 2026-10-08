@@ -1,0 +1,725 @@
+﻿@model NA.PMS.NICServices.SWPEpassViewModel
+@using Kendo.Mvc.UI;
+@using NA.PMS.Model;
+@using System.Web.Mvc;
+
+@{
+    ViewBag.Title = "View Epass";
+    Layout = "~/Views/Shared/_Blank.cshtml";
+}
+<style>
+    /*#CommonInfo {
+        display: none;
+    }
+
+    #h2-declaration {
+        display: none;
+    }
+
+    #div-declaration {
+        display: none;
+    }*/
+
+    .k-button.k-upload-button {
+        margin: 0;
+    }
+
+    .k-upload-files {
+        margin: 0;
+    }
+
+    #userphoto {
+        display: none;
+    }
+
+        #userphoto:hover {
+            cursor: pointer;
+        }
+
+    .glyphicon-user:hover {
+        cursor: pointer;
+    }
+
+    #signature {
+        display: none;
+    }
+
+        #signature:hover {
+            cursor: pointer;
+        }
+
+    .img-upld-bx:hover {
+        cursor: pointer;
+    }
+
+    #loader {
+        display: none;
+    }
+
+    .text-red {
+        color: red;
+    }
+
+    .upload-user-image {
+        width: 140px;
+        height: 140px;
+        padding-top: 60px;
+    }
+
+    .upload-sign-image {
+        width: 140px;
+        height: 55px;
+        line-height: 14px;
+        padding-top: 5px;
+    }
+
+    .upload-image {
+        background: #fff;
+        border: 1px solid #ccc;
+        font-size: 11px;
+        text-align: center;
+        float: right;
+    }
+
+    .area-form-fee {
+        display: none;
+    }
+
+    #btn-download-form {
+        /*display: none;*/
+    }
+
+    #form-download-href {
+        display: none;
+    }
+
+    #btn-form-submit {
+        display: none;
+    }
+</style>
+
+@using (Html.BeginForm("SaveEpassForm2", "OnlineProperty", FormMethod.Post, new { enctype = "multipart/form-data", id = "applicationform" }))
+{
+    <div class="online-registration" style="margin:25px 100px;">
+        <div class="col-md-12">
+            <div class="row" style="margin-top:6px;">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Online E-Pass Form</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce" id="first-form">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px" id="divApplicantInformation">
+                <h2 class="blck-heading" style="margin-bottom:6px;">
+                    Applicant Information
+                </h2>
+                <div class="form-bx">
+                    <div class="hidden-field">
+                        @Html.HiddenFor(model => model.Id)
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-4 col-sm-6 col-xs-12 form-group">
+                                    <label>Epass Type</label>
+                                </div>
+                                <div class="col-md-8 col-sm-6 col-xs-12 form-group">
+                                    @(Html.Kendo().DropDownListFor(model => model.EpassType)
+                                        .DataTextField("Text")
+                                        .DataValueField("Value")
+                                        .OptionLabel(" -- Select --")
+                                        .Enable(true)
+                                        .BindTo(new List<SelectListItem>() {
+                                          new SelectListItem() { Text = "Individual", Value = "I" },
+                                          new SelectListItem() { Text = "Vehicle", Value = "V" }
+                                      })
+                                        .HtmlAttributes(new { style = "width:100%", @class = "input-disabled" })
+                                    )
+                                </div>
+                            </div>
+                            <div class="row row-expansion">
+                                <div class="col-md-4 col-sm-6 col-xs-12 form-group">
+                                    <label>NOIDA Employee</label>
+                                </div>
+                                <div class="col-md-8 col-sm-6 col-xs-12 form-group">
+                                    @(Html.Kendo().DropDownListFor(model => model.IsAuthorityEmployee)
+                                        .DataTextField("Text")
+                                        .DataValueField("Value")
+                                        .OptionLabel(" -- Select --")
+                                        .Enable(true)
+                                        .BindTo(new List<SelectListItem>() {
+                                          new SelectListItem() { Text = "Yes", Value = "true" },
+                                          new SelectListItem() { Text = "No", Value = "false" }
+                                      })
+                                        .HtmlAttributes(new { style = "width:100%", @class = "input-disabled" })
+                                    )
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 col-sm-6 col-xs-12 form-group">
+                                    @Html.Label("Applicant Name", htmlAttributes: new { @class = "required" })
+                                </div>
+                                <div class="col-md-8 col-sm-6 col-xs-12 form-group">
+                                    @Html.TextBoxFor(model => model.Applicant, new { @class = "form-control" })
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 col-sm-6 col-xs-12 form-group">
+                                    @Html.Label("Mobile No", htmlAttributes: new { @class = "required" })
+                                </div>
+                                <div class="col-md-8 col-sm-6 col-xs-12 form-group">
+                                    @Html.TextBoxFor(model => model.MobileNo, new { @class = "form-control", @max = "10" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="row">
+                                <div class="col-md-4 col-sm-6 col-xs-12"></div>
+                                <div class="col-md-8 col-sm-6 col-xs-12 form-group">
+                                    <div class="row">
+                                        @{
+                                                if (Model.ApplicantImage != null)
+                                                {
+                                                    <div class="col-md-12 text-right" style="margin-bottom:5px;">
+                                                        <img id="userphoto1" src="@Model.ApplicantImage" alt="your image" height="150" width="140" name="userImage2" />
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    @*<div class="col-md-12 text-right" style="margin-bottom:5px;">
+                                                        <div id="userid" class="img-upld-bx upload-image upload-user-image" style=""> Upload your image <small class="text-red"> User Image Size Min(10kb) and Max(50kb)</small></div>
+                                                        <img id="userphoto" src="#" alt="your image" height="150" width="140" name="userImage2" />
+                                                        <input type='file' id="imguser" name="userImage" accept="image/jpg" style="display:none" />
+                                                    </div>*@
+                                                }
+                                            }
+                                        @*<div class="col-md-12 text-right" style="margin-bottom:5px;">
+                                            <div id="userid" class="img-upld-bx upload-image upload-user-image" style=""> Upload your image <small class="text-red"> User Image Size Min(10kb) and Max(50kb)</small></div>
+                                            <img id="userphoto" src="#" alt="your image" height="150" width="140" name="userImage2" />
+                                            <input type='file' id="imguser" name="userImage" accept="image/jpg" style="display:none" />
+                                        </div>*@
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row divCompanyInfo" id="divCompanyInfo">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Email Id", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.Email, new { @class = "form-control" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-company">
+                            @Html.Label("Aadhar No", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-company">
+                            @Html.TextBoxFor(model => model.EPDI, new { @class = "form-control", @maxlength = "150", placeholder = "place name" })
+                        </div>
+                    </div>
+                    <div class="row divCompanyInfo" id="divCompanyInfo">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-company">
+                            @Html.Label("State", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-company">
+                            @Html.TextBoxFor(model => model.State, new { @class = "form-control", @maxlength = "150", placeholder = "state name" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("City", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.City, new { @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="row divCompanyInfo" id="divCompanyInfo">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-company">
+                            @Html.Label("Local Area", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-company">
+                            @Html.TextBoxFor(model => model.LocalPlace, new { @class = "form-control", @maxlength = "150", placeholder = "place name" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("PIN Code", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.PIN, new { @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("From Address", htmlAttributes: new { @class = "required lbl-permanent-address" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextAreaFor(model => model.FromAddress, new { @class = "form-control", @maxlength = "500", placeholder = "address" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("To Address", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextAreaFor(model => model.ToAddress, new { @class = "form-control", @maxlength = "500", placeholder = "address" })
+                        </div>
+                    </div>
+
+                    @*<div class="row" id="divCompanyInfo2">
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group col-company">
+                                @Html.Label("OTP", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group col-company">
+                                <input type="text" class="k-textbox" id="text-otp" maxlength="10" placeholder="123" style="width:100%" />
+                            </div>
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                <input type="button" class="k-button" id="btn-validate-otp" value="Submit" style="width:100%" />
+                            </div>
+                        </div>*@
+                </div>
+
+                <div id="div-otp" class="form-bx">
+
+                </div>
+
+                <div id="CommonInfo" class="form-bx">
+                    <div class="row divCompanyInfo" id="divCompanyInfo">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-company">
+                            @Html.Label("From Date", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-company">
+                            @*@Html.TextBoxFor(model => model.StartDate, new { @class = "form-control", @maxlength = "150", placeholder = "place name" })*@
+                            @(Html.Kendo().DatePickerFor(model => model.StartDate).HtmlAttributes(new { style = "width: 100%", title = "datepicker" }))
+
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("To Date", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @*@Html.TextBoxFor(model => model.EndDate, new { @class = "form-control" })*@
+                            @(Html.Kendo().DatePickerFor(model => model.EndDate).HtmlAttributes(new { style = "width: 100%", title = "datepicker" }))
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Purpose", htmlAttributes: new { @class = "required lbl-permanent-address" })
+                        </div>
+                        <div class="col-md-10 col-sm-9 col-xs-12 form-group">
+                            @Html.TextAreaFor(model => model.Purpose, new { @class = "form-control", @maxlength = "500", placeholder = "address" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Vehicle Type", htmlAttributes: new { @class = "required lbl-permanent-address" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @(Html.Kendo().DropDownListFor(model => model.VehicleType)
+                                        .DataTextField("Text")
+                                        .DataValueField("Value")
+                                        .OptionLabel(" -- Select --")
+                                        .Enable(true)
+                                        .BindTo(new List<SelectListItem>() {
+                                          new SelectListItem() { Text = "Private", Value = "Private" },
+                                          new SelectListItem() { Text = "Commercial", Value = "Commercial" }
+                                      })
+                                        .HtmlAttributes(new { style = "width:100%", @class = "input-disabled" })
+                            )
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @*@Html.Label("RC No", htmlAttributes: new { @class = "required" })*@
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @*@Html.TextBoxFor(model => model.RCNo, new { @class = "form-control" })*@
+                        </div>
+                    </div>
+                    <div class="row divCompanyInfo" id="divCompanyInfo">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group col-company">
+                            @Html.Label("Vehicle No", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group col-company">
+                            @Html.TextBoxFor(model => model.VehicleNo, new { @class = "form-control", @maxlength = "150", placeholder = "place name" })
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Vehicle RC No", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(model => model.RCNo, new { @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Applicant Id Card", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @*@Html.TextBoxFor(model => model.UserIdPath, new { type = "file", @name = "idfile", @class = "form-control" })*@
+                            <input type='file' id="idfile" name="idfile" accept="image/jpg" />
+                        </div>
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Vehicle RC doc", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @*@Html.TextBoxFor(model => model.RCPath, new { type = "file", @name="rcfile", @class = "form-control" })*@
+                            <input type='file' id="rcfile" name="rcfile" accept="image/jpg" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Driving Licence", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                            @*@Html.TextBoxFor(model => model.EPDII, new { type = "file", @name = "dlfile", @class = "form-control" })*@
+                            <input type='file' id="dlfile" name="dlfile" accept="image/jpg" />
+                        </div>
+                    </div>
+                </div>
+
+
+                <h2 id="h2-declaration" class="blck-heading" style="margin-bottom:6px;">DECLARATION BY THE APPLICANT</h2>
+                <div id="div-declaration" class="form-bx">
+                    <div class="row">
+                        <div class="col-md-12 form-group">
+                            <p>
+                                <label>
+                                    <input type="checkbox" required name="checkbox-declaration" id="checkbox-declaration" />
+                                    <b>I am aware of application guideline & directions from central and state government(https://mohfw.gov.in) to prevent the spread of Corona Virus. I will follow the social distancing norms every time.</b>
+                                </label>
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="box-button text-center" id="div-box-button">
+                <input type="button" class="btn btn-default" id="btn-next-form" value="Next" />
+                <input type="button" value="Submit" id="btn-form-submit" class="btn btn-add" />
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+}
+
+<div class="col-md-12" id="div-otp-popup-window">
+    <div class="row" style="margin-top:25px;">
+        <div class="col-md-4 col-sm-4 col-xs-12 form-group" style="text-align:center">
+            <label>OTP</label>
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+            <input type="text" class="k-textbox" id="text-otp" maxlength="10" placeholder="123" style="width:100%" />
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+            <input class="k-button" type="button" value="Resend" id="btn-otp-resend" />
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-2 col-sm-4 col-xs-12 form-group">
+            <input type="hidden" id="hdn-otp" />
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+            <input type="button" class="k-button" id="btn-validate-otp" value="Submit" style="width:100%" />
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+            <input type="button" class="k-button" id="btn-cancel-otp" value="Cancel" style="width:100%" />
+        </div>
+    </div>
+</div>
+
+<div id="progressbar" style="width:100%; text-align:center;">
+    <div id="loader" style="position: fixed;top:210px; left:0;  width:100%; height: 100%;  ">
+        <img src="~/Content/Images/ajax_loader_red.gif" style="width:200px;height:200px;" />
+    </div>
+</div>
+
+
+
+
+<script>
+    $(document).ready(function () {
+
+        $('#div-otp-popup-window').kendoWindow({
+            modal: true,
+            title: "Online E-Pass validation",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "30%"
+            },
+            width: "40%", height: "210px" //"35%"
+        });
+
+        $('#userid').click(function () {
+            $("#imguser").click();
+        });
+
+        $("#imguser").change(function () {
+            readURL(this);
+        });
+
+        $('#btn-next-form').click(function () {
+            SendOTP();
+            //$('#div-otp-popup-window').data("kendoWindow").open();
+        });
+
+        $('#btn-cancel-otp').click(function () {
+            $('#div-otp-popup-window').data("kendoWindow").close();
+        });
+
+        $('#btn-validate-otp').click(function () {
+            ValidateOtpOnPage();
+            //$('#div-otp-popup-window').data("kendoWindow").close();
+        });
+
+        $('#btn-form-submit').click(function () {
+            if (ValidateFormFields()) {
+                SubmitEpassForm();
+            }
+        });
+    });
+    function readURL(input) {
+        if (CheckUserImage(input)) {
+            if (input.files && input.files[0]) {
+                var imgsize = input.files[0].size / 1024;
+                if (imgsize > 11 && imgsize < 51) {
+                    var reader = new FileReader();
+                    $('#userid').css("display", "none");
+                    reader.onload = function (e) {
+                        $('#userphoto').attr('src', e.target.result);
+                    }
+                    $('#userphoto').show();
+                    reader.readAsDataURL(input.files[0]);
+                }
+                else {
+                    alertify.error("user image min(10kb) and max(50kb)");
+                    $('#imguser').val('');
+                }
+            }
+        }
+        else {
+            $('#imguser').val('');
+        }
+    }
+
+    function CheckUserImage(input) {
+        var file = input.files[0].name;
+        var count = file.lastIndexOf('.') + 1;
+        var ext = file.substr(count);
+        if (ext.toLowerCase() == "jpg") {
+            return true;
+        }
+        else {
+            alertify.error("Only jpg file allowed.");
+            return false;
+        }
+    }
+
+    function SendOTP() {
+        var mobile = $('#MobileNo').val();
+        var mailId = $('#Email').val();
+        if (mobile != "") {
+            $.ajax({
+                type: 'POST',
+                dataType: 'json',
+                data: { mobileNo: mobile, email: mailId },
+                url: '/NIC/OnlineEpass/SendOTP',
+                success: function (result) {
+                    if (result != null) {
+                        $('#hdn-otp').val(result);
+                        $('#div-otp-popup-window').data("kendoWindow").open();
+                        //alertify.success("OTP has been sent on your mobile and email id successfuly.");
+                        return false;
+                    }
+                    else {
+
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    //alert(respText);
+                }
+            });
+        }
+        else {
+            alertify.error("Please enter Mobile No");
+        }
+    }
+
+    function ValidateOtpOnPage() {
+        var otp_sent = $('#text-otp').val();
+        var otp_return = $('#hdn-otp').val();
+        if (otp_sent != "") {
+            if (otp_sent == otp_return) {
+                $('#CommonInfo').show();
+                $('#h2-declaration').show();
+                $('#div-declaration').show();
+                $('#btn-form-submit').show();
+                $('#div-otp-popup-window').data("kendoWindow").close();
+                //SubmitOpenSchemeForm();
+            }
+            else {
+                $('#CommonInfo').css("display", "none");
+                $('#h2-declaration').css("display", "none");
+                $('#div-declaration').css("display", "none");
+                $('#btn-form-submit').css("display", "none");
+                alertify.error("OTP mismatch");
+            }
+        }
+    }
+
+    function SubmitEpassForm() {
+        $('#btn-form-submit').prop("disabled", true);
+        //var atype = $('#DDLApplicantType').val();
+        //var ftype = $('#DDLApplicationFormType').val();
+        //$('#hdnFormType').val("Online"); //$('#hdnFormType').val(form);
+        //$('#ApplicantType').val(atype);
+        //$('#ApplicationFormType').val(ftype);
+
+        var formData = new FormData($('form').get(0));
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: false, // Not to set any content header
+            processData: false, // Not to process data
+            data: formData,
+            url: '/NIC/OnlineEpass/SaveEpassForm',
+            success: function (result) {
+                if (result != null) {
+                    //$("#ApplicationFormId").val(result.ApplicationFormId);
+                    //var gst = CalculateGST(result.ApplicationFee);
+                    //var totalAmount = parseFloat((parseFloat(result.ApplicationFee) + parseFloat(gst)).toFixed(2));
+                    //$("#schemeformfee").val(totalAmount);
+                    //$("#FormFeeWithGST").val(totalAmount);
+                    //$(".area-form-fee").show();
+                    //$('#div-box-button').css("display", "none");
+                    alert("Your e-pass request is submitted successfully.");
+                    //ClearInputFields();
+                    window.location.reload();
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                alertify.error("Network error, try again later");
+                $('#btn-form-submit').prop("disabled", false);
+            }
+        });
+    }
+
+    function ValidateFormFields() {
+        var bflag = true;
+        if ($("#EpassType").val() == "") {
+            alertify.error("Please select e-pass type.");
+            bflag = false;
+        }
+        if ($("#IsAuthorityEmployee").val() == "") {
+            alertify.error("Please select employee type");
+            bflag = false;
+        }
+        if ($("#Email").val() == "") {
+            alertify.error("Please enter email id.");
+            bflag = false;
+        }
+        if ($("#MobileNo").val() == "") {
+            alertify.error("Please enter Mobile no.");
+            bflag = false;
+        }
+        if ($("#MobileNo").val() != "") {
+            if ($("#MobileNo").val().length != 10) {
+                alertify.error("Please enter correct Mobile No.");
+                bflag = false;
+            }
+        }
+        //if ($("#EPDI").val() == "") {
+        //    alertify.error("Please enter Aadhar Number.");
+        //    bflag = false;
+        //}
+        if ($("#EPDI").val() != "") {
+            if ($("#EPDI").val().length != 12) {
+                alertify.error("Please enter correct Aadhar Number.");
+                bflag = false;
+            }
+        }
+        if ($("#State").val() == "") {
+            alertify.error("Please enter State.");
+            bflag = false;
+        }
+        if ($("#City").val() == "") {
+            alertify.error("Please enter city name.");
+            bflag = false;
+        }
+        if ($("#LocalPlace").val() == "") {
+            alertify.error("Please enter local palace name.");
+            bflag = false;
+        }
+        if ($("#FromAddress").val() == "") {
+            alertify.error("Please enter from address.");
+            bflag = false;
+        }
+        if ($("#ToAddress").val() == "") {
+            alertify.error("Please enter Destination Address.");
+            bflag = false;
+        }
+        if ($("#StartDate").val() == "") {
+            alertify.error("Please enter local palace name.");
+            bflag = false;
+        }
+        if ($("#EndDate").val() == "") {
+            alertify.error("Please enter local palace name.");
+            bflag = false;
+        }
+        if ($("#Purpose").val() == "") {
+            alertify.error("Please enter purpose for movement.");
+            bflag = false;
+        }
+        if ($("#EpassType").val() != "") {
+            if ($("#VehicleType").val() == '') {
+                alertify.error("Please select Vehicle type.");
+                bflag = false;
+            }
+            if ($("#VehicleNo").val() == '') {
+                alertify.error("Please enter vehicle no.");
+                bflag = false;
+            }
+            if ($("#RCNo").val() == '') {
+                alertify.error("Please enter vehicle rc no.");
+                bflag = false;
+            }
+        }
+
+        var dflag = $("#checkbox-declaration").prop("checked");
+        if (dflag == false) {
+            alertify.error("Please check Declaration .");
+            bflag = false;
+        }
+
+        return bflag;
+
+    }
+
+    function ClearInputFields() {
+        $('#EpassType').data("kendoDropDownList").value('');
+        $('#IsAuthorityEmployee').data("kendoDropDownList").value('');
+        $('#Applicant').val('');
+        $('#MobileNo').val('');
+        $('#Email').val('');
+        $('#State').val('');
+        $('#City').val('');
+        $('#PIN').val('');
+        $('#EPDI').val('');
+        $('#StartDate').data("kendoDatePicker").value('');
+        $('#EndDate').data("kendoDatePicker").value('');
+        $('#Purpose').val('');
+        $('#VehicleType').data("kendoDropDownList").value('');
+        $('#RCNo').val('');
+        $('#VehicleNo').val('');
+        $('#LocalPlace').val('');
+        $('#FromAddress').val('');
+        $('#ToAddress').val('');
+    }
+</script>
+
+
+
+

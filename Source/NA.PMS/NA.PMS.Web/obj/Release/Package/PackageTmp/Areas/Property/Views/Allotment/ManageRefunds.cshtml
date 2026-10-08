@@ -1,0 +1,64 @@
+﻿@using Kendo.Mvc.UI
+@{
+    ViewBag.Title = "Manage Refunds";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .k-grid-content {
+        overflow-y: hidden;
+        overflow-x: hidden;
+    }
+</style>
+
+<div>
+    @*<legend><img src="~/Content/Images/Manage_Allottee_List_Requests-1.png" style="height:60px;" />Manage Allotment</legend>*@
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Refunds</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+              
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.RefundModel>()
+        .Name("gridRefunds")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.SchemeName).Title("Scheme Name").Width(100);
+            columns.Bound(c => c.DepttName).Title("Department Name").Width(100);
+            columns.Bound(c => c.RefundStatusText).Title("Refund Status").Width(100);
+            columns.Bound(c => c.SubmissionDate).Title("Submission Date").Width(100).Format("{0:dd/MM/yyyy}");
+            columns.Bound(c => c.RefundInitiationDate).Title("Refund Initiate Date").Width(100).Format("{0:dd/MM/yyyy}");
+            //columns.Bound(c => c.SchemeId).Title("Actions").ClientTemplate("<a href=\"/Property/Allotment/ViewUnsuccessfulList/#= Id#\" id='e_#=Id#'><span class='glyphicon glyphicon-eye-open'></span> View List</a>").Width(40).Filterable(false).Sortable(false);
+            if (@ViewBag.ReadOnlyMenu != null && @ViewBag.ReadOnlyMenu == true)
+            {
+                columns.Bound(p => p.SchemeId).Title("Actions").ClientTemplate("<a href='" + Url.Action("ViewUnsuccessfulList", "Allotment") + "?scID=#= SchemeId #&depID=#= DepttId#'" + ">View List</a>").Width(100);
+            }
+            else
+            {
+                columns.Bound(c => c.SchemeId).ClientTemplate("View List").Title("Action").Filterable(false);
+            }
+
+
+        })
+        .Sortable()
+        .Filterable()
+                .Resizable(resize => resize.Columns(true))
+        .Pageable(pageable => pageable
+                                               .Enabled(true)
+                                               .Refresh(true)
+                                               .PageSizes(true)
+                                            )
+                                            .Groupable()
+        .DataSource(dataSource => dataSource
+        .Ajax().Model(model => model.Id(c => c.SchemeId))
+        .ServerOperation(true)
+        .Read(read => read.Action("GetRefundDetails", "Allotment")).PageSize(20)
+        )
+        )
+    </div>
+</div>
+

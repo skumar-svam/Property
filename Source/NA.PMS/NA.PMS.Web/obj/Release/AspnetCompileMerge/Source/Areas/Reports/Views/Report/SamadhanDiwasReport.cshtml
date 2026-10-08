@@ -1,0 +1,387 @@
+﻿@model NA.PMS.Model.ServiceViewModel
+@using Kendo.Mvc.UI;
+
+@{
+    ViewBag.Title = "Samadhan Diwas Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style type="text/css">
+    .top-margin {
+        margin-top: 6px;
+    }
+
+    .col-md-2.pad-left {
+        /*margin-left: 12px;*/
+    }
+
+    .lbl-status-action {
+        cursor: pointer;
+        color: blue;
+    }
+</style>
+
+<div id="SDServiceReports">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Samadhan Diwas Report</h1></div>
+            <div class="col-md-6 col-sm-6 col-xs-12 col-btn">
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12" style="border-left:1px solid #abc;border-right:1px solid #abc ;padding-bottom:15px;">
+        <div class="row form-group">
+            <div class="col-md-2 pad-left">
+                @Html.Label("Department")
+                @(Html.Kendo().DropDownListFor(model => model.DepartmentId)
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel(" -- Select --")
+                    //.DataSource(source => source.Read(read => read.Action("GetDepartmentList", "ServiceRequest")))
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true).ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetDepartmentListAsDataSource", "Report", new { area = "Reports" })))
+                        .Schema(schema => schema.Data("Data").Total("Total")).PageSize(100);
+                    })
+                    .Events(e => e.Change("ChangeDepartmentEvent"))
+                   .HtmlAttributes(new { style = "width:95%;float:right;", @class = "input-disabled" })
+                )
+            </div>
+            <div class="col-md-2 pad-left">
+                @Html.Label("Start Date")
+                @(Html.Kendo().DatePickerFor(model => model.StartDate).Events(e => e.Change("ChangeDepartmentEvent")).HtmlAttributes(new { style = "width:95%;float:right;" }))
+            </div>
+            <div class="col-md-2 pad-left">
+                @Html.Label("End Date")
+                @(Html.Kendo().DatePickerFor(model => model.EndDate).Events(e => e.Change("ChangeDepartmentEvent")).HtmlAttributes(new { style = "width:95%;float:right;" }))
+            </div>
+            <div class="col-md-2 pad-left">
+                <label>Status</label>
+                @(Html.Kendo().DropDownListFor(m => m.StatusId)
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel(" -- Select --")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetStatusMasterAsDataSource", "Report", new { area = "Reports" })))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(100);
+                    })
+                    .Events(events => { events.Change("ChangeDepartmentEvent"); })
+                    .HtmlAttributes(new { @class = "input-disabled", style = "width:95%;float:right;" })
+                )
+            </div>
+            <div class="col-md-2 pad-left">
+                <label>Service Name</label>
+                @(Html.Kendo().DropDownListFor(model => model.ServiceId)
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel("---select---")
+                    .DataSource(dataSource => dataSource
+                        .Read(read => read.Action("GetServiceListByDepartment", "ServiceRequest", new { area="Member"}).Data("FilterDepartment")).ServerFiltering(true)
+                    )
+                    .CascadeFrom("DepartmentId")
+                    .HtmlAttributes(new { style = "width:95%;float:right;" })
+                    .Events(e => e.Change("ChangeDepartmentEvent"))
+                )
+            </div>
+            <div class="col-md-2" style="text-align:center;">
+                <label style="width:100%;"> </label>
+                <button type="button" id="btnSearch" class="k-button top-margin" value="Search">Search</button>
+                <button type="button" id="btnClear" class="k-button top-margin" value="Clear">Clear</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 k-grid-content" style="overflow-y:hidden;">
+        @(Html.Kendo().Grid<NA.PMS.Model.ServiceViewModel>()
+              .Name("GridSDServiceRequest")
+              .Excel(excel => excel.AllPages(true).Filterable(true).FileName("ServiceReport.xlsx"))
+              .ToolBar(toolsExcel => toolsExcel.Excel())
+              .Columns(columns =>
+              {
+                  columns.Bound(c => c.RegistrationNo).Hidden(true);
+                  columns.Bound(c => c.Id).Title("Ref No").Width(100).ClientFooterTemplate("Total Count: #=count#");
+                  columns.Bound(c => c.Department).Title("Department").Width(120).ClientTemplate("<span>#= Department #<br/>#if(SubDepartment!=null){# <small>(#=SubDepartment#)</small> #}else{# -- #}#</span>").Sortable(false).Filterable(false);
+                  columns.Bound(c => c.PropertyNo).Title("Property No.").Width(140);
+                  columns.Bound(c => c.Applicant).Title("Applicant").ClientTemplate("<span>#= Applicant #<br/>#if(MobileNo!=null){# <small class='glyphicon glyphicon-phone'>&nbsp;#=MobileNo#</small> #}else{# -- #}#</span>");
+                  //columns.Bound(c => c.ServiceName).Title("Services").ClientTemplate("<span>#= ServiceName #<br/><small ><b>Receiving Date:</b>&nbsp;#= kendo.toString(CreatedDate, 'D')#</small></span>");
+                  columns.Bound(c => c.RequestDate).Width(120).Format("{0:dd/MM/yyyy}");
+                  columns.Bound(c => c.Status).Title("Status").Width(100);
+                  //columns.Bound(c => c.CreatedDate).Title(" ").Width(80).ClientTemplate("<a  onclick='javascript:OpenFile(this);'><center><span class='glyphicon glyphicon-print'></span></center></a>").Filterable(false).Sortable(false);
+                  //columns.Bound(c => c.IsServiceHasDoc).ClientTemplate("#if(IsServiceHasDoc){# <center><span class='glyphicon glyphicon-download'></span></center> #}else{# <center>--</center> #}#").Title(" ").Filterable(false).Width(50);
+                  //columns.Bound(c => c.UploadedDocument).ClientTemplate("#if(UploadedDocument!=''){# <a  onclick='javascript:OpenDocument_user(this);'><center><span class='glyphicon glyphicon-download'></span></center></a> #}else{# <center>--</center> #}#").Title("User").Filterable(false).Width(50);
+                  //columns.Bound(c => c.DispatchedDocument).ClientTemplate("#if(DispatchedDocument!=''){# <a  onclick='javascript:OpenDocument_officer(this);'><center><span class='glyphicon glyphicon-download'></span></center></a> #}else{# <center>--</center> #}#").Title("Officer").Filterable(false).Width(50);
+                  columns.Bound(c => c.UploadedDocument).Hidden(true);
+                  columns.Bound(c => c.DispatchedDocument).Hidden(true);
+                  columns.Bound(c => c.MobileNo).Hidden(true);
+                  columns.Bound(c => c.SubDepartment).Hidden(true);
+                  columns.Bound(c => c.CreatedDate).Format("{0:dd/MM/yyyy}").Hidden(true);
+                  columns.Bound(c => c.ServiceName).Hidden(true);
+                  columns.Bound(c => c.Description).Hidden(true);
+                  columns.Bound(c => c.Applicant).Hidden(true);
+              })
+              .Sortable()
+              .Filterable()
+              .Resizable(resize => resize.Columns(true))
+              .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+              .ClientDetailTemplateId("template")
+                //.HtmlAttributes(new { style = "height:600px;" })
+              .DataSource
+              (
+                  dataSource => dataSource
+                      .Ajax().ServerOperation(true).Sort(x => x.Add("CreatedDate").Descending())                     
+                      .Model(model => model.Id(p => p.Id))                      
+                      .Read(read => read.Action("GetSamadhanDiwasRequestReport", "Report", new { area = "Reports" }).Data("FilterSearchParameter")).PageSize(10)
+                      .Aggregates(aggregates => aggregates.Add(p => p.Id).Count())
+              )
+              .Events(events => events.ExcelExport("excelex"))
+        )
+    </div>
+</div>
+
+<input type="hidden" value="@System.Configuration.ConfigurationManager.AppSettings["FTPSiteRootPath"]" id="DocPath" />
+<div id="divDocumentView" style="overflow:hidden">
+    <div class="row">
+        <div class="col-md-12 no-margin no-padding" id="divPageView" style="overflow:hidden">
+            <iframe id="ifrmViewPdf"></iframe>
+        </div>
+    </div>
+</div>
+
+
+<script id="template" type="text/kendo-tmpl">
+    @(Html.Kendo().Grid<NA.PMS.Model.ServiceViewModel>()
+            .Name("grid_#=Id#") // template expression, to be evaluated in the master context
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Hidden(true);
+                columns.Bound(o => o.ServiceName).Width(250).Sortable(false).Filterable(false);//.ClientTemplate("<span>#= ServiceName #<br/><small ><b>Receiving Date:</b>&nbsp;#= CreatedDate#</small></span>");
+                columns.Bound(o => o.Description).Sortable(false).Filterable(false);
+                columns.Bound(o => o.Comment).Sortable(false).Filterable(false);
+                columns.Bound(o => o.Status).Width(120).Title("Status");//.ClientTemplate("<label class='lbl-status-action' onclick='javascript:OpenStatusWindow(this)'>#=Status#</label>").Sortable(false).Filterable(false);
+                //columns.Bound(o => o.RequestDate).Format("{0:dd/MM/yyyy}").Width(120);
+            })
+            .DataSource(dataSource => dataSource
+                .Ajax()
+                .PageSize(10)
+                .Read(read => read.Action("GetSamadhanDiwasRequestReport", "Report", new { area = "Reports", Id = "#=Id#" }))
+            )
+            //.Pageable()
+            .ToClientTemplate()
+    )
+</script>
+<script>
+    function dataBound() {
+        this.expandRow(this.tbody.find("tr.k-master-row").first());
+    }
+</script>
+
+
+<script>
+    $(document).ready(function () {
+        $('.popup-window').kendoWindow({
+            modal: true,
+            title: "Service Acknowledgement",
+            actions: false, // [ "Minimize", "Maximize"],
+            visible: false,
+            width: "70%",
+            //height: "60%",
+        });
+
+        $('#btnClose').click(function () {
+            $(".popup-window").data("kendoWindow").close();
+            //ClearFields();
+        });
+
+        $("#btnStatusClose").click(function () {
+            $(".status-window").data("kendoWindow").close();
+        });
+
+        $('#divDocumentView').kendoWindow({
+            modal: true,
+            title: "Document",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "15%"
+            },
+            width: "70%", height: "80%"
+        });
+
+    })
+
+    function AddRequest(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("Index", "ServiceRequest")';
+    }
+
+    function FilterDepartment() {
+        return { departmentId: $('#DepartmentId').val() }
+    }
+
+    function FilterSearchParameter() {
+        return {
+            DepartmentId: $('#DepartmentId').val(),
+            //ServiceId: $('#ServiceId').val(),
+            StartDate: $('#StartDate').val(),
+            EndDate: $('#EndDate').val()
+        };
+    }
+    function ChangeDepartmentEvent() {
+        $("#GridSDServiceRequest").data("kendoGrid").dataSource.read();
+    }
+
+    $('#btnSearch').click(function () {
+        var model = {
+            DepartmentId: $('#DepartmentId').val(),
+            //ServiceId: $('#ServiceId').val(),
+            StartDate: $('#StartDate').val(),
+            EndDate: $('#EndDate').val(),
+            //RegistrationNo: $('#RegistrationNo').val()
+        };
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ model: model }),
+            url: '/Property/GetServiceRequestReport',
+            success: function (result) {
+                $("#GridSDServiceRequest").data("kendoGrid").dataSource.read();
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Something is wrong, try again later");
+            }
+        });
+    });
+
+    $('#btnClear').click(function () {
+        $('#DepartmentId').data("kendoDropDownList").value("");
+        //$('#ServiceId').data("kendoDropDownList").value("");
+        $('#StartDate').data("kendoDatePicker").value("");
+        $('#EndDate').data("kendoDatePicker").value("");
+        //$('#RegistrationId').val("");
+        $("#GridSDServiceRequest").data("kendoGrid").dataSource.read();
+    });
+
+    function OpenDocument_user(row) {
+        $("#divDocumentView").empty();
+        var tr = $(row).parent().parent();
+        var link = $(tr).children("td:eq(16)").text();
+        var ServiceRequestId = $(tr).children("td:eq(0)").text();
+        var path = "http://" + $("#DocPath").val() + "//" + ServiceRequestId.trim() + "//";
+        $("#divDocumentView").append($('<iframe src=' + path + link + ' style="width:900px;height:500px;overflow:hidden;"></iframe>'));
+        $("#divDocumentView").data("kendoWindow").center();
+        $("#divDocumentView").data("kendoWindow").open();
+        $("#divDocumentView").data("kendoWindow").pin();
+    }
+
+    function OpenDocument_officer(row) {
+        $("#divDocumentView").empty();
+        var tr = $(row).parent().parent();
+        var link = $(tr).children("td:eq(17)").text();
+        var ServiceRequestId = $(tr).children("td:eq(0)").text();
+        var path = "http://" + $("#DocPath").val() + "//" + ServiceRequestId.trim() + "//";
+        $("#divDocumentView").append($('<iframe src=' + path + link + ' style="width:900px;height:500px;overflow:hidden;"></iframe>'));
+        $("#divDocumentView").data("kendoWindow").center();
+        $("#divDocumentView").data("kendoWindow").open();
+        $("#divDocumentView").data("kendoWindow").pin();
+    }
+
+
+
+
+    function excelex(e) {
+        var rows = e.workbook.sheets[0].rows;
+        var StrParam = GetSearchParam();
+        if (StrParam != "") {
+            rows.unshift({
+                cells: [{ value: GetSearchParam(), background: "#FFFFFF", fontSize: 16, colSpan: 10, textAlign: "right" }]
+            });
+        }
+        rows.unshift({
+            cells: [{ value: "", background: "#FFFFFF", fontSize: 18, colSpan: 3, textAlign: "right" }, { value: "Service Report - " + (new Date()).toDateString(), fontSize: 20, background: "#FFFFFF", colSpan: 4, textAlign: "right" }]
+        });
+    }
+
+    //String for Excel
+    function GetSearchParam() {
+        var dept = $('#ddlDepartment').val() != "" ? "Department: " + $('#ddlDepartment').data("kendoDropDownList").text() + " || " : "";
+        var fdate = $('#kendoFromDate').val() != "" ? " From Date: " + $('#kendoFromDate').val() + " || " : "";
+        var tdate = $('#kendoToDate').val() != "" ? " To Date: " + $('#kendoToDate').val() + " || " : "";
+
+        var paramString = dept + fdate + tdate;
+        return paramString;
+    }
+
+    $(document).ready(function () {
+        var exportFlag = false;
+        $("#GridSDServiceRequest").data("kendoGrid").bind("excelExport", function (e) {
+            if (!exportFlag) {
+                //alert(0);
+                // add an empty column
+                //e.sender.showColumn(0);//MobileNo.
+                //e.sender.showColumn(1);//MobileNo.
+                //e.sender.showColumn(2);//Department
+                //e.sender.showColumn(8);//Description
+                //e.sender.showColumn(9);//SubDepartment
+                //e.sender.showColumn(10);//Description
+                //e.sender.showColumn(11);//SubDepartment
+                //e.sender.showColumn(12);//Description
+                //e.sender.showColumn(13);//SubDepartment
+                //e.sender.showColumn(16);//signature
+
+                //e.sender.hideColumn(3);//Department
+                //e.sender.hideColumn(4);//MobileNo.
+                //e.sender.hideColumn(5);//Department
+                //e.sender.hideColumn(6);//MobileNo.
+                //e.sender.hideColumn(7);//Department
+                //e.sender.hideColumn(14);//MobileNo.
+                //e.sender.hideColumn(15);//Department
+                e.preventDefault();
+                exportFlag = true;
+                var grid = $("#GridSDServiceRequest").data("kendoGrid");
+                grid.saveAsExcel();
+
+                setTimeout(function () {
+
+                    // e.sender.saveAsExcel();
+                });
+            } else {
+                //alert(1);
+                //e.sender.hideColumn(1);//MobileNo.
+                //e.sender.hideColumn(2);//Department
+                //e.sender.hideColumn(8);//Description
+                //e.sender.hideColumn(9);//SubDepartment
+                //e.sender.hideColumn(10);//Description
+                //e.sender.hideColumn(11);//SubDepartment
+                //e.sender.hideColumn(12);//Description
+                //e.sender.hideColumn(13);//SubDepartment
+                //e.sender.hideColumn(16);//signature
+
+                //e.sender.showColumn(3);//Department
+                //e.sender.showColumn(4);//MobileNo.
+                //e.sender.showColumn(5);//Department
+                //e.sender.showColumn(6);//MobileNo.
+                //e.sender.showColumn(7);//Department
+                //e.sender.showColumn(14);//MobileNo.
+                //e.sender.showColumn(15);//Department
+                $(".k-grid table").css('width', '100%');
+                exportFlag = false;
+            }
+        });
+    });
+
+</script>
+
+

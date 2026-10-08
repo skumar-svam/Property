@@ -1,0 +1,669 @@
+﻿@model NA.PMS.Model.PropertyViewModel
+@using Kendo.Mvc.UI
+@using NA.PMS.Common
+@{
+    ViewBag.Title = "Property Cost";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style type="text/css">
+    .col-cost .form-control{
+        width:90%;
+        float:right;
+    }
+    .k-numerictextbox{
+        float:right;
+    }
+</style>
+
+@using (Html.BeginForm("SavePropertyDetail", "ManageProperty", FormMethod.Post, new { enctype = "multipart/form-data", id = "propertyform" }))
+{
+    @Html.AntiForgeryToken()
+    <div class="col-lg-12 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-0">
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Allotted Property Cost</h1></div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+                </div>
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="col-md-12 content-top-spce">
+                <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                    <h2 class="blck-heading">Property Cost Detail</h2>
+                    <div class="form-bx">
+                        <div style="text-align:center">
+                            @Html.HiddenFor(model => model.PropertyId)
+                            @Html.HiddenFor(model => model.DepartmentId)
+                            @Html.HiddenFor(model => model.IsLocationCharged)
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                @Html.Label("Registration Id", htmlAttributes: new { @class = "required" })
+                                @(Html.Kendo().DropDownListFor(m => m.RegistrationId)
+                                    .Filter("contains")
+                                    .DataTextField("Text")
+                                    .DataValueField("Id")
+                                    .OptionLabel("---Select---")
+                                    .Enable(true)
+                                    .AutoBind(true)
+                                    .DataSource(source =>
+                                    {
+                                        source.Custom()
+                                        .ServerFiltering(true)
+                                        .ServerPaging(true)
+                                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                        .Transport(transport => { transport.Read("GetRegistrationIdListAsDataSource", "Authority", new { area = "Member" }); })
+                                        .Schema(schema => { schema.Data("Data").Total("Total"); })
+                                        .PageSize(100);
+                                    })
+                                    .Events(events => { events.Change("RegistrationIdChangeEvent"); })
+                                    .HtmlAttributes(new { @class = "col-custom", style = "width:90%; float:right;" })
+                                )
+                            </div>
+                            
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                @Html.Label("Department", htmlAttributes: new { @class = "required" })
+                                @Html.TextBoxFor(model => model.Department, htmlAttributes: new { @class="form-control" })
+                            </div>
+                            <div class="col-md-6 col-sm-6 col-xs-12 col-cost form-group">
+                                @Html.Label("Allottee Name", htmlAttributes: new { @class = "required" })
+                                @Html.TextBoxFor(model => model.Applicant, htmlAttributes: new { @class = "form-control", style="width:95%;float:right;" })
+                            </div>
+                            
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                @Html.Label("Sector", htmlAttributes: new { @class = "required" })
+                                @Html.TextBoxFor(model => model.SectorName, htmlAttributes: new { @class = "form-control" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                @Html.Label("Block", htmlAttributes: new { @class = "required" })
+                                @Html.TextBoxFor(model => model.BlockName, htmlAttributes: new { @class = "form-control" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                @Html.Label("Property/Plot No", htmlAttributes: new { @class = "required" })
+                                @Html.TextBoxFor(m => m.PlotNo, new { @class = "form-control", @maxlength = "10", onkeypress = "return ValidateSpace(event);" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                @Html.Label("Floor/Area Range", new { @id = "lblFloor", @class = "required" })
+                                @(Html.Kendo().DropDownListFor(m => m.FloorAreaId)
+                                    .Filter("contains")
+                                    .DataTextField("Text")
+                                    .DataValueField("Id")
+                                    .OptionLabel("---Select---")
+                                    .DataSource(source =>
+                                    {
+                                        source.Custom()
+                                        .ServerFiltering(true)
+                                        .ServerPaging(true)
+                                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                        .Transport(transport => { transport.Read(read => read.Action("GetFloorAreaListAsDataSource", "Finance", new { area = "Revenue" }).Data("FilterDepartmentId")); })
+                                        .Schema(schema => { schema.Data("Data").Total("Total"); })
+                                        .PageSize(100);
+                                    })
+                                    .HtmlAttributes(new { style = "width: 90%; float:right;" })
+                                    //.CascadeFrom("BlockId")
+                                    .Enable(true)
+                                    .AutoBind(false)
+                                )
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                @Html.Label("Property Type", htmlAttributes: new { @class = "required" })
+                                @Html.TextBoxFor(model => model.PropertyType, htmlAttributes: new { @class = "form-control" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                @Html.Label("Total Area (sqm)", htmlAttributes: new { @class = "required" })
+                                @(Html.Kendo().NumericTextBoxFor(m => m.TotalArea)
+                                    .Min(0).Max(9999999999999999)
+                                    .Spinners(false).Step(0).Enable(true)
+                                    .HtmlAttributes(new { style = "width: 90%;", @maxlength = "13", @class = "text-right", @onchange="TotalAreaChange()" })
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                @Html.Label("Covered Area (sqm)", htmlAttributes: new { @class = "" })
+                                @(Html.Kendo().NumericTextBoxFor(m => m.CoveredArea)
+                                    .Min(0).Max(99999999999999)
+                                    .Spinners(false).Step(0).Enable(true)
+                                    .HtmlAttributes(new { style = "width: 90%", @maxlength = "14", @class = "text-right" })
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                @Html.Label("Actual Area(sqm)", htmlAttributes: new { @class = "" })
+                                @(Html.Kendo().NumericTextBoxFor(m => m.ActualArea)
+                                    .Min(0).Max(99999999999999)
+                                    .Spinners(false).Step(0).Enable(true)
+                                    .HtmlAttributes(new { style = "width: 90%;", @maxlength = "14", @class = "text-right" })
+                                )
+                            </div>
+                            
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                <label>Allotment Rate (sqm)</label>
+                                @(Html.Kendo().NumericTextBoxFor(m => m.AllotmentRate)
+                                    .Min(0).Max(99999999999999)
+                                    .Spinners(false).Step(0).Enable(true)
+                                    .Events(e=>e.Change("AllotmentRateChangeEvent"))
+                                    //.Events(e => e.Change("CalculateTotalPropertyCost"))
+                                    .HtmlAttributes(new { style = "width: 90%;", @maxlength = "14", @class = "text-right" })
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                <label>Allotment Money</label>
+                                @(Html.Kendo().NumericTextBoxFor(m => m.AllotmentMoney)
+                                        .Min(0).Max(999999999)
+                                        .Spinners(false).Step(0).Enable(true)
+                                        .Events(e=>e.Change("CalculateBalanceAmount"))
+                                        .HtmlAttributes(new { style = "width: 90%", @maxlength = "16", @class = "text-right"})
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                @Html.Label("Earnest Money", htmlAttributes: new { @class = "required" })
+                                @(Html.Kendo().NumericTextBoxFor(m => m.EarnestMoney)
+                                        .Min(0).Max(999999999)
+                                        .Spinners(false).Step(0).Enable(true)
+                                        .Events(e => e.Change("CalculateBalanceAmount"))
+                                        .HtmlAttributes(new { style = "width: 90%;", @maxlength = "16", @class = "text-right"})
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                @Html.Label("Processing Fee", htmlAttributes: new { @class = "" })
+                                @(Html.Kendo().NumericTextBoxFor(m => m.ProcessingFee)
+                                        .Min(0).Max(999999999)
+                                        .Spinners(false).Step(0).Enable(true)
+                                        .HtmlAttributes(new { style = "width: 90%;", @maxlength = "16", @class = "text-right"})
+                                )
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                @Html.Label("Property Cost", htmlAttributes: new { @class = "required" })
+                                @(Html.Kendo().NumericTextBoxFor(m => m.PropertyCost)
+                                    .Min(0).Max(99999999999999)
+                                    .Spinners(false).Step(0).Enable(true)
+                                    .HtmlAttributes(new { style = "width: 90%;", @maxlength = "14", @class = "text-right", @onchange="CalculateTotalPropertyCost()" })
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                @Html.Label("Civil Cost", htmlAttributes: new { @class = "" })
+                                @(Html.Kendo().NumericTextBoxFor(m => m.CivilCost)
+                                    .Min(0).Max(99999999999999)
+                                    .Spinners(false).Step(0).Enable(true)
+                                    .HtmlAttributes(new { style = "width: 90%;", @maxlength = "14", @class = "text-right", @onchange = "CalculateTotalPropertyCost()" })
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                @Html.Label("Lease Rent(%)", htmlAttributes: new { @class = "" })
+                                @(Html.Kendo().NumericTextBoxFor(m => m.LeaseRent)
+                                        .Min(0).Max(99)
+                                        .Spinners(false).Step(0)
+                                        .Enable(true)
+                                        .HtmlAttributes(new { style = "width: 90%;", @maxlength = "16", @class = "text-right" })
+                                        .Events(e => e.Change("LeaseRentChangeEvent"))
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                @Html.Label("Advance Lease Rent", htmlAttributes: new { @class = "" })
+                                @(Html.Kendo().NumericTextBoxFor(m => m.AdvanceLeaseRent)
+                                        .Min(0).Max(99999999999999)
+                                        .Spinners(false).Step(0).Enable(true)
+                                        .HtmlAttributes(new { style = "width: 90%;", @maxlength = "16", @class = "text-right" })
+                                )
+                            </div>
+                        </div>
+                                                 
+                        <div class="row" id="div-location-detail">
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                @Html.Label("Location Type", htmlAttributes: new { @class = "" })
+                                @(Html.Kendo().DropDownListFor(m => m.LocationId)
+                                    .Filter("contains")
+                                    .DataTextField("Text")
+                                    .DataValueField("Id")
+                                    .OptionLabel("---Select---")
+                                    .DataSource(source =>
+                                    {
+                                        source.Custom()
+                                        .ServerFiltering(true)
+                                        .ServerPaging(true)
+                                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                        .Transport(transport => { transport.Read(read => read.Action("GetLocationTypeListAsDataSource", "Finance", new { area = "Revenue" }).Data("FilterDepartmentId")); })
+                                        .Schema(schema => { schema.Data("Data").Total("Total"); })
+                                        .PageSize(100);
+                                    })
+                                    .HtmlAttributes(new { style = "width:90%;float:right;" })
+                                    .Events(e => e.Change("LocationTypeChangeEvent"))
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                @Html.Label("Location Charge(%)", htmlAttributes: new { @class = "" })
+                                @(Html.Kendo().NumericTextBoxFor(m => m.LocationCharge)
+                                    .Min(0).Max(99)
+                                    .Spinners(false).Step(0).Enable(true)
+                                    .HtmlAttributes(new { style = "width: 90%", @maxlength = "16", @class = "text-right", @onchange = "LocationTypeChangeEvent()" })
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                @Html.Label("Location Charge Rate(sqm)", htmlAttributes: new { @class = "" })
+                                @(Html.Kendo().NumericTextBoxFor(m => m.LocationChargeRate)
+                                    .Min(0).Max(999999999)
+                                    .Spinners(false).Step(0).Enable(true)
+                                    .HtmlAttributes(new { style = "width: 90%", @maxlength = "16", @class = "text-right" })
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                @Html.Label("Total Allotment Rate(sqm)", htmlAttributes: new { @class = "required" })
+                                @(Html.Kendo().NumericTextBoxFor(m => m.TotalAllotmentRate)
+                                    .Min(0).Max(99999999)
+                                    .Spinners(false).Step(0).Enable(true)
+                                    .HtmlAttributes(new { style = "width: 90%", @maxlength = "16", @class = "text-right" })
+                                )
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                @Html.Label("Registry", htmlAttributes: new { @class = "required" })
+                                @(Html.Kendo().DropDownListFor(m => m.RegistryType)
+                                    .Filter("contains")
+                                    .DataTextField("Text")
+                                    .DataValueField("Text")
+                                    .OptionLabel("---Select---")
+                                    .DataSource(source => source.Read(read => read.Action("GetRegistryTypeList", "Finance", new { area = "Revenue" }).Data("FilterRegistryType")))
+                                    .HtmlAttributes(new { style = "width: 90%;float:right;" })
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                <label>Total Property Cost (INR)</label>
+                                @(Html.Kendo().NumericTextBoxFor(m => m.TotalPropertyCost)
+                                    .Min(0).Max(99999999999999)
+                                    .Spinners(false).Step(0).Enable(true)
+                                    .HtmlAttributes(new { style = "width: 90%;", @maxlength = "14", @class = "text-right" })
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                <label>Balance Allotment Money</label>
+                                @(Html.Kendo().NumericTextBoxFor(m => m.BalanceAllotmentMoney)
+                                    .Min(0).Max(99999999999999)
+                                    .Spinners(false).Step(0).Enable(true)
+                                    .HtmlAttributes(new { style = "width: 90%;", @maxlength = "14", @class = "text-right" })
+                                )
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 col-cost form-group">
+                                <label>Total Balance Amount</label>
+                                @(Html.Kendo().NumericTextBoxFor(m => m.BalanceAmount)
+                                    .Min(0).Max(99999999999999)
+                                    .Spinners(false).Step(0).Enable(true)
+                                    .HtmlAttributes(new { style = "width: 90%;", @maxlength = "14", @class = "text-right" })
+                                )
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="box-button text-center">
+                    <input type="button" id="btnCancel" value="Cancel" class="btn btn-default" />
+                    <input value="Update" type="button" id="btnSubmit" class="btn btn-add" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#btnCancel").click(function () {
+            @*window.location.href = '@Url.Action("Manage", "ManageProperty")';*@
+        });
+
+        TotalAreaChange();
+
+        $('#btnSubmit').click(function () {
+            //SubmitPropertyForm();
+            SubmitPropertyCost();
+        });
+    });
+
+    var spaceKeys = new Array();
+    spaceKeys.push(8); //Backspace
+    function ValidateSpace(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = (keyCode != 32);
+        if (ret == false)
+            return false;
+    }
+
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1 || keyCode == 46);
+        if (ret == false)
+            return false;
+    }
+
+
+
+    function FilterDepartmentId() {
+        return {
+            DepartmentId: $('#DepartmentId').val() == "" ? 1 : $('#DepartmentId').val()
+        }
+    }
+
+    function FilterRegistryType() {
+        return {
+            category: "RegistryType"
+        }
+    }
+
+    //function PropertyTypeChange(event) {
+    //    var schemeId = $("#schemeId").val();
+    //    var departmentId = $("#departmentId").val();
+    //    var propTypeId = $("#propertyTypeId").val();
+    //}
+    //function CheckTotalAreaRange(event) {
+    //    if ($("#totalArea").val() != '') {
+    //        TotalAreaChange();
+    //    }
+    //    SchemeSelection(event);
+    //}
+
+
+    //function filterSchemes() {
+    //    return {
+    //        schemeId: $("#SchemeId").val()
+    //    };
+    //}
+    //function filterSectorValues() {
+    //    return {
+    //        schemeId: $("#SchemeId").val(),
+    //        departmentId: $("#DepartmentId").val()
+    //    };
+    //}
+
+
+    function RegistrationIdChangeEvent() {
+        if ($("#RegistrationId").val() != '') {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ RegistrationId: $("#RegistrationId").val() }),
+                url: '/Revenue/Finance/GetPropertyCostDetailAsPerScheme',
+                success: function (result) {
+                    if (result != null) {
+                        $("#PropertyId").val(result.PropertyId);
+                        $("#DepartmentId").val(result.DepartmentId);
+                        $("#Department").val(result.Department);
+                        $("#Applicant").val(result.Applicant);
+                        $("#SectorName").val(result.SectorName);
+                        $("#BlockName").val(result.BlockName);
+                        $("#PlotNo").val(result.PlotNo);
+                        $("#FloorAreaId").data("kendoDropDownList").value(result.FloorAreaId);
+                        $("#PropertyNo").val(result.PropertyNo);
+                        $("#PropertyType").val(result.PropertyType);
+                        $("#TotalArea").data("kendoNumericTextBox").value(result.TotalArea);
+                        $("#ActualArea").data("kendoNumericTextBox").value(result.ActualArea);
+                        $("#CoveredArea").data("kendoNumericTextBox").value(result.CoveredArea);
+                        $("#AllotmentRate").data("kendoNumericTextBox").value(result.LandRate);
+                        $("#TotalAllotmentRate").data("kendoNumericTextBox").value(result.TotalAllotmentRate);
+                        $("#PropertyCost").data("kendoNumericTextBox").value(result.PropertyCost);
+                        $("#TotalPropertyCost").data("kendoNumericTextBox").value(result.TotalPropertyCost);
+                        $("#CivilCost").data("kendoNumericTextBox").value(result.CivilCost);
+                        $("#AllotmentMoney").data("kendoNumericTextBox").value(result.AllotmentMoney);
+                        $("#EarnestMoney").data("kendoNumericTextBox").value(result.EarnestMoney);
+                        $("#LocationId").data("kendoDropDownList").value(result.LocationId);
+                        $("#LocationCharge").data("kendoNumericTextBox").value(result.LocationCharge);
+                        $("#LocationChargeRate").data("kendoNumericTextBox").value(result.LocationChargeRate);
+                        $("#LeaseRent").data("kendoNumericTextBox").value(result.LeaseRent);
+                        $("#AdvanceLeaseRent").data("kendoNumericTextBox").value(result.AdvanceLeaseRent);
+                        $("#RegistryType").data("kendoDropDownList").value(result.RegistryType);
+                        if (result.DepartmentId == '@NADepartment.Housing') {
+                            $("#CivilCost").data("kendoNumericTextBox").value(result.CivilCost);
+                            $("#CivilCost").data("kendoNumericTextBox").enable(true);
+                        }
+                        else {
+                            $("#CivilCost").data("kendoNumericTextBox").value('');
+                            $("#CivilCost").data("kendoNumericTextBox").enable(false);
+                        }
+                        CalculateBalanceAmount();
+                    }
+                    else {
+                        alertify.error("Network Error. Please try again later.");
+                    }
+                },
+                error: function (obj) {
+                    //ClearValues();
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            });
+        }
+        else {
+            ClearInputFields();
+        }
+    }
+
+    function SubmitPropertyCost() {
+        if ($('#RegistrationId').val() != "") {
+            var formData = new FormData($('form').get(0));
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: false, // Not to set any content header
+                processData: false, // Not to process data
+                data: formData,
+                url: '/Revenue/Finance/SavePropertyCostAsPerScheme',
+                success: function (result) {
+                    if (result == '@ReturnType.Updated') {
+                        alertify.success("Property cost updated successfully.");
+                        ClearInputFields();
+                    }
+                    else if (result == '@ReturnType.Exist') {
+                        alertify.error("Property already updated");
+                    }
+                    else {
+                        return false;
+                    }
+                    //ClearFields();
+                },
+                error: function (ajaxRequest, strError) {
+                    alertify.error("Network error, try again later");
+                }
+            });
+        }
+    }
+
+    function AllotmentRateChangeEvent() {
+        //CalculateTotalPropertyCost();
+        TotalAreaChange();
+        LocationTypeChangeEvent();
+    }
+
+    function CalculateBalanceAmount() {
+        var allotmentMoney = $('#AllotmentMoney').val() == "" ? 0 : $('#AllotmentMoney').val();
+        var earnestMoney = $('#EarnestMoney').val() == "" ? 0 : $('#EarnestMoney').val();
+        var totalCost = $('#TotalPropertyCost').val() == "" ? 0 : $('#TotalPropertyCost').val();
+        var balanceAllotment = Number(parseFloat(allotmentMoney).toFixed(2)) - Number(parseFloat(earnestMoney).toFixed(2));
+        var balanceAmount = Number(parseFloat(totalCost).toFixed(2)) - Number(parseFloat(allotmentMoney).toFixed(2));
+        $('#BalanceAllotmentMoney').data("kendoNumericTextBox").value(balanceAllotment);
+        $('#BalanceAmount').data("kendoNumericTextBox").value(balanceAmount);
+    }
+
+    function CalculateTotalPropertyCost() {
+        if ($('#DepartmentId').val() != "") {
+            if ($('#DepartmentId').val() == '@NADepartment.Housing') {
+                $('#CivilCost').data("kendoNumericTextBox").enable(true);
+                $("#AllotmentRate").data("kendoNumericTextBox").value('');
+                $("#TotalAllotmentRate").data("kendoNumericTextBox").value('');
+                var propertycost = $('#PropertyCost').val();
+                var civilcost = $('#CivilCost').val();
+                propertycost = (isNaN(Math.round(parseFloat(propertycost).toFixed(2)))) ? 0 : (parseFloat(propertycost).toFixed(2))
+                civilcost = (isNaN(Math.round(parseFloat(civilcost).toFixed(2)))) ? 0 : (parseFloat(civilcost).toFixed(2));
+
+                var totalcost = Number(parseFloat(propertycost).toFixed(2)) + Number(parseFloat(civilcost).toFixed(2));
+                totalcost = (isNaN(Math.round(parseFloat(totalcost).toFixed(2)))) ? '' : Math.round(parseFloat(totalcost).toFixed(2));
+                $("#PropertyCost").data("kendoNumericTextBox").value(totalcost);
+                $("#TotalPropertyCost").data("kendoNumericTextBox").value(totalcost);
+            }
+            else {
+                $('#CivilCost').data("kendoNumericTextBox").value('');
+                $('#CivilCost').data("kendoNumericTextBox").enable(false);
+                var totalcost;
+                var landrate = $("#AllotmentRate").val() == "" ? 0 : $("#AllotmentRate").val();
+                var totalrate = $("#TotalAllotmentRate").val() == "" ? 0 : $("#TotalAllotmentRate").val();
+                var totalarea = $("#TotalArea").val() == "" ? 0 : $("#TotalArea").val();
+                landrate = (parseFloat(landrate).toFixed(2));
+                if ($("#LocationId").val() != '') {                    
+                    var chargepercent = $("#LocationCharge").val();
+                    var charges = (parseFloat($("#LocationChargeRate").val()).toFixed(2));
+                    var totalCharges = parseFloat(landrate) + parseFloat(charges);
+                    $("#PropertyCost").data("kendoNumericTextBox").value(parseFloat(landrate * parseFloat(totalarea).toFixed(2)).toFixed(2));
+                    totalcost = (isNaN(Math.round(parseFloat(totalCharges * parseFloat(totalarea).toFixed(2)).toFixed(2)))) ? '' : Math.round(parseFloat(totalCharges * parseFloat(totalarea).toFixed(2)).toFixed(2));
+                }
+                else {
+                    totalcost = (isNaN(Math.round(parseFloat(landrate * parseFloat(totalarea).toFixed(2)).toFixed(2)))) ? '' : Math.round(parseFloat(landrate * parseFloat(totalarea).toFixed(2)).toFixed(2));
+                }
+                    
+                $("#PropertyCost").data("kendoNumericTextBox").value(parseFloat(landrate * parseFloat(totalarea).toFixed(2)).toFixed(2));
+                $("#TotalPropertyCost").data("kendoNumericTextBox").value(totalcost);
+            }
+
+            CalculateBalanceAmount();
+        }
+        else {
+
+        }
+    }
+
+    function TotalAreaChange() {
+        if ($("#DepartmentId").val() != '') {
+            var dropdownlist = $("#FloorAreaId").data("kendoDropDownList");
+            var totalArea = $("#TotalArea").val();
+            if ($("#DepartmentId").val() != '@NADepartment.Housing') {
+                var actualarea = $("#ActualArea").val();
+                var coveredarea = $("#CoveredArea").val();
+                if (dropdownlist.text().includes(">")) {
+                    var areaRange = dropdownlist.text().split(">");
+                    if (totalArea <= parseInt(areaRange[1].trim())) {
+                        alertify.error("Enter Total Area greater than Area Range.");
+                        $("#TotalArea").data("kendoNumericTextBox").value('');
+                    }
+                }
+                else if (dropdownlist.text().includes("<")) { //Added on 27th Feb. 2017 for the following missing validation:
+                    var areaRange = dropdownlist.text().split("<");
+                    if (totalArea >= parseInt(areaRange[1].trim())) {
+                        alertify.error("Please enter Total Area less than Area Range.");
+                        $("#TotalArea").data("kendoNumericTextBox").value('');
+                    }
+                }
+                else {   //New validatione ends here
+                    var areaRange = dropdownlist.text().split("-");
+                    if (totalArea < parseFloat(areaRange[0].trim()) || totalArea > parseFloat(areaRange[1].trim())) {
+                        alertify.error("Please enter Total Area within Area Range.");
+                        $("#TotalArea").data("kendoNumericTextBox").value('');
+                    }
+                }
+            }
+            CalculateTotalPropertyCost();
+        }
+        else {
+
+        }
+    }
+
+    function LocationTypeChangeEvent() {
+        var totalcost;
+        var allotmentRate = $("#AllotmentRate").val() == "" ? 0 : $("#AllotmentRate").val();
+        var totalAllotmentRate = $("#TotalAllotmentRate").val() == "" ? 0 : $("#TotalAllotmentRate").val();
+        var totalArea = $("#TotalArea").val() == "" ? 0 : $("#TotalArea").val();
+        if ($("#LocationId").val() != '') {
+            allotmentRate = (parseFloat(allotmentRate).toFixed(2));
+            var chargeInPercent = $("#LocationCharge").val() == "" ? 0 : $("#LocationCharge").val();
+            var chargeRate = parseFloat(parseFloat(allotmentRate).toFixed(2) * parseFloat(chargeInPercent).toFixed(2) / 100).toFixed(2);
+            
+            var locationCharge = (parseFloat(chargeRate).toFixed(2));
+            var totalCharges = Number(parseFloat(allotmentRate).toFixed(2)) + Number(parseFloat(locationCharge).toFixed(2));
+            
+            totalcost = (isNaN(Math.round(parseFloat(totalCharges * parseFloat(totalArea).toFixed(2)).toFixed(2)))) ? '' : Math.round(parseFloat(totalCharges * parseFloat(totalArea).toFixed(2)).toFixed(2));
+            $("#LocationChargeRate").data("kendoNumericTextBox").value(chargeRate);
+            $("#TotalAllotmentRate").data("kendoNumericTextBox").value(totalCharges);
+        }
+        else {
+            totalcost = (isNaN(Math.round(parseFloat(allotmentRate * parseFloat(totalArea).toFixed(2)).toFixed(2)))) ? '' : Math.round(parseFloat(allotmentRate * parseFloat(totalArea).toFixed(2)).toFixed(2));
+        }
+            
+        $("#TotalPropertyCost").data("kendoNumericTextBox").value(totalcost);
+    }
+
+    function LeaseRentChangeEvent() {
+        var leaseRentPercent = $('#LeaseRent').val() == "" ? 0 : $('#LeaseRent').val();
+        var totalCost = $('#TotalPropertyCost').val();
+        var leaserent = parseFloat(parseFloat(totalCost).toFixed(2) * parseFloat(leaseRentPercent).toFixed(2) / 100).toFixed(2);
+        $("#AdvanceLeaseRent").data("kendoNumericTextBox").value(leaserent);
+    }
+
+
+    function ClearInputFields() {
+        $("#RegistrationId").data("kendoDropDownList").value('');
+        $("#PropertyId").val('');
+        $("#DepartmentId").val('');
+        $("#Department").val('');
+        $("#Applicant").val('');
+        $("#SectorName").val('');
+        $("#BlockName").val('');
+        $("#PlotNo").val('');
+        $("#FloorAreaId").data("kendoDropDownList").value('');
+        $("#RegistryType").data("kendoDropDownList").value('');
+        $("#PropertyNo").val('');
+        $("#PropertyType").val('');
+        $("#TotalArea").data("kendoNumericTextBox").value('');
+        $("#ActualArea").data("kendoNumericTextBox").value('');
+        $("#CoveredArea").data("kendoNumericTextBox").value('');
+        $("#AllotmentRate").data("kendoNumericTextBox").value('');
+        $("#TotalAllotmentRate").data("kendoNumericTextBox").value('');
+        $("#PropertyCost").data("kendoNumericTextBox").value('');
+        $("#TotalPropertyCost").data("kendoNumericTextBox").value('');
+        $("#CivilCost").data("kendoNumericTextBox").value('');
+        $("#AllotmentMoney").data("kendoNumericTextBox").value('');
+        $("#EarnestMoney").data("kendoNumericTextBox").value('');
+        $("#ProcessingFee").data("kendoNumericTextBox").value('');
+        $("#LocationId").data("kendoDropDownList").value('');
+        $("#LocationCharge").data("kendoNumericTextBox").value('');
+        $("#LocationChargeRate").data("kendoNumericTextBox").value('');
+        $("#LeaseRent").data("kendoNumericTextBox").value('');
+        $("#AdvanceLeaseRent").data("kendoNumericTextBox").value('');
+        $("#BalanceAllotmentMoney").data("kendoNumericTextBox").value('');
+        $("#BalanceAmount").data("kendoNumericTextBox").value('');
+    }
+
+
+
+    //$(function () {
+    //    $("form").kendoValidator();
+    //});
+    function ValidateForm() {
+        var status = true;
+        status = $("#schemeId").kendoValidator().data("kendoValidator").validate();
+        status = $("#departmentId").kendoValidator().data("kendoValidator").validate();
+        status = $("#sectorId").kendoValidator().data("kendoValidator").validate();
+        status = $("#blockId").kendoValidator().data("kendoValidator").validate();
+        status = $("#plotProperty").kendoValidator().data("kendoValidator").validate();
+        status = $("#propertyTypeId").kendoValidator().data("kendoValidator").validate();
+        status = $("#floorId").kendoValidator().data("kendoValidator").validate();
+        status = $("#totalArea").kendoValidator().data("kendoValidator").validate();
+        status = $("#actualArea").kendoValidator().data("kendoValidator").validate();
+        status = $("#RegistryName").kendoValidator().data("kendoValidator").validate();
+        status = $("#locationId").kendoValidator().data("kendoValidator").validate();
+        status = $("#charges").kendoValidator().data("kendoValidator").validate();
+        status = $("#PropertyCost").kendoValidator().data("kendoValidator").validate();
+        status = $("#civilCost").kendoValidator().data("kendoValidator").validate();
+        return status;
+    }
+
+
+</script>
+
+

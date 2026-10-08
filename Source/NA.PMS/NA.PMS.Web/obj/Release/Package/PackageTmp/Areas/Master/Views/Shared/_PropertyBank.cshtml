@@ -1,0 +1,171 @@
+﻿@model NA.PMS.Model.PropertyModel
+@using Kendo.Mvc.UI
+@using NA.PMS.Model
+
+<div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+    <h2 class="blck-heading">Property Detail</h2>
+    <div class="form-bx">
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Department", htmlAttributes: new { @class = "required" })</div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @(Html.Kendo().DropDownListFor(m => m.departmentId)
+                                    .DataTextField("text")
+                                    .DataValueField("id")
+                                    .OptionLabel("Select")
+                                      .Filter("contains")
+                                      .Events(events => { events.Change("DepartmentSelection"); })
+                                    .DataSource(source =>
+                                    {
+                                        source.Read(read =>
+                                        {
+                                            read.Action("GetAllDepartments", "ManageProperty");
+                                        });
+                                    }
+
+                            )
+                                    .HtmlAttributes(new { style = "width:100%" })
+                )
+
+
+
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Property Type", htmlAttributes: new { @class = "required" })</div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @(Html.Kendo().DropDownListFor(m => m.propertyTypeId)
+                                .Filter("contains")
+                                  .DataTextField("text")
+                                  .DataValueField("id")
+                                  .OptionLabel("-Select-")
+                                  .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("GetAllPropTypes", "ManageProperty")
+                                                    .Data("filterFloorAndPropType");
+                                            })
+                                            .ServerFiltering(true);
+                                        })
+                                   .HtmlAttributes(new { style = "width: 100%" })
+                                    .CascadeFrom("departmentId")
+                                   .Enable(true)
+                                   .AutoBind(false)
+                )
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Sector", htmlAttributes: new { @class = "required" })</div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @(Html.Kendo().DropDownListFor(m => m.sectorId)
+                                    .DataTextField("text")
+                                    .DataValueField("id")
+                                    .OptionLabel("Select")
+                                      .Filter("contains")
+                                    .DataSource(source =>
+                                    {
+                                        source.Read(read =>
+                                        {
+                                            read.Action("GetAllSectors", "ManageProperty");
+                                        });
+                                    }
+
+                            )
+                                    .HtmlAttributes(new { style = "width:100%" })
+                )
+
+
+
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Block", htmlAttributes: new { @class = "required" })</div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @(Html.Kendo().DropDownListFor(m => m.blockId)
+                                    .DataTextField("text")
+                                    .DataValueField("id")
+                                    .OptionLabel("Select")
+                                      .Filter("contains")
+                                    .DataSource(source =>
+                                    {
+                                        source.Read(read =>
+                                        {
+                                            read.Action("GetAllBlocks", "ManageProperty");
+                                        });
+                                    }
+
+                            )
+                                    .HtmlAttributes(new { style = "width:100%" })
+                )
+
+
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Floor", new { @id = "lblFloor", @class = "required" })</div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @(Html.Kendo().DropDownListFor(m => m.floorId)
+                                .Filter("contains")
+                                  .DataTextField("text")
+                                  .DataValueField("id")
+                                  .OptionLabel("-Select-")
+                        //.Events(events => { events.Change("CheckTotalAreaRange"); })
+                                  .DataSource(source =>
+                                        {
+                                            source.Read(read =>
+                                            {
+                                                read.Action("GetFloorByDeptId", "ManageProperty")
+                                                    .Data("filterFloorAndPropType");
+                                            })
+                                            .ServerFiltering(true);
+                                        })
+                                   .HtmlAttributes(new { style = "width: 100%" })
+                                            .CascadeFrom("departmentId")
+                                   .Enable(true)
+                                   .AutoBind(false)
+                )
+
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Property/Plot No", htmlAttributes: new { @class = "required", @id = "plotNo" })</div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.TextBoxFor(m => m.plotProperty, new { @class = "form-control", @maxlength = "10", onkeypress = "return ValidateSpace(event);" })
+            @Html.ValidationMessageFor(m => m.plotProperty, "", new { @class = "text-danger" })  
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">@Html.Label("Total Area (Sq Mtr)", htmlAttributes: new { @class = "required" })</div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                @(Html.Kendo().NumericTextBoxFor(m => m.totalArea)
+                                     .Min(0)
+                                    .Max(9999999999999999)
+                                            .Spinners(false).Step(0)
+                                    .Enable(true)
+.HtmlAttributes(new { style = "width: 100%", @maxlength = "13", @class = "k-label schemeForms textBoxValueRightAlign" })
+                )
+            </div>
+            <div class="col-md-3 col-sm-3 col-xs-12 form-group"></div><div class="col-md-3 col-sm-3 col-xs-12 form-group"></div>
+        </div>
+        </div>
+    </div>
+
+<script type="text/javascript">
+    function DepartmentSelection(event) {
+        var departmentId = $("#departmentId").val();
+        if (departmentId == 5)
+            $("#lblFloor").text("Floor");
+        else
+            $("#lblFloor").text('Area Range');
+    }
+    var specialKeysForValidateSpace = new Array();
+    specialKeysForValidateSpace.push(8); //Backspace
+    function ValidateSpace(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = (keyCode != 32);
+        if (ret == false)
+            return false;
+    }
+    function filterFloorAndPropType() {
+        return {
+            departmentId: $("#departmentId").val()
+        };
+    }
+</script>
+

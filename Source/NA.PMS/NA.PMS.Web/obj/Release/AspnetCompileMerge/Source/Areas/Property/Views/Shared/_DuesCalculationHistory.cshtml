@@ -1,0 +1,120 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@using NA.PMS.Common;
+
+<style>
+    #div-GridDuesCalculationHistory{
+        display:none;
+    }
+</style>
+
+<div class="col-md-12 m_20">
+    <div class="row blck-heading-grid">
+        <div class="col-md-12 col-sm-12 col-xs-12">
+            <span>Dues Calculation By Date</span>
+        </div>
+    </div>
+</div>
+<div class="col-md-12" style="border-left:1px solid #abc; border-right:1px solid #abc;">
+    <div class="row">
+        <div class="col-md-6 col-sm-12 col-xs-12" style="padding:2px 2px;">
+            <input id="hdnCalDueDateTime" value="@DateTime.Now" title="datepicker" />
+            <input type="button" class="btn btn-success" id="btnCalDuebyDate" value="Calculate Dues" />
+        </div>
+        <div class="col-md-6 col-sm-12 col-xs-12">
+            <label id="lbl-dues-calculation-status" style="font-size:large; font-weight:500;padding-top:6px;"></label>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-12 k-grid-content" id="div-GridDuesCalculationHistory">
+    @(Html.Kendo().Grid<NA.PMS.Model.Sp_DuesCalculationHistory_Result>()
+    .Name("GridDuesCalculationHistory")
+        .AutoBind(false)
+    .Columns(columns =>
+    {
+        columns.Bound(c => c.InstallmentAmount).Title("Installment");//.ClientTemplate("<a href='" + "/Property/PropertyAllotment/PropertyDetails/#= RegistrationId #'>#= RegistrationId #</a>").Filterable(true);
+        columns.Bound(c => c.DepositAmount).Title("Deposit");
+        columns.Bound(c => c.InstallmentDueDate).Title("Due Date").Format("{0:dd-MMM-yyyy}");
+        columns.Bound(c => c.DuesTill).Title("Dues");
+        columns.Bound(c => c.DuesNextWithInterest).Title("Total Dues (<span class='fa fa-rupee'></span>)");
+        columns.Bound(c => c.PenalAmount).Title("Penal Amount");
+        columns.Bound(c => c.NewDateDiff).Title("Diff Date");//.ClientFooterTemplate("<div><span class='fa fa-rupee'></span> #= sum #</div>");
+        columns.Bound(c => c.TotalPanelAmount).Title("Total Penal");
+        columns.Bound(c => c.TotalPrincipalAmount).Title("Total Principal").Width(140);//.ClientTemplate(" <center><a onclick='javascript:PrintDemandNote(#=RegistrationId#,#=DuesAmount#);'><span class='fa fa-print'></span></a></center> ");
+        columns.Bound(c => c.DepositDate).Title("Deposit Date").Format("{0:dd-MMM-yyyy}");//.ClientTemplate("<center><a onclick='javascript:CalculateInstallmentDues(#=RegistrationId#);'><span class='fa fa-refresh'></span></a></center> ");
+    })
+    .Events(m => m.DataBound("kendoGridDueAfterDataBound"))
+    .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+    .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+    .DataSource(dataSource => dataSource
+            .Ajax()
+            .ServerOperation(true)
+            .Read(read => read.Action("GetDuesCalcaluationHistoryAsDataSource", "PropertyAllotment", new { area = "Property" }).Data("FilterDuesParam")).PageSize(10)
+        )
+    )
+</div>
+
+
+
+<script>
+
+    $(document).ready(function () {
+        $("#hdnCalDueDateTime").kendoDatePicker();
+    })
+
+    function FilterDuesParam() {
+        return {
+            RegistrationId: $('#Rid').val(),
+            ActionDate: $('#hdnCalDueDateTime').val(),
+            PropertyTypeId: 1
+        };
+    }
+
+    $("#btnCalDuebyDate").click(function () {
+        var rid = $('#Rid').val();
+        var date = $("#hdnCalDueDateTime").val();
+        var flag1 = confirm("Are You sure to update Installment dues");
+        if(flag1){
+            $("#GridDuesCalculationHistory").data('kendoGrid').dataSource.read();
+        }
+        var flag2 = confirm("Are You sure to update Lease Rent dues");
+        if (flag2) {
+            //var rentdata = $("#GridLeaseRentDues").data("kendoGrid").dataSource;
+            CalculateFromInstallmentDuesCal(date,rid);
+        }
+
+        //$("#GridLeaseRentDues").data("kendoGrid").dataSource.read();
+    });
+
+    function kendoGridDueAfterDataBound() {
+        var dataCount = $("#GridDuesCalculationHistory").data('kendoGrid').dataSource.total();
+        if(dataCount == 0){
+            $('#lbl-dues-calculation-status').html("Installment Full Paid");
+            $('#div-GridDuesCalculationHistory').css("display","none");
+        }
+        else{
+            $('#lbl-dues-calculation-status').html("");
+            $('#div-GridDuesCalculationHistory').show();
+        }
+        var rid = $('#Rid').val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ RegistrationId: rid }),
+            url: '/Revenue/Payment/InstallmentDuesPayment',
+            success: function (result) {
+                $('#lbl-dues-amuont').html(result.PremiumPaidStatus);
+                //$('#lbl-dues-amuont').html(result.TotalDuesAmount);
+                $('#lbl-penal-interest').html(result.PenalInterest);
+                $('#lbl-principal-amuont').html(result.PrincipalAmount);
+                $('#lbl-dues-upto-date').html(result.DuesUptoDate != null && result.DuesUptoDate != "" ? new Date(parseInt(result.DuesUptoDate.substr(6))) : new Date());
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Some Error in save database.");
+            }
+        });
+    }
+</script>

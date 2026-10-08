@@ -1,0 +1,431 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@using NA.PMS.Common
+@model NA.PMS.Model.PaymentViewModel
+
+@{
+    ViewBag.Title = "Manage Demand Note";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="manage-demand-note">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Demand Reports</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                @*<a href="#" onclick="javascript:OpenUpdateWindow()"><i class="fa fa-plus"></i> <span>Update Dues</span></a>
+                <a href="/Revenue/Payment/DemandNote" target="_blank"><i class="fa fa-plus"></i> <span>Demand Note</span></a>*@
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 content-top-spce">
+        <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            <h2 class="blck-heading" style="margin-bottom:15px;">Installment Dues</h2>
+            <div class="form-bx">
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <b>@Html.Label("Department")</b>
+                        @(Html.Kendo().DropDownListFor(m => m.DepartmentId)
+                            .Filter("contains")
+                            .DataTextField("Text")
+                            .DataValueField("Id")
+                            .OptionLabel(" --- select ---")
+                            .DataSource(source =>
+                            {
+                                source.Custom()
+                                .ServerFiltering(true)
+                                .ServerPaging(true)
+                                .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                .Transport(transport => transport.Read(read => read.Action("GetDepartmentList", "Finance", new { area = "Revenue" })))
+                                .Schema(schema => schema.Data("Data").Total("Total"))
+                                .PageSize(6);
+                            })
+                            .Events(events => { events.Change("ChangeDepartmentEvent"); })
+                            .HtmlAttributes(new { @class = "input-disabled", style = "width:90%; float:right;" })
+                        )
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label>Start Date</label>
+                        @(Html.Kendo().DatePickerFor(m => m.StartDate).Events(e => e.Change("ParameterChangeEvent")).HtmlAttributes(new { style = "width:90%; float:right;" }))
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label>End Date</label>
+                        @(Html.Kendo().DatePickerFor(m => m.EndDate).Events(e => e.Change("ParameterChangeEvent")).HtmlAttributes(new { style = "width:90%; float:right;" }))
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group" style="display:none;">
+                        <label>Demand Note Type</label>
+                        @(Html.Kendo().DropDownListFor(m => m.DemandNoteTypeId)
+                          .DataTextField("Text")
+                          .DataValueField("Value")
+                          .OptionLabel("---Select---")
+                          .Events(e => e.Change("ChangeDepartmentEvent"))
+                          .BindTo(new List<SelectListItem>() {
+                              new SelectListItem() { Text = "Installment", Value = "1" },
+                              new SelectListItem() { Text = "Lease Rent", Value = "2" },
+                              new SelectListItem() { Text = "Installment N Leaserent", Value = "3" }
+                          })
+                          .HtmlAttributes(new { style = "width: 90%; float:right;" })
+                        )
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 k-grid-content">
+                @(Html.Kendo().Grid<NA.PMS.Model.PaymentViewModel>()
+                        .Name("GridDemandNote")
+                        //.Excel(excel => excel.AllPages(true).Filterable(true).FileName("PremiumDuesReport.xlsx"))
+                        //.ToolBar(toolsExcel => toolsExcel.Excel())
+                        .Columns(columns =>
+                        {
+                            columns.Bound(c => c.Id).Hidden(true);
+                            columns.Bound(c => c.RegistrationId).Title("Registration Id").ClientTemplate("<a href='" + "/Property/PropertyAllotment/PropertyDetails/#= RegistrationId #'>#= RegistrationId #</a>").Filterable(true);
+                            columns.Bound(c => c.SectorName).Title("Sector");
+                            columns.Bound(c => c.BlockName).Title("Block");
+                            columns.Bound(c => c.PlotNo).Title("Plot No");
+                            columns.Bound(c => c.TotalDuesAmount).Title("Dues Amount (<span class='fa fa-rupee'></span>)");
+                            columns.Bound(c => c.CreatedDate).Title("Date").Format("{0:dd-MMM-yyyy}");
+                            columns.Bound(c => c.DemandNoteStatus).Title("Status");
+                            columns.Bound(c => c.DemandNoteType).Title("Demand Type").Width(140);
+                            //columns.Bound(c => c.DemandNoteTypeId).Title("Demand Note").Width(140).ClientTemplate(" <center><a onclick='javascript:PrintDemandNote(#=RegistrationId#,#=DuesAmount#);'><span class='fa fa-print'></span></a></center> ");
+                            columns.Bound(c => c.DemandNoteTypeId).Title("Print").Width(50).ClientTemplate(" <center><label onclick='javascript:DisplayDemandNote(this)'><span class='fa fa-print hyperlink'></span></label></center> ").Sortable(false).Filterable(false);
+                            //columns.Bound(c => c.IsActive).Title(" ").Width(50).ClientTemplate("<center><a onclick='javascript:CalculateInstallmentDues(#=RegistrationId#);'><span class='fa fa-refresh'></span></a></center> ").Sortable(false).Filterable(false);
+                            columns.Bound(c => c.DemandNoteContent).Hidden(true);
+                        })
+                        .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                        .ClientDetailTemplateId("template").AutoBind(true)
+                        .DataSource(dataSource => dataSource
+                                .Ajax().ServerOperation(true)
+                                .Model(model => model.Id(p => p.Id))
+                                        .Read(read => read.Action("GetDemandNotesReportDataAsDataSource", "Report", new { area = "Reports" }).Data("FilterParameter")).PageSize(10)
+                                .Sort(s => s.Add(c => c.Id).Descending())
+                        //.Aggregates(aggregates => aggregates.Add(p => p.LeaseRentDues).Sum())
+                            )
+                )
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="col-md-12" id="dues-update-window">
+    <div class="row form-group" style="margin-top:25px;">
+        <div class="col-md-4 col-sm-12 col-xs-12" style="text-align:center;padding:0;">
+            <label>Update Dues for</label>
+        </div>
+        <div class="col-md-5 col-sm-12 col-xs-12" style="padding:0;">
+            @(Html.Kendo().DropDownList()
+              .Name("ddlUpdateDues")
+              .DataTextField("Text")
+              .DataValueField("Value")
+                    //.Events(e => e.Change("change"))
+              .BindTo(new List<SelectListItem>() {
+                  new SelectListItem() { Text = "Installment", Value = "Installment" },
+                  new SelectListItem() { Text = "LeaseRent", Value = "Leaserent" },
+                  //new SelectListItem() { Text = "Schedule", Value = "Schedule" }
+              })
+              .Value("1")
+              .HtmlAttributes(new { style = "width: 100%" })
+            )
+        </div>
+        <div class="col-md-3 col-sm-12 col-xs-12" style="padding:0;">
+
+        </div>
+    </div>
+    <div class="row form-group" style="margin:15px 0 15px 0;">
+        <div class="col-md-4 col-sm-6 col-xs-12"></div>
+        <div class="col-md-5 col-sm-6 col-xs-12">
+            <input type="button" class="k-button btn btn-primary" id="btnSubmitAction" value="Update" style="width:100%" />
+        </div>
+    </div>
+</div>
+
+
+<div id="divPrintSchemeForm" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="padding-top:40px;">
+    <div class="modal-dialog" style="width: 60%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title"><b>Demand Note</b></h4>
+            </div>
+            <div class="modal-body" style="overflow:auto; height:400px;">
+                <div id="divSchemeForm"></div>
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="submit" id="btnPrintDiv" class="k-button" data-dismiss="modal" onclick="PrintSchemeFormDiv();">Print</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="template" type="text/kendo-tmpl">
+    @(Html.Kendo().Grid<NA.PMS.Model.PaymentViewModel>()
+            .Name("grid_#=Id#") // template expression, to be evaluated in the master context
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Hidden(true);
+                columns.Bound(c => c.RegistrationId).Hidden(true);
+                columns.Bound(c => c.InstallmentAmount).Title("Installment Dues").Width(120);
+                columns.Bound(c => c.InstallmentInterest).Title("Installment Interest").Width(120);
+                columns.Bound(c => c.LeaseRentDues).Title("Leaserent Dues").Width(130);
+                columns.Bound(c => c.LeaseRentInterest).Title("Leaserent Interest").Width(120);
+                columns.Bound(c => c.TotalDuesAmount).Title("Total Dues").Width(120);
+                //columns.Bound(c => c.InstallmentDuesUptoDate).Title("Dues Upto").Width(120).Format("{0:dd-MMM-yyyy}");
+                columns.Bound(c => c.PaymentStatus).Title("Status").Width(100);
+                //columns.Bound(c => c.Id).Title("Status").Width(120).ClientTemplate("#if(IsPropertyAllotted==true){#<lable>Allotted</label>#}else{#<label>Not Allotted</label>#}#");
+            })
+            .DataSource(dataSource => dataSource
+                .Ajax().Read(read => read.Action("GetDemandNoteListAsDataSource", "Payment", new { area = "Revenue", Id = "#=Id#" }))
+            )
+            .ToClientTemplate()
+    )
+</script>
+<script>
+    function dataBound() {
+        this.expandRow(this.tbody.find("tr.k-master-row").first());
+    }
+</script>
+
+<script>
+    $(document).ready(function () {
+        $('#dues-update-window').kendoWindow({
+            modal: true,
+            title: "Dues Update Window",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "30%"
+            },
+            width: "40%", height: "35%"
+        });
+
+        $('.anchor-tag1').click(function () {
+            $('.blck-heading').text("Installment Dues");
+        });
+        $('.anchor-tag2').click(function () {
+            $('.blck-heading').text("Lease Rent Dues");
+        });
+        $('.anchor-tag3').click(function () {
+            $('.blck-heading').text("Premium Schedule");
+        });
+
+        $('#btnSubmitAction').click(function () {
+            UpdateDuesByDepartment();
+        });
+    });
+    function ChangeDepartmentEvent() {
+        $("#GridDemandNote").data("kendoGrid").dataSource.read();
+    }
+
+    function ParameterChangeEvent() {
+        $("#GridDemandNote").data("kendoGrid").dataSource.read();
+    }
+
+    function FilterParameter() {
+        return {
+            ActionType: "DemandNote",
+            DepartmentId: $('#DepartmentId').val(),
+            DemandNoteTypeId: $('#DemandNoteTypeId').val(),
+            StartDate: $('#StartDate').val(),
+            EndDate: $('#EndDate').val()
+        };
+    }
+    function FilterLeaserentParam() {
+        return {
+            ActionType: "Leaserent",
+            DepartmentId: $('#DepartmentId').val()
+        };
+    }
+
+    function FilterScheduleParam() {
+        return{
+            ActionType: "Premium Schedule",
+            DepartmentId: $('#DepartmentId').val(),
+            DuesUptoDate: $('#DuesUptoDate').val()
+        }
+    }
+
+    function OpenUpdateWindow() {
+        $("#dues-update-window").data("kendoWindow").center();
+        $("#dues-update-window").data("kendoWindow").open();
+        $("#dues-update-window").data("kendoWindow").pin();
+    }
+
+    function DisplayDemandNote(row) {
+        var tr = $(row).parent().parent().parent();
+        var content = $(tr).children("td:eq(11)").text();
+        $("#divSchemeForm").html(content);
+        $("#divPrintSchemeForm").modal('show');
+
+        //$(".popup-window").data("kendoWindow").open();
+        //$(".popup-window").data("kendoWindow").center();
+    }
+
+    function UpdateDuesByDepartment() {
+        if ($('#DepartmentId').val() == '') {
+            alertify.error("Please select Department");
+            return false;
+        }
+        if ($('#ddlUpdateDues').val() == '') {
+            alertify.error("Please select Dues type to update");
+            return false;
+        }
+        else {
+            var actionType = $('#ddlUpdateDues').val();
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json;charset=utf-8",
+                data: JSON.stringify({ DepartmentId: $("#DepartmentId").val(), ActionType: $('#ddlUpdateDues').val() }),
+                url: '@Url.Action("UpdateDuesPaymentDetails", "Payment", new { area = "Revenue" })',
+                success: function (result) {
+                    $("#dues-update-window").data("kendoWindow").close();
+                    if (actionType == '@Constants.Installment' && result == '@ReturnType.Updated') {
+                        alertify.success("Dues updated successfully");
+                        $('#GridDemandNote').data("kendoGrid").dataSource.read();
+                    }
+                    if (actionType == '@Constants.Leaserent' && result == '@ReturnType.Updated') {
+                        alertify.success("Dues updated successfully");
+                        $('#GridDemandNote').data("kendoGrid").dataSource.read();
+                    }
+                    else {
+                        alertify.error("Dues is not updated");
+                        return false;
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Something is wrong, try again later");
+                }
+            });
+        }
+    }
+
+    function CalculateInstallmentDues(rid) {
+        return false;
+        //alert(rid);
+        var flag = confirm("Are You sure to update installment dues of RID " + rid);
+        if (rid != 0 && flag == true) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ RegistrationId: rid, ActionType: "Installment" }),
+                //url: '/Revenue/Payment/UpdateInstallmentDuesPaymentById',
+                url: '/Revenue/Payment/UpdateInstallmentDuesPaymentII',
+                success: function (result) {
+                    if (result != null && result == '@ReturnType.Updated') {
+                        $("#GridDemandNote").data("kendoGrid").dataSource.read();
+                        alertify.success("Dues Updated successfully");
+                    }
+                    else if (result != null && result == '@ReturnType.Success') {
+                        $("#GridDemandNote").data("kendoGrid").dataSource.read();
+                        alertify.success("Dues Updated successfully");
+                    }
+                    else {
+                        alertify.error("Dues is not Updated.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    var respText = ajaxRequest.responseText;
+                    alertify.error("Some Error in save database.");
+                }
+            });
+            }
+        }
+
+
+        function CalculateDuesUptoDate(rid) {
+            //alert(rid);
+            var flag = confirm("Are You sure to update Lease Rent of RID " + rid);
+            if (rid != 0 && flag == true) {
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ RegistrationId: rid, ActionType: "LeaseRent" }),
+                    url: '/Revenue/Payment/UpdateLeaseRentDuesPaymentById',
+                    success: function (result) {
+                        if (result != null && result.ReturnTypeId == '@ReturnType.Updated') {
+                            $("#GridLeaseRentDues").data("kendoGrid").dataSource.read();
+                            alertify.success("Dues Updated successfully");
+                        }
+                        else {
+                            alertify.error("Dues is not Updated.");
+                        }
+                    },
+                    error: function (ajaxRequest, strError) {
+                        var respText = ajaxRequest.responseText;
+                        alertify.error("Some Error in save database.");
+                    }
+                });
+            }
+        }
+
+
+        function PrintDemandNote(registrationId, dueAmount) {
+            //, DuesUptoDate: duesUptoDate
+
+            var _ObjDemand = { RegistrationId: registrationId, LeaseRentDues: dueAmount };
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ _LeaseRentViewModel: _ObjDemand }),
+                url: '/Revenue/Finance/PrintDemandNote',
+                success: function (result) {
+                    //$("#divApplicationForm").modal('hide');
+                    $("#divSchemeForm").html(result);
+                    $("#divPrintSchemeForm").modal('show');
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    alertify.error("Some Error in save database.");
+                }
+            });
+        }
+
+        function PrintDemandNote(registrationId, dueAmount) {
+            //, DuesUptoDate: duesUptoDate
+
+            var _ObjDemand = { RegistrationId: registrationId, LeaseRentDues: dueAmount };
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ _LeaseRentViewModel: _ObjDemand }),
+                url: '/Revenue/Finance/PrintDemandNote',
+                success: function (result) {
+                    //$("#divApplicationForm").modal('hide');
+                    $("#divSchemeForm").html(result);
+                    $("#divPrintSchemeForm").modal('show');
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    alertify.error("Some Error in save database.");
+                }
+            });
+        }
+
+        function PrintSchemeFormDiv() {
+            var contents = document.getElementById("divSchemeForm").innerHTML;
+            var frame1 = document.createElement('iframe');
+            frame1.name = "frame1";
+            frame1.style.position = "absolute";
+            frame1.style.top = "-1000000px";
+            document.body.appendChild(frame1);
+            var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+            frameDoc.document.open();
+            frameDoc.document.write('<html><head><title></title>');
+            frameDoc.document.write('</head><body>');
+            frameDoc.document.write(contents);
+            frameDoc.document.write('</body></html>');
+            frameDoc.document.close();
+            setTimeout(function () {
+                window.frames["frame1"].focus();
+                window.frames["frame1"].print();
+                document.body.removeChild(frame1);
+            }, 500);
+            return false;
+        }
+</script>

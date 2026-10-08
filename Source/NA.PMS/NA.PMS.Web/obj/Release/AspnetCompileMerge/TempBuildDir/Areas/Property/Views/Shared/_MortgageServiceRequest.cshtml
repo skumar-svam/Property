@@ -1,0 +1,52 @@
+﻿@using Kendo.Mvc.UI;
+@using NA.PMS.Model
+<br />
+<div class="col-md-12 col-sm-12 col-xs-12 form-bx">
+    @*<div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="_FormID">Bank Name </label> </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="MlblBName" class="form-control"></label></div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="_ApplicantName">Previous Loan NOC </label>  </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="MlblPLNOC" class="form-control"></label></div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="_FormID">Branch Address </label> </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="MlblBAdd" class="form-control"></label></div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="_FormID">Sanctioned Amount </label> </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="MlblSAmnt" class="form-control"></label></div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="_FormID">Mortgage Type </label> </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"><label id="MlblMType" class="form-control"></label></div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"></div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group"></div>
+    </div>*@
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<MortgageModel>()
+                .Name("gvMortgageServiceRequest")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.BankName).Title("Bank Name");
+                    columns.Bound(c => c.PreviousLoanNoc).Title("Previous Loan Noc");
+                    columns.Bound(c => c.BranchAddress).Title("Branch Address");
+                    columns.Bound(c => c.SanctionedAmount).Title("Sanctioned Amount");
+                    columns.Bound(c => c.MortgageType).Title("Mortgage Type");
+                })
+                .Sortable()
+                .Filterable()
+                .Pageable
+                    (
+                        pageable => pageable
+                        .Enabled(true)
+                        .PageSizes(true)
+                     )
+                .DataSource
+                (
+                     dataSource => dataSource
+                    .Ajax().Model(model => model.Id(p => p.RID))
+                    .ServerOperation(true)
+                                            .Read(read => read.Action("GetMortgageServiceReqByRid", "CitizenRequests", new { area = "Member" }).Data("GetRid")).PageSize(20)
+                 ).AutoBind(false)
+        )
+    </div>
+
+</div>

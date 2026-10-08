@@ -1,0 +1,279 @@
+﻿@model NA.PMS.Model.ProjectViewModel
+@using Kendo.Mvc.UI
+@using NA.PMS.Common;
+@{
+    ViewBag.Title = "Add Project";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style type="text/css">
+    .hyperlink:hover {
+        color: #fff;
+        cursor: pointer;
+    }
+
+        .active label {
+        padding: 4px 0 4px 10px;
+        margin: 0;
+    }
+</style>
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Add Project</h1></div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <h2 class="blck-heading">Property Detail</h2>
+                <div class="form-bx">
+                    <div>
+                        @Html.HiddenFor(m => m.Id)
+                        @Html.HiddenFor(m => m.SchemeId)
+                        @Html.HiddenFor(m => m.DepartmentId)
+                        @Html.HiddenFor(m => m.PropertyId)
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Registration Id", htmlAttributes: new { @class = "required" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @*@Html.TextBoxFor(m => m.RegistrationId, new { @class = "form-control", @maxlength = '8', @minlength = '8' })*@
+                            @(Html.Kendo().DropDownListFor(po => po.RegistrationId)
+                    .Filter("contains")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel("Select")
+                                    //.AutoBind(false)
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport =>
+                        {
+                            transport.Read("GetRIDsForProject", "ManageProperty");
+                        }).Schema(schema =>
+                        {
+                            schema.Data("Data")
+                            .Total("Total");
+                        }).PageSize(100);
+                    })
+                    .Events(events => { events.Change("RIdChange"); })
+             .HtmlAttributes(new { style = "width:100%", @class = "schemeForms" })
+                            )
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Department")
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.Department, new { @readonly = "readonly", @class = "form-control" })
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.Label("Project", htmlAttributes: new { @class = "" })
+                        </div>
+                        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                            @Html.TextBoxFor(m => m.Project, new { @class = "form-control", @maxlength = "250" })
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="box-button text-center">
+                <input type="button" id="btnCancel" value="Cancel" class="btn btn-default" />
+                <input value="Add" type="button" id="btnSubmit" class="btn btn-add" />
+            </div>
+        </div>
+    </div>
+    <br />
+    <div class="col-md-12" id="PGrid">
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="k-grid-content">
+            @(Html.Kendo().Grid<NA.PMS.Model.ProjectModel>()
+                    .Name("gridProject")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(c => c.ProjectId).Hidden(true);
+                        columns.Bound(c => c.Project).Title("Project");
+                        columns.Bound(c => c.ParentPropertyId).Title("Property ID");
+                        columns.Bound(c => c.ParentRegistrationId).Title("Registration ID");
+                        columns.Bound(c => c.Status).Title("Action").ClientTemplate("<label onclick='javascript:UpdateStatus(\"#=ProjectId#\");' class='glyphicon glyphicon-remove-circle hyperlink rem'></label>").Filterable(false).HtmlAttributes(new { @class = "active" }).Width(90);
+
+                    })
+                    .Sortable()
+                    .Filterable()
+                    .Resizable(resize => resize.Columns(true))
+                    .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                    .DataSource(dataSource => dataSource
+                    .Ajax().Model(model => model.Id(c => c.ProjectId))
+                    .ServerOperation(true)
+                    .Read(read => read.Action("GetProjectByRid", "ManageProperty").Data("FilterRegistrationId")).PageSize(10)
+                    )
+            )
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#PGrid").hide();
+
+        $("#btnCancel").click(function () {
+            window.location.href = '@Url.Action("Manage", "ManageProperty")';
+        });
+    });
+
+    //On Registration Id change
+    function RIdChange() {        
+        var rid = $("#RegistrationId").val();
+        if (rid == '') {
+            alertify.error("Enter Registration Id");
+            return false;
+        }
+        $.ajax({
+            url: '@(Url.Action("GetParentPropertyDetailById", "ManageProperty"))',
+            type: 'Post',
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rid: rid }),
+            success: function (result) {
+                if (result.IsRIDValid == false) {
+                    ClearValues();
+                    $("#PGrid").hide();
+                    alertify.error("Please enter a valid RID");
+                    return false;
+                }
+                else {
+                    if (result.DepartmentId == '@NADepartment.Institutional' || result.DepartmentId == '@NADepartment.Commercial' || result.DepartmentId == '@NADepartment.GroupHousing') {
+                        $("#SchemeId").val(result.SchemeId);
+                        $("#PropertyType").val(result.PropertyType);
+                        $("#PropertyTypeId").val(result.PropertyTypeId);
+                        $("#DepartmentId").val(result.DepartmentId);
+                        $("#PropertyId").val(result.PropertyId);
+                        $("#ParentPropertyId").val(result.PropertyId);
+                        $("#Department").val(result.Department);
+                        $("#gridProject").data("kendoGrid").dataSource.read();
+                        $("#PGrid").show();
+
+                    }
+                    else {
+                        alertify.error("Not allowed");
+                        return false;
+                    }
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Some network error. Please try again later.");
+            }
+        });
+    }
+
+    function FilterParentRid() {
+        return { ParentRid: $("#RegistrationId").val() };
+    }
+
+    function FilterRegistrationId() {
+        return { Rid: $("#RegistrationId").val() };
+    }
+
+    $("#btnSubmit").click(function () {
+        var rid = $("#RegistrationId").val();
+        var Project = $("#Project").val();
+        var propertyId = $("#PropertyId").val();
+        if (rid == '') {
+            alertify.error("Enter Registration ID.");
+            return false;
+        }
+        if (Project == '') {
+            alertify.error("Please Enter Project ID.");
+            return false;
+        }
+
+        $.ajax({
+            url: '@(Url.Action("GetParentPropertyDetailById", "ManageProperty"))',
+            type: 'Post',
+            dataType: 'json',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rid: rid }),
+            success: function (result) {
+                if (result.IsRIDValid == false) {
+                    ClearValues();
+                    alertify.error("Please enter a valid RID and respective Department");
+                    return false;
+                }
+                else {
+                    $.ajax({
+                        url: '/Master/ManageProperty/SavePropertyProject',
+                        type: 'Post',
+                        dataType: 'json',
+                        contentType: 'application/json; charset=utf-8',
+                        data: JSON.stringify({ RegistrationId: rid, Project: Project, PropertyId: propertyId }),
+                        success: function (result) {
+                            if (result == '@ReturnType.Saved') {
+                                $("#gridProject").data("kendoGrid").dataSource.read();
+                                ClearValues();
+                                alertify.success("Project added successfully.");
+                            }
+                            else if (result == '@ReturnType.Updated') {
+                                $("#gridProject").data("kendoGrid").dataSource.read();
+                                ClearValues();
+                                alertify.success("Project updated successfully.");
+                            }
+                            else if (result == '@ReturnType.Exist') {
+                                $("#gridProject").data("kendoGrid").dataSource.read();
+                                ClearValues();
+                                alertify.error("Project name already exists.");
+                            }
+                            else {
+                                alertify.error("Please try again later.");
+                            }
+                        },
+                        error: function (ajaxRequest, strError) {
+                            alertify.error("Some error occured. Please try again later.");
+                        }
+                    });
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                alertify.error("Some error occured. Please try again later.");
+            }
+        });
+
+    });
+
+    function UpdateStatus(Id) {
+        var r = confirm("Are you sure you want to remove this project?");
+        if (r == true) {
+            $.ajax({
+                url: '@(Url.Action("UpdateProjectStatus", "ManageProperty"))',
+                type: 'Post',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ ProjectId: Id }),
+                success: function (result) {
+                    if (result == '@ReturnType.Updated') {
+                        $("#gridProject").data("kendoGrid").dataSource.read();                        
+                        alertify.success("Project removed.");
+                    }
+                    else {
+                        alertify.error("Please try again later.");
+                    }
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    //alert(respText);
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            });
+        }
+    }
+
+    function ClearValues() {
+        $("#Project").val('');
+    }
+</script>

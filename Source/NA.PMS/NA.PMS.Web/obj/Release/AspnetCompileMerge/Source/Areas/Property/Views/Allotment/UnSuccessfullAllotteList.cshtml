@@ -1,0 +1,51 @@
+﻿@model NA.PMS.Model.ManageRequestModel
+@using Kendo.Mvc.UI
+@using NA.PMS.Common
+@{
+    ViewBag.Title = "Manage Requests";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .k-grid-content {
+        overflow-y: hidden;
+        overflow-x: hidden;
+    }
+</style>
+
+<div class="unsuccessful-applicant">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Unsuccessful Applicant</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.ManageRequestModel>()
+              .Name("gridViewAllUsers")
+              .Columns(columns =>
+              {
+                  columns.Bound(c => c.SchemeName).Title("Scheme Name");
+                  columns.Bound(c => c.Department).Title("Department");
+                  //columns.Bound(c => c.Status).Title("Status");
+                  //columns.Bound(c => c.ReuestedBy).Title("Reuested By");
+                  //columns.Bound(c => c.RequestedReceived).Title("Reuested Received");
+                  //columns.Bound(c => c.ApprovedBy).Title("Approved By");
+                  //columns.Bound(c => c.ApprovedOn).Title("Approved On");
+                  columns.Bound(c => c.SchemeId).Title("Actions").ClientTemplate("<a href='" + "/Property/Allotment/ManageUnsuccessfullAllottees/" + "?SchemeId=#= EncryptedSchemeId #&DepartmentId=#=EncryptedDeptId#&AllotmentDate=#=EncryptedRequestedReceived#'" + ">View List</a>").Filterable(false);
+              })
+                      .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                      .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                      .Groupable()
+                      .DataSource(dataSource => dataSource
+                      .Ajax().Model(model => model.Id(p => p.Status))
+                     .ServerOperation(true)
+                     .Read(read => read.Action("GetAllUnsuccessfullApplicants", "Allotment")).PageSize(20)
+              )
+        )
+    </div>
+
+</div>

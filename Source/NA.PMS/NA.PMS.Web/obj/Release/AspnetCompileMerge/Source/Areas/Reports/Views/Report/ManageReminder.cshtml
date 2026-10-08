@@ -1,0 +1,50 @@
+﻿
+@model NA.PMS.Model.KYAViewModel
+@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@using NA.PMS.Common
+
+@{
+    ViewBag.Title = "Manage Reminder";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div id="Reminder">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle"> Dues Reminder Log</h1></div>           
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 alot-prop-grid k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.SMSLogViewModel>()
+            .Name("GridSMSLog")
+            .Columns(columns =>
+            {
+                //columns.Bound(c => c.Id).Hidden(true);//.Title("Reference Id").Width(130).ClientTemplate("#if(IsActive==true){#<a target='_blank' href='/Member/Authority/KYADetail/#=Id#'>#=Id#</a>#}else{#<label>#=ReferenceId#</label>#}#").Sortable(true);
+                columns.Bound(c => c.RegistrationId).Title("Registration Id").ClientTemplate("<a href='" + "/Property/PropertyAllotment/PropertyDetails/#= RegistrationId #'>#= RegistrationId #</a>").Filterable(true);
+                columns.Bound(c => c.SentDate).Title("Sent Date").Format("{0:dd-MMM-yyyy}").Sortable(false);
+                columns.Bound(c => c.Sender).Title("Sent By");
+                columns.Bound(c => c.MobileNo).Title("Sent To");           
+            })
+            .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))            
+            .AutoBind(true)
+            .DataSource
+            (
+                dataSource => dataSource
+                .Ajax()
+                //.Model(model => model.Id(p => p.Id))
+                .ServerOperation(true)
+                .Read(read => read.Action("GetSMSLogList", "Report", new { area = "Reports" }))
+                //.Sort(s => s.Add(x => x.Id).Descending())
+                .PageSize(10)
+            )
+            //.Excel(excel => excel
+            //    .AllPages(true).Filterable(true)
+            //    .FileName("Lease Rent Reminder Report.xlsx"))
+            //.ToolBar(toolsExcel => toolsExcel.Excel())
+        )
+    </div>
+</div>
+

@@ -1,0 +1,54 @@
+﻿@using Kendo.Mvc.UI
+@{
+    ViewBag.Title = "Manage Possession";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="panel panel-body">
+    <h3>Manage Possession</h3>
+    <div class="row">
+        <div class="col-md-9"></div>
+        <div class="col-md-3">
+            <input type="button" value="Create Possession Order" id="btnCreatePO" />
+        </div>
+    </div>
+    <br />
+    <div class="k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.PossessionModel>()
+        .Name("gridRefunds")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.Id).Title("ID").Hidden(true).Width(100);
+            columns.Bound(c => c.RequestNo).Title("Request No").Width(100);
+            columns.Bound(c => c.RId).Title("RID").Width(100);
+            columns.Bound(c => c.PropNo).Title("Property No").Width(100);
+            columns.Bound(c => c.RequestDate).Title("Request Date").Width(100).Format("{0:dd/MM/yyyy}");
+            columns.Bound(c => c.PossessionDate).Title("Possession Date").Width(100).Format("{0:dd/MM/yyyy}");
+            columns.Bound(p => p.AreaChange).Title("Area Change").Width(100);
+            columns.Bound(p => p.Status).Title("Status").Width(100);
+        })
+        .Sortable()
+        .Filterable()
+                .Resizable(resize => resize.Columns(true))
+                        
+        .Pageable(pageable => pageable
+                                               .Enabled(true)
+                                               .Refresh(true)
+                                               .PageSizes(true)
+                                            )
+        .DataSource(dataSource => dataSource
+        .Ajax().Model(model => model.Id(c => c.Id))
+        .ServerOperation(true)
+        .Read(read => read.Action("GetPossessionData", "PropertyRegistration")).PageSize(20)
+        )
+        )
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#btnCreatePO").click(function () {
+            window.location.href = '@Url.Action("RequestPossessionOrder", "PropertyRegistration")';
+        });
+    });
+</script>

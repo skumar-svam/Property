@@ -1,0 +1,500 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@model NA.PMS.Model.MutationModel
+@using NA.PMS.Common;
+
+<h2 class="blck-heading">Registration Id</h2>
+<div class="form-bx">
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Registration Id", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DropDownListFor(m => m.RId)
+                    .Filter("contains")
+                    .DataTextField("text")
+                    .DataValueField("id")
+                    .OptionLabel("Select")
+                    .DataSource(source =>
+                    {
+                        //source.Read(read =>
+                        //{
+                        //    read.Action("GetRIDsForMutation", "PropertyRegistration");
+                        //});
+                        source.Custom()
+                    .ServerFiltering(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    .Transport(transport =>
+                    {
+                        transport.Read("GetRIDsForMutation", "PropertyRegistration");
+                    }).Schema(schema =>
+                    {
+                        schema.Data("Data")
+                        .Total("Total");
+                    }).PageSize(100);
+                    })
+                    .Events(events => { events.Change("RIdChange"); })
+                    .HtmlAttributes(new { @class = "schemeForms", style = "width:100%" })
+            )
+            @*@Html.TextBoxFor(m => m.RId, htmlAttributes: new { @class = "form-control schemeForms", @onchange = "RIdChange();",@id="txtRId" })*@
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Property No")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span class="lbl-form-control">
+                <div id="lblPropNo">
+                    @Html.DisplayFor(m => m.PropNo)
+                </div>
+            </span>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Request Ref No", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(m => m.OnlineRequestRefNo, htmlAttributes: new { @class = "form-control", onkeypress = "return IsNumeric(event);", @maxlength = "8", @onchange = "RequestIdCheck();" })
+        </div>
+    </div>
+</div>
+
+<h2 class="blck-heading">Applicant Details</h2>
+<div class="form-bx">
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Scheme Name")
+            @Html.HiddenFor(m => m.ReqNo)
+            @Html.HiddenFor(m => m.Status)
+        </div>
+
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span class="lbl-form-control">
+                <div id="lblScNa">
+                    @Html.DisplayFor(m => m.SchemeName)
+                </div>
+            </span>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Department")
+        </div><div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span class="lbl-form-control">
+                <div id="lblDeNa">
+                    @Html.DisplayFor(m => m.DepttName)
+                </div>
+            </span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Applicant's Name")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span class="lbl-form-control">
+                <div id="lblApNa">
+                    @Html.DisplayFor(m => m.ApplicantName)
+                </div>
+            </span>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Gender")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span class="lbl-form-control">
+                <div id="lblGender">
+                    @Html.DisplayFor(m => m.Gender)
+                </div>
+            </span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Father's/Husband's Name")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span class="lbl-form-control">
+                <div id="lblReNa">
+                    @Html.DisplayFor(m => m.RelationName)
+                </div>
+            </span>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Property Type")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span class="lbl-form-control">
+                <div id="lblPropTy">
+                    @Html.DisplayFor(m => m.PropType)
+                </div>
+            </span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Area")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span class="lbl-form-control">
+                <div id="lblArea">
+                    @Html.DisplayFor(m => m.Area)
+                </div>
+            </span>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Floor")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span class="lbl-form-control">
+                <div id="lblFloor">
+                    @Html.DisplayFor(m => m.Floor)
+                </div>
+            </span>
+        </div>
+    </div>
+</div>
+
+<h2 class="blck-heading">Transfer Details</h2>
+<div class="form-bx">
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Transferee Name")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span class="lbl-form-control">
+                <div id="lblTrNa">
+                    @Html.DisplayFor(m => m.TransfereeName)
+                </div>
+            </span>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Gender")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span class="lbl-form-control">
+                <div id="lblTrGender">
+                    @Html.DisplayFor(m => m.TransfereeGender)
+                </div>
+            </span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Father's/Husband's Name")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span class="lbl-form-control">
+                <div id="lblTrReNa">
+                    @Html.DisplayFor(m => m.TransfereeRelationName)
+                </div>
+            </span>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Transfer Date")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DatePickerFor(m => m.TransferDate)
+                                  .HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Transfer Type")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span class="lbl-form-control">
+                <div id="lblTransTy">
+                    @Html.DisplayFor(m => m.TransferType)
+                </div>
+            </span>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        </div>
+    </div>
+
+    <div class="row row-gpa">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("GPA Holder Name")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span class="lbl-form-control">
+                <div id="lblGpaHolderName">
+                    @Html.DisplayFor(m => m.GPAHolderName)
+                </div>
+            </span>
+</div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("GPA Holder Address")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            <span class="lbl-form-control">
+                <div id="lblGpaHolderAddress">
+                    @Html.DisplayFor(m => m.GPAHolderAddress)
+                </div>
+            </span>
+        </div>
+    </div>
+
+    <div class="row row-gpa">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("GPA Effective From")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DatePickerFor(m => m.GPAEffectiveFrom).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("GPA Effective To")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DatePickerFor(m => m.GPAEffectiveto).HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+        </div>
+    </div>
+</div>
+
+<h2 class="blck-heading">Mutation Details</h2>
+<div class="form-bx">
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Mutation Date", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DatePickerFor(m => m.MutationDate).Max(DateTime.Now)
+                                  .HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Transfer Deed Date", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @(Html.Kendo().DatePickerFor(m => m.TransferDeedDate).Max(DateTime.Now)
+                                  .HtmlAttributes(new { @class = "DisableKeyboardInput", style = "width:100%" }))
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Bahi Number", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(m => m.BahiNo, htmlAttributes: new { @class = "form-control", @maxlength = "10" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Bahi Zild Number", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(m => m.BahiZildNo, htmlAttributes: new { @class = "form-control", @maxlength = "10" })
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Bahi Page Number", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(m => m.BahiPageNo, htmlAttributes: new { @class = "form-control", @maxlength = "10" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("SI Number", htmlAttributes: new { @class = "required" })
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.TextBoxFor(m => m.SINo, htmlAttributes: new { @class = "form-control", @maxlength = "10" })
+        </div>
+    </div>
+
+    <div class="row" id="divUpload">
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @Html.Label("Upload Transfer Deed")
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+            @{Html.RenderPartial("_FileUpload", Model);}
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        </div>
+    </div>
+    @Html.HiddenFor(m => m.DepttId)
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#TransferDate').data('kendoDatePicker').enable(false);
+        $("#GPAEffectiveFrom").data("kendoDatePicker").enable(false);
+        $("#GPAEffectiveto").data("kendoDatePicker").enable(false);
+        $('.row-gpa').hide();
+        //$('#txtRId').hide();
+        //$('#RId').hide();
+    });
+
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+
+    function RIdChange() {
+        var rId = $("#RId").val();
+        if (rId == '') {
+            ClearValues();
+            alertify.error("Please select an RID");
+            return false;
+        }
+        //GetKYADetails(rId);
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ rId: rId }),
+            url: '/PropertyRegistration/GetTransferDetailsByRID',
+            success: function (result) {
+                if (result != null) {
+                    $("#lblPropNo").html(result.PropNo);
+                    $("#lblScNa").html(result.SchemeName);
+                    $("#lblDeNa").html(result.DepttName);
+                    $("#lblApNa").html(result.AllotteName);
+                    $("#lblGender").html(result.Gender);
+                    $("#lblReNa").html(result.FatherName);
+                    $("#lblPropTy").html(result.PropType);
+                    $("#lblArea").html(result.Area);
+                    $("#lblFloor").html(result.Floor);
+                    $("#lblTrNa").html(result.TransfereeName);
+                    $("#lblTrGender").html(result.TransfereeGender);
+                    $("#lblTrReNa").html(result.TransfereeRelationName);
+                    $("#lblTransTy").html(result.TransferType);
+                    $("#TransferDate").data("kendoDatePicker").value(result.TransferDate);
+                    $("#ReqNo").val(result.ReqNo);
+                    $("#DepttId").val(result.DepttID);
+                    $("#GPAEffectiveFrom").data("kendoDatePicker").value(result.GPAEffectiveFrom);
+                    $("#GPAEffectiveto").data("kendoDatePicker").value(result.GPAEffectiveto);
+                    $("#lblGpaHolderName").html(result.GPAHolderName);
+                    $("#lblGpaHolderAddress").html(result.GPAHolderAddress);
+
+                    if (result.TransferType == "GPA") {
+                        $('.row-gpa').show();
+                    }
+                }
+                else {
+                    ClearValues();
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            },
+            error: function (obj) {
+                ClearValues();
+                alertify.error("Some error occured. Please try again later.");
+            }
+        });
+    }
+
+    function GetKYADetails(rId) {
+        //var rId = $("#RId").val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ RegistrationId: rId }),
+            url: '/Property/PropertyRegistration/GetKYADetailsForRid',
+            success: function (result) {
+                if (result != null) {
+                    if (result.StatusId == "2") {
+                        alertify.error("Your KYA has been Rejected. Please Complete your KYA again.");
+                        $('#btnAdd').attr('disabled', 'disabled');
+                        return false;
+                    }
+                    else if (result.StatusId == "" || result.StatusId == null) {
+                        alertify.error("Please Complete your KYA.");
+                        $('#btnAdd').prop('disabled', true);
+                        return false;
+                    }
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+
+    function ClearValues() {
+        $("#lblPropNo").html('');
+        $("#lblScNa").html('');
+        $("#lblDeNa").html('');
+        $("#lblApNa").html('');
+        $("#lblGender").html('');
+        $("#lblReNa").html('');
+        $("#lblPropTy").html('');
+        $("#lblArea").html('');
+        $("#lblFloor").html('');
+        $("#lblTrNa").html('');
+        $("#lblTrGender").html('');
+        $("#lblTrReNa").html('');
+        $("#lblTransTy").html('');
+        $("#TransferDate").data("kendoDatePicker").value('');
+        $("#GPAEffectiveFrom").data("kendoDatePicker").value('');
+        $("#GPAEffectiveto").data("kendoDatePicker").value('');
+        $("#ReqNo").val('');
+        $("#lblGpaHolderName").val('');
+        $("#lblGpaHolderAddress").val('');
+    }
+
+    function RequestIdCheck() {
+        var request = $("#OnlineRequestRefNo").val();
+        rModel = {
+            RequestId: $("#OnlineRequestRefNo").val(),
+            RegistrationId: $("#RId").val(),
+            ServiceId: "9"
+        }
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ model: rModel }),
+            url: '/Property/PropertyRegistration/IsRequestIdIsExist',
+            success: function (result) {
+                if (result != '@ReturnType.Exist') {
+                    if (result == '@NAStatusId.Completed') {
+                        alertify.error("This Request is Completed");
+                    }
+                    else if (result == '@NAStatusId.Initiated') {
+                        alertify.error("This Request is in Initiated State. Please Forward this request first.");
+                    }
+                    else if (result == '@NAStatusId.Objection') {
+                        alertify.error("This Request in Objection State.");
+                    }
+                    else if (result == '@NAStatusId.Rejected') {
+                        alertify.error("This Request is Rejected");
+                    }
+                    else if (result == '@NAStatusId.Cancelled') {
+                        alertify.error("This Request is cancelled");
+                    }
+                    else if (result == '@NAStatusId.Withdrawn') {
+                        alertify.error("This Request is Withdrawn by Allottee.");
+                    }
+                    else {
+                        alertify.error("Request no. mismatch. Please enter a valid Request No.");
+                    }
+                    $("#OnlineRequestRefNo").val('');
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                //alert(respText);
+            }
+        });
+    }
+</script>
+

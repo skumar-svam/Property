@@ -1,0 +1,227 @@
+﻿@using Kendo.Mvc.UI
+
+@model NA.PMS.Model.Property.PropertyPossessionModel
+@{
+    ViewBag.Title = "Manage Possession Order";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@using (Html.BeginForm("AddBulkPossessionOrder", "Possession", FormMethod.Post, new { enctype = "multipart/form-data" }))
+{
+
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Add Bulk Possession Order</h1></div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+                </div>
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="col-md-12 content-top-spce">
+                <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+
+                    <h2 class="blck-heading">Select Scheme</h2>
+
+                    <div class="form-bx">
+                        <div class="row">
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group">@Html.Label("Scheme", htmlAttributes: new { @class = "required" })</div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(m => m.SchemeId)
+                  .Name("SchemeId")
+                  .DataTextField("schemeName")
+                  .DataValueField("schemeId")
+                  .OptionLabel(" -- Please Select --")
+                  .DataSource(source => source.Read(read => read.Action("GetSchemeListForAllotment", "PropertyAllotment")))
+                  .Events(e => e.Change("SetSchemeId"))
+                  .Enable(true)
+                  .AutoBind(true)
+                  .HtmlAttributes(new { style = "width: 100%; height:100%" })
+                                )
+                            </div>
+                            <div class="col-md-2 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Department", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-4 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(m => m.DepartmentId)
+                  .Name("DepartmentId")
+                  .DataTextField("DepartmentName")
+                  .DataValueField("DepartmentId")
+                  .OptionLabel(" -- Please Select -- ")
+                  .DataSource(source =>
+                  {
+                      source.Read(read =>
+                      {
+                          read.Action("FilterDepartmentOnScheme", "PropertyAllotment")
+                              .Data("FilterDepartment");
+                      })
+                          .ServerFiltering(true);
+                  })
+                  .Events(e => e.Change("BindPossessionGrid"))
+                  .Enable(false)
+                  .AutoBind(false)
+                  .CascadeFrom("SchemeId")
+                  .HtmlAttributes(new { style = "width: 100%; height:100%" })
+                                )
+                            </div>
+                        </div>
+                        @Html.HiddenFor(m => m.SchemeId)
+                        @Html.HiddenFor(m => m.DepartmentId)
+                    </div>
+                    <div class="col-md-12 blnk-rw"></div>
+                    <div class="row">
+                        <div class="k-grid-content">
+
+                            @(Html.Kendo().Grid<NA.PMS.Model.Property.PropertyPossessionModel>()
+              .Name("gridBulkPossession")
+              .Columns(columns =>
+              {
+                  columns.Bound(c => c.PropertyId).Title("Property Number").Width(100).Visible(false);
+                  columns.Bound(c => c.IsSelected).Width(30).ClientTemplate("<input type='checkbox' #= IsSelected ? checked='checked':'' # class='inpchk' ></input>").HeaderTemplate(" <input type='checkbox' id='chkSelectAll' onchange='SelectAll(this)'/>").Filterable(false).Sortable(false).Title("");
+                  columns.Bound(c => c.Rid).Title("RID").Width(60).ClientTemplate("<a href=\"/Property/Possession/ViewBulkPossessionOrder/#= Rid#\" id='v_#=Rid#'  style = 'width: 30px;' >#=Rid#</a>");
+                  columns.Bound(c => c.PropertyNumber).Title("Property Number").Width(100);
+                  columns.Bound(c => c.ApplicantName).Title("Applicant's Name").Width(100);
+                  columns.Bound(c => c.FatherName).Title("FatherName").Width(100);
+                  //columns.Bound(c => c.Print).ClientTemplate("<input type='checkbox' class='chkbx' ></input>").Title("Print").Width(75).Filterable(false).Sortable(false);
+              })
+              .Sortable()
+              .Filterable()
+              .Resizable(resize => resize.Columns(true))
+              .Pageable(pageable => pageable
+                  .Enabled(true)
+                  .Refresh(true)
+                  .PageSizes(true)
+              )
+              .DataSource(dataSource => dataSource
+                  .Ajax().Model(model => model.Id(c => c.Rid))
+                  .ServerOperation(true)
+                          .Read(read => read.Action("GetPossessionPropertiesBySchemeDept", "Possession").Data("FilterGrid")).PageSize(20)
+              )
+                            )
+
+                            <script type="text/javascript">
+                                function FilterGrid() {
+                                    return {
+                                        SchemeId: $("#SchemeId").val(),
+                                        DepartmentId: $("#DepartmentId").val()
+                                    };
+                                }
+
+                            </script>
+                        </div>
+                    </div>
+                </div>
+                <div class="box-button text-center">
+                    <button type="button" class="btn btn-default" onclick="window.history.back();" id="btnBack">Back</button>
+                    <button type="button" class="btn btn-add" id="btnAdd">Add</button>
+                </div>
+                @Html.Hidden("RedirectTo", Url.Action("ManagePossessionOrder", "Possession"))
+            </div>
+        </div>
+    </div>
+}
+
+<script type="text/javascript">
+
+    function SetSchemeId(e) {
+        var dataItem = this.dataItem(e.item);
+        $("#SchemeId").val(dataItem.schemeId);
+    }
+
+    function FilterDepartment() {
+        return { SchemeId: $("#SchemeId").val() };
+    }
+
+    function BindPossessionGrid(e) {
+        var dataItem = this.dataItem(e.item);
+        $("#DepartmentId").val(dataItem.DepartmentId);
+
+        var grid = $("#gridBulkPossession").data("kendoGrid");
+        grid.dataSource.read();
+        //if (grid.dataSource.total() <= 0) {
+        //    $("#btnAdd").attr('disabled', 'disabled');
+        //} else {
+        //    alert("Hii");
+        //    $("#btnAdd").removeAttr('disabled');
+        //}
+
+    }
+
+    var checkedPropertyIds = [];
+    var checkedRIds = [];
+
+    function SelectAll(e) {
+        var state = $(e).is(':checked');
+        if (state == true) {
+            var grid = $('#gridBulkPossession').data("kendoGrid");
+            $.each(grid.dataSource.view(), function () {
+                $(".inpchk").prop('checked', 'checked');
+                if (this['IsSelected'] != state)
+                    this['IsSelected'] = state;
+                checkedRIds.push(this.Rid);
+                checkedPropertyIds.push(this.PropertyId);
+            });
+        } else {
+            $(".inpchk").removeAttr('checked');
+            var grid = $('#gridBulkPossession').data("kendoGrid");
+            $.each(grid.dataSource.view(), function () {
+                this['IsSelected'] = false;
+            });
+        }
+    }
+    var currentDate = new Date().toJSON().slice(0, 10);
+    //select selected checkboxes
+    $(function () {
+        $('#gridBulkPossession').on('change', '.inpchk', function () {
+
+            var checked = $(this).is(':checked');
+            $("#chkSelectAll").removeAttr('checked');
+            if ($('.inpchk:checked').length == $('.inpchk').length) {
+                $("#chkSelectAll").prop('checked', 'checked');
+            }
+            var grid = $('#gridBulkPossession').data().kendoGrid;
+            var dataItem = grid.dataItem($(this).closest('tr'));
+            dataItem.set('IsSelected', checked);
+            checkedRIds.push(dataItem.Rid);
+            checkedPropertyIds.push(this.PropertyId);
+        });
+
+    });
+
+    $("#btnAdd").click(function () {
+        var items = $("#gridBulkPossession").data("kendoGrid").dataSource.data();
+        var rIds = [];
+        var propertyIds = [];
+        for (var i = 0; i < items.length; i++) {
+            var item = items[i];
+            if (item.IsSelected == true) {
+
+                rIds.push(item.Rid + "," + item.PropertyId);
+                //propertyIds.push(item.PropertyId);
+            }
+        }
+        if (rIds.length > 0) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ rIds: rIds }),
+                url: '/Possession/AddBulkPossessionOrder',
+                success: function (result) {
+                    //alertify.success("Records added successfully.");
+                    alert("Records added successfully.");
+                    var url = $("#RedirectTo").val();
+                    window.location.href = url;
+                },
+                error: function (obj) {
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            });
+        } else {
+            alertify.error("Please select atleast one property for Possession Order.");
+        }
+
+
+    });
+
+</script>

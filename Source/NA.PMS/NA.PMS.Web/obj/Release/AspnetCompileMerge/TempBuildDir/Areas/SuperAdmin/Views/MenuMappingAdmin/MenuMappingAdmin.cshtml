@@ -1,0 +1,223 @@
+﻿@model NA.PMS.Model.MenuMapping
+@*@using System.Web.Mvc.Html;*@
+@using Kendo.Mvc.UI
+
+@{
+    ViewBag.Title = "MenuMapping";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<script src="~/Scripts/kendo.aspnetmvc.min.js"></script>
+
+@Html.HiddenFor(model => model.applicationId)
+@Html.HiddenFor(model => model.roleId)
+<div class="container-fluid">
+    <fieldset>
+        <legend>Menu Mapping for Admin Roles</legend>
+    <div class="row">
+           
+            <div class="col-sm-2">Select Role</div>
+            <div class="col-sm-2">
+            @(Html.Kendo().DropDownList()
+        .Name("Roles")
+        .DataValueField("roleId")
+        .DataTextField("roleName")
+        .HtmlAttributes(new { style = "width:200px;" })
+            .DataSource(source => source.Read(read => read.Action("GetRolesByApplicationId", "MenuMappingAdmin")))
+    .Value(Model.roleId.ToString())
+    @*Events(e => e.Change("change"))*@
+            )
+        </div>
+    </div>
+
+    <div id="dvRaw">
+        @Html.Raw(Model.htmlString)
+    </div>
+
+        <div id="dvDdl"></div>
+
+    </div>
+    
+
+    
+    <div class="modal-footer">
+            <button type="button" id="btnSubmit" class="btn-primary">Submit</button>
+            <button type="button" class="btn-primary" value="Cancel" id="btnBack">Cancel</button>
+            @*<button type="button" id="btnBack" class="btn-default" data-dismiss="modal">Back</button>*@
+
+    </div>
+    </fieldset>
+</div>
+<script type="text/javascript">
+
+
+    $(document).ready(function () {
+
+        $(document).on('click', ".imgApp", function () {
+            $(this).parents('fieldset:eq(0)').find('.dvMenu').toggle();
+            return false;
+        });
+
+        $(document).on('click', ".imgMenu", function () {
+            $(this).parents('fieldset:eq(0)').find('.dvSubMenu').toggle();
+            return false;
+        });
+
+        //clicking the parent checkbox should check or uncheck all child checkboxes
+        $(document).on('click', ".chkMenuRead", function () {
+            $(this).parents('fieldset:eq(0)').find('.chkSubMenuRead').prop('checked', this.checked);
+        });
+        //clicking the last unchecked or checked checkbox should check or uncheck the parent checkbox
+        $(document).on('click', ".chkSubMenuRead", function () {
+            if ($(this).parents('fieldset:eq(0)').find('.chkMenuRead').prop('checked') == true && this.checked == false)
+                $(this).parents('fieldset:eq(0)').find('.chkMenuRead').prop('checked', false);
+            if (this.checked == true) {
+                var flag = true;
+                $(this).parents('fieldset:eq(0)').find('.chkSubMenuRead').each(
+                    function () {
+                        if (this.checked == false)
+                            flag = false;
+                    }
+                );
+                $(this).parents('fieldset:eq(0)').find('.chkMenuRead').prop('checked', flag);
+            }
+
+        });
+
+        //clicking the parent checkbox should check or uncheck all child checkboxes
+        $(document).on('click', ".chkMenuWrite", function () {
+            $(this).parents('fieldset:eq(0)').find('.chkSubMenuWrite').prop('checked', this.checked);
+        });
+        //clicking the last unchecked or checked checkbox should check or uncheck the parent checkbox
+        $(document).on('click', ".chkSubMenuWrite", function () {
+            if ($(this).parents('fieldset:eq(0)').find('.chkMenuWrite').prop('checked') == true && this.checked == false)
+                $(this).parents('fieldset:eq(0)').find('.chkMenuWrite').prop('checked', false);
+            if (this.checked == true) {
+                var flag = true;
+                $(this).parents('fieldset:eq(0)').find('.chkSubMenuWrite').each(
+                    function () {
+                        if (this.checked == false)
+                            flag = false;
+                    }
+                );
+                $(this).parents('fieldset:eq(0)').find('.chkMenuWrite').prop('checked', flag);
+            }
+
+        });
+
+        //clicking the parent checkbox should check or uncheck all child checkboxes
+        $(document).on('click', ".chkMenuModify", function () {
+            $(this).parents('fieldset:eq(0)').find('.chkSubMenuModify').prop('checked', this.checked);
+        });
+        //clicking the last unchecked or checked checkbox should check or uncheck the parent checkbox
+        $(document).on('click', ".chkSubMenuModify", function () {
+            if ($(this).parents('fieldset:eq(0)').find('.chkMenuModify').prop('checked') == true && this.checked == false)
+                $(this).parents('fieldset:eq(0)').find('.chkMenuModify').prop('checked', false);
+            if (this.checked == true) {
+                var flag = true;
+                $(this).parents('fieldset:eq(0)').find('.chkSubMenuModify').each(
+                    function () {
+                        if (this.checked == false)
+                            flag = false;
+                    }
+                );
+                $(this).parents('fieldset:eq(0)').find('.chkMenuModify').prop('checked', flag);
+            }
+
+        });
+
+        //clicking the parent checkbox should check or uncheck all child checkboxes
+        $(document).on('click', ".chkMenuDelete", function () {
+            $(this).parents('fieldset:eq(0)').find('.chkSubMenuDelete').prop('checked', this.checked);
+        });
+        //clicking the last unchecked or checked checkbox should check or uncheck the parent checkbox
+        $(document).on('click', ".chkSubMenuDelete", function () {
+            if ($(this).parents('fieldset:eq(0)').find('.chkMenuDelete').prop('checked') == true && this.checked == false)
+                $(this).parents('fieldset:eq(0)').find('.chkMenuDelete').prop('checked', false);
+            if (this.checked == true) {
+                var flag = true;
+                $(this).parents('fieldset:eq(0)').find('.chkSubMenuDelete').each(
+                    function () {
+                        if (this.checked == false)
+                            flag = false;
+                    }
+                );
+                $(this).parents('fieldset:eq(0)').find('.chkMenuDelete').prop('checked', flag);
+            }
+
+        });
+
+        $("#btnSubmit").click(function () {
+            document.getElementById("btnSubmit").disabled = true;
+            var roleId = $("#Roles").val();
+            var appDetail;
+            var flag = false;
+            $('input:checkbox').each(function () {
+                var sThisVal = (this.checked ? $(this).val() : "");
+                if (sThisVal == 'on') {
+                    if (appDetail != 'undefined') {
+                        flag = true;
+                        appDetail = appDetail + ',' + $(this).attr("id") + "_IsCheckedTrue";
+                    }
+                }
+                else {
+                    if (appDetail != 'undefined')
+                        appDetail = appDetail + ',' + $(this).attr("id") + "_IsCheckedFalse";
+                }
+            });
+            if (flag == false) {
+                alert("Please select atleast one menu or submenu.");
+                return false;
+            }
+
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ appDetail: appDetail, roleId: roleId }),
+                url: '/MenuMappingAdmin/SaveMenuMapping',
+                success: function (result) {
+                    if (result == true)
+                        alert("Record added succssfully");
+                    window.location.href = '@Url.Action("ManageAdminRoles", "ManageAdminRoles")';
+                    //document.getElementById("btnSubmit").disabled = false;
+                },
+                error: function (obj) {
+                    alert("Error Ocurred while updating.");
+                }
+            });
+        });
+
+    });
+
+    $("#btnBack").click(function () {
+        window.location.href = '@Url.Action("ManageAdminRoles", "ManageAdminRoles")';
+    });
+
+    $("#Roles").change(function () {
+        var roleId;
+        var selsectedUserLevelId = $("#Roles").val();
+        if (selsectedUserLevelId == 0)
+            roleId = $("#roleId").val();
+        else
+            roleId = selsectedUserLevelId;
+        var appID = $("#applicationId").val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ roleId: roleId, appID: appID }),
+            url: '/MenuMappingAdmin/MenuBind',
+            success: function (result) {
+                if (result != null) {
+                    $("#dvRaw").html('');
+                    $("#dvDdl").html(result.htmlString);
+                }
+            },
+            error: function (obj) {
+
+            }
+        });
+    }).change();
+
+</script>

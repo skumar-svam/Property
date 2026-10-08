@@ -1,0 +1,171 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions
+@model NA.PMS.Model.ServiceReportDepartmentWiseVM
+
+@{
+    ViewBag.Title = "Service Status Report";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="ServiceReport">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Service Report</h1></div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12">
+        <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            <h2 class="blck-heading" style="margin-bottom:0;">Search</h2>
+            <div class="" style="">
+                <div class="row">
+                    <div class="col-md-2 col-sm-2 col-xs-12 form-group" style="padding-left:10px;">
+                        @Html.Label("Department")
+                        @(Html.Kendo().DropDownList()
+                                    .Name("ddlDepartment")
+                                    .DataTextField("text")
+                                    .DataValueField("id")
+                                    .OptionLabel("--Select--")
+                                    .Filter("contains")
+                                    .DataSource(source =>
+                                    {
+                                        source.Read(read =>
+                                        {
+                                            read.Action("GetDepartmentListForLoginUser", "Report");
+                                        });
+                                    })
+                                    .HtmlAttributes(new { style = "width:96%;margin-right:10px;" })
+                        )
+                    </div>
+                    <div class="col-md-2 col-sm-2 col-xs-12 form-group">
+                        <label>Date From</label>
+                        @(Html.Kendo().DatePicker().Name("kendoStartDate").HtmlAttributes(new { style = "width:96%;" }))
+                    </div>
+                    <div class="col-md-2 col-sm-2 col-xs-12 form-group">
+                        <label>Date To</label>
+                        @(Html.Kendo().DatePicker().Name("kendoEndDate").HtmlAttributes(new { style = "width:96%;" }))
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12 form-group" style="text-align:right">
+                        <input type="button" class="btn btn-default" id="btnPrintServiceStatus" value="Print Report" />
+                        <input type="button" id="btnReportSearch" class="btn btn-add" value="Search" />
+                        <input type="button" id="btnClear" class="btn btn-default" value="Clear" style="margin-right:10px;" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.ServiceReportDepartmentWiseVM>()
+        .Name("GridServiceStatus")
+        .AutoBind(true)
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.ServiceName).Title("Service Name");
+            columns.Bound(c => c.Pending).Title("Pending").ClientFooterTemplate("<div><span class=''></span> #= sum #</div>");
+            columns.Bound(c => c.Completed).Title("Completed").ClientFooterTemplate("<div><span class=''></span> #= sum #</div>");
+            columns.Bound(c => c.TotalRequest).Title("Total Request").ClientFooterTemplate("<div><span class=''></span> #= sum #</div>");
+            columns.Bound(c => c.InProgessPercentage).Title("Pending %");
+        })
+        .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+        .DataSource(dataSource => dataSource
+        .Ajax()
+        .ServerOperation(true)
+        .Model(model => model.Id(p => p.ServiceName))
+        .Read(read => read.Action("GetServiceStatusReport", "Report", new { area = "Reports" }).Data("ReportData")).PageSize(10)
+        .Aggregates(aggregates => aggregates.Add(p => p.Pending).Sum())
+        .Aggregates(aggregates => aggregates.Add(p => p.TotalRequest).Sum())
+        .Aggregates(aggregates => aggregates.Add(p => p.Completed).Sum())
+        )
+        )
+    </div>
+</div>
+
+@*PopUp to print*@
+<div id="divPrintServiceReport" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" >
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">  <b>Service Status Report</b></h4>
+            </div>
+            <div class="modal-body" id="divServiceStatusReportBody">
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="submit" id="btnPrintDiv" class="k-button" data-dismiss="modal" onclick="PrintDiv();">Print</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    function ReportData() {
+        var model = { DepartmentId: parseInt($('#ddlDepartment').val()), StartDate: $('#kendoStartDate').val(), EndDate: $('#kendoEndDate').val() };
+        return model;
+    }
+
+    $('#btnReportSearch').click(function () {
+        if ($('#ddlDepartment').val() != "" && $('#kendoStartDate').val() != "" && $('#kendoEndDate').val() != "") {
+            if ($('#kendoEndDate').data("kendoDatePicker").value() >= $('#kendoStartDate').data("kendoDatePicker").value()) {
+                $("#GridServiceStatus").data("kendoGrid").dataSource.read();
+            } else { alertify.error("date to should be greater than or eual to date from."); }
+        } else { alertify.error("select the required fields [Department, Date from & Date to]."); }
+    });
+
+    function ClearFields() {
+        $('#ddlDepartment').data("kendoDropDownList").value('');
+        $('#kendoStartDate').data("kendoDatePicker").value('');
+        $('#kendoEndDate').data("kendoDatePicker").value('');
+    }
+
+    $("#btnClear").click(function () {
+        ClearFields();
+    });
+
+    $("#btnPrintServiceStatus").click(function () {
+        if ($('#ddlDepartment').val() != "" && $('#kendoStartDate').val() != "" && $('#kendoEndDate').val() != "") {
+            if ($('#kendoEndDate').data("kendoDatePicker").value() >= $('#kendoStartDate').data("kendoDatePicker").value()) {
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ deptId: $('#ddlDepartment').val(), startDate: $('#kendoStartDate').val(), enddate: $('#kendoEndDate').val() }),
+                    url: '/DocParser/PrintServiceReport',
+                    success: function (result) {
+                        $("#divServiceStatusReportBody").html(result);
+                        $("#divPrintServiceReport").modal('show');
+                    },
+                    error: function (objAjaxRequest, strError) {
+                        var respText = objAjaxRequest.responseText;
+                        alertify.error("Some error occured. Please try again later.");
+                    }
+                });
+            } else { alertify.error("date to should be greater than or eual to date from."); }
+        } else { alertify.error("select the required fields [Department, Date from & Date to]."); }
+    });
+
+    function PrintDiv() {
+        var contents = document.getElementById("divServiceStatusReportBody").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title><style> .text-position {text - align: center;}</style>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+</script>
+

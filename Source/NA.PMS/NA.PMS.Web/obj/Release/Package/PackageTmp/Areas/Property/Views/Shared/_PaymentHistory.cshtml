@@ -1,0 +1,48 @@
+﻿@model NA.PMS.Model.PaymentSchedule
+@using Kendo.Mvc.UI;
+
+<div class="col-md-12" style=" margin-top: 20px;">
+    <div class="row blck-heading-grid">
+        <div class="col-md-6 col-sm-6 col-xs-12">
+            <span>Payment History</span>
+        </div>
+    </div>
+</div>
+
+@Html.HiddenFor(c => c.Rid)
+<div class="col-md-12 k-grid-content">
+    @(Html.Kendo().Grid<NA.PMS.Model.PaymentReceipt>()
+        .Name("gridPaymentReceipt")
+        .Columns(columns =>
+        {
+            columns.Bound(c => c.RECEIPT_ID).Title("Receipt No").Width(80);
+            columns.Bound(c => c.RECEIPT_HEAD_Name).Title("Receipt Head").Width(80);
+            columns.Bound(c => c.RECEIPT_SUBHEAD_Name).Title("Receipt Sub Head").Width(80);
+            columns.Bound(c => c.CHALLAN_ID).Title("Challan No").Width(80);
+            columns.Bound(c => c.DEPOSIT_DATE).Title("Deposit Date").Format("{0:dd/MM/yyyy}").Width(80);
+            columns.Bound(c => c.AMOUNT_PAID).Title("Amount Paid").Width(80);
+        })
+        .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+        .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+        //.Groupable(g=>g.Enabled)
+        .DataSource
+        (
+            dataSource => dataSource
+                .Ajax()
+                .Model(model => model.Id(p => p.ID))
+                .ServerOperation(true)
+                .Read(read => read.Action("GetReceiptSchedule", "PropertyAllotment").Data("AdditionalInfo"))
+                .PageSize(10)
+                .Group(g=>g.Add(f=>f.RECEIPT_SUBHEAD_Name))
+                        //.Group(g => g.Add(f => f.RECEIPT_ID))
+        )
+    )
+</div>
+
+<script type="text/javascript">
+    function AdditionalInfo() {
+        return {
+            rid: $('#Rid').val()
+        }
+    }
+</script>

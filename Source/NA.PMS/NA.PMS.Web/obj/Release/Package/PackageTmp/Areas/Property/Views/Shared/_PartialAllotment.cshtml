@@ -1,0 +1,42 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@model NA.PMS.Model.PropertyAllotmentModel
+
+<div class="row form-group">
+    <div class="col-sm-6">
+        <label>Department</label>
+        @(Html.Kendo().DropDownListFor(model => model.DepartmentId)
+                      .Name("DepartmentId")
+                      .DataTextField("DepartmentName")
+                      .DataValueField("DepartmentId")
+                      .OptionLabel(" -- Please Select --")
+                      .DataSource(source => source.Read(read => read.Action("GetDepartmentListForAllotment", "PropertyAllotment")))
+                      .Enable(true)
+                      .AutoBind(true)
+                      .HtmlAttributes(new { style = "width: 100%; height:100%" })
+        )
+    </div>
+    <div class="col-sm-6">
+        <label>Scheme</label>
+        @(Html.Kendo().DropDownListFor(model => model.SchemeId)
+                      .Name("SchemeId")
+                      .DataTextField("schemeName")
+                      .DataValueField("schemeId")
+                      .OptionLabel(" -- Please Select --")
+                      .DataSource(source => source.Read(read => read.Action("FilterSchemeListOnDepartment", "PropertyAllotment").Data("FilterScheme"))
+                                                  .ServerFiltering(true))
+                      .Enable(false)
+                      .AutoBind(false)
+                      .CascadeFrom("DepartmentId")
+                      .HtmlAttributes(new { style = "width: 100%; height:100%" })
+        )
+    </div>
+</div>
+
+<script>
+
+    function FilterScheme() {
+        return { DepartmentId: $("#DepartmentId").val() };
+    }
+
+</script>

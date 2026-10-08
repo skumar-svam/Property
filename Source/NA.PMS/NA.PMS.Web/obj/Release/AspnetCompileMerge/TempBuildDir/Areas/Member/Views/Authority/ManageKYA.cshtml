@@ -1,0 +1,580 @@
+﻿@model NA.PMS.Model.KYAViewModel
+@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@using NA.PMS.Common
+
+@{
+    ViewBag.Title = "Manage KYA";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    #divPopupWindow {
+        display: none;
+    }
+
+    #DocumentWindow {
+        display: none;
+    }
+
+    .row-approver {
+        display: none;
+    }
+
+    .row-reason {
+        display: none;
+    }
+
+    .hyperlink {
+        color: darkblue;
+        font: bold;
+    }
+</style>
+
+<div id="kyaformlist">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage KYA Form</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                @Html.ActionLink("KYA Reports", "KYAReports", new { controller = "Authority", area = "Member" }, htmlAttributes: new { target = "_blank" })
+                @Html.ActionLink("Dashboard", "Dashboard", new { controller = "Authority", area = "Member" }, htmlAttributes: new { target = "_blank" })
+                @Html.ActionLink("Apply KYA", "KYAForm", new { controller = "Property", area = "Customer" }, htmlAttributes: new { target = "_blank" })
+                @Html.HiddenFor(model => model.Id)
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12">
+        <div class="row form-group" style="margin-top:10px;">
+            <div class="col-md-3 pad-left">
+                @Html.Label("Department")
+                @(Html.Kendo().DropDownListFor(model => model.DepartmentId)
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel(" -- Select --")
+                    .DataSource(source => source.Read(read => read.Action("GetDepartmentList", "ServiceRequest")))
+                    .Events(e => e.Change("ChangeDepartmentEvent"))
+                   .HtmlAttributes(new { style = "width:95%;float:right;", @class = "input-disabled" })
+                )
+            </div>
+            <div class="col-md-3 pad-left">
+                @Html.Label("Start Date")
+                @(Html.Kendo().DatePickerFor(model => model.StartDate).Events(e => e.Change("ChangeDepartmentEvent")).HtmlAttributes(new { style = "width:95%;float:right;" }))
+            </div>
+            <div class="col-md-3 pad-left">
+                @Html.Label("End Date")
+                @(Html.Kendo().DatePickerFor(model => model.EndDate).Events(e => e.Change("ChangeDepartmentEvent")).HtmlAttributes(new { style = "width:95%;float:right;" }))
+            </div>
+            <div class="col-md-3 pad-left">
+                <label>Status</label>
+                @(Html.Kendo().DropDownListFor(m => m.ActionId)
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel(" -- Select --")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetStatusMasterAsDataSource", "Authority", new { area = "Member" })))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(100);
+                    })
+                    .Events(events => { events.Change("ChangeDepartmentEvent"); })
+                    .HtmlAttributes(new { @class = "input-disabled", style = "width:95%;float:right;" })
+                )
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 alot-prop-grid k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.KYAViewModel>()
+            .Name("GridKYASubmittedForm")
+            .Columns(columns =>
+            {
+                //columns.Bound(c => c.Id).Hidden(true);//.Title("Reference Id").Width(130).ClientTemplate("#if(IsActive==true){#<a target='_blank' href='/Member/Authority/KYADetail/#=Id#'>#=Id#</a>#}else{#<label>#=ReferenceId#</label>#}#").Sortable(true);
+                columns.Bound(c => c.Id).Title("Ref No").Width(140).ClientTemplate("#if(IsActive==true){#<a target='_blank' href='/Member/Authority/KYADetail/#=Id#'>#=KYAReferenceCode#</a>#}else{#<label>#=KYAReferenceCode#</label>#}#").Sortable(true);
+                columns.Bound(c => c.RegistrationId).Title("Registration Id").Width(130).ClientTemplate("#if(IsActive==true){#<a target='_blank' href='/Property/PropertyAllotment/PropertyDetails/#=RegistrationId#'>#=RegistrationId#</a>#}else{#<label>#=RegistrationId#</label>#}#").Sortable(false);
+                columns.Bound(c => c.Department).Title("Department").Width(120).Sortable(false).Filterable(false);
+                columns.Bound(c => c.Sector).Title("Sector").Width(100);
+                columns.Bound(c => c.Block).Title("Block").Width(100);
+                columns.Bound(c => c.PlotNo).Title("Plot").Width(90);
+                columns.Bound(c => c.AllotteeName).Title("Applicant (Allottee)");
+                columns.Bound(c => c.SubmitDate).Title("Submission").Width(120).Format("{0:dd-MMM-yyyy}").Sortable(false);
+                columns.Bound(c => c.ApprovalDate).Title("Approval").Width(120).Format("{0:dd-MMM-yyyy}").Sortable(false);
+                //columns.Bound(c => c.IsActive).Title("Active").Width(100).ClientTemplate("#if(IsActive==true){#<label>Active</label>#}else{#<label>InActive</label>#}#");
+                columns.Bound(c => c.Status).Title("Status").Width(100);
+                //columns.Bound(c => c.IsDocumentAvailable).Title(" ").Width(80).ClientTemplate("<label class='hyperlink' onclick='javascript:UpdateDocument(this)'>#=IsDocumentAvailable#</label>");
+                //columns.Bound(c => c.IsActive).Title(" ").Width(50).ClientTemplate("#if(IsDocumentAvailable){#<center><span class='glyphicon glyphicon-download'></span></center> #}else{#<center><span class='glyphicon glyphicon-refresh' onclick='javascript:UpdateDocument(this)'></span></center>#}#").Sortable(false);
+            })
+            .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+            .ClientDetailTemplateId("template")
+            .AutoBind(true)
+            .DataSource
+            (
+                dataSource => dataSource
+                .Ajax()
+                .Model(model => model.Id(p => p.Id))
+                .ServerOperation(true)
+                .Read(read => read.Action("GetKYASubmittedFormList", "Authority", new { area = "Member" }).Data("FilterSearchParameter"))
+                .Sort(s => s.Add(x => x.Id).Descending())
+                .PageSize(10)
+            )
+            .Excel(excel => excel
+                .AllPages(true).Filterable(true)
+                .FileName("KYA Forms.xlsx"))
+            .ToolBar(toolsExcel => toolsExcel.Excel())
+        )
+    </div>
+</div>
+
+
+<script id="template" type="text/kendo-tmpl">
+    @(Html.Kendo().Grid<NA.PMS.Model.KYAViewModel>()
+            .Name("grid_#=Id#") // template expression, to be evaluated in the master context
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Hidden(true);
+                columns.Bound(c => c.RegistrationId).Hidden(true);
+                columns.Bound(c => c.AuthorizedSignatory).Title("Authorized Person");
+                columns.Bound(c => c.CorrespondAddress).Title("Address");
+                columns.Bound(c => c.PAN).Title("PAN").Width(120);
+                columns.Bound(c => c.GSTNo).Title("GST No").Width(120);
+                columns.Bound(c => c.Email).Title("Email");
+                columns.Bound(c => c.MobileNo).Title("Mobile No").Width(130);
+                //columns.Bound(c => c.GSTNo).Title("Status").Width(120).ClientTemplate("#if(IsPropertyAllotted==true){#<label>Allotted</label>#}else{#<label>Not Allotted</label>#}#");
+            })
+            .ClientDetailTemplateId("template2").AutoBind(true)
+            .DataSource(dataSource => dataSource
+                .Ajax().Read(read => read.Action("GetKYASubmittedFormList", "Authority", new { area = "Member", Id = "#=Id#" }))
+            )
+            .ToClientTemplate()
+    )
+</script>
+
+<script id="template2" type="text/kendo-tmpl">
+    @(Html.Kendo().Grid<NA.PMS.Model.KYAViewModel>()
+            .Name("grid2_#=Id#") // template expression, to be evaluated in the master context
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Hidden(true);
+                columns.Bound(c => c.RegistrationId).Hidden(true);
+                columns.Bound(c => c.AllotteeIdFileType).Title("Id File").ClientTemplate("<label class='hyperlink' onclick='javascript:OpenIdFile(#=RegistrationId#,#=Id#)'>#=AllotteeIdFileType#</label>");
+                columns.Bound(c => c.PlotOwnershipFileType).Title("Letter Type").ClientTemplate("<label class='hyperlink' onclick='javascript:OpenLetterDocument(#=RegistrationId#,#=Id#)'>#=PlotOwnershipFileType#</label>");
+                columns.Bound(c => c.OtherFileType).Title("Other Document").ClientTemplate("#if(OtherFileType==null){#<label></label>#}else{#<label class='hyperlink' onclick='javascript:OpenOtherDocument(#=RegistrationId#,#=Id#)'>#=OtherFileType#</label>#}#");
+                //columns.Bound(c => c.Id).Title("Action").ClientTemplate("<label class='hyperlink' onclick='javascript:ValidateDocument(#=Id#)'>Validate</label>");
+                columns.Bound(c => c.Id).Title("Action").Width(120).ClientTemplate("#if(IsInitiated==true){#<label class='hyperlink' onclick='javascript:ValidateDocument(#=Id#)'>Validate</label>#} else if(IsForwarded==true){#<label class='hyperlink' onclick='javascript:ValidateDocument(#=Id#)'>Approve</label>#}else{#<label>#=Status#</label>#}#");
+            })
+            .DataSource(dataSource => dataSource
+                .Ajax().Read(read => read.Action("GetKYASubmittedFormList", "Authority", new { area = "Member", Id = "#=Id#" }))
+            )
+            .ToClientTemplate()
+    )
+</script>
+<script>
+    function dataBound() {
+        this.expandRow(this.tbody.find("tr.k-master-row").first());
+    }
+</script>
+
+
+<div class="col-md-12" id="divPopupWindow" style="min-height:300px;background:url(/Content/Images/boxed-bg.jpg) repeat">
+    <div class="row form-group">
+        <div class="col-md-3 col-sm-12 col-xs-12 form-group">
+            <label>Service Status</label>
+        </div>
+        <div class="col-md-6">
+            @(Html.Kendo().DropDownListFor(model => model.StatusId)
+                .Filter("contains")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .OptionLabel(" -- Select --")
+                    //.DataSource(source => source.Read(read => read.Action("GetStatusMasterAsDataSource", "Authority", new { area = "Member" })).ServerFiltering(true))
+                .DataSource(source =>
+                {
+                    source.Custom()
+                    .ServerFiltering(true)
+                    .ServerPaging(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    .Transport(transport => transport.Read(read => read.Action("GetStatusMasterAsDataSource", "Authority", new { area = "Member" })))
+                    .Schema(schema => schema.Data("Data").Total("Total"))
+                    .PageSize(100);
+                })
+                .Events(events => { events.Change("ChangeStatusIdEvent"); })
+                .HtmlAttributes(new { @class = "input-disabled", style = "width:100%; float:right;" })
+            )
+        </div>
+    </div>
+    <div class="row form-group row-approver">
+        <div class="col-md-3 col-sm-12 col-xs-12 form-group">
+            <label>Approver</label>
+        </div>
+        <div class="col-md-6">
+            @(Html.Kendo().DropDownListFor(model => model.ApproverId)
+                .Filter("contains")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .OptionLabel(" -- Select --")
+                .DataSource(source =>
+                {
+                    source.Custom()
+                    .ServerFiltering(true)
+                    .ServerPaging(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    .Transport(transport => transport.Read(read => read.Action("GetApproverIdList", "Authority", new { area = "Member" })))
+                    .Schema(schema => schema.Data("Data").Total("Total"))
+                    .PageSize(100);
+                })
+                    //.Events(events => { events.Change("ChangeDepartmentEvent"); })
+                .HtmlAttributes(new { @class = "input-disabled", style = "width:100%; float:right;" })
+            )
+        </div>
+    </div>
+    <div class="row form-group row-reason">
+        <div class="col-md-3 col-sm-12 col-xs-12 form-group">
+            <label>Reason</label>
+        </div>
+        <div class="col-md-6">
+            @(Html.Kendo().DropDownListFor(model => model.OptionalId)
+                .Filter("contains")
+                .DataTextField("Text")
+                .DataValueField("Text")
+                .OptionLabel(" -- Select --")
+                .DataSource(source =>
+                {
+                    source.Custom()
+                    .ServerFiltering(true)
+                    .ServerPaging(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    .Transport(transport => transport.Read(read => read.Action("GetOptionalReasonAsDataSource", "Authority", new { area = "Member" })))
+                    .Schema(schema => schema.Data("Data").Total("Total"))
+                    .PageSize(100);
+                })
+                    //.Events(events => { events.Change("ChangeDepartmentEvent"); })
+                .HtmlAttributes(new { @class = "input-disabled", style = "width:100%; float:right;" })
+            )
+        </div>
+    </div>
+    <div class="row" style="margin-top:25px;">
+        <div class="col-md-3 col-sm-12 col-xs-12 form-group">
+            <label>Remarks</label>
+        </div>
+        <div class="col-md-8 col-sm-12 col-xs-12 form-group">
+            @Html.TextAreaFor(model => model.Remarks, htmlAttributes: new { @class = "form-control" })
+            @*<input type="text" class="k-textbox" id="txtotp" maxlength="10" placeholder="enter otp here" style="width:100%" />*@
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-12 col-xs-12 form-group">
+
+        </div>
+        <div class="col-md-8 col-sm-12 col-xs-12 form-group">
+            <input type="button" class="k-button" id="btnCancelPopup" value="Cancel" style="width:100px" />
+            <input type="button" class="k-button" id="btnSubmitComment" value="submit" style="width:100px" />
+        </div>
+    </div>
+</div>
+
+
+
+<div class="col-md-12 popup-window" id="DocumentWindow" style="min-height:500px;background:url(/Content/Images/boxed-bg.jpg) repeat;">
+    <div class="row form-group" id="divLetterContent" style="height:500px; overflow:auto;">
+
+    </div>
+    <div class="row">
+        <div class="col-md-12" style="text-align:center">
+            <button type="button" class="k-button" onclick="PrintLetter();" style="width:100px;">Print</button>
+            <button type="button" class="k-button" onclick="CloseLetter();" style="width:100px;">Close</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#divPopupWindow').kendoWindow({
+            modal: true,
+            title: "Validate KYA Form",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "30%"
+            },
+            width: "50%", height: "35%"
+        });
+
+        $('.popup-window').kendoWindow({
+            modal: true,
+            title: "Noida Authority Letter",
+            //actions: false,
+            actions: ["Pin", "Minimize", "Maximize", "Close"],
+            visible: false,
+            width: "75%"
+        });
+
+        $('#btnCancelPopup').click(function () {
+            $("#divPopupWindow").data("kendoWindow").close();
+        });
+
+        $('#btnSubmitComment').click(function () {
+            UpdateKYAStatus();
+        });
+
+    });
+
+    function CloseLetter() {
+        $("#DocumentWindow").data("kendoWindow").close();
+    }
+
+    function ChangeDepartmentEvent() {
+        $("#GridKYASubmittedForm").data("kendoGrid").dataSource.read();
+    }
+
+    function OpenIdFile(row, id) {
+        $("#divLetterContent").empty();
+        //var tr = $(row).parent().parent();
+        //var link = $(tr).children("td:eq(4)").text();
+        var model = {
+            RegistrationId: row,
+            ActionId: 1,
+            Id: id
+        };
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ model: model }),
+            url: '/Member/Authority/GetDocumentPath',
+            success: function (result) {
+                if (result != null) {
+                    //$("#divLetterContent").append($('<iframe src=' + link + ' style="width:100%;min-height:500px;"></iframe>'));
+                    $("#divLetterContent").append($('<iframe src=' + result + ' style="width:100%;min-height:500px;"></iframe>'));
+                    $("#DocumentWindow").data("kendoWindow").center();
+                    $("#DocumentWindow").data("kendoWindow").open();
+                }
+                else {
+                    //alertify.success("Data is not approved, try again later");
+                }
+
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Network error, try again later");
+            }
+        });
+
+
+    }
+
+    function OpenLetterDocument(row, id) {
+        $("#divLetterContent").empty();
+        var model = {
+            RegistrationId: row,
+            ActionId: 2,
+            Id: id
+        };
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ model: model }),
+            url: '/Member/Authority/GetDocumentPath',
+            success: function (result) {
+                if (result != null) {
+                    $("#divLetterContent").append($('<iframe src=' + result + ' style="width:100%;min-height:500px;"></iframe>'));
+                    $("#DocumentWindow").data("kendoWindow").center();
+                    $("#DocumentWindow").data("kendoWindow").open();
+                }
+                else {
+                    //alertify.success("Data is not approved, try again later");
+                }
+
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Network error, try again later");
+            }
+        });
+
+
+    }
+
+    function OpenOtherDocument(row, id) {
+        $("#divLetterContent").empty();
+        var model = {
+            RegistrationId: row,
+            ActionId: 3,
+            Id: id
+        };
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ model: model }),
+            url: '/Member/Authority/GetDocumentPath',
+            success: function (result) {
+                if (result != null) {
+                    $("#divLetterContent").append($('<iframe src=' + result + ' style="width:100%;min-height:500px;"></iframe>'));
+                    $("#DocumentWindow").data("kendoWindow").center();
+                    $("#DocumentWindow").data("kendoWindow").open();
+                }
+                else {
+                    alertify.error("Other document not uploaded.");
+                }
+
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Network error, try again later");
+            }
+        });
+
+
+    }
+
+
+    function OpenFile(row) {
+        $("#divLetterContent").empty();
+        var tr = $(row).parent().parent();
+        var link = $(tr).children("td:eq(4)").text();
+        $("#divLetterContent").append($('<iframe src=' + link + ' style="width:100%;min-height:500px;"></iframe>'));
+        $("#DocumentWindow").data("kendoWindow").center();
+        $("#DocumentWindow").data("kendoWindow").open();
+    }
+    function OpenFile(row) {
+        $("#divLetterContent").empty();
+        var tr = $(row).parent().parent();
+        var link = $(tr).children("td:eq(4)").text();
+        $("#divLetterContent").append($('<iframe src=' + link + ' style="width:100%;min-height:500px;"></iframe>'));
+        $("#DocumentWindow").data("kendoWindow").center();
+        $("#DocumentWindow").data("kendoWindow").open();
+    }
+
+    function FilterSearchParameter() {
+        return {
+            DepartmentId: $('#DepartmentId').val(),
+            StartDate: $('#StartDate').val(),
+            EndDate: $('#EndDate').val(),
+            ActionId: $('#ActionId').val()
+        };
+    }
+
+    function ReadKYAFormGrid() {
+        $("#GridKYASubmittedForm").data("kendoGrid").dataSource.read();
+    }
+
+    function ValidateDocument(row) {
+        //alert(row);
+        //var tr = $(row).parent().parent();
+        //var id = $(tr).children("td:eq(0)").text();
+        $('#Id').val(row);
+        $("#divPopupWindow").data("kendoWindow").center();
+        $("#divPopupWindow").data("kendoWindow").open();
+        $("#divPopupWindow").data("kendoWindow").pin();
+    }
+
+    function ValidateActionField() {
+        var flag = true;
+        if ($('#StatusId').val() == "") {
+            alertify.error("Select service status");
+            flag = false;
+        }
+        else if (($('#StatusId').val() == '@NAStatusId.Rejected') || ($('#StatusId').val() == '@NAStatusId.Pending')) {
+            if ($('#OptionalId').val() == "") {
+                alertify.error("Select reason for rejection/pending");
+                flag = false;
+            }
+            if ($('#Remarks').val() == "") {
+                alertify.error("Enter remarks for rejection/pending");
+                flag = false;
+            }
+        }
+        else if ($('#StatusId').val() == '@NAStatusId.Forwarded') {
+            if ($('#ApproverId').val() == "") {
+                alertify.error("Select Approver");
+                flag = false;
+            }
+        }
+        return flag;
+    }
+
+    function ChangeStatusIdEvent() {
+        if ($('#StatusId').val() == '') {
+            $('.row-approver').css("display", "none");
+            $('.row-reason').css("display", "none");
+        }
+        else if ($('#StatusId').val() == '@NAStatusId.Approved') {
+            $('.row-approver').css("display", "none");
+            $('.row-reason').css("display", "none");
+        }
+        else if (($('#StatusId').val() == '@NAStatusId.Rejected') || ($('#StatusId').val() == '@NAStatusId.Pending')) {
+            $('.row-approver').css("display", "none");
+            $('.row-reason').show();
+        }
+        else if ($('#StatusId').val() == '@NAStatusId.Forwarded') {
+            $('.row-approver').show();
+            $('.row-reason').css("display", "none");
+        }
+    }
+
+    function UpdateKYAStatus() {
+        if (ValidateActionField()) {
+            var model = {
+                Id: $('#Id').val(),
+                StatusId: $('#StatusId').val(),
+                OptionalId: $('#OptionalId').val(),
+                ApproverId: $('#ApproverId').val(),
+                OptionalAction: $('#OptionalId').data("kendoDropDownList").text(),
+                Remarks: $('#Remarks').val()
+            };
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ model: model }),
+                url: '/Member/Authority/ValidateKYAForm',
+                success: function (result) {
+                    if (result == '@ReturnType.None') {
+                        $('#divPopupWindow').data("kendoWindow").close();
+                        alertify.error("provider failed to update status.");
+                    }
+                    else if (result == '@ReturnType.Initiated') {
+                        $('#divPopupWindow').data("kendoWindow").close();
+                        alertify.error("Form can't be approved/reject but forward.");
+                    }
+                    else if (result == '@ReturnType.Updated') {
+                        $('#divPopupWindow').data("kendoWindow").close();
+                        alertify.error("KYA form already approved.");
+                    }
+                    else if (result == '@ReturnType.Approved') {
+                        $('#divPopupWindow').data("kendoWindow").close();
+                        alertify.success("Data approved successfully.");
+                        $("#GridKYASubmittedForm").data("kendoGrid").dataSource.read();
+                    }
+                    else if (result == '@ReturnType.Rejected') {
+                        $('#divPopupWindow').data("kendoWindow").close();
+                        alertify.success("KYA rejected successfully.");
+                        $("#GridKYASubmittedForm").data("kendoGrid").dataSource.read();
+                    }
+                    else if (result == '@ReturnType.Forwarded') {
+                        $('#divPopupWindow').data("kendoWindow").close();
+                        alertify.error("KYA already forwarded, either approve or reject it.");
+                    }
+                    else if (result == '@ReturnType.Validated') {
+                        $('#divPopupWindow').data("kendoWindow").close();
+                        alertify.success("KYA validated and forwarded to Approver.");
+                        $("#GridKYASubmittedForm").data("kendoGrid").dataSource.read();
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again later");
+                }
+            });
+        }
+
+    }
+
+</script>

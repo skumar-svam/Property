@@ -1,0 +1,417 @@
+﻿@model NA.PMS.Model.Quota
+@using Kendo.Mvc.UI
+
+<div class="SchemeQuotaForm">
+
+    <div id="quotaDetail" class="col-md-12">
+        @*<div class="col-md-12 blnk-rw"></div>*@
+        <h2 class="blck-heading">Quota Information</h2>
+        @using (Html.BeginForm())
+        {
+            @Html.AntiForgeryToken()
+            @Html.Hidden("HUnit")
+            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+            <div class="scheme-form-bx col-md-12 col-sm-12 col-xs-12">
+                @Html.HiddenFor(model => model.schemeId)
+                <div class="row ">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.LabelFor(model => model.quotaDepartmentId, htmlAttributes: new { @class = "k-label required" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @(Html.Kendo().DropDownListFor(model => model.quotaDepartmentId)
+                        .DataTextField("text")
+                        .DataValueField("id")
+                        .OptionLabel("Select")
+                        .Filter("contains")
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetAllDepartmentsByScheme", "Scheme").Data("AdditionalData");
+                            });
+                        })
+                       .HtmlAttributes(new { style = "width:100%" })
+                        )
+
+                        @Html.ValidationMessageFor(model => model.quotaDepartmentId, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.LabelFor(model => model.quotaId, htmlAttributes: new { @class = "k-label required" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @(Html.Kendo().DropDownListFor(m => m.quotaId)
+                        .DataTextField("text")
+                        .DataValueField("id")
+                        .OptionLabel("Select")
+                        .Filter("contains")
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetAllQuota", "Scheme");
+                            });
+                        })
+                        .HtmlAttributes(new { @class = "schemeForms", style = "width:100%" })
+                        )
+
+                        @Html.ValidationMessageFor(model => model.quotaId, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.LabelFor(model => model.unit, htmlAttributes: new { @class = "k-label required" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @(Html.Kendo().DropDownListFor(m => m.unit)
+                        .Name("UnitId")
+                        .DataTextField("text")
+                        .DataValueField("id")
+                        .OptionLabel("Select")
+                        .Filter("contains")
+                        .DataSource(source =>
+                        {
+                            source.Read(read =>
+                            {
+                                read.Action("GetAllUnits", "Scheme");
+                            });
+                        })
+                        .HtmlAttributes(new { style = "width:100%" })
+                        )
+                        @Html.ValidationMessageFor(model => model.unit, "", new { @class = "text-danger" })
+                    </div>
+
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.LabelFor(model => model.value, htmlAttributes: new { @class = "k-label required" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.TextBoxFor(model => model.value, htmlAttributes: new { @class = "form-control  textBoxValueRightAlign", style = "width:100%" })
+
+                        @Html.ValidationMessageFor(model => model.value, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+
+
+                <div class="row">
+
+                    <div class="col-md-10" style="text-align:center">
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        }
+    </div>
+    <div class="row scheme-rw-btn">
+        <div class="col-md-4 col-sm-4 col-xs-4 text-left">
+            <button type="button" class="btn btn-add" value="Add" id="btnPre6">Previous <i class="glyphicon glyphicon-backward"></i></button>
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-4 text-center">
+            <button type="button" class="btn btn-add" value="Add" id="btnQuotaAdd"> Add</button>
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+            <button type="button" class="btn btn-add" value="Add" id="btnNext6">Next <i class="glyphicon glyphicon-forward"></i></button>
+        </div>
+    </div>
+    @*<div class="col-md-3 col-sm-3 col-xs-2 form-group">
+            <button type="button" class="btn btn-add" value="Add" id="btnPre6">Previous <i class="glyphicon glyphicon-backward"></i></button>
+        </div>
+        <div class="col-md-3 col-sm-3 col-xs-2 form-group">
+            <button type="button" class="btn btn-add" value="Add" id="btnNext6">Next <i class="glyphicon glyphicon-forward"></i></button>
+        </div>*@
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 k-grid-content" style="margin-bottom:10px;">
+        @(Html.Kendo().Grid<NA.PMS.Model.Quota>()
+                .Name("gridQuota")
+                .Columns(columns =>
+                {
+                    columns.Bound(c => c.quotaDepartmentName).Title("Department").Width(150);
+                    columns.Bound(c => c.quotaDepartmentId).Hidden(true);
+                    columns.Bound(c => c.quotaName).Width(100).Title("Quota Type");
+                    columns.Bound(c => c.quotaId).Hidden(true);
+                    columns.Bound(c => c.value).Width(90).Title("Value");
+                    columns.Bound(c => c.unitName).Width(90).Title("Units");
+                    columns.Bound(c => c.unit).Hidden(true);
+                    if (ViewBag.view != "Yes")
+                    {
+                        columns.Bound(c => c.refId).Title("Action").HeaderHtmlAttributes(new { @class = "removeColumnHeader" }).ClientTemplate("<a onclick='javascript:RemoveQuotaRecord(\"#=refId#\");' class='schemeMasterGrids'>Remove</a>").Width(50).Filterable(false).Sortable(false);
+                    }
+                })
+                .Sortable()
+                        .Filterable()
+                      .Groupable()
+                 .Pageable
+                (
+                     pageable => pageable
+                    .Enabled(true)
+                         //.Refresh(true)
+                    .PageSizes(true)
+                )
+                .DataSource
+                (
+                     dataSource => dataSource
+                    .Ajax().Model(model => model.Id(p => p.refId))
+                    .ServerOperation(true)
+                    .Read(read => read.Action("GetQuotaData", "Scheme").Data("AdditionalData")).PageSize(20)
+                 )
+
+        )
+    </div>
+    <div class="row scheme-rw-btn">
+        <div class="col-md-4 col-sm-4 col-xs-4 text-left">
+            <button type="button" class="btn btn-add" value="Add" id="btnPre61">Previous <i class="glyphicon glyphicon-backward"></i></button>
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-4 text-center">            
+        </div>
+        <div class="col-md-4 col-sm-4 col-xs-4 text-right">
+            <button type="button" class="btn btn-add" value="Add" id="btnNext61">Next <i class="glyphicon glyphicon-forward"></i></button>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    //var temp = false;
+
+    $(document).ready(function () {
+        //alert("Unit Value");
+
+        //$("#btnQuotaAdd").removeAttr('disabled');
+        $("#btnQuotaAdd").click(function () {
+            //$("#btnQuotaAdd").attr('disabled','disabled');
+            var validatequota=ValidateQuotaMasterScheme();
+            if (validatequota) {
+                var departmentID = $('#quotaDepartmentId').val();
+                var schemeID = $("#scheId").val();
+                var quotaId=$("#quotaId").val();
+                var pp=$("HUnit").val();
+                var strunitId="";
+                if(($("#UnitId").data("kendoDropDownList").text()=="PERCENTAGE"))
+                {
+                    strunitId="PER";
+                }
+                else{
+                    strunitId=$("#UnitId").data("kendoDropDownList").text();
+                }
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ departmentID: departmentID, schemeID: schemeID,quotaId:quotaId }),
+                    url: '/Scheme/IsQuotaNameUnique',
+                    success: function (result) {
+                        if (result == true) {
+                            alertify.error("This Department already exists");
+                            //$("#btnQuotaAdd").removeAttr('disabled');
+                            return false;
+                        }
+                        else {
+                            $.ajax({
+                                dataType: 'json',
+                                type: 'Post',
+                                contentType: 'application/json; charset=utf-8',
+                                data: JSON.stringify({ quotaDepartmentId: $("#quotaDepartmentId").val(), quotaId: $("#quotaId").val(), value: $("#value").val(), UnitId: strunitId, schemeId: $("#scheId").val() }),
+                                url: "/Scheme/AddQuota",
+                                success: function (data) {
+                                    if (data == 1) {
+                                        $("HUnit").val($("#UnitId").val());
+                                        $("#quotaDepartmentId").data("kendoDropDownList").value("");
+                                        $("#quotaId").data("kendoDropDownList").value("");
+                                        $("#UnitId").data("kendoDropDownList").value("");
+                                        $("#value").val("");
+                                        $("#gridQuota").data("kendoGrid").dataSource.read();
+                                        alertify.success("Data added successfully");
+                                        setTimeout(function () { ActivateScheme(); }, 2000);
+                                        //$("#btnQuotaAdd").removeAttr('disabled');
+                                    }
+                                    else if (data==2)
+                                    {
+                                        alertify.error("Quotas unit Value should be of the same type for all Quotas.");
+                                        //$("#btnQuotaAdd").removeAttr('disabled');
+                                    }
+                                    else if(data==3)
+                                    {
+                                        alertify.error("This Department already exists");
+                                        //$("#btnQuotaAdd").removeAttr('disabled');
+                                    }
+                                    else if (data == 4) {
+                                        alertify.error("Sum of Quota value can't exceed 100%");
+                                    }
+                                    else
+                                    {
+                                        alertify.error("Data Not added successfully");
+                                        //$("#btnQuotaAdd").removeAttr('disabled');
+                                    }
+                                },
+                                error: function (objAjaxRequest, strError) {
+                                    var respText = objAjaxRequest.responseText;
+                                    //$("#btnQuotaAdd").removeAttr('disabled');
+                                    //alert(respText);
+                                }
+                            });
+                        }
+                    },
+                    error: function (objAjaxRequest, strError) {
+                        var respText = objAjaxRequest.responseText;
+                        //$("#btnQuotaAdd").removeAttr('disabled');
+                    }
+
+                });
+            }
+            //$("#btnQuotaAdd").removeAttr('disabled');
+        });
+        $('#btnNext6').click(function () {
+            $("#acc7").click();
+        });
+        $('#btnPre6').click(function () {
+            $("#acc5").click();
+        });
+        $('#btnNext61').click(function () {
+            $("#acc7").click();
+        });
+        $('#btnPre61').click(function () {
+            $("#acc5").click();
+        });
+
+    });
+
+    function RemoveQuotaRecord(refId) {
+        var schemeID = $("#scheId").val();
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ refId: refId,schemeID:schemeID }),
+            url: '/Scheme/RemoveQuotaRecord',
+            success: function (result) {
+                if (result == true) {
+                    $("#gridQuota").data("kendoGrid").dataSource.read();
+                    $('#gridQuota').data('kendoGrid').refresh();
+                    var grdQuota = $("#gridQuota").data("kendoGrid").dataSource.data();
+                    if(grdQuota.length==1)
+                    {
+                        IsSchemeCompletedByRemove(false);
+                    }
+                    alertify.success("Record deleted successfully.");
+                }
+            },
+            error: function (obj) {
+                //alert('Error While Saving Record.');
+            }
+        });
+    }
+
+    function ValidateQuotaMasterScheme()
+    {
+        var selecteddpttValue = $('#quotaDepartmentId');
+        var selectedquotaValue = $('#quotaId');
+        var selectedunitValue = $('#UnitId');
+        var getvalue = $('#value');
+        var unt = $("#UnitId").val();
+        var uvalu = $('#value').val();
+        var grid = $("#gridQuota").data("kendoGrid");
+
+        if (selecteddpttValue.val() == "")
+        {
+            alertify.error('Please select Department');
+            return false;
+        }
+        else if (selectedquotaValue.val() == "")
+        {
+            alertify.error('Please select Quota Type');
+            return false;
+        }
+        else if (selectedunitValue.val() == "")
+        {
+            alertify.error('Please select Units');
+            return false;
+        }
+        else if(getvalue.val()=="")
+        {
+            alertify.error('Please enter Value');
+            return false;
+        }
+        else if(unt == 2 && (uvalu >=0 && uvalu <= 99)){
+            return true;
+        }
+        else if(unt == 1 && (uvalu >=0 && uvalu <= 9999999)){
+            return true;
+        }
+        else{
+            if(unt==1)
+            {
+                alertify.error('Value should be a number and between 0 to 9999999.');
+                return false;
+            }
+            else if(unt==2)
+            {
+                alertify.error('Value should be a number and between 0 to 99.');
+                return false;
+            }
+            else{
+                alertify.error('Invalid entry.');
+                return false;
+            }
+        }
+        return true;
+    }
+    //function OnQuotaChange() {
+    //    var departmentID = $('#quotaDepartmentId').val();
+    //    var schemeID = $("#scheId").val();
+    //     validateQuotaDuplicateDeptt(departmentID, schemeID);
+    //}
+
+    function validateQuotaDuplicateDeptt(quotaDepartmentId, schemeID,quotaId)
+    {
+
+        //alert("return" + temp);
+        //return temp;
+    }
+
+
+    $('#UnitId').blur(function(){
+        var unit = $('#UnitId').val();
+        //alert(unit);
+        if(unit==1){
+            $('#value').attr("maxlength","10")
+        }
+        if(unit==2){
+            $('#value').attr("maxlength","5")
+        }
+    });
+
+    $('#value').blur(function(){
+        var unt = $("#UnitId").val();
+        var uvalu = $('#value').val();
+        if(unt == 2 && (uvalu >=0 && uvalu <= 99)){
+            return true;
+        }
+        if(unt == 1 && (uvalu >=0 && uvalu <= 9999999)){
+            return true;
+        }
+        else{
+            if(unt==1)
+            {
+                alertify.error('Value should be a number and between 0 to 9999999.');
+                return false;
+            }
+            else if(unt==2)
+            {
+                alertify.error('Value should be a number and between 0 to 99.');
+                return false;
+            }
+            else{
+                alertify.error('Invalid entry.');
+                return false;
+            }
+        }
+    });
+
+    $('#UnitId').change(function(){
+        $('#value').val(null);
+    });
+
+
+</script>

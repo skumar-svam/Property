@@ -1,0 +1,163 @@
+﻿@using Kendo.Mvc.UI
+@model NA.PMS.Model.OnlineApplicationFormModel
+@{
+    ViewBag.Title = "Online Application Uploads";
+    Layout = "~/Views/Shared/_OnlineRequestLayout.cshtml";
+}
+<div class="ApplicationForm">
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Online Application Uploads</h1></div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 mandatory"></div>
+                </div>
+            </div>
+            @Html.HiddenFor(m => m.ApplicationId)
+            @{Html.RenderPartial("_UploadApplicationDetails");}
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="k-grid-content">
+                @(Html.Kendo().Grid<NA.PMS.Model.ChecklistDocuments>()
+                        .Name("gridDocs")
+                        .Columns(columns =>
+                        {
+                            columns.Bound(c => c.SNo).Title("S.No.").Width(10);
+                            columns.Bound(c => c.DocName).Title("Document Required").Width(100);
+                            columns.Bound(c => c.IsSelected).Width(10).ClientTemplate("<input type='checkbox' #= IsSelected ? checked='checked':'' # class='inpchk' ></input>").Title("Attached").Filterable(false).Sortable(false);//.HeaderTemplate(" <input type='checkbox' id='chkSelectAll' onchange='SelectAll(this)'/>")
+                            columns.Bound(c => c.Id).Hidden(true);
+                        })
+                        .Sortable()
+                        .Filterable()
+                        .Resizable(resize => resize.Columns(true))
+                        //.Pageable(pageable => pageable
+                        //                                       .Enabled(true)
+                        //                                       .Refresh(true)
+                        //                                       .PageSizes(true)
+                        //                                    )
+                        .AutoBind(true)
+                        .DataSource(dataSource => dataSource
+                        .Ajax().Model(model => model.Id(c => c.Id))
+                        .ServerOperation(false)
+                            .Read(read => read.Action("GetApplicationChcklstDocuments", "Allotment").Data("AdditionalData"))//.PageSize(10)
+                        )
+                )
+            </div>
+                <div style="padding:10px 0"></div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <input type="button" id="btnUpload" value="Save & Process to Payment" class="btn btn-add" />
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group"></div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group"></div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group"></div>
+                </div>
+            
+        </div>
+    </div>
+    <script type="text/javascript">
+        var checkedIds = [];
+
+        function AdditionalData() {
+            return { //applicationId: $("#ApplicationId").val()
+                applicationId: $("#ApplicationId").val()
+            };
+        }
+
+        function SelectAll(e) {
+            var state = $(e).is(':checked');
+            if (state == true) {
+                var grid = $('#gridDocs').data("kendoGrid");
+                $.each(grid.dataSource.view(), function () {
+                    $(".inpchk").prop('checked', 'checked');
+                    if (this['IsSelected'] != state)
+                        this['IsSelected'] = state;
+                    checkedRIds.push(this.RId);
+                    //checkedPropertyIds.push(this.PropertyId);
+                });
+            } else {
+                $(".inpchk").removeAttr('checked');
+                var grid = $('#gridDocs').data("kendoGrid");
+                $.each(grid.dataSource.view(), function () {
+                    this['IsSelected'] = false;
+                });
+            }
+        }
+
+        //select selected checkboxes
+        $(function () {
+            $('#gridDocs').on('change', '.inpchk', function () {
+                var checked = $(this).is(':checked');
+                $("#chkSelectAll").removeAttr('checked');
+                if ($('.inpchk:checked').length == $('.inpchk').length) {
+                    $("#chkSelectAll").prop('checked', 'checked');
+                }
+                var grid = $('#gridDocs').data().kendoGrid;
+                var dataItem = grid.dataItem($(this).closest('tr'));
+                dataItem.set('IsSelected', checked);
+                checkedIds.push(dataItem.RId);
+                //checkedPropertyIds.push(this.PropertyId);
+            });
+        });
+
+        $(document).ready(function () {
+            $("#btnUpload").click(function () {
+                if ($('#photoDoc').val() == '' || $('#photoDoc').val() == null) {
+                    alertify.error("Please upload a Photograph.");
+                    return false;
+                }
+                if ($('#signDoc').val() == '' || $('#signDoc').val() == null) {
+                    alertify.error("Please upload a Signature.");
+                    return false;
+                }
+                var formData = new FormData();
+                var filePhoto = $('#photoDoc')[0];
+                var fileSign = $('#signDoc')[0];
+                var fileProposalDoc = $('#proposalDoc')[0];
+                var applicationID = $("#ApplicationId").val();
+                formData.append("filePhoto", filePhoto.files[0]);
+                formData.append("fileSign", fileSign.files[0]);
+                formData.append("fileProposalDoc", fileProposalDoc.files[0]);
+                formData.append("applicationID", applicationID);
+                var items = $("#gridDocs").data("kendoGrid").dataSource.data();
+                var Ids = [];
+                for (var i = 0; i < items.length; i++) {
+                    //alert();
+                    var item = items[i];
+                    if (item.IsSelected == true) {
+                        //alert(item.Id);
+                        Ids.push(item.Id);
+                    }
+                }
+                if (Ids.length < 1) {
+                    alertify.error("Please select atleaset one document.");
+                    return false;
+                }
+                formData.append("IDLst", Ids);
+                //alert(Ids);
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    data: formData,
+                    url: '/Allotment/SaveFiles',
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    success: function (result) {
+                        if (result == true) {
+                            alertify.success("Data saved successfully.");
+                            @*window.location.href = '@Url.Action("ManageMutation", "PropertyRegistration")';*@
+                            //window.location = "/Property/Allotment/ViewOnlineDetails/" + applicationID;
+                             window.location.href = '@Url.Action("ViewOnlineDetails", "Allotment", new { area = "Property"})'+"/"+applicationID;
+                        }
+                        else {
+                            alertify.error("Some error occured. Please try again later.");
+                        }
+                    },
+                    error: function (objAjaxRequest, strError) {
+                        var respText = objAjaxRequest.responseText;
+                        alertify.error("Some error occured. Please try again later.");
+                    }
+                });
+            });
+        });
+    </script>

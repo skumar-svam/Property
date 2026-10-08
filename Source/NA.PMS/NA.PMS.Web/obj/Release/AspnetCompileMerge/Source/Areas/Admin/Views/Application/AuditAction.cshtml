@@ -1,0 +1,330 @@
+﻿@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions
+@model NA.PMS.Model.AuditViewModel
+@{
+    ViewBag.Title = "Audit Action";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .searchbox{
+        text-align:center;
+    }
+     .k-widget.k-window {
+        padding: 0;
+    }
+
+    .k-window-content.k-content {
+        padding: 0;
+    }
+
+    .k-window-titlebar.k-header {
+        background: #299a8b;
+        color: #ffffff;
+        border-radius: 0;
+    }
+    .insert{
+        background:#47ca47;
+        width:100px;
+        border:0px;
+
+    }
+       .delete{
+        background:red;
+        width:100px;
+        border:0px;
+
+    }
+         .update{
+        background:yellow;
+        width:100px;
+        border:0px;
+
+    }
+    .newclass {
+        text-align:center;
+        opacity:initial;
+    }
+    /*#divSearchedAudit{
+        display:none;
+    }*/
+    .test1{
+        background:red;
+    }
+    .test2{
+        background:green;
+    }
+    .test3{
+        background:yellow;
+    }
+    input{
+        border: none;
+        padding:0px;
+        margin:0;
+    }
+</style>
+<script src="~/Scripts/KendoJS/2016.2/kendo.excel.min.js"></script>
+<script src="~/Scripts/KendoJS/2016.2/jszip.min.js"></script>
+<script src="~/Scripts/_references.js"></script>
+
+<div class="AuditAction">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Application Log</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                <a href="#" id="btnExportExcel" class="" onclick="javascript:DownloadInExcelFormat(event);">Download in Excel</a>
+            </div>
+        </div>
+    </div> 
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12" style="border-left:1px solid #abc;border-right:1px solid #abc;">
+        <div class="row">
+            <div class="col-md-2 col-sm-6 col-xs-12 form-group" style="text-align:center">
+                @Html.Label("Module")
+                @(Html.Kendo().DropDownListFor(model => model.TableName)
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("Text")
+                    .OptionLabel(" -- Select --")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetAuditSearchParameter", "Application", new { area = "Admin" }).Data("FilterTableName")))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(100);
+                    })
+                    .Events(events => { events.Change("ChangeSearchParameter"); })
+                )
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                @Html.Label("Module")
+                @(Html.Kendo().DropDownListFor(model=>model.FormName)
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("Text")
+                    .OptionLabel(" -- Select --")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true).ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetAuditSearchParameter", "Application", new { area = "Admin" }).Data("FilterFormName")))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(100);
+                    })
+                    .Events(events => { events.Change("ChangeSearchParameter"); })
+                )
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                @Html.Label("Attribute")
+                @(Html.Kendo().DropDownListFor(model=>model.FieldName)
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("Text")
+                    .OptionLabel(" -- Select --")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true).ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetAuditSearchParameter", "Application", new { area = "Admin" }).Data("FilterActionName")))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(100);
+                    })
+                    .Events(events => { events.Change("ChangeSearchParameter"); })
+                )
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                @Html.Label("Username")
+                @(Html.Kendo().DropDownListFor(model=>model.UserId)
+                    .Filter("contains")
+                    .DataTextField("Text")
+                    .DataValueField("Id")
+                    .OptionLabel(" -- Select --")
+                    .DataSource(source =>
+                    {
+                        source.Custom()
+                        .ServerFiltering(true)
+                        .ServerPaging(true)
+                        .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                        .Transport(transport => transport.Read(read => read.Action("GetAuditSearchParameter", "Application", new { area = "Admin" }).Data("FilterUserName")))
+                        .Schema(schema => schema.Data("Data").Total("Total"))
+                        .PageSize(100);
+                    })
+                    .Events(events => { events.Change("ChangeSearchParameter"); })
+                )
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                @Html.Label("From Date")
+                @(Html.Kendo().DatePickerFor(model => model.StartDate).Events(events => { events.Change("ChangeSearchParameter"); }))
+            </div>
+            <div class="col-md-2 col-sm-6 col-xs-12 form-group">
+                @Html.Label("To Date")
+                @(Html.Kendo().DatePickerFor(model => model.EndDate).Events(events => { events.Change("ChangeSearchParameter"); }))
+            </div>
+            @*<div class="col-md-2 col-sm-6 col-xs-12 form-group" style="text-align:center">
+                @Html.Label(" ")<br />
+                <input type="button" class="btn btn-add" value="Search" id="btnAdvanceSearch" />
+                <input type="button" class="btn btn-default" value="Clear" id="btnClear" />
+            </div>*@
+        </div>
+    </div>
+    <div class="col-md-12 k-grid-content">
+        @(Html.Kendo().Grid<NA.PMS.Model.AuditViewModel>()
+            .Name("gridAdvanceSearch")
+            //.ToolBar(tool => tool.Excel())
+            //.Excel(excel => excel.FileName("AuditTrailLog.xlsx").AllPages(true).Filterable(true))
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Hidden(true);
+                columns.Bound(c => c.FormName).Title("Module");
+                columns.Bound(c => c.FieldName).Title("Attribute");
+                columns.Bound(c => c.KeyField).Title("Key Field");
+                //columns.Bound(c => c.KeyValue).Title("key Value");
+                columns.Bound(c => c.UserName).Title("User name");
+                columns.Bound(c => c.ActionDate).Title("Date").Format("{0:dd-MMM-yyyy}").Width(120); 
+                //columns.Bound(c => c.ActionType).Title("Action");
+                columns.Bound(c => c.ActionType).Title("Action").HeaderHtmlAttributes(new { style = "text-align:center" }).Width(110)
+               .Filterable(false).HtmlAttributes(new { style = "text-align:center;padding:0;" })
+               .ClientTemplate("#if(ActionType == 'Insert'){#<input type='text' readonly='readonly' class='test2' disabled='disabled'/> #} if(ActionType == 'Update'){#<input type='text' readonly='readonly' class='test3' disabled='disabled'/> #} if(ActionType == 'Delete'){#<input type='text' readonly='readonly' class='test1' disabled='disabled'/> #} if(ActionType=='SMS'){#<label><b>SMS</b></label>#}#");
+            })
+            .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+            .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+            .ClientDetailTemplateId("template").AutoBind(true)
+            .DataSource(dataSource => dataSource
+                .Ajax().Model(model => model.Id(p => p.Id))
+                .ServerOperation(true).Sort(s=>s.Add(c=>c.ActionDate).Descending())
+                //.Read(read => read.Action("GetAuditTrailByAdvanceSearch", "Application").Data("FilterAdvanceSearch")).PageSize(10)
+                .Read(read => read.Action("GetAuditActionDetailByAdvanceSearch", "Application").Data("FilterAdvanceSearch")).PageSize(10)
+            )
+        )
+    </div>
+    <div class="col-md-12">
+        <div class="row form-group" style="padding-top:12px; text-align:right">
+            <div class="col-md-12">
+                <input type="text" class="test2" style="width:30px;" disabled="disabled" />&nbsp;  Insert
+                <input type="text" class="test3" style="width:30px;" disabled="disabled" />&nbsp;  Update
+                <input type="text" class="test1" style="width:30px;" disabled="disabled" />&nbsp;  Delete
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="divExportKendoGridInExcel">
+    @*@{Html.RenderPartial("_PartialSearchAuditTrail");}*@
+    <div id="divExport"></div>
+</div>
+
+<script id="template" type="text/kendo-tmpl">
+    @(Html.Kendo().Grid<NA.PMS.Model.AuditViewModel>()
+            .Name("grid_#=Id#") // template expression, to be evaluated in the master context
+            .Columns(columns =>
+            {
+                columns.Bound(c => c.Id).Hidden(true);
+                columns.Bound(c => c.TableName).Width(200);
+                columns.Bound(c => c.OldValue).Width(200);//.ClientTemplate("<span>#= ServiceName #<br/><small ><b>Receiving Date:</b>&nbsp;#= CreatedDate#</small></span>");
+                columns.Bound(o => o.NewValue);
+                columns.Bound(c => c.ActionDate).Title("Time").Width(120).Format("{0:HH:mm:ss}");
+                //columns.Bound(o => o.Status).Width(120).Title("Update Status").ClientTemplate("<label class='lbl-status-action' onclick='javascript:OpenStatusWindow(this)'>#=Status#</label>");
+                //columns.Bound(o => o.RequestDate).Format("{0:dd/MM/yyyy}").Width(120);
+            })
+            .DataSource(dataSource => dataSource
+                .Ajax()
+                .PageSize(10)
+                .Read(read => read.Action("GetAuditActionDetailByAdvanceSearch", "Application", new { AuditId = "#=Id#" }))
+            )
+            .ToClientTemplate()
+    )
+</script>
+<script>
+    function dataBound() {
+        this.expandRow(this.tbody.find("tr.k-master-row").first());
+    }
+</script>
+
+<script>
+    function ChangeSearchParameter() {
+        FilterDropDownList();
+        $("#gridAdvanceSearch").data("kendoGrid").dataSource.read();
+    }
+
+    function FilterDropDownList() {
+        $('#TableName').data("kendoDropDownList").dataSource.read();
+        $('#FormName').data("kendoDropDownList").dataSource.read();
+        $('#FieldName').data("kendoDropDownList").dataSource.read();
+        $('#UserId').data("kendoDropDownList").dataSource.read();
+    }
+
+    function FilterAdvanceSearch() {
+        return {
+            TableName: $('#TableName').val(),
+            FormName: $('#FormName').val(),
+            FieldName: $('#FieldName').val(),
+            UserId: $('#UserId').val(),
+            StartDate: $('#StartDate').val(),
+            EndDate: $('#EndDate').val()
+        };
+    }
+
+    function FilterTableName() {
+        return {
+            ActionType: "TableName",
+            FormName: $('#FormName').val(),
+            FieldName: $('#FieldName').val(),
+            UserId: $('#UserId').val()
+        }
+    }
+    function FilterFormName() {
+        return {
+            ActionType: "FormName",
+            TableName: $('#TableName').val(),
+            FieldName: $('#FieldName').val(),
+            UserId: $('#UserId').val()
+        }
+    }
+    function FilterActionName() {
+        return {
+            ActionType: "FieldName",
+            TableName: $('#TableName').val(),
+            FormName: $('#FormName').val(),
+            UserId: $('#UserId').val()
+        }
+    }
+    function FilterUserName() {
+        return {
+            ActionType: "UserName",
+            TableName: $('#TableName').val(),
+            FormName: $('#FormName').val(),
+            FieldName: $('#FieldName').val()
+        }
+    }
+</script>
+
+<script>
+
+    $('#btnAdvanceSearch').click(function () {
+        $("#gridAdvanceSearch").data("kendoGrid").dataSource.read();
+    });
+
+    $('#btnClear').click(function () {
+        $('#TableName').data("kendoDropDownList").value('');
+        $('#FormName').data("kendoDropDownList").value('');
+        $('#FieldName').data("kendoDropDownList").value('');
+        $('#UserId').data("kendoDropDownList").value('');
+        $('#StartDate').val('');
+        $('#EndDate').val('');
+    });
+
+    $('#btnExportExcel').click(function () {
+        var grid = $("#gridAdvanceSearch").data("kendoGrid");       
+        grid.bind("excelExport", function (e) {
+            e.workbook.fileName = "AuditTrail.xlsx";
+        });
+        grid.saveAsExcel();
+    });
+
+</script>

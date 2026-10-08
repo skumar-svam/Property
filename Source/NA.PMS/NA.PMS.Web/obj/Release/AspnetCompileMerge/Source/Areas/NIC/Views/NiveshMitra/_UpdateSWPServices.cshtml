@@ -1,0 +1,327 @@
+﻿@using NA.PMS.NICServices;
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions
+
+
+<div class="panel-body">
+    <div class="row form-group">
+        <div class="col-md-12" id="ApplicationMenu" style="text-align:center">
+            <input type="radio" name="service-action" value="AddSWPService" />Add SWP Service &nbsp;&nbsp;
+            <input type="radio" name="service-action" value="UpdateSWPService" />Update SWP Service &nbsp;&nbsp;
+        </div>
+    </div>
+    <div class="row" style="display:none">
+        <input type="hidden" id="hdn-swp-service-id" />
+        <input type="hidden" id="hdn-swp-service-code" />
+    </div>
+    <div class="row form-group" style="padding-right:30px;">
+        <div class="col-md-3 col-20">
+            <label>Department</label>
+        </div>
+        <div class="col-md-3 col-30">
+            @(Html.Kendo().DropDownList()
+                  .Name("ddlDepartmentList")
+                  .OptionLabel("---select---")
+                  .DataTextField("Text")
+                  .DataValueField("Id")
+                  .Filter("contains")
+                  .DataSource(source =>
+                  {
+                      source.Custom().ServerFiltering(true).ServerPaging(true).Type("aspnetmvc-ajax")
+                      .Transport(transport => transport.Read(read => read.Action("GetDropDownListAsDataSource", "NiveshMitra", new { area = "NIC" }).Data("FilterDepartment")))
+                      .Schema(schema => schema.Data("Data").Total("Total")).PageSize(100);
+                  })
+                  .HtmlAttributes(new { style = "width:100%;" })
+                  .Events(e=>e.Change("DepartmentChangeEvent"))
+            )
+        </div>
+        <div class="col-md-3 col-20">
+            <label>Authority Service</label>
+        </div>
+        <div class="col-md-3 col-30">
+            @(Html.Kendo().DropDownList()
+                .Name("ddlAuthorityServiceList")
+                .OptionLabel("---select---").Filter("contains")
+                .DataTextField("Text").DataValueField("Id")
+                .CascadeFrom("ddlDepartmentList")
+                .DataSource(source => source.Read(read => read.Action("GetServiceListByDepartment", "NiveshMitra", new { area = "NIC" }).Data("FilterService")).ServerFiltering(true))
+                .HtmlAttributes(new { style = "width:100%;" })
+                .Events(e => e.Change("AuthorityServiceChangeEvent"))
+            )
+        </div>
+    </div>
+    <div class="row form-group" style="padding-right:30px;">
+        <div class="col-md-3 col-20">
+            <label>NIC Service:</label>
+        </div>
+        <div class="col-md-3 col-30">
+            @(Html.Kendo().DropDownList()
+                .Name("ddlNICServiceList")
+                .OptionLabel("---select---").Filter("contains")
+                .DataTextField("Text").DataValueField("Value")
+                .CascadeFrom("ddlDepartmentList").CascadeFromField("DepartmentId")
+                .DataSource(source =>
+                {
+                    source.Custom().ServerFiltering(true).ServerPaging(true).Type("aspnetmvc-ajax")
+                    .Transport(transport => transport.Read(read => read.Action("GetDropDownListAsDataSource", "NiveshMitra", new { area = "NIC" }).Data("FilterNICServiceCode")))
+                    .Schema(schema => schema.Data("Data").Total("Total")).PageSize(100);
+                })
+                .HtmlAttributes(new { style = "width:100%;" })
+                .Events(e=>e.Change("SWPServiceChangeEvent"))
+            )
+        </div>
+        <div class="col-md-3 col-20">
+            <label id="lbl-status">NIC Service Status:</label>
+        </div>
+        <div class="col-md-3 col-30">
+            @(Html.Kendo().DropDownList()
+                .Name("ddlServiceStatusList")
+                .OptionLabel("---select---")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .BindTo(new List<NA.PMS.NICServices.SWPDropdownViewModel>() { 
+                    new NA.PMS.NICServices.SWPDropdownViewModel(){ Text="Active", Id=1 },
+                    new NA.PMS.NICServices.SWPDropdownViewModel(){ Text="InActive", Id=0 }
+                })
+                .HtmlAttributes(new { style = "width:100%;" })
+            )
+        </div>
+    </div>
+    <div class="row form-group" style="padding-right:30px;">
+        <div class="col-md-3 col-20">
+            <label>NIC Service Code:</label>
+        </div>
+        <div class="col-md-3 col-30">
+            <input type="text" maxlength="10" id="txt-nic-servicecode" class="k-textbox" />
+        </div>
+        <div class="col-md-3 col-20">
+            <label>NIC Service Name:</label>
+        </div>
+        <div class="col-md-3 col-30">
+            <input type="text" maxlength="100" id="txt-nic-servicename" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row form-group" style="padding-right:30px;">
+        <div class="col-md-3 col-20">
+            <label>Service Charge:</label>
+        </div>
+        <div class="col-md-3 col-30">
+            <input type="text" maxlength="10" id="txt-service-charge" class="k-textbox" />
+        </div>
+    </div>
+    <div class="row form-group" style="text-align:right;padding-right:30px;">
+        <div class="col-md-12">
+            <input type="button" id="btn-update-service" class="k-button" value="Update" style="min-width:100px;" />
+            <input type="button" id="btn-clear-service" class="k-button" value="Clear" style="min-width:100px;"/>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+        $('input[type="radio"][name="service-action"]').on("change", function () {
+            var action = $('input[type="radio"][name="service-action"]:checked').val();
+            if (action == "AddSWPService") {
+                $('#ddlAuthorityServiceList').data("kendoDropDownList").value('');
+                $('#ddlNICServiceList').data("kendoDropDownList").value('');
+                $('#ddlNICServiceList').data("kendoDropDownList").enable(false);
+                $('#ddlAuthorityServiceList').data("kendoDropDownList").dataSource.read();
+            }
+            else if (action == "UpdateSWPService") {
+                $('#ddlAuthorityServiceList').data("kendoDropDownList").value('');
+                $('#ddlAuthorityServiceList').data("kendoDropDownList").enable(false);
+                $('#ddlNICServiceList').data("kendoDropDownList").value('');
+                $('#ddlNICServiceList').data("kendoDropDownList").enable(true);
+                $('#ddlNICServiceList').data("kendoDropDownList").dataSource.read();
+            }
+        });
+
+        $('#btn-update-service').click(function () {
+            SubmitSWPServiceDetail();
+        });
+
+    });
+
+    function FilterDepartment() {
+        return {
+            FilterType: "Department",//
+            ReturnType: "Property"
+        };
+    }
+
+    function FilterNICServiceCode() {
+        return {
+            FilterType: "NICServiceCode",
+            DepartmentId: $('#ddlDepartmentList').val()
+        };
+    }
+
+    function FilterService() {
+        return { departmentId: $('#ddlDepartmentList').val() };
+    }
+
+
+    function SubmitSWPServiceDetail() {
+        var flag = true;
+        var actiontype = $('input[type="radio"][name="service-action"]:checked').val();
+        var departmentId = $('#ddlDepartmentList').data("kendoDropDownList").value();
+        var authorityServiceId = $('#ddlAuthorityServiceList').data("kendoDropDownList").value();
+        var serviceId = $('#ddlNICServiceList').data("kendoDropDownList").value();
+        var statusId = $('#ddlServiceStatusList').data("kendoDropDownList").value();
+        var serviceCode = $('#txt-nic-servicecode').val();
+        var serviceName = $('#txt-nic-servicecode').val();
+        if (actiontype == "" || actiontype == undefined) {
+            flag = false;
+            alertify.error("Select Action type.");
+            return false;
+        }
+        if (departmentId == "") {
+            flag = false;
+            alertify.error("Select Department.");
+            return false;
+        }
+        if (actiontype == "AddSWPService") {
+            if (authorityServiceId == "" || authorityServiceId == undefined) {
+                alertify.error("Please select Authority Service");
+                flag = false;
+            }
+            actiontype = "Add";
+        }
+        if (actiontype == "UpdateSWPService") {
+            if (serviceId == "" || serviceId == undefined) {
+                alertify.error("Please Select NIC Service Code");
+                flag = false;
+            }
+            actiontype = "Update";
+        }
+        if (statusId == "" || statusId == undefined) {
+            alertify.error("Enter select Service Status");
+            return false;
+        }
+        if (serviceCode == "" || serviceCode == undefined) {
+            alertify.error("Enter NIC Service Code");
+            return false;
+        }
+        if (serviceName == "" || serviceName == undefined) {
+            alertify.error("Enter NIC Service Name");
+            return false;
+        }
+        if (flag) {
+            var serviceModel = {
+                ActionType: actiontype,
+                Id: $('#hdn-swp-service-id').val(),
+                DepartmentId: $('#ddlDepartmentList').data("kendoDropDownList").value(),
+                AuthorityServiceId: $('#ddlAuthorityServiceList').data("kendoDropDownList").value(),
+                NICServiceCode: $('#txt-nic-servicecode').val(),
+                ServiceName: $('#txt-nic-servicename').val(),
+                ServiceCharge: $('#txt-service-charge').val(),
+                StatusId: $('#ddlServiceStatusList').data("kendoDropDownList").value()
+            };
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ apimodel: serviceModel }),
+                url: '/NIC/NiveshMitra/SaveSWPServices',
+                success: function (result) {
+                    if (result.ReturnTypeId == '@SWPReturnTypeId.Updated') {
+                        alertify.success("Service saved successfully.");
+                        ClearSWPServiceFields();
+                        $('#ddlAuthorityServiceList').data("kendoDropDownList").dataSource.read();
+                        $('#ddlNICServiceList').data("kendoDropDownList").dataSource.read();
+                    }
+                    else {
+                        alertify.error("Provider failed to save service.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again");
+                }
+            });
+        }
+    }
+
+    function ClearSWPServiceFields() {
+        $('#ddlDepartmentList').data("kendoDropDownList").value('');
+        $('#ddlNICServiceList').data("kendoDropDownList").value('');
+        $('#txt-nic-servicecode').val('');
+        $('#txt-nic-servicename').val('');
+        $('#txt-service-charge').val('');
+    }
+
+    function DepartmentChangeEvent() {
+        var action = $('input[type="radio"][name="service-action"]:checked').val();
+        if (action == "AddSWPService") {
+            $('#ddlAuthorityServiceList').data("kendoDropDownList").dataSource.read();
+        }
+        else if (action == "UpdateSWPService") {
+            $('#ddlNICServiceList').data("kendoDropDownList").dataSource.read();
+        }
+    }
+
+
+    function AuthorityServiceChangeEvent() {
+        var swp = {
+            DepartmentId: $('#ddlDepartmentList').val(),
+            AuthorityServiceId: $('#ddlAuthorityServiceList').val()
+        }
+        $.ajax({
+            type: "post",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ model: swp }),
+            url: '/NIC/NiveshMitra/GetSWPServiceDetailById',
+            success: function (result) {
+                if ((result != null)) {
+                    $('#hdn-swp-service-id').val(result.Id);
+                    $('#txt-nic-servicecode').val(result.NICServiceCode);
+                    $('#txt-nic-servicename').val(result.ServiceName);
+                    $('#txt-service-charge').val(result.ServiceCharge);
+                    var statusid = result.StatusId == 1 ? 1 : 0;
+                    $('#ddlServiceStatusList').data("kendoDropDownList").value(statusid);
+                }
+                else {
+                    alertify.error("Service don't match.");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Network error, try again");
+            }
+        });
+    }
+
+    function SWPServiceChangeEvent() {
+        var swp = {
+            DepartmentId: $('#ddlDepartmentList').val(),
+            NICServiceCode: $('#ddlNICServiceList').val()
+        }
+        $.ajax({
+            type: "post",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ model: swp }),
+            url: '/NIC/NiveshMitra/GetSWPServiceDetailById',
+            success: function (result) {
+                if ((result != null)) {
+                    $('#hdn-swp-service-id').val(result.Id);
+                    $('#txt-nic-servicecode').val(result.NICServiceCode);
+                    $('#txt-nic-servicename').val(result.ServiceName);
+                    $('#txt-service-charge').val(result.ServiceCharge);
+                    var statusid = result.StatusId == 1 ? 1 : 0;
+                    $('#ddlServiceStatusList').data("kendoDropDownList").value(statusid);
+                }
+                else {
+                    alertify.error("Service don't match.");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Network error, try again");
+            }
+        });
+    }
+
+</script>

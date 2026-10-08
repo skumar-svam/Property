@@ -1,0 +1,227 @@
+﻿@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+
+<div class="panel-body">
+    <div class="row form-group">
+        <div class="col-md-12  rdio-bx" id="ServiceActionGroup" style="text-align:center">
+            <input type="radio" id="rbtnRegistrationId" name="InfoRequestService" value="RegistrationId">&nbsp;Registration Id &nbsp;&nbsp;
+            <input type="radio" id="rbtnServiceStatus" name="InfoRequestService" value="ServiceStatus">&nbsp;Service Status &nbsp;&nbsp;
+            <input type="radio" id="rbtnServiceComment" name="InfoRequestService" value="Comment" />&nbsp;Comment
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-3">
+            <label>Service Request No:</label>
+        </div>
+        <div class="col-md-3">
+            <input type="text" maxlength="10" id="txtRequestNo" class="k-textbox numeric-box" />
+        </div>
+        <div class="col-md-3">
+            <label>Registration Id:</label>
+        </div>
+        <div class="col-md-3">
+            <input type="text" maxlength="8" id="txtRegistrationId" class="k-textbox numeric-box" />
+        </div>
+    </div>
+    <div class="row form-group">        
+        <div class="col-md-3">
+            <label>Service Status: </label>
+        </div>
+        <div class="col-md-3">
+            @(Html.Kendo().DropDownList()
+                .Name("SServiceStatus")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .OptionLabel("---select---")
+                .DataSource(source =>source.Read(read=>read.Action("GetStatusMasterList","Report",new{area="Reports"})))
+                //.Events(events => { events.Change("GetAllotteeDetailsByRegistrationId"); })
+                .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+    </div>
+    <div class="row form-group">
+        <div class="col-md-3">
+            <label>Comment: </label>
+        </div>
+        <div class="col-md-9">
+            <textarea class="k-textbox" id="txtServiceComment" maxlength="500"></textarea>
+            @*<input type="text" maxlength="200" id="txtServiceComment" class="k-textbox" />*@
+        </div>
+    </div>
+    <div class="row form-group" style="text-align:right;">
+        <input type="button" id="btnUpdateRequest" class="k-button" value="Update" />
+        <input type="button" id="btnClearRequest" class="k-button" value="Clear" />
+    </div>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+        var actionFlag = "RegistrationId";
+        $('input[type=radio][name=InfoRequestService][value=RegistrationId]').prop('checked', true);
+        $('input[type=radio][name=InfoRequestService]').change(function () {
+            actionFlag = this.value;
+            //ToggleServiceFields();
+        });
+
+        $('#btnUpdateRequest').click(function () {
+            actionFlag = $('input[name=InfoRequestService]:checked', '#ServiceActionGroup').val();
+            var id = $('#txtRequestNo').val();
+            var rid = $('#txtRegistrationId').val();
+            if (actionFlag == undefined) {
+                alertify.error("Please select Updation type.");
+                return false;
+            }
+            if (id == "" || id <= 0) {
+                alertify.error("Please enter Request no.");
+                return false;
+            }           
+            if (actionFlag == "RegistrationId") {
+                if (rid == "") {
+                    alertify.error("Please enter Registration Id.");
+                    return false;
+                }
+                if (rid.length != 8) {
+                    alertify.error("Enter Registration Id in correct format.");
+                    return false;
+                }
+                UpdateServiceRequest();
+            }
+            else if (actionFlag == "ServiceStatus") {
+                if ($('#SServiceStatus').val() == "") {
+                    alertify.error("Please select service status.");
+                    return false;
+                }
+                UpdateServiceRequest();
+            }
+            else if (actionFlag == "Comment") {
+                if ($('#txtServiceComment').val() == "") {
+                    alertify.error("Please enter comment in comment box.");
+                    return false;
+                }
+                UpdateServiceRequest();
+            }
+        });
+
+        $('#txtRequestNo').blur(function () {
+            actionFlag = $('input[name=InfoRequestService]:checked', '#ServiceActionGroup').val();
+            var id = $('#txtRequestNo').val();
+            //if (actionFlag != undefined) {
+                if (id != "") {
+                    $.ajax({
+                        type: "post",
+                        dataType: "json",
+                        contentType: "application/json; charset=utf-8",
+                        data: JSON.stringify({ id: id }),
+                        url: '@Url.Action("GetServiceRequestDetailById", "Report", new { area="Reports"})',
+                        success: function (result) {
+                            if (result != null) {
+                                $('#txtRegistrationId').val(result.Registration_No);
+                                $('#SServiceStatus').data("kendoDropDownList").value(result.StatusId);
+                                $('#txtServiceComment').val(result.Comment);
+                            }
+                            else {
+                                alertify.error("Service doesn't exist.");
+                            }
+                        },
+                        error: function (ajaxRequest, strError) {
+                            //alert(ajaxRequest.responseText);
+                            alertify.error("Please try again.");
+                        }
+                    });
+                }
+            //}
+            //else {
+            //    alertify.error("Check Ation Type.");
+            //}
+        });
+
+        $('#btnClearRequest').click(function () {
+            $('#txtRequestNo').val('');
+            $('#txtRegistrationId').val('');
+            $('#SServiceStatus').data("kendoDropDownList").value('');
+            $('#txtServiceComment').val('');
+        });
+
+    });
+
+    function UpdateServiceRequest() {
+        actionFlag = $('input[name=InfoRequestService]:checked', '#ServiceActionGroup').val();
+        var rmodel = {
+            ActionType: actionFlag,
+            Id: $('#txtRequestNo').val(),
+            RegistrationId: $('#txtRegistrationId').val(),
+            StatusId: $('#SServiceStatus').val(),
+            Comment: $('#txtServiceComment').val()
+        };
+
+        $.ajax({
+            type: "post",
+            dataType: "json",
+            contentType: "application/json; charset=utf-8",
+            data: JSON.stringify({ model: rmodel }),
+            url: '@Url.Action("UpdateServiceRequestDetail", "Report", new { area="Reports"})',
+            success: function (result) {
+                if (actionFlag == '@ActionType.RegistrationId') {
+                    if (result == '@ReturnType.Updated') {
+                        alertify.success("Registration Id updated successfully.");
+                        ClearServiceRequestFields();
+                    }
+                }
+                else if (actionFlag == '@ActionType.ServiceStatus') {
+                    if (result == '@ReturnType.Updated') {
+                        alertify.success("Service status updated successfully.");
+                        ClearServiceRequestFields();
+                    }
+                }
+                else if (actionFlag == '@ActionType.Comment') {
+                    if (result == '@ReturnType.Updated') {
+                        alertify.success("Service comment updated successfully.");
+                        ClearServiceRequestFields();
+                    }
+                }
+                else if (result == '@ReturnType.None') {
+                    alertify.error("Data is not updated");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                //alert(ajaxRequest.responseText);
+                alertify.error("Network error.");
+            }
+        });
+    }
+
+    function ClearServiceRequestFields() {
+        //$('#txtRequestNo').val('');
+        $('#txtRegistrationId').val('');
+        $('#SServiceStatus').data("kendoDropDownList").value('');
+        $('#txtServiceComment').val('');
+    }
+
+    function ToggleServiceFields() {
+        var actionFlag = $('input[name=InfoRequestService]:checked', '#ServiceActionGroup').val();
+        if (actionFlag == '@ActionType.RegistrationId') {
+            $('#txtRegistrationId').prop("disabled", false);
+            $('#SServiceStatus').data("kendoDropDownList").value('');
+            $('#txtServiceComment').val('');
+            $('#SServiceStatus').data("kendoDropDownList").enable(false);
+            $('#txtServiceComment').prop("disabled",true);
+        }
+        else if (actionFlag == '@ActionType.ServiceStatus') {
+            $('#txtRegistrationId').val('');
+            $('#txtRegistrationId').prop("disabled", true);
+            $('#SServiceStatus').data("kendoDropDownList").enable(true);
+            $('#txtServiceComment').val('');
+            $('#txtServiceComment').prop("disabled", true);
+        }
+        else if (actionFlag == '@ActionType.Comment') {
+            $('#txtRegistrationId').val('');
+            $('#txtRegistrationId').prop("disabled", true);
+            $('#SServiceStatus').data("kendoDropDownList").value('');
+            $('#SServiceStatus').data("kendoDropDownList").enable(false);
+            $('#txtServiceComment').val('');
+            $('#txtServiceComment').prop("disabled", false);
+        }
+    }
+
+</script>

@@ -1,0 +1,359 @@
+﻿@model NA.PMS.Model.AllotmentModel
+@using Kendo.Mvc.UI;
+@using NA.PMS.Model
+@{
+    ViewBag.Title = "ManageAllotment";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+<style>
+    .bulkDialog {
+        display: none;
+    }
+    /*#btnAddAllotment{
+        float:right;
+    }
+    #btnBulkAllotment{
+        float:right;
+    }*/
+    #uploadFormGroupId {
+        display: none;
+    }
+
+    #btnFormGroupId {
+        display: none;
+    }
+
+    #loadingImg {
+        display: none;
+    }
+
+    .k-grid-content {
+        overflow-y: hidden;
+        overflow-x: hidden;
+    }
+</style>
+
+
+
+<div class="ManageAllotment">
+    <div class="col-md-12">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-12 col-xs-12"><h1 class="gridTitle">Manage Allotment</h1></div>
+            <div class="col-md-6 col-sm-12 col-xs-12 col-btn">
+                @*<a href="#" id="btnBulkAllotment" class="" onclick="javascript: AddBulkAllotment(event);">Bulk Allotment</a>*@
+                <a href="#" id="btnAddAllotment" class="" onclick="javascript: AddAllotment(event);">Add Allotment</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="k-grid-content">
+        @(Html.Kendo().Grid<AllotmentModel>()
+                    .Name("gridAllotment")
+                   // .ToolBar(tools => tools.Excel())
+                   // .ToolBar(tools => tools.Pdf())
+                   // .Pdf(pdf => pdf
+                   //     .AllPages()
+                   //     .AvoidLinks()
+                   //     .PaperSize("A4")
+                   //     .Scale(0.8)
+                   //     .Margin("2cm", "1cm", "1cm", "1cm")
+                   //     .Landscape()
+                   //     .RepeatHeaders()
+                   //     .TemplateId("page-template")
+                   //     .FileName("AllottedProperty.pdf")
+                   //     .ProxyURL(Url.Action("Pdf_Export_Save", "Report"))
+                   // )
+                   //.Excel(excel => excel
+                   //     .FileName("AllottedProperty.xlsx")
+                   //     .AllPages(true)
+                   //     .Filterable(true)
+                   //     .ProxyURL(Url.Action("Excel_Export_Save", "Report"))
+                   //)
+                  .Columns(columns =>
+                  {
+                      columns.Bound(c => c.RID).Hidden(true);
+                      if (@ViewBag.ReadOnlyMenu != null && @ViewBag.ReadOnlyMenu == true)
+                      {
+                          columns.Bound(c => c.RID).ClientTemplate("<a href='" + "/Property/Allotment/ViewAllotmentdetails/#= EncodedParameter #'>#= RID #</a>").Title("Registration Id").Width(130).Filterable(false);
+                      }
+                      else
+                      {
+                          columns.Bound(c => c.RID).Title("Registration Id").Width(150);
+                      }
+                      columns.Bound(c => c.EncryptedSchemeId).Hidden(true);
+                      columns.Bound(c => c.SchemeId).Title("Scheme").ClientTemplate("<a href='" + "/Property/Allotment/ViewSchemeDetails/#= EncryptedSchemeId #'>#= SchemeName #</a>");
+                      //columns.Bound(c => c.SchemeName).Title("Scheme Name");
+                      columns.Bound(c => c.DepartmentName).Title("Department Name");
+                      columns.Bound(c => c.SectorName).Title("Sector").Width(100);
+                      columns.Bound(c => c.BlockName).Title("Block").Width(100);
+                      columns.Bound(c => c.PropertyNo).Title("Property No.").Width(130);
+                      //columns.Bound(c => c.PropertyNumber).Title("Property No.");
+                      columns.Bound(c => c.ApplicantName).Title("Applicant's Name");
+                      columns.Bound(c => c.AllotmentDate).Title("Allotment Date").Format("{0:dd-MM-yyyy}");
+                      columns.Bound(c => c.isStatus).Title("Staus").Title("Status");
+                      columns.Bound(c => c.EncodedParameter).Hidden(true);
+                      if (@ViewBag.EditMenuVal != null && @ViewBag.EditMenuVal == true)
+                      {
+                          columns.Bound(c => c.RID).ClientTemplate("<a class='gridEdit' href='" + "/Property/Allotment/EditAllotment/#= EncodedParameter #'>Edit</a>").Title("Action").Filterable(false);
+                      }
+                      else
+                      {
+                          columns.Bound(c => c.RID).ClientTemplate("Edit").Title("Action").Filterable(false);
+                      }
+                      columns.Bound(c => c.RID).HeaderHtmlAttributes(new { style = "text-align:center;" }).HtmlAttributes(new { style = "text-align:center;" }).Title("Cancel Request").ClientTemplate("#if(isStatus == 'Approved'){#<span class='gridNotEdit'>Cancel</span>#} else{#<a class='gridEdit' onclick='javascript:CancelAllotment(this);'>Cancel</a> #}#").Filterable(false).Sortable(false);
+                  })
+                  .Sortable().Filterable().Resizable(resize => resize.Columns(true))
+                  .Events(e => e.DataBound("onDataBound"))
+                  .Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                  .Groupable()
+                  .DataSource
+                  (
+                      dataSource => dataSource
+                      .Ajax().ServerOperation(true).Model(model => model.Id(p => p.RID))
+                      .Read(read => read.Action("GetAllotment", "Allotment"))
+                      .PageSize(10)
+                  )
+        )
+    </div>
+</div>
+@*@{Html.RenderPartial("_ViewAllotment");}*@
+
+<div class="bulkDialog" id="dialog" title="Bulk upload Allotment" style="width:700px">
+    @using (Html.BeginForm("BulkUploadForAllotment", "Allotment", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        <div class="row form-group" style="padding-bottom:30px;">
+            <div class="col-sm-6">
+                <label>Scheme</label><span class="text-danger">*</span>
+                @(Html.Kendo().DropDownList()
+                      .Name("SchemeId")
+                      .DataTextField("schemeName")
+                      .DataValueField("schemeId")
+                      .OptionLabel(" -- Please Select --")
+                      .DataSource(source => source.Read(read => read.Action("GetSchemeListForAllotment", "PropertyAllotment")))
+                      .Enable(true)
+                      .AutoBind(true)
+                      .HtmlAttributes(new { style = "width: 100%; height:100%" })
+                )
+                @*@Html.ValidationMessageFor(model => model.SchemeId, "", new { @class = "text-danger" })*@
+            </div>
+            <div class="col-sm-6">
+                <label>Department</label><span class="text-danger">*</span>
+                @(Html.Kendo().DropDownList()
+                      .Name("DepartmentId")
+                      .DataTextField("DepartmentName")
+                      .DataValueField("DepartmentId")
+                      .OptionLabel(" -- Please Select --")
+                      .DataSource(source => source.Read(read => read.Action("FilterDepartmentOnScheme", "PropertyAllotment").Data("FilterDepartment"))
+                                                          .ServerFiltering(true))
+                      .Enable(false)
+                      .AutoBind(false)
+                      .CascadeFrom("SchemeId")
+                      .HtmlAttributes(new { style = "width: 100%; height:100%" })
+                )
+                @*@Html.ValidationMessageFor(model => model.DepartmentId, "", new { @class = "text-danger" })*@
+            </div>
+        </div>
+        <div class="row form-group" id="downloadFormGroupId" style="padding-top:30px;">
+            <div class="col-sm-4">
+                <button class="btn btn-default" type="button" id="btnDownloadExcelFormat">Download Format</button>
+                @*<button class="btn btn-block btn-primary" type="button" id="btnDownloadExcelFormat">Download Format&nbsp;&nbsp;<span class="glyphicon glyphicon-download-alt"></span></button>*@
+                @*@Html.ActionLink("Download Format", "DownloadAllotmentExcelFormat", "Allotment", new { @class="btn btn-block btn-primary " })*@
+            </div>
+            <div class="col-sm-4"></div>
+            <div class="col-sm-4">
+                <button id="btnNextForUpload" class="btn btn-default">Next</button>
+                @*<button id="btnNextForUpload" class="btn btn-block btn-primary">Next</button>*@
+            </div>
+        </div>
+        <div class="row form-group" id="uploadFormGroupId">
+            <div class="col-sm-6" style="font-size:13px;">
+                <input type="file" accept=".xls, .xlsx" onchange="UploadFileSelection(this)" id="fileUploadId" name="uploadExcel" />
+            </div>
+        </div>
+
+        <div class="row form-group" id="btnFormGroupId">
+            <div class="col-sm-6">
+                <div id="loadingImg" class="chartContainer" style="border-left: 5px solid #fff; border-top: 5px solid #fff; border-right: 5px solid #fff;">
+                    <img src="@Url.Content("~/Content/Images/loading_green.gif")" class="loading" />
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <input type="button" value="Back" id="btnBack" class="btn btn-default" />
+                @*<input type="button" value="Back" id="btnBack" class="btn btn-block btn-primary" />*@
+            </div>
+            <div class="col-sm-3">
+                <input type="button" value="Upload" id="btnUpload" class="btn btn-default" />
+                @*<input type="button" value="Upload" id="btnUpload" class="btn btn-block btn-primary" />*@
+            </div>
+        </div>
+    }
+</div>
+
+
+
+<script type="text/javascript">
+    function FilterDepartment() {
+        return { SchemeId: $("#SchemeId").val() };
+    }
+
+    function AddAllotment(event) {
+        event.preventDefault();
+        window.location.href = '@Url.Action("AddAllotment", "Allotment")';
+    }
+
+    function AddBulkAllotment(event) {
+        event.preventDefault();
+        //alert("bulk upload2");
+        $("#dialog").dialog({
+            minHeight: 330,
+            width: 700
+        });
+    }
+
+    function UploadFileSelection(file) {
+        var schemeId = $('#SchemeId').val();
+        var departmentId = $('#DepartmentId').val();
+        var uploadFile = $("#fileUploadId").val();
+        var fileExtension = uploadFile.split('.');
+        if (uploadFile == null) {
+            alertify.error("Please select file");
+            return false;
+        }
+        if (fileExtension[1] != "xlsx") {
+            alertify.error("Please select only excel(xlsx) file.");
+            file.value = null;
+            return false;
+        }
+    }
+
+    $('#btnDownloadExcelFormat').click(function () {
+        //var schemeId = $('#SchemeId').val();
+        //var departmentId = $('#DepartmentId').val();
+        window.location = "/Allotment/DownloadAllotmentExcelFormat";
+    });
+
+    $('#btnNextForUpload').click(function () {
+        $('#downloadFormGroupId').css("display", "none");
+        $('#uploadFormGroupId').show();
+        $('#btnFormGroupId').show();
+        return false;
+    });
+
+    $('#btnBack').click(function () {
+        $('#downloadFormGroupId').show();
+        $('#uploadFormGroupId').css("display", "none");
+        $('#btnFormGroupId').css("display", "none");
+        return false;
+    });
+
+    //$('#btnUpload').click(function () {
+    //    var schemeId = $('#SchemeId').val();
+    //    var departmentId = $('#DepartmentId').val();
+    //    var uploadFile = $("#fileUploadId").val();
+    //    if (uploadFile == null || uploadFile == "") {
+    //        alertify.error("Please select file");
+    //        return false;
+    //    }
+    //    if (schemeId != 0 && departmentId != 0) {
+    //        UploadFileSelection();
+    //        return true;
+    //    }
+    //    else {
+    //        alertify.error("Select valid entry");
+    //        return false;
+    //    }
+    //});
+
+    $('#btnUpload').click(function () {
+        var schemeId = $('#SchemeId').val();
+        var departmentId = $('#DepartmentId').val();
+        var uploadFile = $("#fileUploadId").val();
+
+        // Create FormData object
+        var formData = new FormData();
+        var file = $('#fileUploadId')[0];
+        formData.append("excelFile", file.files[0]);
+        formData.append("schemeId", schemeId);
+        formData.append("departmentId", departmentId);
+        formData.append("uploadFile", uploadFile);
+
+        if (uploadFile == null || uploadFile == "") {
+            alertify.error("Please select file");
+            return false;
+        }
+        if (schemeId != 0 && departmentId != 0) {
+            $('#loadingImg').show();
+            $.ajax({
+                url: '/Allotment/BulkUploadForAllotment',
+                type: "POST",
+                contentType: false, // Not to set any content header
+                processData: false, // Not to process data
+                //data: {schemeId:schemeId, departmentId:departmentId,uploadExcel:fileData},
+                data: formData,
+                success: function (result) {
+                    if (result == true) {
+                        alertify.success("Uploaded successfully");
+                        $('#loadingImg').css("display", "none");
+                        file.value = null;
+                    }
+                    else {
+                        alertify.error("Upload is not successful");
+                        $('#loadingImg').css("display", "none");
+                        file.value = null;
+                    }
+                },
+                error: function (err) {
+                    //alert(err.statusText);
+                    alertify.error("Data field is not valid");
+                    $('#loadingImg').css("display", "none");
+                    file.value = null;
+                }
+            });
+
+        }
+        else {
+            alertify.error("Select valid entry");
+            return false;
+        }
+    });
+    function onDataBound(e) {
+        var AddMenuVal = '@ViewBag.AddMenuVal'
+        var EditMenuVal = '@ViewBag.EditMenuVal'
+        if (AddMenuVal == "False") {
+            $("#btnAddAllotment").addClass("disable_a_href");
+            $("#btnBulkAllotment").addClass("disable_a_href");
+
+        }
+
+    }
+
+    function CancelAllotment(row) {
+        var confirmCancel = confirm('Are you sure you want to Cancel ?');
+        if (confirmCancel) {
+            var tr = $(row).parent().parent();
+            var rId = $(tr).children("td:eq(0)").text();
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ rid: rId }),
+                url: '/Allotment/CancelAllotment',
+                success: function (result) {
+                    if (result == true) {
+                        $("#gridAllotment").data("kendoGrid").dataSource.read();
+                        alertify.success("Allotment canceled successfully.");
+                    }
+                    else
+                        alertify.error("Some error occured. Please try again later.");
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    alertify.error("Something is wrong. Please try again later.");
+                }
+            });
+        }
+    }
+</script>

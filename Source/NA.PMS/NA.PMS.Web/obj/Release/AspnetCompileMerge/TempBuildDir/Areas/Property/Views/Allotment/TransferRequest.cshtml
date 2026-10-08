@@ -1,0 +1,374 @@
+﻿@model NA.PMS.Model.TransferViewModel
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@using NA.PMS.Common;
+@{
+    ViewBag.Title = "Transfer Request";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    #div-popup-window{
+        display:none;
+    }
+
+    .k-window {
+        width: 39%;
+        height: 30%;
+    }
+</style>
+
+@using (Html.BeginForm())
+{
+    <div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Transfer Request</h1></div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 mandatory">Fields marked with an asterisk (<span class="star">*</span>) are required.</div>
+                </div>
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="col-md-12 content-top-spce">
+                <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                    <h2 class="blck-heading" id="allottee_detail_header" style="margin-bottom:5px;">Trnasferor Details</h2>
+                    <div class="form-bx" id="div-allottee-detail">
+                        <div class="row">
+                            @Html.HiddenFor(model => model.Id)
+                            @Html.HiddenFor(model => model.RequestNo)
+                            @Html.HiddenFor(model => model.DepartmentId)
+                            @Html.HiddenFor(model => model.PropertyId)
+                            @Html.HiddenFor(model => model.ApplicantAddressII)
+                            @Html.HiddenFor(model => model.ApplicantMaster)
+                            @Html.HiddenFor(model => model.IsGPAEffective)
+                            @Html.HiddenFor(model => model.IsCancelledOrSurrendered)
+                            @Html.HiddenFor(model => model.AnnualLeaseRent)
+                            @Html.HiddenFor(model => model.TotalPropertyCost)
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12 col-sm-12 col-xs-12 form-group" id="divTransferThrough" style="text-align:center">
+                                <label><b>Property Transfer Through</b></label>
+                                <label>@Html.RadioButtonFor(m => m.TransferThrough, "Allottee", new { @class = "", @checked = true, @id = "" }) <b>Allottee</b></label>
+                                <label>@Html.RadioButtonFor(m => m.TransferThrough, "GPA", new { @class = "", @id = "" }) <b>GPA</b></label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Registration Id", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @(Html.Kendo().DropDownListFor(m => m.RegistrationId)
+                                .Filter("contains")
+                                .DataTextField("Text")
+                                .DataValueField("Id")
+                                .OptionLabel("---Select---")
+                                .DataSource(source =>
+                                {
+                                    source.Custom()
+                                   .ServerFiltering(true)
+                                   .PageSize(100).ServerPaging(true)
+                                   .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                                   .Transport(transport => transport.Read("GetRegistrationIdListAsDataSource", "Allotment", new { area = "Property" }))
+                                   //.DataSource(source => source.Read(read => read.Action("GetAssineToByDepttId", "PropertyRegistration").Data("AdditionalData")))
+                                   .Schema(schema => schema.Data("Data").Total("Total"))
+                                   .PageSize(100);
+                                })
+                                .Events(events => { events.Change("RegistrationIdChangeEvent"); })
+                                .HtmlAttributes(new { @class = "", style = "width:100%" })
+                                )
+                            </div>
+
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Property Number")
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.PropertyNo, htmlAttributes: new { @class = "form-control", @maxlength = "30" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Department")
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.Department, htmlAttributes: new { @class = "form-control", @maxlength = "20" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.LabelFor(m => m.OnlineRequestNo, htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.OnlineRequestNo, new { @class = "form-control", onkeypress = "return IsNumeric(event);", maxlength = "8" })
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label id="lbl-allottee">Allottee Name</label>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.Applicant, htmlAttributes: new { @class = "form-control", @maxlength = "100" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                <label id="lbl-applicant-master">Total Area</label>
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.TotalArea, htmlAttributes: new { @class = "form-control", @maxlength = "20" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Applicant Address")
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.ApplicantAddress, htmlAttributes: new { @class = "form-control", @maxlength = "100" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("One Time Lease Rent")
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.OneTimeLeaseStatus, htmlAttributes: new { @class = "form-control", @maxlength = "100" })
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Is Mortgaged")
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.MortgageStatus, htmlAttributes: new { @class = "form-control", @maxlength = "100" })
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.Label("Is Functional")
+                            </div>
+                            <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                                @Html.TextBoxFor(model => model.FunctionalStatus, htmlAttributes: new { @class = "form-control", @maxlength = "100" })
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <h2 class="blck-heading" id="transfer_detail_header">Transferee Details</h2>
+                    <div class="form-bx" id="transfer_detail_formbox">
+                        @{Html.RenderPartial("_TransferDetail");}
+                    </div>
+
+                </div>
+
+                <div class="box-button text-center">
+                    @*<input type="button" id="btnBack" value="Back" class="btn btn-default" />*@
+                    @*<input type="button" id="btnNxt" value="Next" class="btn btn-default" />*@
+                    <input type="button" id="btnCncl" value="Cancel" class="btn btn-default" />
+                    <input type="button" id="btnSubmit" value="Add for Approval" class="btn btn-add" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="col-md-12" id="div-popup-window" style="min-height:200px;">
+    <div class="row" style="margin-top:25px;">
+        <div class="col-md-4 col-sm-12 col-xs-12 form-group" style="text-align:center">
+            <label>Assign To: </label>
+        </div>
+        <div class="col-md-6 col-sm-12 col-xs-12 form-group">
+            @(Html.Kendo().DropDownListFor(model => model.ApproverId)
+                .Name("DDLApproverId")
+                .DataTextField("Text")
+                .DataValueField("Id")
+                .OptionLabel("---Select---").Filter("contains").AutoBind(true)
+                .DataSource(source =>
+                {
+                    source.Custom()
+                    .ServerFiltering(true)
+                    .PageSize(100).ServerPaging(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    .Transport(transport => transport.Read("GetApproverIdList", "Allotment", new { area = "Property" }))
+                    .Schema(schema => schema.Data("Data").Total("Total"))
+                    .PageSize(100);
+                })
+                .HtmlAttributes(new { style = "width:100%" })
+            )
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-7 col-sm-6 col-md-offset-5">
+            <input type="button" class="btn btn-add" id="btnPopupSubmit" value="Submit" />
+            <input type="button" class="btn btn-default close-window" value="Close" />
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#div-popup-window').kendoWindow({
+            modal: true,
+            title: "Assign To",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "30%"
+            },
+            width: "40%", height: "35%"
+        });
+
+
+        $("#btnCncl").click(function () {
+            window.location.href = '@Url.Action("ManageTransfers", "PropertyRegistration")';
+        });
+
+        $("#btnPopupSubmit").click(function () {
+            SubmitTransferRequestForm();
+        });
+
+        $(".close-window").click(function () {
+            $('#div-popup-window').data("kendoWindow").close();
+        });
+
+        $("#btnSubmit").click(function () {
+            //ValidateTransfereeDetails();
+
+            $('#div-popup-window').data("kendoWindow").center();
+            $('#div-popup-window').data("kendoWindow").open();
+        });
+        
+        $("#TransferRate").blur(function () {
+            var area = $("#TotalArea").val() == "" ? 0 : $("#TotalArea").val();
+            var intArea = parseFloat(area);
+            var rslt = intArea * ($("#TransferRate").val() == "" ? 0 : $("#TransferRate").val());
+            $("#TotalTransferCharge").val(rslt.toFixed(2));
+        });
+
+        $('input[name=TransferThrough]').change(function () {
+            var radiobtnVal = $('input[name=TransferThrough]:checked', '#divTransferThrough').val();
+            if ($("#RegistrationId").val() != '') {
+                RegistrationIdChangeEvent();
+            }
+        });
+    });
+
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+
+    function FilterForTransfer() {
+        return {
+            FilterType: "Transfer"
+        };
+    }
+
+
+    function SubmitTransferRequestForm() {
+        if ($('#RegistrationId').val() != "") {
+            var formData = new FormData($('form').get(0));
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: false, // Not to set any content header
+                processData: false, // Not to process data
+                data: formData,
+                url: '/Property/Allotment/SavePropertyTransferDetail',
+                success: function (result) {
+                    if (result == '@ReturnType.Saved') {
+                        alertify.success("Transfer detail saved successfully.");
+                        //window.location.href = "/Customer/Property/KYAForm";
+                        //ClearInputFields();
+                    }
+                    else if (result == '@ReturnType.Exist') {
+                        alertify.error("Property already updated");
+                    }
+                    else {
+                        return false;
+                    }
+                    //ClearFields();
+                },
+                error: function (ajaxRequest, strError) {
+                    alertify.error("Network error, try again later");
+                }
+            });
+        }
+    }
+
+    function RegistrationIdChangeEvent() {
+        var transferBy = $('input[name=TransferThrough]:checked', '#divTransferThrough').val();
+        if (transferBy == '' || transferBy == undefined) {
+            alertify.error("Please select Property Transfer Through");
+            return false;
+        }
+        if ($("#RegistrationId").val() == '') {
+            //ClearValues();
+            alertify.error("Please select an RID");
+            return false;
+        }
+        else {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify({ RegistrationId: $("#RegistrationId").val(), FilterType: "Transfer" }),
+                url: '/Property/Allotment/GetApplicantDetailsToTransferProperty',
+                success: function (result) {
+                    if (result != null) {
+                        if (result.isLeaseDeedExecuted == false) {
+                            //ClearValues();
+                            alertify.error("Please execute Lease Deed before Transfer process");
+                            $("#RegistrationId").data('kendoDropDownList').value('');
+                            return false;
+                        }
+                        else {
+                            $("#PropertyId").val(result.PropertyId);
+                            $("#DepartmentId").val(result.DepartmentId);
+                            $("#Department").val(result.Department);
+                            var aplicant = transferBy == "GPA" ? result.GPAHolderName : result.Applicant;
+                            $("#Applicant").val(aplicant);
+                            $("#ApplicantMaster").val(result.ApplicantMaster);
+                            var address = transferBy == "GPA" ? result.GPAHolderAddress : result.ApplicantAddress;
+                            $("#ApplicantAddress").val(address);
+
+                            $("#ApplicantAddressII").val(result.ApplicantAddressII);
+                            $("#PropertyNo").val(result.PropertyNo);
+                            $("#TotalArea").val(result.TotalArea);
+                            $("#MortgageStatus").val(result.MortgageStatus);
+                            $("#FunctionalStatus").val(result.FunctionalStatus);
+                            //$("#BalanceDues").val(result.BalanceDues);
+                            //$("#PossessionDate").data("kendoDatePicker").value(result.PossessionDate);
+                            $("#IsGPAEffective").val(result.IsGPAEffective);
+                            $("#IsCancelledOrSurrendered").val(result.IsCancelledOrSurrendered);
+                        }
+                    }
+                    else {
+                        //ClearValues();
+                        alertify.error("Some error occured. Please try again later.");
+                    }
+                },
+                error: function (obj) {
+                    //ClearValues();
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            });
+        }
+        
+    }
+
+
+
+
+    function ClearTransferorFields() {
+        $("#Applicant").val('');
+        $("#ApplicantMaster").val('');
+        $("#Department").val('');
+        $("#TotalArea").val('');
+        $("#PropertyNo").val('');
+        $("#MortgagedStatus").val('');
+        $("#FunctionalStauts").val('');
+        $("#OneTimeLeaseStatus").val('');
+        $("#OnlineRequestNo").val('');
+        $("#ApplicantAddress").val('');
+    }
+</script>
+
+

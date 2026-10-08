@@ -1,0 +1,33 @@
+﻿@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@model NA.PMS.Model.PropertyCompletionModel
+@*<div class="row">*@
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @Html.Label("Registration Id", htmlAttributes: new { @class = "required" })
+    </div>
+    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+        @(Html.Kendo().DropDownListFor(m => m.RId)
+            .Filter("contains")
+            .DataTextField("text")
+            .DataValueField("id")
+            .OptionLabel("Select")
+            .DataSource(source =>
+            {
+                source.Read(read =>
+                {
+                    read.Action("GetRIDs", "Completion").Data("RIdChanges");
+                });
+            })
+            .Events(events => { events.Change("RIdChange"); })
+            .HtmlAttributes(new { @class = "schemeForms",style="width:100%" })
+        )
+    </div>
+@*</div>*@
+
+<script type="text/javascript">
+    function RIdChanges() {
+        return {
+            type: "completion"
+        };
+    }
+</script>

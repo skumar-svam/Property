@@ -1,0 +1,308 @@
+﻿@using NA.PMS.Common;
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions
+
+
+<div class="panel-body">
+    <div class="row form-group">
+        <div class="col-md-12" id="Application" style="text-align:center">
+            <input type="radio" name="config-action" value="New-Category" />New Category &nbsp;&nbsp;
+            <input type="radio" name="config-action" value="Update-Category" />Update Category &nbsp;&nbsp;
+            <input type="radio" name="config-action" value="Add-Name" />Add Data &nbsp;&nbsp;
+            <input type="radio" name="config-action" value="Update-Name" />Update Data &nbsp;&nbsp;           
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-12 form-group col-20">
+            <label>Category</label>
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-30">
+            @(Html.Kendo().DropDownList()
+                  .Name("ddlCategory")
+                  .OptionLabel("---select---")
+                  .DataTextField("Text")
+                  .DataValueField("Value")
+                  .Filter("contains")
+                  //.DataSource(source => source.Read(read => read.Action("GetCommonConfigCategoryList", "Application", new { area = "Admin" })))
+                .DataSource(source =>
+                {
+                    source.Custom()
+                    .ServerFiltering(true)
+                    .ServerPaging(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    .Transport(transport => transport.Read(read => read.Action("GetMasterDataDropDownListAsDataSource", "Organization", new { area = "Admin" }).Data("FilterConfigCategory")))
+                    .Schema(schema => schema.Data("Data").Total("Total"))
+                    .PageSize(100);
+                })
+                  .HtmlAttributes(new { style = "width:100%;" })
+                  .Events(e => e.Change("GetCommonConfigDetail"))
+            )
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-20">
+            <label>New Category</label>
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-30">
+            <input type="text" name="txtCategoryType" id="txtCategoryType" maxlength="30" class="k-textbox" style="width:100%;"/>
+        </div>
+    </div>
+    <div class="row">    
+        <div class="col-md-3 col-sm-12 form-group col-20">
+            <label>Ex Common data:</label>
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-30">
+            @(Html.Kendo().DropDownList()
+                  .Name("ddlConfig")
+                  .OptionLabel("---select---")
+                  .DataTextField("Text")
+                  .DataValueField("Id")
+                  .CascadeFrom("ddlCategory")
+                  .CascadeFromField("Value")
+                  //.DataSource(source => source.Read(read => read.Action("GetCommonConfigDataList", "Application", new { area = "Admin" }).Data("FilterCategory")).ServerFiltering(true))
+                .DataSource(source =>
+                {
+                    source.Custom()
+                    .ServerFiltering(true)
+                    .ServerPaging(true)
+                    .Type("aspnetmvc-ajax") //Set this type if you want to use DataSourceRequest and ToDataSourceResult instances.
+                    .Transport(transport => transport.Read(read => read.Action("GetMasterDataDropDownListAsDataSource", "Organization", new { area = "Admin" }).Data("FilterConfigName")))
+                    .Schema(schema => schema.Data("Data").Total("Total"))
+                    .PageSize(100);
+                })
+                  .HtmlAttributes(new { style = "width:100%;" })
+                  .Events(e => e.Change("GetCommonConfigDetail"))
+            )
+        </div>   
+        <div class="col-md-3 col-sm-12 form-group col-20">
+            <label>New Common data:</label>
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-30">
+            <input type="text" maxlength="49" id="txtCategoryName" class="k-textbox" style="width:100%;"/>
+        </div>        
+    </div>
+    <div class="row">
+        <div class="col-md-3 col-sm-12 form-group col-20">
+            <label>Range(value)</label>
+        </div>
+        <div class="col-md-3 col-sm-12 form-group col-30">
+            <input type="text" maxlength="8" id="txtRange" class="k-textbox" style="width:100%;"/>
+        </div>
+    </div>
+    <div class="row form-group" style="text-align:right;">
+        <div class="col-md-12">
+            <input type="button" id="btn-save-config" class="k-button" value="Update" style="min-width:80px;" />
+            <input type="button" id="btn-clear-config" class="k-button" value="Clear" style="min-width:80px;" />
+        </div>
+    </div>
+</div>
+
+<script>
+    //onkeypress = "return IsNumeric(event);
+
+    //var specialKeys = new Array();
+    //specialKeys.push(8); //Backspace
+    //function IsNumeric(e) {
+    //    var keyCode = e.which ? e.which : e.keyCode
+    //    var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+    //    if (ret == false)
+    //        return false;
+    //}
+
+    $(document).ready(function () {
+
+        $('input[type="radio"][name="config-action"]').on("change", function () {
+            var action = $('input[type="radio"][name="config-action"]:checked').val();
+            if (action == "New-Category") {
+                $('#ddlCategory').data("kendoDropDownList").value('');
+                $('#ddlCategory').data("kendoDropDownList").enable(false);
+                //$('#ddlConfig').data("kendoDropDownList").value('');
+                //$('#ddlConfig').data("kendoDropDownList").enable(false);
+            }
+            else if (action == "Update-Category") {
+                $('#ddlCategory').data("kendoDropDownList").enable(true);
+                //$('#ddlConfig').data("kendoDropDownList").value('');
+                //$('#ddlConfig').data("kendoDropDownList").enable(false);
+            }
+            else if (action == "Add-Name") {
+                $('#btn-save-config').val("Add");
+                $('#ddlConfig').data("kendoDropDownList").value('');
+                $('#ddlConfig').data("kendoDropDownList").enable(false);
+                $('#ddlCategory').data("kendoDropDownList").enable(true);
+            }
+            else if (action == "Update-Name") {
+                $('#btn-save-config').val("Update");
+                $('#ddlConfig').data("kendoDropDownList").enable(true);
+                $('#ddlCategory').data("kendoDropDownList").enable(true);
+            }
+        });
+
+        $('#btn-save-config').click(function () {
+            SubmitCommonDataForm();
+        });
+
+        $('#btn-clear-config').click(function () {
+            ClearCommonDataFields();
+        });
+    });
+
+    function FilterCategory() {
+        return { category: $('#ddlCategory').data("kendoDropDownList").text() };
+    }
+
+    function FilterConfigCategory() {
+        return {
+            FilterType: "Category",
+            MasterData: "CommonConfig"
+        }
+    }
+
+    function FilterConfigName() {
+        return {
+            FilterType: $('#ddlCategory').data("kendoDropDownList").text(),
+            MasterData: "CommonConfig"
+        }
+    }
+
+    function SubmitCommonDataForm() {
+        var flag = true;
+        var actiontype = $('input[type="radio"][name="config-action"]:checked').val();
+        var categoryId = $('#ddlCategory').data("kendoDropDownList").value();
+        var configId = $('#ddlConfig').data("kendoDropDownList").value();
+        var category = $('#txtCategoryType').val();
+        var config = $('#txtCategoryName').val();
+        var range = $('#txtRange').val();
+        if (actiontype == "" || actiontype == undefined) {
+            flag = false;
+            alertify.error("Select Action type.");
+            return false;
+        }
+        actiontype = actiontype == "Add-Name" ? "Save" : (actiontype == "Update-Name" ? "Update" : "No Action")
+        if (ValidateCommonConfigFields()) {
+            var ConfigModel = {
+                MasterData: "CommonConfig",
+                FilterType: "Category",
+                ActionType: actiontype,
+                Category: $('#ddlCategory').data("kendoDropDownList").value(),
+                ConfigId: $('#ddlConfig').data("kendoDropDownList").value(),
+                ConfigName: $('#txtCategoryName').val(),
+                ConfigRangeId: $('#txtRange').val()
+            };
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ model: ConfigModel }),
+                url: '/Admin/Organization/SaveMasterDataInfoByType',
+                success: function (result) {
+                    if (result.ReturnTypeId == '@ReturnType.Success') {
+                        alertify.success("Common data saved successfully.");
+                        ClearCommonDataFields();
+                        $('#ddlCategory').data("kendoDropDownList").dataSource.read();
+                        $('#ddlConfig').data("kendoDropDownList").dataSource.read();
+                    }
+                    else if (result == '@ReturnType.None') {
+                        alertify.error("Property Type doesn't exist.");
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again");
+                }
+            });
+        }
+    }
+
+    function ValidateCommonConfigFields() {
+        var flag = true;
+        var actiontype = $('input[type="radio"][name="config-action"]:checked').val();
+        var categoryId = $('#ddlCategory').data("kendoDropDownList").value();
+        var configId = $('#ddlConfig').data("kendoDropDownList").value();
+        if (actiontype == "New-Category") {
+            if ($('#txtCategoryType').val() == "") {
+                alertify.error("Enter Category Type");
+                flag = false;
+            }
+            else if ($('#txtCategoryName').val() == "") {
+                alertify.error("Enter Common name");
+                flag = false;
+            }
+        }
+        if (actiontype == "Update-Category") {
+            if ($('#txtCategoryType').val() == "") {
+                alertify.error("Enter Category Type");
+                flag = false;
+            }
+            else if ($('#txtCategoryName').val() == "") {
+                alertify.error("Enter Common name");
+                flag = false;
+            }
+        }
+        if (actiontype == "Add-Name") {
+            if (categoryId == "") {
+                alertify.error("Select Category Type");
+                flag = false;
+            }
+            if ($('#txtCategoryName').val() == "") {
+                alertify.error("Enter Common name");
+                flag = false;
+            }
+        }
+        if (actiontype == "Update-Name") {
+            if (categoryId == "") {
+                alertify.error("Select Category Type");
+                flag = false;
+            }
+            else if (configId == "") {
+                alertify.error("Select Common Type");
+                flag = false;
+            }
+            else if ($('#txtCategoryName').val() == "") {
+                alertify.error("Enter Common name");
+                flag = false;
+            }
+        }
+        return flag;
+    }
+
+    function GetCommonConfigDetail() {
+        var categoryType = $('#ddlCategory').data("kendoDropDownList").value();
+        var configId = $('#ddlConfig').data("kendoDropDownList").value();
+        if (configId != "" && configId != undefined) {
+            var configModel = {
+                MasterData: "CommonConfig",
+                FilterType: "CommonConfig",
+                Id: configId,
+                ConfigId: configId,
+                Category: categoryType
+            };
+            $.ajax({
+                type: "post",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify({ model: configModel }),
+                url: '/Admin/Organization/GetMasterDataInfoByType',
+                success: function (result) {
+                    if (result.ReturnTypeId == '@ReturnType.Success') {
+                        $('#txtCategoryType').val(result.Category);
+                        $('#txtCategoryName').val(result.ConfigName);
+                        $('#txtRange').val(result.ConfigRangeId);
+                        $('#ddlConfig').data("kendoDropDownList").dataSource.read();
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Network error, try again");
+                }
+            });
+        }
+        
+    }
+
+
+    function ClearCommonDataFields() {
+        $('#ddlConfig').data("kendoDropDownList").value('');
+        $('#txtCategoryType').val('');
+        $('#txtCategoryName').val('');
+        $('#txtRange').val('');
+    }
+
+</script>

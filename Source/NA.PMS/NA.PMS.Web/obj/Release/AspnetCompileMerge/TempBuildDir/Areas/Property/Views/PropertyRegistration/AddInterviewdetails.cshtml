@@ -1,0 +1,102 @@
+﻿
+@model NA.PMS.Model.InterviewDetailsModel 
+@using Kendo.Mvc.UI;
+@using Kendo.Mvc.Extensions;
+@{
+    ViewBag.Title = "Add Interview Details ";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="row rw-spce">
+                <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Add Interview Request</h1></div>
+                <div class="col-md-6 col-sm-6 col-xs-12 mandatory">
+                    @*<a class="word" href="http://docs.google.com/gview?url=http://domain.com/path/docFile.doc&embedded=true">open a word document in fancybox</a>*@
+                    Fields marked with an asterisk (<span class="star">*</span>) are required.
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12 blnk-rw"></div>
+        <div class="col-md-12 content-top-spce">
+            <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                @{Html.RenderPartial("_InterviewDetails", Model);}
+            </div>
+
+            <div class="box-button text-center">
+                <input type="button" id="btnBack" value="Cancel" class="btn btn-default" />
+                <input type="button" id="btnSubmit" value="Add" class="btn btn-add" />
+            </div>
+        </div>       
+    </div>
+</div>
+
+
+
+<script>
+    $("#btnBack").click(function () {
+        window.location.href = '@Url.Action("ManageInterviewDetails", "PropertyRegistration")';
+    });
+    $("#btnSubmit").click(function () {
+        var InterviewDetails = $("#InterviewDetails").val();
+        var InterviewDate = $("#InterviewDate").val();
+        var ApplicationId = $("#ApplicationId").val();
+        var SchemeId = $("#SchemeId").val();
+        var DepartmentId = $("#DepartmentId").val();
+        var FormNo = $("#FormNo").val();
+    
+        if (SchemeId == "") {
+            alertify.error("Please select Scheme.");
+            return false;
+        }
+        if (DepartmentId == "") {
+            alertify.error("Please select Department.");
+            return false;
+        }
+        if (FormNo == "") {
+            alertify.error("Please select FormNo.");
+            return false;
+        }
+        if (InterviewDate == "") {
+            alertify.error("Please enter Interview Date.");
+            return false;
+        }
+        if (InterviewDetails == "") {
+            alertify.error("Please enter Interview Details.");
+            return false;
+        }
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ApplicationId:ApplicationId, InterviewDetails: InterviewDetails, InterviewDate: InterviewDate, SchemeId: SchemeId, DepartmentId: DepartmentId, FormNo: FormNo }),
+            url: '/PropertyRegistration/SaveInterviewdetails',
+            success: function (result) {
+                if (result == 1) {
+                    alertify.success("Data saved successfully.");
+                    window.location.href = '@Url.Action("ManageInterviewDetails", "PropertyRegistration")';
+                    return false;
+                }
+                if (result == 2) {
+                    alertify.error("Interview Details Data already saved .");
+                    return false;
+                }
+                if (result == 3) {
+                    alertify.error("Interview Date must be between Scheme Start Date and Scheme End Date.");
+                    return false;
+                }
+                else {
+                    alertify.error("Some error occured. Please try again later.");
+                }
+            },
+            error: function (objAjaxRequest, strError) {
+                var respText = objAjaxRequest.responseText;
+                alertify.error("Some error occured. Please try again later.");
+            }
+
+        });
+
+
+    });
+</script>

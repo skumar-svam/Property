@@ -1,0 +1,491 @@
+﻿@model NA.PMS.OnlineScheme.SchemeFormViewModel
+@using NA.PMS.Common
+@using Kendo.Mvc.UI
+
+<style type="text/css">
+    .RBank {
+        font-weight: bold;
+        font-size: 16px;
+    }
+
+    .banklogo {
+        /*width: 125px;*/
+        height: 15px;
+    }
+
+    .banklbl {
+        margin-left: -28px;
+    }
+</style>
+
+@*kendo Pop Up Choose Payment Option*@
+<div class="col-md-12" id="divPaymentwindow" style="background: url(/Content/Images/boxed-bg.jpg) repeat; min-height:300px;">
+    <div class="row">
+        <div class="col-md-12">
+            @Html.HiddenFor(m => m.ApplicationFormId)
+            @Html.HiddenFor(m => m.SchemeId)
+            @Html.HiddenFor(m => m.ChallanAccountNo)
+            @Html.HiddenFor(m => m.ChallanBranchName)
+            @Html.HiddenFor(m => m.ChallanBranchId)
+            @Html.HiddenFor(m => m.BankIFSCCode)
+            @Html.HiddenFor(m => m.VirtualAccPrefix)
+        </div>
+    </div>
+    <div class="row row-payment-type">
+        <div class="inr-bx" style="">
+            <div class="form-bx">
+                <div class="row" style="margin-top:25px;">
+                    <div class="col-md-4 col-sm-4 col-xs-12 form-group" style="text-align:center">
+                        <label class="RBank">Payment mode</label>
+                    </div>
+                    <div class="col-md-8 col-sm-8 col-xs-12 form-group banklbl" id="PaymentMode">
+                        <label class="RBank">@Html.RadioButtonFor(m => m.PaymentTypeId, "1", new { @class = "", @checked = true, @id = "PaymentOnline" }) Online</label>
+                        <label class="RBank">@Html.RadioButtonFor(m => m.PaymentTypeId, "2", new { @class = "", @id = "PaymentOffline" }) RTGS/NEFT Challan</label>                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 col-sm-12 col-xs-12 form-group" id="div-online-payment">
+            <div class="inr-bx" style="">
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-4 col-sm-4 col-xs-12 form-group" style="text-align:center">
+                            <label class="RBank">Select Gateway</label>
+                        </div>
+                        <div class="col-md-8 col-sm-8 col-xs-12 form-group">
+                            <label class="banklbl">
+                                <input type="radio" name="BankType" value="1" checked="checked" />
+                                <img class="banklogo" src="~/Content/Images/Payment/BankLogo/indus-1.png" />
+                            </label>
+                            <label class="banklbl">
+                                <input type="radio" name="BankType" value="2" />
+                                <img class="banklogo" style="height: 20px;" src="~/Content/Images/Payment/BankLogo/hdfc.png" />
+                            </label>
+                            <label class="banklbl">
+                                <input type="radio" name="BankType" value="3" />
+                                <img class="banklogo" style="height: 22px;" src="~/Content/Images/Payment/BankLogo/icici.png" />
+                            </label>
+                            <label class="banklbl">
+                                <input type="radio" name="BankType" value="4" />
+                                <img class="banklogo" style="height: 22px;" src="~/Content/Images/Payment/BankLogo/bank_of_baroda_logo.png" />
+                            </label>
+                        </div>
+                        <div class="col-md-12 col-sm-12 col-xs-12 form-group text-center">
+                            <input type="button" id="btn-online-payment" value="Submit" class="btn btn-add" />
+                            <input type="button" id="btn-window-close" value="Cancel" class="btn btn-default btn-close-window" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+       
+        <div class="col-md-12 col-sm-12 col-xs-12 form-group" id="div-challan-payment">
+            <div class="inr-bx" style="">
+                <div class="form-bx">
+                    <div class="row">
+                        <div class="col-md-4 col-sm-4 col-xs-12 form-group" style="text-align:center">
+                            @Html.Label("Select Bank:", htmlAttributes: new { @class = "required RBank" })
+                        </div>
+                        <div class="col-md-8 col-sm-8 col-xs-12 form-group">
+                            @{
+                                if (Model.SchemeBankList != null)
+                                {
+                                    foreach (var item in Model.SchemeBankList)
+                                    {
+                                        <input type="radio" name="ChallanRTGS" value="@item.Id" checked="checked" /> @item.Text
+                                    }
+                                }
+                            }
+                        </div>
+                        
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+
+                        </div>
+                        <div class="col-md-8 col-sm-8 col-xs-12 form-group">
+                            <input type="button" class="btn btn-add" id="btn-generate-challan" value="Generate Challan" />
+                            <input type="button" id="btn-window-close_challan_rtgs" value="Cancel" class="btn btn-default btn-close-window" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12 col-sm-12 col-xs-12 form-group" id="div-challan-upload-form">
+            <div class="inr-bx" style="">
+                <div class="form-bx" style="margin-top:20px;min-height:250px;">
+                    <form action="/Online/Housing/SaveGeneratedSchemeFormChallan" enctype="multipart/form-data" id="UploadChallanForm" method="post" novalidate="novalidate">
+                        @Html.HiddenFor(m => m.ApplicationFormId)
+                        @Html.HiddenFor(m => m.AppType)
+                        <div class="row">
+                            <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                                @Html.Label("Transaction Id:", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-8 col-sm-8 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.SchemePayment.TransactionId, htmlAttributes: new { @maxlength = "15", @class = "k-textbox", style = "width:100%;" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                                @Html.Label("Trans/Challan Date:", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-8 col-sm-8 col-xs-12 form-group">
+                                @(Html.Kendo().DatePickerFor(model => model.SchemePayment.EntryDate).HtmlAttributes(new { style = "width:100%", @class = "input-disabled" }))
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                                @Html.Label("Payment Type:", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-8 col-sm-8 col-xs-12 form-group">
+                                <label style="padding-left:0;">@Html.RadioButtonFor(m => m.PayType, "RTGS", new { @class = "", @checked = true, @id = "RTGS" }) RTGS</label>
+                                <label>@Html.RadioButtonFor(m => m.PayType, "Other", new { @class = "", @id = "ONLINE" }) Other</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                                @Html.Label("UTR No:", htmlAttributes: new { @class = "required lbl-utr" })
+                            </div>
+                            <div class="col-md-8 col-sm-8 col-xs-12 form-group">
+                                @Html.TextBoxFor(m => m.SchemePayment.BankReferenceNo, htmlAttributes: new { @class = "k-textbox", @maxlength = "30", style = "width:100%;" })
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+                                @Html.Label("Upload Challan:", htmlAttributes: new { @class = "required" })
+                            </div>
+                            <div class="col-md-8 col-sm-8 col-xs-12 form-group">
+                                <input type='file' id='paid-challan-file' class='paid-challan k-textbox' name='files' onchange='CheckFilePreChallanSize(this)' style="width:100%;" />
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 col-sm-4 col-xs-12 form-group">
+
+                            </div>
+                            <div class="col-md-8 col-sm-8 col-xs-12 form-group">
+                                <input type="button" class="btn btn-add btn-save-window" id="btnUploadChallan" value="Upload Paid Challan" />
+                                <input type="button" class="btn btn-default btn-close-window" id="btn-close_Challan" value="Cancel" />
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="divPrintChallan" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true" style="padding-top:40px;">
+    <div class="modal-dialog" style="width: 60%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close challanWindowClose" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">  <b>Challan</b></h4>
+            </div>
+            <div class="modal-body" style="overflow:auto; height:400px;">
+                <div id="divChallanBody"></div>
+            </div>
+            <div class="modal-footer" style="text-align: center;">
+                <button type="submit" id="btnPrintDiv" class="k-button" data-dismiss="modal" onclick="PrintchallanDiv();">Print</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $("#div-online-payment").show();
+    //$("#OfflinePayment").hide();
+    $("#div-challan-payment").hide();
+    $("#div-challan-upload-form").hide();
+
+    $(document).ready(function () {
+        $('input:radio[name=PayType]').on('change', function () {
+            var formType = $('input[name=PayType]:checked').val();
+            if (formType.trim() == "RTGS") {
+                $(".lbl-utr").html("UTR No");
+            }
+            else {
+                $(".lbl-utr").html("Bank Reference No");
+            }
+        });
+
+        //$("input[type='radio'][name=BankType][value=3]").attr("disabled", "disabled");
+        //Disable Bank In RTGS
+        // $("input[type='radio'][name=ChallanRTGS][value=67]").attr("disabled", "disabled");//HDFC
+        $("input[type='radio'][name=ChallanRTGS][value=48]").attr("disabled", "disabled");//ICICI
+        // $("input[type='radio'][name=ChallanRTGS][value=74]").attr("disabled", "disabled");//INDUSIND
+        $('#divPaymentwindow').kendoWindow({
+            modal: true,
+            title: "Online Payment",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "30%"
+            },
+            width: "50%", height: "auto"
+        });
+
+        $('#btn-online-payment').click(function () {
+            var BankType = $('input[name=BankType]:checked').val();
+            if (BankType.trim() != "") {
+                var formId = $("#ApplicationFormId").val();
+                window.location.href = '@Url.Action("OnlinePayment", "Payment", new { area = "Online"})' + "/?id=" + formId + "&banktype=" + BankType;
+            }
+            else {
+                alertify.success("Select Bank.");
+                return false;
+            }
+        });
+
+        $('#PaymentMode input:radio[name=PaymentTypeId]').on('change', function () {
+            var formType = $('input[name=PaymentTypeId]:checked', '#PaymentMode').val();
+            if (formType.trim() == "1") {
+                $("#div-online-payment").show();
+                // $("#OfflinePayment").hide();
+                $("#div-challan-payment").hide();
+                $("#div-challan-upload-form").hide();
+
+            } else if (formType.trim() == "2") {
+                //$("#OfflinePayment").show();
+                $("#div-online-payment").hide();
+                $("#div-challan-payment").show();
+                $("#div-challan-upload-form").hide();
+            }
+            else if (formType.trim() == "3") {
+                $("#div-online-payment").hide();
+                $("#div-challan-payment").hide();
+                $("#div-challan-upload-form").show();
+            }
+            else {
+                alertify.success("Select payment Method.");
+                return false;
+            }
+        });
+
+        $('.btn-close-window').click(function () {
+            $("#divPaymentwindow").data("kendoWindow").close();
+        });
+
+        //$("#btn-window-close").click(function () {
+        //    $("#divPaymentwindow").data("kendoWindow").close();
+        //});
+
+        //$("#btn-window-close_challan").click(function () {
+        //    $("#divPaymentwindow").data("kendoWindow").close();
+        //});
+
+        //$("#btn-window-close_challan_rtgs").click(function () {
+        //    $("#divPaymentwindow").data("kendoWindow").close();
+        //});
+
+        //$("#btn-window-close_uploadPreChallan").click(function () {
+        //    $("#divPaymentwindow").data("kendoWindow").close();
+        //});
+
+        $(".challanWindowClose").click(function () {
+            window.location.href = '@Url.Action("SchemeInformation", "Application", new { area = "Online"})';
+        });
+
+        $("#btnPayment").click(function () {
+            var formId = $("#ApplicationFormId").val();
+            var type = "Payment";
+            $('.row-payment-type').show();
+            $("#div-online-payment").show();
+            $("#div-challan-payment").hide();
+            $("#div-challan-upload-form").hide();
+           // ValidatePayment(formId, type);
+            $("#divPaymentwindow").data("kendoWindow").center();
+            $("#divPaymentwindow").data("kendoWindow").open();
+            $("#divPaymentwindow").data("kendoWindow").pin();
+        });
+
+        $("#btn-upload-challan").click(function () {
+            var formId = $("#ApplicationFormId").val();
+            $('.row-payment-type').hide();
+            $("#div-online-payment").hide();
+            $("#div-challan-payment").hide();
+            $("#div-challan-upload-form").show();
+
+            $("#divPaymentwindow").data("kendoWindow").center();
+            $("#divPaymentwindow").data("kendoWindow").open();
+            $("#divPaymentwindow").data("kendoWindow").pin();
+        });
+    });
+
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+
+    $("#btnUploadChallan").click(function () {
+        bflag = true;
+        var transactionId = $("#PaymentModel_TransactionId").val();
+        var amount = $("#PaymentModel_Amount").val();
+        var entryDate = $("#PaymentModel_EntryDate").val();
+        var bankName = $("#PaymentModel_BankName").val();
+        var challanFile = $("#paid-challan-file").val();
+
+        if (transactionId == "") {
+            alertify.error("Please enter transaction/challan Id.");
+            return bflag = false;
+        }
+        else if (amount == "") {
+            alertify.error("Please enter amount.");
+            return bflag = false;
+        }
+        else if (entryDate == "") {
+            alertify.error("Please enter transaction/challan date.");
+            return bflag = false;
+        }
+        else if (bankName == "") {
+            alertify.error("Please enter bank name.");
+            return bflag = false;
+        }
+        else if (challanFile == '') {
+            return alertify.error("Please upload challan/transaction reciept.");
+        }
+
+        $("#UploadChallanForm").submit();
+        bflag = true;
+    });
+
+    $("#btn-generate-challan").click(function () {
+        var formModel = {
+            ApplicationFormId: $("#ApplicationFormId").val(),
+            SchemeId: $("#SchemeId").val(),
+            BankId: $('input[name=ChallanRTGS]:checked').val(),
+            ActionType: 'TemplateChallan'
+        };
+        GenerateChallanByTemplate(formModel);
+    });
+
+    //Re-Print Challan
+    $("#btn-reprint-challan").click(function () {
+        var formModel = {
+            ApplicationFormId: $("#ApplicationFormId").val(),
+            SchemeId: $("#SchemeId").val(),
+            BankId: $('input[name=ChallanRTGS]:checked').val(),
+            ActionType: 'TemplateChallan'
+        };
+        GenerateChallanByTemplate(formModel);
+    });
+
+    function GenerateChallanByTemplate(formModel) {
+        if (formModel != null && formModel != undefined) {
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(formModel),
+                url: '/Online/Housing/GenerateSchemeFormChallanByTemplate',
+                success: function (result) {
+                    $("#divPaymentwindow").data("kendoWindow").close();
+                    $("#divChallanBody").html(result);
+                    $("#divPrintChallan").modal('show');
+                },
+                error: function (objAjaxRequest, strError) {
+                    var respText = objAjaxRequest.responseText;
+                    alertify.error("Provider failed to create challan.");
+                }
+            });
+        }
+        else {
+            alertify.alert("Challan Information!","Network error ")
+        }
+        
+    }
+
+    function FilterbankId() {
+        return { bankId: $("#ChallanBankId").val() };
+    }
+
+    function FilterSchemeID() {
+        return { schemeId: $("#SchemeId").val() };
+    }
+
+    function PrintchallanDiv() {
+        var contents = document.getElementById("divChallanBody").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('<link href="/Content/CSS/font-awesome.min.css" rel="stylesheet"/>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+    $('#divPrintChallan').on('hidden.bs.modal', function () {
+        ClearFieldValue();
+    });
+
+    function ClearFieldValue() {
+        $("#ChallanBankId").data("kendoDropDownList").value("");
+        $("#ChallanBranchId").data("kendoDropDownList").value("");
+        $("#ChallanAccountNo").val('');
+    }
+
+    $("#paid-challan-file").change(function () {
+        CheckFileSizePCExt(this);
+    });
+
+    function CheckFileSizePCExt(input) {
+        var file = input.files[0].name;
+        var fileSize = input.files[0].size / 1024 //Size in KB
+        var count = file.lastIndexOf('.') + 1;
+        var ext = file.substr(count);
+        if (ext == "pdf") {
+            if (fileSize < 10) {
+                IsError = false;
+                alertify.error(file + " Min 10kb file size is allowed");
+                return false;
+            }
+            if (fileSize / 1024 > 5) {
+                IsError = false;
+                alertify.error(file + " Max 5Mb file size is allowed");
+                return false;
+            }
+        }
+        else {
+            alertify.error("Only jpg, png, jpeg & pdf file allowed.");
+            return false;
+        }
+    }
+
+    var IsError = false;
+    function CheckFilePreChallanSize(row) {
+        var filename = row.files[0].name;
+        var size = row.files[0].size / 1024;
+        var extension = filename.substr(filename.lastIndexOf('.') + 1);
+        if (extension.toLowerCase() == "pdf") {
+            if (size / 1024 > 6) {
+                IsError = true;
+                alertify.error("Maximum 5Mb file size is allowed");
+            }
+            if (IsError == true) {
+                row.value = '';
+            }
+        }
+        else {
+            alertify.error("Please upload pdf documents.");
+            row.value = '';
+        }
+    }
+</script>

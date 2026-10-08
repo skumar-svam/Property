@@ -1,0 +1,206 @@
+﻿@using System.Web.Mvc;
+@{
+    ViewBag.Title = "Service Request Status";
+    Layout = "~/Views/Shared/_Blank.cshtml";
+}
+
+<style>
+    .service-pad{
+        width:80%;
+        margin-left:10%;
+    }
+    .row-result{
+        display:none;
+    }
+</style>
+
+<div id="mainWrapper" class="grad1">
+    <nav id="header-full" class="navbar navbar-default navbar-fixed-top nav-bg">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <div class="brand-wrap">
+                    <a class="navbar-brand" href="#"></a>
+                </div>
+            </div>
+            <div class="collapse navbar-collapse" id="mainNav">
+                <h2 class="" style="margin-top:25px; color:green;text-align:center;"><b>New Okhla Industrial Development Authority</b></h2>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div><!-- /.container-fluid -->       
+    </nav>
+
+    <div class="container-fluid contentWrapper main" id="mainMaster" style="padding-top:110px;">
+
+        
+        <div class="col-md-12 service-pad">
+            <div class="col-md-12" style="position:static">
+                <div class="row rw-spce">
+                    <div class="col-md-6 col-sm-6 col-xs-12"><h1 class="gridTitle">Service Request Status</h1></div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 mandatory"></div>
+                </div>
+            </div>
+            <div class="col-md-12 blnk-rw"></div>
+            <div class="col-md-12 form-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+                <div class="row" style="padding-top:15px;">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label>Service Request Id</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <input type="text" class="form-control" id="txtRequestId" maxlength="10" onkeypress="return IsNumeric(event);" />
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label>Mobile No.</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <input type="text" class="form-control" id="txtMobile" min="10" maxlength="10" onkeypress="return IsNumeric(event);" />
+                    </div>
+                </div>
+
+
+                <div class="row row-result">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label>Applicant</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="lbl-form-control" id="lblApplicant">["Applicant"]</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label>Department</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="lbl-form-control" id="lblDepartment">["Department"]</label>
+                    </div>
+                </div>
+                <div class="row row-result">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label>Service Name</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="lbl-form-control" id="lblService">["Service Name"]</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label>Sub Department</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="lbl-form-control" id="lblSubDepartment">["Sub Department"]</label>
+                    </div>
+                </div>
+                <div class="row row-result">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label>Address</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="lbl-form-control" id="lblAddress">["Address"]</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label>Description</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="lbl-form-control" id="lblDescription">["Description"]</label>
+                    </div>
+                </div>
+                <div class="row row-result">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label>Request Status</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="lbl-form-control" id="lblStatus">["Status"]</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label>Property No</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="lbl-form-control" id="lblProperty">["Property"]</label>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12 col-sm-12 col-xs-12 form-group" style="text-align:right;">
+                        <button class="btn btn-default" id="btnRequest">Veiw Service Status</button>
+                        <button class="btn btn-danger" id="btnClear">Clear</button>
+                    </div>
+                </div>
+
+            </div>           
+        </div>
+
+    </div>
+
+    <footer>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12 col-xs-12 copyright text-center">
+                    Copyright © @DateTime.Now.Year <b>NOIDA</b>. Developed and Maintained by <a href="http://www.svam.com">North Shore Technologies</a>
+
+                </div>
+            </div>
+        </div>
+    </footer>
+</div>
+
+
+
+<script>
+    var specialKeys = new Array();
+    specialKeys.push(8); //Backspace
+    function IsNumeric(e) {
+        var keyCode = e.which ? e.which : e.keyCode
+        var ret = ((keyCode >= 48 && keyCode <= 57) || specialKeys.indexOf(keyCode) != -1);
+        if (ret == false)
+            return false;
+    }
+
+    $(document).ready(function () {
+        $('#btnRequest').click(function () {
+            var serviceId = $('#txtRequestId').val();
+            var mobile = $('#txtMobile').val();
+            if (serviceId.trim() == "") {
+                alertify.error("Enter Request No");
+                return false;
+            }
+            //if (mobile.trim() == "") {
+            //    alertify.error("Enter Mobile No");
+            //    return false;
+            //}
+            if (!isNaN(serviceId)) {
+                $.ajax({
+                    dataType: 'json',
+                    type: 'Post',
+                    contentType: 'application/json; charset=utf-8',
+                    data: JSON.stringify({ requestId: serviceId, mobile: mobile }),
+                    url: '/Member/ServiceRequest/GetServiceRequestDetailForCustomer',
+                    success: function (result) {
+                        $('#lblApplicant').text(result.ServiceModel.ApplicantName);
+                        $('#lblProperty').text(result.ServiceModel.Property_No);
+                        $('#lblDepartment').text(result.ServiceModel.DepartmentName);
+                        $('#lblSubDepartment').text(result.ServiceModel.SubDepartment);
+                        $('#lblService').text(result.ServiceModel.ServiceName);
+                        $('#lblDescription').text(result.ServiceModel.Description);
+                        $('#lblAddress').text(result.ServiceModel.ApplicantAddress);
+                        $('#lblStatus').text(result.ServiceModel.RequestStatus);
+                        $('.row-result').show();
+                    },
+                    error: function (ajaxRequest, strError) {
+                        alertify.error("Network error, try again later");
+                    }
+                });
+            }
+        });
+
+        $('#btnClear').click(function () {
+            $('#txtRequestId').val('');
+            $('#txtMobile').val('');
+            $('#lblApplicant').text('');
+            $('#lblDepartment').text('');
+            $('#lblSubDepartment').text('');
+            $('#lblService').text('');
+            $('#lblDescription').text('');
+            $('#lblAddress').text('');
+            $('#lblStatus').text('');
+            $('#lblProperty').text('');
+            $('.row-result').css("display","none");
+        });
+
+    });
+</script>

@@ -1,0 +1,783 @@
+﻿@model NA.PMS.Model.NIC.ServiceRequestVM
+@using Kendo.Mvc.UI
+@using Kendo.Mvc.Extensions;
+@using NA.PMS.Common;
+@using NA.PMS.Web.Models
+
+@{
+    ViewBag.Title = "View Request Detail";
+    Layout = "~/Areas/NIC/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .row-approver {
+        display: none;
+    }
+
+    .doc {
+        display: none;
+    }
+
+    #divStatusMaster {
+        display: none;
+    }
+
+
+    .msg-red {
+        color: red;
+    }
+</style>
+
+<div class="col-lg-10 col-md-12 col-sm-12 col-md-offset-0s col-lg-offset-1">
+    <div class="col-md-12" style="position:static">
+        <div class="row rw-spce">
+            <div class="col-md-6 col-sm-6 col-xs-12">
+                <h1 class="gridTitle">Request Detail [@Html.DisplayFor(model => model.ServiceModel.RequestStatus)]</h1>
+                @{
+                    <small class="msg-red">@Model.ServiceModel.StatusMessage</small>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12 blnk-rw"></div>
+    <div class="col-md-12 content-top-spce">
+        <div class="inr-bx" style="border:solid #e2e3e4; border-width:0 1px 1px">
+            <h2 class="blck-heading" style="margin-bottom:5px;">Applicant Information</h2>
+            <div class="form-bx">
+                <div class="row" style="display:none">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group"></div>
+                    <div class="col-md-6 col-sm-6 col-xs-12 form-group" id="divRequestService">
+                        <input type="radio" id="rbtnRegistered" name="RegistrationType" value="Registered" checked="checked">&nbsp;Registered &nbsp;&nbsp;
+                        <input type="radio" id="rbtnUnRegistered" name="RegistrationType" value="UnRegistered" />&nbsp;UnRegistered
+                        <input type="radio" id="rbtnOther" name="RegistrationType" value="Other" />&nbsp;Samadhan Diwas
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.HiddenFor(m => m.ServiceId)
+                        @Html.HiddenFor(m => m.ServiceModel.RequestStatus)
+                        @Html.HiddenFor(m => m.ServiceModel.RequestId)
+                        @Html.HiddenFor(m => m.ServiceModel.DepartmentId)
+                        @Html.HiddenFor(m => m.ServiceModel.SubDepartmentId)
+                        @Html.HiddenFor(m => m.ServiceModel.ServiceId)
+                        @Html.HiddenFor(m => m.ServiceModel.Sector)
+                        @Html.HiddenFor(m => m.ServiceModel.Block)
+                        @Html.HiddenFor(m => m.ServiceModel.PlotNo)
+                        @Html.HiddenFor(model => model.ServiceModel.StatusId, htmlAttributes: new { @id = "hdn-status-id" })
+                    </div>
+                </div>
+                @Html.HiddenFor(m => m.ServiceModel.RequestStatus)
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class=""> Registration Id </label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.TextBoxFor(model => model.ServiceModel.RegistrationId, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label>Service Request Id</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.TextBoxFor(model => model.ServiceModel.Id, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class=""> Property No </label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.TextBoxFor(model => model.ServiceModel.PropertyNo, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class=" ">  Department </label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.TextBoxFor(model => model.ServiceModel.Department, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class=" "> Services </label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.TextBoxFor(model => model.ServiceModel.ServiceName, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="">Sub Department </label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.TextBoxFor(model => model.ServiceModel.SubDepartment, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class=" ">Allottee Name</label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.TextAreaFor(model => model.ServiceModel.Applicant, htmlAttributes: new { @class = "form-control", @readonly = "readonly", style = "height: 35px;" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class=" ">Requestor Name </label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.TextAreaFor(model => model.ServiceModel.Requestor, htmlAttributes: new { @class = "form-control", @readonly = "readonly", style = "height: 35px;" })
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class=" "> Allottee Address </label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.TextAreaFor(model => model.ServiceModel.ApplicantAddress, htmlAttributes: new { @class = "form-control", @readonly = "readonly", style = "height: 35px;" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class=" "> Requestor Address </label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.TextAreaFor(model => model.ServiceModel.RequestorAddress, htmlAttributes: new { @class = "form-control", @readonly = "readonly", style = "height: 35px;" })
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class=" "> Mobile No </label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.TextBoxFor(model => model.ServiceModel.MobileNo, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        <label class="">  Email ID </label>
+                    </div>
+                    <div class="col-md-3 col-sm-3 col-xs-12 form-group">
+                        @Html.TextBoxFor(model => model.ServiceModel.Email, htmlAttributes: new { @class = "form-control", @readonly = "readonly" })
+                    </div>
+                </div>
+
+
+                <div id="div-extension">
+                    @{Html.RenderPartial("_ExtensionRequest");}
+                </div>
+
+                <div id="div-transfer">
+                    @{Html.RenderPartial("_TransferRequest");}
+                </div>
+
+                <div id="div-cic">
+                    @{Html.RenderPartial("_CICRequest");}
+                </div>
+
+                <div id="div-mortgage">
+                    @{Html.RenderPartial("_MortgageRequest");}
+                </div>
+
+                <div id="div-mutation">
+                    @{Html.RenderPartial("_MutationRequest");}
+                </div>
+
+                <div id="div-gpa">
+                    @{Html.RenderPartial("_GPARequest");}
+                </div>
+
+                <div id="div-rent">
+                    @{Html.RenderPartial("_RentRequest");}
+                </div>
+
+                <div class="row" id="divDescription">
+                    <div class="col-md-3 col-sm-12 col-xs-12 form-group">
+                        <label>Description</label>
+                    </div>
+                    <div class="col-md-9 col-sm-12 col-xs-12 form-group">
+                        @Html.TextAreaFor(model => model.ServiceModel.Description, htmlAttributes: new { @class = "form-control", @readonly = "readonly", style = "height: 35px;" })
+                    </div>
+                </div>
+                <div class="row" id="divPendencyLevel">
+                    <div class="col-md-3 col-sm-12 col-xs-12 form-group">
+                        <label>Current Pendency Level</label>
+                    </div>
+                    <div class="col-md-9 col-sm-12 col-xs-12 form-group">
+                        @Html.TextAreaFor(model => model.ServiceModel.PendencyLevel, htmlAttributes: new { @class = "form-control", @readonly = "readonly", style = "height: 35px;" })
+                    </div>
+                </div>
+                <div class="row" style="padding-left:30px;">
+                    <div class="col-md-12 k-grid-content">
+                        @(Html.Kendo().Grid<NA.PMS.Model.NIC.DocumentVM>()
+                            .Name("gridDocs")
+                            .Columns(columns =>
+                            {
+                                columns.Bound(c => c.Id).Title("S.No.").Width(60).ClientTemplate("# if (DocumentName != null) {#<a onclick='javascript:OpenDocument(this);' class='hyperlink'>#=Id#</a>#}else {#<span>#=Id#</span>#} #").Filterable(false);
+                                columns.Bound(c => c.DocumentName).Title("Document Uploaded").ClientTemplate("# if (DocumentName != null) {#<a onclick='javascript:OpenDocument(this);' class='hyperlink'>#=DocumentName#</a>#}else {#<span>---</span>#} #").Filterable(false);
+                                columns.Bound(c => c.DocumentPath).Hidden(true);
+                            })
+                            .Resizable(resize => resize.Columns(true))
+                            .AutoBind(true)
+                            .DataSource(dataSource => dataSource
+                                    .Ajax().ServerOperation(true)
+                                    .Model(model => model.Id(c => c.Id))
+                                    .Read(read => read.Action("GetServiceRequestDocumentsById", "NiveshMitraServices", new { Area = "NIC" }).Data("FilterRequestId2"))
+                            )
+                            .Events(e => e.DataBound("dataBound"))
+                        )
+                    </div>
+                </div>
+                <div class="row" style="padding-left:20px;">
+                    @{
+                        <br />
+                        <span class="msg-red">Note:- @Model.ServiceModel.StatusMessage</span>
+                    }
+                </div>
+                <div class="row">
+                    <div class="col-md-12 form-group" style="text-align:right">
+                        @{
+                            if (Model.ServiceModel.StatusId == NAStatusId.Objection)
+                            {
+                                using (Html.BeginForm("ReSubmitRequest", "NiveshMitraServices", FormMethod.Post, new { id = "ReSubmitRequestForm", name = "ReSubmitRequestForm", enctype = "multipart/form-data" }))
+                                {<input type="hidden" value="@Model.ServiceModel.RequestId" id="OnlineRequestId" name="OnlineRequestId" />
+                                    <div class="row">
+                                        <div class="col-md-12" id="file-option" style="padding:0 0 10px 0px;">
+                                        </div>
+                                    </div>
+
+                                    <input type="submit" id="btn-re-submit" value="Re-Submit" class="btn btn-primary" style="min-width:100px; margin-right:12px;border-radius:0;" />
+                                    <input type="button" id="btn-cancel" value="Back" class="btn btn-primary" style="width:100px; margin-right:12px;border-radius:0;" />
+                                }
+
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="divDocumentView" style="overflow:hidden">
+    <div class="row  no-margin no-padding">
+        <div class="col-md-12 no-margin no-padding" id="divPageView" style="overflow:hidden">
+            <iframe id="ifrmViewPdf"></iframe>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+
+    $(document).ready(function () {
+        ChangeService();
+        var _status = '@Model.ServiceModel.StatusId';
+        if (_status == '10') {
+            GetFileUploadOption_Objection();
+
+    }
+
+        $('#divDocumentView').kendoWindow({
+            modal: true,
+            title: "Document",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "15%"
+            },
+            width: "70%", height: "80%"
+        });
+
+        $('.divPopupWindow').kendoWindow({
+            modal: true,
+            title: "Validate Service Request",
+            visible: false,
+            position: {
+                top: 60, // or "100px"
+                left: "15%"
+            },
+            width: "40%"
+        });
+
+
+        $("#btnSubmit").click(function () {
+            var files = $(".single");
+            if (CheckFileToUpload()) {
+                if (CheckFileSize(files)) {
+                    $("#btnSubmit").submit();
+                    return true;
+                } else { return false; }
+            } else { return false; }
+
+        });
+
+
+
+        $('#btn-approve-hod').click(function () {
+            $(".divPopupWindow").data("kendoWindow").center();
+            $(".divPopupWindow").data("kendoWindow").open();
+            $(".divPopupWindow").data("kendoWindow").pin();
+        });
+
+        $('#btn-approve-asst').click(function () {
+            $(".divPopupWindow").data("kendoWindow").center();
+            $(".divPopupWindow").data("kendoWindow").open();
+            $(".divPopupWindow").data("kendoWindow").pin();
+        });
+
+        $('#btnStatusClose').click(function () {
+            $(".divPopupWindow").data("kendoWindow").close();
+        });
+
+        $('#btnStatusSubmit').click(function () {
+            UpdateServiceStatus();
+        });
+
+        $("#btn-cancel").click(function () {
+            window.location.href = "/Member/ServiceRequest/Manage";
+        });
+
+        if ($('#hdn-status-id').val() == '@NAStatusId.Forwarded') {
+            $('#btn-approve-asst').val("Cancel/Complete");
+        }
+        else if (($('#hdn-status-id').val() == '@NAStatusId.Completed') || ($('#hdn-status-id').val() == '@NAStatusId.Cancelled')) {
+            $('#btn-approve-asst').css("display", "none");
+            $('#btn-approve-hod').css("display", "none");
+        }
+    });
+
+    function dataBound(e) {
+        var grid = $("#gridDocs").data("kendoGrid");
+
+        var rowCount = grid.dataSource.total();
+        if (rowCount == 0) {
+            $(".k-grid-content").hide();
+            $(".checklist").show();
+        } else {
+            $(".k-grid-content").show();
+            $(".checklist").hide();
+        }
+    }
+
+    function FilterRequestId() {
+        return { RequestId: $("#ServiceModel_RequestId").val() }
+    }
+
+    function FilterRequestId2() {
+        return {
+            RegistrationId: $("#ServiceModel_RegistrationId").val(),
+            RequestId: $("#ServiceModel_RequestId").val()
+        }
+    }
+
+    function PrintDiv() {
+        var contents = document.getElementById("divAcknowledgementReceiptBody").innerHTML;
+        var frame1 = document.createElement('iframe');
+        frame1.name = "frame1";
+        frame1.style.position = "absolute";
+        frame1.style.top = "-1000000px";
+        document.body.appendChild(frame1);
+        var frameDoc = frame1.contentWindow ? frame1.contentWindow : frame1.contentDocument.document ? frame1.contentDocument.document : frame1.contentDocument;
+        frameDoc.document.open();
+        frameDoc.document.write('<html><head><title></title>');
+        frameDoc.document.write('</head><body>');
+        frameDoc.document.write(contents);
+        frameDoc.document.write('</body></html>');
+        frameDoc.document.close();
+        setTimeout(function () {
+            window.frames["frame1"].focus();
+            window.frames["frame1"].print();
+            document.body.removeChild(frame1);
+        }, 500);
+        return false;
+    }
+
+    function OpenDocument(row) {
+        $("#divDocumentView").empty();
+        var tr = $(row).parent().parent();
+        var link = $(tr).children("td:eq(2)").text();
+        $("#divDocumentView").append($('<iframe src=' + link + ' style="width:900px;height:500px;overflow:hidden;"></iframe>'));
+        $("#divDocumentView").data("kendoWindow").center();
+        $("#divDocumentView").data("kendoWindow").open();
+        $("#divDocumentView").data("kendoWindow").pin();
+    }
+
+    function ChangeService() {
+        var id = $('#ServiceModel_ServiceId').val();
+        if (id == '@NAService.Extension') {
+            $('#div-extension').show();
+            $('#div-transfer').css("display", "none");
+            $('#div-mortgage').css("display", "none");
+            $('#div-mutation').css("display", "none");
+            $('#div-cic').css("display", "none");
+            $('#div-gpa').css("display", "none");
+            $('#div-rent').css("display", "none");
+        }
+        else if (id == '@NAService.Transfer') {
+            $('#div-extension').css("display", "none");
+            $('#div-transfer').show();
+            $('#div-mortgage').css("display", "none");
+            $('#div-mutation').css("display", "none");
+            $('#div-cic').css("display", "none");
+            $('#div-gpa').css("display", "none");
+            $('#div-rent').css("display", "none");
+        }
+        else if (id == '@NAService.CIC') {
+            $('#div-extension').css("display", "none");
+            $('#div-transfer').css("display", "none");
+            $('#div-mortgage').css("display", "none");
+            $('#div-mutation').css("display", "none");
+            $('#div-cic').show();
+            $('#div-gpa').css("display", "none");
+            $('#div-rent').css("display", "none");
+        }
+        else if (id == '@NAService.Mortgage') {
+            $('#div-extension').css("display", "none");
+            $('#div-transfer').css("display", "none");
+            $('#div-mortgage').show();
+            $('#div-mutation').css("display", "none");
+            $('#div-cic').css("display", "none");
+            $('#div-gpa').css("display", "none");
+            $('#div-rent').css("display", "none");
+        }
+        else if (id == '@NAService.Mutation') {
+            $('#div-extension').css("display", "none");
+            $('#div-transfer').css("display", "none");
+            $('#div-mortgage').css("display", "none");
+            $('#div-mutation').show();
+            $('#div-cic').css("display", "none");
+            $('#div-gpa').css("display", "none");
+            $('#div-rent').css("display", "none");
+        }
+        else if (id == '@NAService.Rent') {
+            $('#div-extension').css("display", "none");
+            $('#div-transfer').css("display", "none");
+            $('#div-mortgage').css("display", "none");
+            $('#div-mutation').css("display", "none");
+            $('#div-cic').css("display", "none");
+            $('#div-gpa').css("display", "none");
+            $('#div-rent').show();
+        }
+        else if (id == '@NAService.GPA') {
+            $('#div-extension').css("display", "none");
+            $('#div-transfer').css("display", "none");
+            $('#div-mortgage').css("display", "none");
+            $('#div-mutation').css("display", "none");
+            $('#div-cic').css("display", "none");
+            $('#div-gpa').show();
+            $('#div-rent').css("display", "none");
+        }
+        else {
+            $('#div-extension').css("display", "none");
+            $('#div-transfer').css("display", "none");
+            $('#div-mortgage').css("display", "none");
+            $('#div-mutation').css("display", "none");
+            $('#div-cic').css("display", "none");
+            $('#div-gpa').css("display", "none");
+            $('#div-rent').css("display", "none");
+        }
+        GetFileUploadOption();
+    }
+
+
+    function GetFileUploadOption() {
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ departmentId: $('#ServiceModel_DepartmentId').val(), serviceId: $('#ServiceModel_ServiceId').val() }),
+            url: '/NIC/NiveshMitraServices/GetFileUploadOptionsForService',
+            success: function (result) {
+                if (result != "NotExist") {
+                    $('#file-option').html(result);
+                    $('#file-option').show();
+                }
+                else {
+                    $('#file-option').css("display", "none");
+                    $('#file-option').html("");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+            }
+        });
+    }
+
+    function GetFileUploadOption_Objection() {
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ departmentId: $('#ServiceModel_DepartmentId').val(), serviceId: $('#ServiceModel_ServiceId').val() }),
+            url: '/NIC/NiveshMitraServices/GetFileUploadOptionsForService_Objection',
+            success: function (result) {
+                if (result != "NotExist") {
+                    $('#file-option').html(result);
+                    $('#file-option').show();
+                }
+                else {
+                    $('#file-option').css("display", "none");
+                    $('#file-option').html("");
+                }
+            },
+            error: function (ajaxRequest, strError) {
+            }
+        });
+    }
+
+
+    function CheckFileToUpload() {
+        flag = false;
+        var files = $(".single");
+        if ($(".single").length > 0) {
+            for (i = 0; i < $(".single").length; i++) {
+                if ($(".single")[i].value.trim() == "") {
+                    alertify.alert("Upload Documents", "Please Upload All the Documents");
+                    return flag = false;
+                }
+                else {
+                    flag = true;
+                }
+            }
+            return flag;
+        }
+        else {
+            alertify.alert("Upload Documents", "No file found to upload.");
+            return flag = false;
+        }
+    }
+
+    function CheckFileSize(FileUpload) {
+        flag = false;
+        var files = FileUpload;//$(".single");
+        if ($(".single").length > 0) {
+            var errorMessage = "";
+            for (i = 0; i < files.length; i++) {
+                var FileNoCount = i + 1;
+                if (files[i].value.trim() != "") {
+                    var size = (files[i].files[0].size / 1024);
+                    var FileName = files[i].files[0].name;
+                    var extension = files[i].value.substr((files[i].value.lastIndexOf('.') + 1));
+                    if (extension.toLowerCase() == "pdf" || extension.toLowerCase() == "jpg" || extension.toLowerCase() == "jpeg") {
+                        flag = true;
+                    }
+                    else {
+                        alertify.error(FileNoCount + " " + FileName + " not allowed.");
+                        return flag = false;;
+                    }
+
+                    if (size < 10) {
+                        alertify.error(FileNoCount + " " + FileName + " Min 10kb file size is allowed");
+                        return flag = false;;
+                    }
+                    if (size / 1024 > 5) {
+                        alertify.error(FileNoCount + " " + FileName + " Max 5Mb file size is allowed");
+                        return flag = false;;
+                    }
+                }
+                else {
+                    alertify.error("Please upload documents.");
+                    return flag = false;;
+                }
+            }
+        }
+        else {
+            alertify.alert("Upload Documents", "No file found to upload.");
+            return flag;
+        }
+        return flag;
+    }
+
+    function CheckFileSizeForUpdate(FileUpload) {
+        flag = false;
+        var files = FileUpload;//$(".single");
+        if ($(".lettersingle").val().length > 0) {
+            var errorMessage = "";
+            for (i = 0; i < files.length; i++) {
+                var FileNoCount = i + 1;
+                if (files[i].trim() != "") {
+                    var size = (files[i].files[0].size / 1024);
+                    var FileName = files[i].files[0].name;
+                    var extension = files[i].value.substr((files[i].value.lastIndexOf('.') + 1));
+                    if (extension.toLowerCase() == "pdf" || extension.toLowerCase() == "jpg" || extension.toLowerCase() == "jpeg") {
+                        flag = true;
+                    }
+                    else {
+                        alertify.error(FileNoCount + " " + FileName + " not allowed.");
+                        return flag = false;;
+                    }
+
+                    if (size < 10) {
+                        alertify.error(FileNoCount + " " + FileName + " Min 10kb file size is allowed");
+                        return flag = false;;
+                    }
+                    if (size / 1024 > 5) {
+                        alertify.error(FileNoCount + " " + FileName + " Max 5Mb file size is allowed");
+                        return flag = false;;
+                    }
+                }
+                else {
+                    alertify.error("Please upload documents.");
+                    return flag = false;;
+                }
+            }
+        }
+        else {
+            alertify.alert("Upload Documents", "No file found to upload.");
+            return flag;
+        }
+        return flag;
+    }
+
+    function ValidateActionField() {
+        var flag = true;
+        var idfile = $("#letterfiles").val();
+        if (idfile != "") {
+            if (CheckOtherFileType() == false) {
+                return flag = false;
+            }
+        }
+
+        if ($('#ServiceModel_StatusId').val() == "") {
+            alertify.error("Select service status");
+            flag = false;
+        }
+        else if (($('#ServiceModel_StatusId').val() == '@NAStatusId.Cancelled') || ($('#ServiceModel_StatusId').val() == '@NAStatusId.Pending')) {
+            if ($('#Comment').val() == "") {
+                alertify.error("Enter remarks for Cancellation/pending");
+                flag = false;
+            }
+        }
+        else if ($('#ServiceModel_StatusId').val() == '@NAStatusId.Forwarded') {
+            if ($('#ServiceModel_ApproverId').val() == "") {
+                alertify.error("Select Approver");
+                flag = false;
+            }
+        }
+        return flag;
+    }
+
+    function ChangeStatusIdEvent() {
+        if ($('#ServiceModel_StatusId').val() == '@NAStatusId.Forwarded') {
+            $('.row-approver').show();
+            $('.doc').css("display", "none");
+        }
+        else if ($('#ServiceModel_StatusId').val() == '@NAStatusId.Completed') {
+            $('.doc').show();
+            $('.row-approver').css("display", "none");
+        }
+        else {
+            $('.row-approver').css("display", "none");
+            $('.doc').css("display", "none");
+        }
+    }
+
+    function UpdateServiceStatus() {
+        if (ValidateActionField()) {
+
+            var Id = $('#ServiceModel_RequestId').val();
+            var StatusId = $('#ServiceModel_StatusId').val();
+            var ApproverId = $('#ServiceModel_ApproverId').val();
+            var Comment = $('#ServiceModel_Comment').val();
+
+            var formData = new FormData($('#userform2').get(0));
+            formData.append("StatusId", StatusId);
+            formData.append("RequestId", Id);
+            formData.append("ApproverId", ApproverId);
+            formData.append("Id", Id);
+            formData.append("Comment", Comment);
+            formData.append("letterfiles", $('#letterfiles')[0].files[0]);
+            $.ajax({
+                dataType: 'json',
+                type: 'Post',
+                contentType: false, // Not to set any content header
+                processData: false, // Not to process data
+                data: formData,
+                url: '/Member/ServiceRequest/UpdateCustomerServiceRequestStatus',
+                success: function (result) {
+                    if (result == '@ReturnType.None') {
+                        $('#divStatusMaster').data("kendoWindow").close();
+                        alertify.error("provider failed to update status.");
+                    }
+                    else if (result == '@ReturnType.Initiated') {
+                        $('#divStatusMaster').data("kendoWindow").close();
+                        alertify.error("Form can't be Complete/Cancel but forward.");
+                    }
+                    else if (result == '@ReturnType.Updated') {
+                        $('#divStatusMaster').data("kendoWindow").close();
+                        alertify.error("Service Request Closed.");
+                    }
+                    else if (result == '@ReturnType.Completed') {
+                        $('#divStatusMaster').data("kendoWindow").close();
+                        alertify.success("Request Completed successfully.");
+                        window.location.reload();
+                    }
+                    else if (result == '@ReturnType.Cancelled') {
+                        $('#divStatusMaster').data("kendoWindow").close();
+                        alertify.success("Request Cancelled successfully.");
+                        window.location.reload();
+                    }
+                    else if (result == '@ReturnType.Forwarded') {
+                        $('#divStatusMaster').data("kendoWindow").close();
+                        alertify.error("Request has already forwarded.");
+                    }
+                    else if (result == '@ReturnType.Pending') {
+                        $('#divStatusMaster').data("kendoWindow").close();
+                        alertify.error("Service Request put on hold.");
+                        window.location.reload();
+                    }
+                    else if (result == '@ReturnType.Exist') {
+                        $('#divStatusMaster').data("kendoWindow").close();
+                        alertify.error("Service Request is already on hold.");
+                    }
+                    else if (result == '@ReturnType.Validated') {
+                        $('#divStatusMaster').data("kendoWindow").close();
+                        alertify.success("Request forwarded successfully.");
+                        window.location.reload();
+                    }
+                },
+                error: function (ajaxRequest, strError) {
+                    //alert(ajaxRequest.responseText);
+                    alertify.error("Something is wrong, try again later");
+                }
+            });
+        }
+    }
+
+    function CheckOtherFileType() {
+        var flag = true;
+        var File = document.getElementById('letterfiles');
+        // VALIDATE OR CHECK IF ANY FILE IS SELECTED.
+        if (File.files.length > 0) {
+
+            // THE TOTAL FILE COUNT.
+            var SumOfTotalFileSize = 0;
+            // RUN A LOOP TO CHECK EACH SELECTED FILE.
+            for (var i = 0; i <= File.files.length - 1; i++) {
+                var FileName = File.files.item(i).name;      // THE NAME OF THE FILE.
+                var FileSize = File.files.item(i).size / 1024;      // THE SIZE OF THE FILE.
+                //var extension = File.files.item(i).value.substr((File.files.item(i).value.lastIndexOf('.') + 1)); //Extension
+                var extension = FileName.split('.').pop();
+                if (extension.toLowerCase() == "pdf" || extension.toLowerCase() == "jpg" || extension.toLowerCase() == "jpeg") {
+                    flag = true;
+                }
+                else {
+                    alertify.error(FileNoCount + " " + FileName + " not allowed.");
+                    return flag = false;;
+                }
+                if (SumOfTotalFileSize == 0) {
+                    SumOfTotalFileSize = (FileSize);
+                }
+                else {
+                    SumOfTotalFileSize = SumOfTotalFileSize + (FileSize);
+                }
+
+                if (FileSize < 10) {
+                    alertify.error(" Min 10kb file size is allowed");
+                    $("#letterfiles").val('');
+                    return flag = false;;
+                }
+                if (FileSize > 500) {
+                    alertify.error(" Max 5Mb file size is allowed");
+                    $("#letterfiles").val('');
+                    return flag = false;;
+                }
+            }
+        }
+        else {
+            alertify.error('Please select a file.')
+            return flag = false;
+        }
+        return flag;
+    }
+</script>
+
+

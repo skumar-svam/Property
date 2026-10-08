@@ -1,0 +1,340 @@
+﻿
+@using Kendo.Mvc.UI
+@using NA.PMS.Common
+@using System.Linq
+
+<div id="div-Online-services">
+    <div class="row" style="padding-bottom:8px;">
+        <div class="col-md-3">
+            <label>Department</label>
+            @(Html.Kendo().DropDownList()
+                .Name("JSKServiceDepartmentId")
+                .DataTextField("Text")
+                .DataValueField("Value")
+                .OptionLabel(" --- Select ---")
+                .BindTo(new List<SelectListItem>() {
+                    new SelectListItem() { Text = "Institutional", Value = "1" },
+                    new SelectListItem() { Text = "Industrial", Value = "4" },
+                    new SelectListItem() { Text = "Commercial", Value = "2" },
+                    new SelectListItem() { Text = "Residential", Value = "3" },
+                    new SelectListItem() { Text = "Housing", Value = "5" },
+                    new SelectListItem() { Text = "Group Housing", Value = "6" },
+                    new SelectListItem() { Text = "5 % Abadi", Value = "7" }
+                })
+                .Events(e => e.Change("JSKServiceChangeEvent"))
+                .HtmlAttributes(new { style = "width: 90%;" })
+            )
+        </div>
+        <div class="col-md-3">
+            <label>Start Date</label>
+            @(Html.Kendo().DatePicker().Name("JSKServiceStartDate")
+                    .Events(e => e.Change("JSKServiceChangeEvent"))
+                    .HtmlAttributes(new { style = "width:90%;" })
+            )
+        </div>
+        <div class="col-md-3">
+            <label>End Date</label>
+            @(Html.Kendo().DatePicker().Name("JSKServiceEndDate")
+                    .Events(e => e.Change("JSKServiceChangeEvent"))
+                    .HtmlAttributes(new { style = "width:90%;" })
+            )
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6 demo-section k-content wide">
+            <div id="DivServicePieChartJSK"></div>
+        </div>
+        <div class="col-md-6 demo-section k-content wide">
+            @*<div id="DivServiceBarChartJSK"></div>*@
+            <div id="DivJSKServicesDonutChart"></div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12" style="margin-top:20px;">
+            <div class="row rw-spce">
+                <div class="col-md-12">
+                    <h2 class=" blck-heading" style="border-left:1px solid green;border-right:1px solid green;margin-bottom:0;">Status Of Services</h2>
+                    <div class="col-md-12 k-grid-content">
+                        @(Html.Kendo().Grid<NA.PMS.Model.ServiceViewModel>()
+                    .Name("GridJSKServiceDetailStatus")
+                    .Columns(columns =>
+                    {
+                        columns.Bound(c => c.ServiceName).Title("Service Name").ClientFooterTemplate("Total Count:");
+                        columns.Bound(c => c.Completed).Title("Completed").Width(110).ClientFooterTemplate("#=sum#");
+                        columns.Bound(c => c.Cancelled).Title("Cancelled").Width(110).ClientFooterTemplate("#=sum#");
+                        columns.Bound(c => c.Rejected).Title("Rejected").Width(110).ClientFooterTemplate("<div>#= sum #</div>");
+                        columns.Bound(c => c.Pending).Title("Pending").Width(110).ClientFooterTemplate("<div>#= sum #</div>");
+                        //columns.Bound(c => c.InProgress).Title("In Progresss").Width(110).ClientFooterTemplate("<div>#= sum #</div>");
+                        columns.Bound(c => c.TotalRequest).Title("Total Request").Width(110).ClientFooterTemplate("<div>#= sum #</div>");
+                        //columns.Bound(c => c.PercentInProgress).Title("Progress(%)").Width(110);//.ClientFooterTemplate("<div>#= sum #</div>");
+                        //columns.Bound(c => c.DateMar).Title("Average Days").ClientFooterTemplate("<div>Avg: #= kendo.toString(average, '0.00') #</div>");//Gap Between submit date and approve date
+                    })
+                    .Resizable(resize => resize.Columns(true))
+                                //.Pageable(pageable => pageable.Enabled(true).Refresh(true).PageSizes(true))
+                    .AutoBind(true)
+                    .DataSource
+                    (
+                        dataSource => dataSource
+                        .Ajax().ServerOperation(true)
+                        .Read(read => read.Action("GetServiceReportsAsDataSource", "Report", new { area = "Reports" }).Data("FilterParameterForJSKServices"))
+                        .Aggregates(aggregates =>
+                        {
+                            aggregates.Add(p => p.Completed).Sum();
+                            aggregates.Add(p => p.Cancelled).Sum();
+                            aggregates.Add(p => p.Rejected).Sum();
+                            aggregates.Add(p => p.Pending).Sum();
+                            //aggregates.Add(p => p.InProgress).Sum();
+                            aggregates.Add(p => p.TotalRequest).Sum();
+                        })
+                    ))
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+
+    $(document).ready(function () {
+        var startdate = '2018-01-01';
+        $('#JSKServiceStartDate').data("kendoDatePicker").value(startdate);
+        var todayDate = kendo.toString(kendo.parseDate(new Date()), 'MM/dd/yyyy');
+        $("#JSKServiceEndDate").data("kendoDatePicker").value(todayDate);
+        $('#JSKServiceDepartmentId').data("kendoDropDownList").value(1);
+
+        //GetJSKServiceListForGraph();
+        //CreateBarGraphForJSKServices();
+    });
+
+    function FilterParameterForJSKServices() {
+        var today = new Date().toDateString();
+        return {
+            DepartmentId : $('#JSKServiceDepartmentId').val() == "" ? 1 : $('#JSKServiceDepartmentId').val(),
+            StartDate: $('#JSKServiceStartDate').val() == "" ? "2018-01-01" : $('#JSKServiceStartDate').val(),
+            EndDate: $('#JSKServiceEndDate').val() == "" ? today : $('#JSKServiceEndDate').val(),
+            RequestThrough:"JSK"
+        }
+    }
+
+    function JSKServiceChangeEvent() {
+        $('#GridJSKServiceDetailStatus').data("kendoGrid").dataSource.read();
+        GetJSKServiceListForGraph();
+        GetJSKServicesOngoingForGraph();
+    }
+
+    //$(document).bind("kendo:skinChange", GetJSKServiceListForGraph());
+    //$(document).bind("kendo:skinChange", CreateBarGraphForJSKServices());
+
+    function GetJSKServiceListForGraph() {
+        var today = new Date().toDateString();
+        var departmentId = $('#JSKServiceDepartmentId').val() == "" ? 1 : $('#JSKServiceDepartmentId').val();
+        var startDate = $('#JSKServiceStartDate').val() == "" ? "2018-01-01" : $('#JSKServiceStartDate').val();
+        var endDate = $('#JSKServiceEndDate').val() == "" ? today : $('#JSKServiceEndDate').val();
+        var reqThrough = "JSK";
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ DepartmentId: departmentId, StartDate: startDate, EndDate: endDate, RequestThrough: reqThrough, FilterType: "TotalServicesByDepartment" }),
+            //url: '/Reports/Report/GetServiceReportsForGraph',
+            url: '/Reports/Report/GetServiceReportsForGraphII',
+            success: function (result) {
+                if (result != null) {
+                    CreateJSKServiceChart(result);
+                    //CreateBarGraphForJSKServices(result);
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Network error, Please try again later.");
+            }
+        });
+    }
+
+    function CreateJSKServiceChart(GraphData) {
+        //var date = $('#StatusDate').val();
+        $("#DivServicePieChartJSK").kendoChart({
+            title: {
+                text: "Total Services"
+            },
+            legend: {
+                position: "bottom",
+                visible: false
+            },
+            dataSource: {
+                data: GraphData
+            },
+            seriesDefaults: {
+                labels: {
+                    visible: true,
+                    background: "transparent",
+                    template: "#= category #: \n #= value#"
+                }
+            },
+            series: [{
+                type: "pie",
+                field: "Value",
+                categoryField: "Label"
+            }],
+            seriesColors: ["#03a9f4", "#ff9800", "#fad84a", "#4caf50", "#FF0000", "#FF00FF", "#000080"],
+            tooltip: {
+                visible: true,
+                template: "#= category #: \n #= value#"
+            },
+            seriesClick: JSKServicesPieChartSeriesClickEvent,
+        });
+    }
+    function JSKServicesPieChartSeriesClickEvent(e) {
+        //alert(kendo.format("Series click :{0} ({1}): {2}", e.series.field, e.category, e.value));
+        //var id = 9;
+        //window.location.href = "/Member/ServiceRequest/RedirectServiceRequestByType?filter=jsk&id=" + id + "&service=" + e.category;
+        var departmentId = $('#JSKServiceDepartmentId').val();
+        var startDate = $('#JSKServiceStartDate').val();
+        var endDate = $('#JSKServiceEndDate').val();
+        var dept = e.category;
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ Department: dept, ActionType: dept, StartDate: startDate, EndDate: endDate, RequestThrough: "JSK", FilterType: "ServicesByDepartment" }),
+            url: "/Reports/Report/GetServiceReportsForGraphII",
+            success: function (result) {
+                if (result != null) {
+                    CreateJSKServiceChart(result)
+                }
+                else {
+                    alertify.error("no data found.");
+                }
+
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+            }
+        });
+    }
+
+    function GetJSKServicesOngoingForGraph() {
+        var today = new Date().toDateString();
+        var departmentId = $('#JSKServiceDepartmentId').val();// == "" ? 4 : $('#JSKServiceDepartmentId').val();
+        var startDate = $('#JSKServiceStartDate').val();// == "" ? "2018-01-01" : $('#JSKServiceStartDate').val();
+        var endDate = $('#JSKServiceEndDate').val();// == "" ? today : $('#JSKServiceEndDate').val();
+        var reqThrough = "JSK";
+        $.ajax({
+            dataType: 'json',
+            type: 'Post',
+            contentType: 'application/json; charset=utf-8',
+            data: JSON.stringify({ StartDate: startDate, EndDate: endDate, FilterType: "PendingServices", RequestThrough: "JSK" }),
+            url: '/Reports/Report/GetServiceReportsForGraphII',
+            success: function (result) {
+                if (result != null) {
+                    CreateJSKServicesDonutChart(result)
+                }
+            },
+            error: function (ajaxRequest, strError) {
+                var respText = ajaxRequest.responseText;
+                alertify.error("Network error, Please try again later.");
+            }
+        });
+    }
+
+    function CreateJSKServicesDonutChart(GraphData) {
+        //var date = $('#StatusDate').val();
+        $("#DivJSKServicesDonutChart").kendoChart({
+            title: {
+                text: "In Process Services"
+            },
+            legend: {
+                //position: "bottom",
+                visible: false
+            },
+            dataSource: {
+                data: GraphData
+            },
+            //seriesDefaults: {
+            //    type: "donut",
+            //    startAngle: 120
+            //},
+            //series: [{
+            //    //type: "pie",
+            //    field: "Value",
+            //    categoryField: "Label",
+            //    labels: {
+            //        visible: true,
+            //        background: "transparent",
+            //        position: "outsideEnd",
+            //        template: "#= category #: \n #= value#"
+            //    }
+            //}],
+            seriesDefaults: {
+                labels: {
+                    visible: true,
+                    background: "transparent",
+                    template: "#= category #: \n #= value#"
+                }
+            },
+            series: [{
+                type: "pie",
+                field: "Value",
+                categoryField: "Label"
+            }],
+            seriesColors: ["#03a9f4", "#ff9800", "#fad84a", "#4caf50", "#FF0000", "#FF00FF", "#000080"],
+            tooltip: {
+                visible: true,
+                template: "#= category #: \n #= value#"
+            },
+            seriesClick: JSKServicesInProcessPieChartSeriesClickEvent,
+        });
+    }
+
+    function JSKServicesInProcessPieChartSeriesClickEvent(e) {
+        //alert(kendo.format("Series click :{0} ({1}): {2}", e.series.field, e.category, e.value));
+        var id = 17;
+        var dept = e.category;
+        var departmentId = $('#JSKServiceDepartmentId').val();
+        var startDate = $('#JSKServiceStartDate').val();
+        var endDate = $('#JSKServiceEndDate').val();
+        window.location.href = "/Reports/Report/ManageServices?filterType=JSK&id=" + id + "&department=" + e.category+ "&startDate="+startDate+"&endDate="+endDate;
+        //$.ajax({
+        //    dataType: 'json',
+        //    type: 'Post',
+        //    contentType: 'application/json; charset=utf-8',
+        //    data: JSON.stringify({ Department: e.category, Status: "InProcess" }),
+        //    url: "/Reports/Report/GetMultipleTypeIdToRedirect",
+        //    success: function (result) {
+        //        if (result != null) {
+        //            //window.location.href = "/Reports/Report/RedirectServiceRequestByType?filterType=Online&id=" + id + "&department=" + e.category;
+        //            window.location.href = "/Reports/Report/ManageServices?filterType=JSK&id=" + id + "&department=" + e.category;
+        //        }
+        //        else {
+        //            alertify.error("no data found.");
+        //        }
+        //    },
+        //    error: function (ajaxRequest, strError) {
+        //        var respText = ajaxRequest.responseText;
+        //    }
+        //});
+    }
+
+    //        //seriesClick: onSeriesClick,
+    //        //seriesHover: onSeriesHover,
+    //        //dataBound: onDataBound,
+    //        //axisLabelClick: onAxisLabelClick,
+    //        //legendItemClick: onLegendItemClick,
+    //        //legendItemHover: onLegendItemHover,
+    //        //plotAreaClick: onPlotAreaClick,
+    //        //plotAreaHover: onPlotAreaHover,
+    //        //render: onRender,
+    //        //dragStart: onDragStart,
+    //        //drag: onDrag,
+    //        //dragEnd: onDragEnd,
+    //        //zoomStart: onZoomStart,
+    //        //zoom: onZoom,
+    //        //zoomEnd: onZoomEnd
+</script>
+
+
+
+
+
+
+
